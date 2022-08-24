@@ -2,32 +2,15 @@ use gloo_timers::callback::{Interval, Timeout};
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Html, NodeRef, Properties};
 
-const PROGRESS_REFRESH: u32 = 20;
-const TIMEOUT: u32 = 15_000;
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {}
 
 #[derive(Default)]
 pub struct Postbar {
-    pub text: String,
-    pub file: Option<String>,
-    pub input_ref: NodeRef,
-    pub attach_ref: NodeRef,
-    placeholder_input: String,
-    cooldown: Option<Timeout>,
-    progress: Option<Interval>,
-    progress_percentage: u32,
-    error_on_input: bool,
-    can_post: bool,
 }
 
 pub enum Msg {
-    SubmitForm,
-    InputChanged,
-    FileAttached,
-    Reactivate,
-    UpdateProgress,
 }
 
 impl Component for Postbar {
@@ -44,64 +27,6 @@ impl Component for Postbar {
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::SubmitForm => {
-                if 2 < self.text.len() && self.text.len() < 128 {
-                    self.text = String::new();
-                    if let Some(input) = self.input_ref.cast::<HtmlInputElement>() {
-                        input.set_value("");
-                    }
-                    if let Some(input) = self.attach_ref.cast::<HtmlInputElement>() {
-                        input.set_value("");
-                    }
-                    self.file = None;
-                    self.can_post = false;
-                    self.error_on_input = false;
-                    self.placeholder_input = String::from("Wait few seconds before typing again");
-                    self.cooldown = Some({
-                        let link = _ctx.link().clone();
-                        Timeout::new(TIMEOUT, move || link.send_message(Msg::Reactivate))
-                    });
-                    self.progress = Some({
-                        let link = _ctx.link().clone();
-                        Interval::new(PROGRESS_REFRESH, move || {
-                            link.clone().send_message(Msg::UpdateProgress);
-                        })
-                    });
-                    true
-                } else {
-                    self.error_on_input = true;
-                    true
-                }
-            }
-            Msg::UpdateProgress => {
-                self.progress_percentage += PROGRESS_REFRESH;
-                true
-            }
-            Msg::InputChanged => {
-                if let Some(input) = self.input_ref.cast::<HtmlInputElement>() {
-                    self.text = input.value();
-                    self.error_on_input = false;
-                    true
-                } else {
-                    false
-                }
-            }
-            Msg::FileAttached => {
-                if let Some(input) = self.attach_ref.cast::<HtmlInputElement>() {
-                    self.file = Some(input.value());
-                    true
-                } else {
-                    false
-                }
-            }
-            Msg::Reactivate => {
-                self.can_post = true;
-                self.placeholder_input = String::from("Type a message");
-                self.cooldown = None;
-                self.progress = None;
-                self.progress_percentage = 0;
-                true
-            }
         }
     }
 
