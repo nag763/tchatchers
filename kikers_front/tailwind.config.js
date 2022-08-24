@@ -4,7 +4,9 @@ module.exports = {
   theme: {
     extend: {
 	gridRow: {
-        	'span-9': 'span 9 / span 9',
+        	'span-10': 'span 10 / span 10',
+        	'span-11': 'span 11 / span 11',
+        	'span-4': 'span 4 / span 4',
       	}
     },
   },

@@ -1,18 +1,24 @@
 pub mod components;
+pub mod router;
+pub mod services;
 
+use components::navbar::Navbar;
+use router::{switch, Route};
 use yew::prelude::*;
-use components::{postbar::Postbar, navbar::Navbar, posts::Posts, footer::Footer};
+use yew_router::prelude::*;
 
 #[function_component(App)]
 fn app() -> Html {
     html! {
         <>
-            <div class="h-screen lg:h-auto grid lg:grid-none grid-rows-12 lg:grid-rows-none">
-                <Navbar />
-                <Postbar />
-                <Posts />
-                <Footer />
-            </div>
+            <BrowserRouter>
+                <div class="h-screen lg:h-auto grid lg:grid-none grid-rows-12 lg:grid-rows-none">
+                    <Navbar />
+                    <div class="row-span-11">
+                        <Switch<Route> render={Switch::render(switch)} />
+                    </div>
+                </div>
+            </BrowserRouter>
         </>
     }
 }

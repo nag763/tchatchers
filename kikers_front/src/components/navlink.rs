@@ -1,9 +1,11 @@
-use yew::{Component, Html, html, Context, Properties};
+use crate::router::Route;
+use yew::{html, Component, Context, Html, Properties};
+use yew_router::prelude::Link;
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub label: String,
-    pub link: String,
+    pub link: Route,
 }
 
 pub struct Navlink;
@@ -18,9 +20,9 @@ impl Component for Navlink {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <a href={ctx.props().clone().link} class="inline-block text-sm px-4 py-2 leading-none text-white" name={ctx.props().clone().label}>
-            {ctx.props().clone().label}
-            </a>
+            <Link<Route> to={ctx.props().clone().link} classes="inline-block text-sm px-4 py-2 leading-none text-white" >
+                {ctx.props().clone().label}
+                </Link<Route> >
         }
     }
 }
