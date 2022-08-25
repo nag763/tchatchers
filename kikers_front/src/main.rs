@@ -12,7 +12,7 @@ fn app() -> Html {
     html! {
         <>
             <BrowserRouter>
-                <div class="h-screen lg:h-auto grid lg:grid-none grid-rows-12 lg:grid-rows-none">
+                <div class="h-screen grid grid-rows-12">
                     <Navbar />
                     <div class="row-span-11">
                         <Switch<Route> render={Switch::render(switch)} />

@@ -35,7 +35,7 @@ pub struct Feed {
     error_on_input: bool,
     can_post: bool,
     received_messages: Vec<String>,
-    ws: WebsocketService,
+    ws: Option<WebsocketService>,
     _producer: Box<dyn Bridge<EventBus>>,
 }
 
@@ -72,7 +72,9 @@ impl Component for Feed {
                 if 2 < self.text.len() && self.text.len() < 128 {
                     self.text = String::new();
                     if let Some(input) = self.input_ref.cast::<HtmlInputElement>() {
-                    self.ws.tx.clone().try_send(input.value()).unwrap();
+                        if let Some(ws) = &self.ws {
+                            ws.tx.clone().try_send(input.value()).unwrap();
+                        }
                         input.set_value("");
                     }
                     if let Some(input) = self.attach_ref.cast::<HtmlInputElement>() {
@@ -132,8 +134,11 @@ impl Component for Feed {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <>
-            <div class="grid grid-cols-6 py-5 px-5 gap-4 justify-center">
+            <div class="grid grid-rows-11 h-full">
+            <div class="row-span-10" >
+                {self.received_messages.iter().map(|m| html!{<p>{m}</p>}).collect::<Html>()}
+            </div>
+            <div class="row-span-1 grid grid-cols-6 py-5 px-5 gap-4 justify-center content-center border-y-2 bg-slate-100 shadow-xl">
                     <div class="grid justify-items-center content-center">
                     <label hidden={self.file.is_some()} for="file-upload">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -145,7 +150,7 @@ impl Component for Feed {
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
                     </label>
-                        <input id="file-upload" type="file" ref={self.attach_ref.clone()} style="display: none;" oninput={ctx.link().callback(|_| Msg::FileAttached)}/>
+                        <input id="file-upload" type="file" ref={self.attach_ref.clone()} style="display: none;" disabled={!self.can_post} oninput={ctx.link().callback(|_| Msg::FileAttached)}/>
 
                     </div>
                     <div class="col-span-4">
@@ -164,8 +169,7 @@ impl Component for Feed {
                       <p class="text-red-500">{"Your message is either to short, or to long, ensure it matches the requirements"}</p>
                       </div>
                   </div>
-                {self.received_messages.iter().map(|m| html!{<p>{m}</p>}).collect::<Html>()}
-            </>
+            </div>
         }
     }
 }

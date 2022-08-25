@@ -11,15 +11,15 @@ pub struct WebsocketService {
     pub tx: Sender<String>,
 }
 
-impl Default for WebsocketService {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl WebsocketService {
-    pub fn new() -> Self {
-        let ws = WebSocket::open("ws://127.0.0.1:8080").unwrap();
+    pub fn new() -> Option<Self> {
+        let ws = match WebSocket::open("ws://127.0.0.1:8080") {
+            Ok(v) => v,
+            Err(e) => {
+                error!("Error while attempting to connect to remote ws :", e.to_string());
+                return None;
+            }
+        };
 
         let (mut write, mut read) = ws.split();
 
@@ -54,6 +54,6 @@ impl WebsocketService {
             debug!("WebSocket Closed");
         });
 
-        Self { tx: in_tx }
+        Some(Self { tx: in_tx })
     }
 }
