@@ -22,6 +22,8 @@ WORKDIR /usr/kikers/front
 
 COPY --from=asset_builder /home/usr/front /usr/kikers/front
 
+COPY ./favicon.ico ./favicon.ico
+
 RUN rustup target add wasm32-unknown-unknown
 
 RUN cargo install trunk
