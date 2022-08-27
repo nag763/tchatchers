@@ -17,14 +17,20 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MessagingSocket {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
         if let Ok(msg) = msg {
             match msg {
-                ws::Message::Text(text) => ctx.text(text),
+                ws::Message::Text(text) => {
+                    let value: String = text.clone().into();
+                    match value.as_str() {
+                        "Ping" => ctx.text("Pong"),
+                        _ => ctx.text(text),
+                    }
+                }
                 ws::Message::Binary(bin) => ctx.binary(bin),
                 ws::Message::Ping(bytes) => ctx.pong(&bytes),
                 ws::Message::Close(reason) => {
                     ctx.close(reason);
                     ctx.stop();
                 }
-                _ => {}
+                _ => {println!("here");}
             }
         } else {
             ctx.stop();

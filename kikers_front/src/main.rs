@@ -7,6 +7,9 @@ use router::{switch, Route};
 use yew::prelude::*;
 use yew_router::prelude::*;
 
+#[macro_use]
+extern crate derive_more;
+
 #[function_component(App)]
 fn app() -> Html {
     html! {

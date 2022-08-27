@@ -1,25 +1,18 @@
 use crate::services::event_bus::{EventBus, Request};
 use futures::{channel::mpsc::Sender, SinkExt, StreamExt};
 use gloo_console::{debug, error, log};
-use reqwasm::websocket::{futures::WebSocket, Message};
+use reqwasm::websocket::{futures::WebSocket, Message, WebSocketError};
+use wasm_bindgen_futures::spawn_local;
 use yew_agent::Dispatched;
 
-use wasm_bindgen_futures::spawn_local;
-
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WebsocketService {
     pub tx: Sender<String>,
 }
 
 impl WebsocketService {
-    pub fn new() -> Option<Self> {
-        let ws = match WebSocket::open("ws://127.0.0.1:8080") {
-            Ok(v) => v,
-            Err(e) => {
-                error!("Error while attempting to connect to remote ws :", e.to_string());
-                return None;
-            }
-        };
+    pub fn new() -> Self {
+        let ws = WebSocket::open("ws://127.0.0.1:8080").unwrap();
 
         let (mut write, mut read) = ws.split();
 
@@ -38,22 +31,39 @@ impl WebsocketService {
                 match msg {
                     Ok(Message::Text(data)) => {
                         log!("from websocket:", &data);
-                        event_bus.send(Request::EventBusMsg(data));
+                        match data.as_str() {
+                            "Pong" => event_bus.send(Request::EventBusKeepAlive),
+                            _ => event_bus.send(Request::EventBusMsg(data)),
+                        }
                     }
                     Ok(Message::Bytes(b)) => {
                         let decoded = std::str::from_utf8(&b);
                         if let Ok(val) = decoded {
                             debug!("from websocket: {}", val);
+                            event_bus.send(Request::EventBusMsg(val.into()));
                         }
                     }
-                    Err(_e) => {
-                        error!("error on websocket");
-                    }
+                    Err(e) => match e {
+                        WebSocketError::ConnectionError => {
+                            error!("Error on connection");
+                            event_bus.send(Request::EventBusNotConnected);
+                        }
+                        WebSocketError::ConnectionClose(e) => {
+                            error!("The connection has been closed :", e.code);
+
+                            event_bus.send(Request::EventBusClosed);
+                        }
+                        WebSocketError::MessageSendError(e) => {
+                            error!("Error while sending message", e.to_string());
+                            event_bus.send(Request::EventBusErr(e.to_string()))
+                        }
+                        _ => error!("Unexpected error while communicating with distant ws"),
+                    },
                 }
             }
             debug!("WebSocket Closed");
         });
 
-        Some(Self { tx: in_tx })
+        Self { tx: in_tx }
     }
 }

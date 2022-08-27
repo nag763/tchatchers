@@ -889,12 +889,14 @@ dependencies = [
  "actix",
  "actix-web",
  "actix-web-actors",
+ "bytestring",
 ]
 
 [[package]]
 name = "kikers_front"
 version = "0.1.0"
 dependencies = [
+ "derive_more",
  "futures",
  "gloo-console",
  "gloo-net 0.2.4",
@@ -902,6 +904,7 @@ dependencies = [
  "log",
  "reqwasm",
  "serde",
+ "serde_json",
  "wasm-bindgen-futures",
  "web-sys",
  "yew",
