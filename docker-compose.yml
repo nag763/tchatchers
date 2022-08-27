@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  front :
+    build: kikers_front/
+    ports:
+      - "80:80"
+
+  back :
+    build: kikers_back/
+    ports:
+      - "8080:8080"
