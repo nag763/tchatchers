@@ -6,7 +6,7 @@ use crate::services::event_bus::EventBus;
 use crate::services::message::*;
 use gloo_timers::callback::Interval;
 use gloo_timers::callback::Timeout;
-use yew::{html, Component, Context, Html, Properties, Callback};
+use yew::{html, Callback, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
 
 const REFRESH_WS_STATE_EVERY: u32 = 5000;
@@ -19,7 +19,7 @@ pub enum Msg {
 }
 
 #[derive(Clone, PartialEq, Properties)]
-pub struct Props {}
+pub struct Props;
 
 pub struct Feed {
     received_messages: Vec<String>,
@@ -78,16 +78,14 @@ impl Component for Feed {
                         self.is_connected = true;
                     }
                 }
-                gloo_console::log!("Is connected :", self.is_connected);
                 true
             }
             Msg::CheckWsState => {
-                gloo_console::log!("Checkin ws");
                 self.ws.tx.clone().try_send("Ping".into()).unwrap();
                 false
             }
             Msg::TryReconnect => {
-                gloo_console::log!("Try reconnect by user");
+                gloo_console::debug!("Try reconnect by user");
                 self.called_back = false;
                 self.ws.tx.clone().try_send("Ping".into()).unwrap();
                 true
@@ -102,12 +100,11 @@ impl Component for Feed {
                 let pass_message_to_ws = Callback::from(move |message: String| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar {pass_message_to_ws}/>} 
-            },
+                html! {<TypeBar {pass_message_to_ws}/>}
+            }
             false => {
                 let link = ctx.link().clone();
                 let try_reconnect = Callback::from(move |_: ()| {
-                    gloo_console::log!("Hey I am here!");
                     link.send_message(Msg::TryReconnect);
                 });
                 html! {<DisconnectedBar called_back={self.called_back} {try_reconnect} />}

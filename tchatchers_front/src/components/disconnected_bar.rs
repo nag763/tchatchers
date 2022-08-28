@@ -1,4 +1,4 @@
-use yew::{html, Component, Context, Html, Properties, function_component, Callback};
+use yew::{function_component, html, Callback, Component, Context, Html, Properties};
 
 pub enum Msg {
     TryReconnect,
@@ -18,14 +18,16 @@ pub fn waiting_for_response() -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct TryReconnectProps {
-    try_reconnect: Callback<()>
+    try_reconnect: Callback<()>,
 }
 
 #[function_component(TryReconnect)]
 pub fn try_reconnect(props: &TryReconnectProps) -> Html {
     let onclick_event = props.try_reconnect.clone();
-    let onclick = move |_| { onclick_event.emit(()); };
-    html!{
+    let onclick = move |_| {
+        onclick_event.emit(());
+    };
+    html! {
         <div class="flex items-center justify-center gap-2 lg:gap-12">
             <span>
             {"You are currently disconnected"}
@@ -37,11 +39,10 @@ pub fn try_reconnect(props: &TryReconnectProps) -> Html {
     }
 }
 
-
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub called_back: bool,
-    pub try_reconnect: Callback<()>
+    pub try_reconnect: Callback<()>,
 }
 
 pub struct DisconnectedBar;
@@ -62,8 +63,8 @@ impl Component for DisconnectedBar {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let component = match ctx.props().called_back {
-            true => html!{ <TryReconnect try_reconnect={ctx.props().try_reconnect.clone()} /> },
-            false => html!{ <WaitingForResponse /> }
+            true => html! { <TryReconnect try_reconnect={ctx.props().try_reconnect.clone()} /> },
+            false => html! { <WaitingForResponse /> },
         };
         html! {
             <div class="col-span-6">
