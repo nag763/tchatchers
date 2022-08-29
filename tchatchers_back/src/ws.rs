@@ -30,7 +30,9 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MessagingSocket {
                     ctx.close(reason);
                     ctx.stop();
                 }
-                _ => {println!("here");}
+                _ => {
+                    println!("here");
+                }
             }
         } else {
             ctx.stop();

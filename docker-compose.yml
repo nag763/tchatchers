@@ -4,8 +4,24 @@ services:
     build: tchatchers_front/
     ports:
       - "80:80"
-
+  postgres:
+    image: postgres
+    restart: always
+    volumes: 
+      - db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
   back :
+    links:
+      - postgres:postgreshost
+    depends_on:
+      - postgres
     build: tchatchers_back/
     ports:
       - "8080:8080"
+volumes:
+  db:

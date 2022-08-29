@@ -1,0 +1,10 @@
+[package]
+name = "tchatchers_core"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0.144", features = ["derive"] }
+sqlx = { version = "0.6", features = [ "runtime-async-std-native-tls" , "postgres"] }
