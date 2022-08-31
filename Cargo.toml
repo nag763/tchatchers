@@ -2,6 +2,6 @@
 
 members = [
     "tchatchers_core",
-    "tchatchers_front",
     "tchatchers_back",
+    "tchatchers_front",
 ]

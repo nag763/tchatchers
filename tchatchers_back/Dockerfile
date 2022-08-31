@@ -5,5 +5,3 @@ COPY . .
 RUN cargo b --release
 
 CMD cargo r --release
-
-EXPOSE 8080
