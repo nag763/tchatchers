@@ -1,16 +1,19 @@
 use axum::{
     extract::ws::{Message, WebSocket, WebSocketUpgrade},
+    extract::Json,
     response::IntoResponse,
-    routing::get,
+    routing::{get, post},
     Router,
 };
 use std::net::SocketAddr;
+use tchatchers_core::user::InsertableUser;
 
 #[tokio::main]
 async fn main() {
     let app = Router::new()
         // top since it matches all routes
-        .route("/", get(ws_handler));
+        .route("/", get(ws_handler))
+        .route("/create_user", post(create_user));
 
     // run it with hyper
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
@@ -18,6 +21,11 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+async fn create_user(Json(new_user): Json<InsertableUser>) {
+    let pool = tchatchers_core::pool::get_pool().await;
+    new_user.insert(&pool).await.unwrap();
 }
 
 async fn ws_handler(ws: WebSocketUpgrade) -> impl IntoResponse {

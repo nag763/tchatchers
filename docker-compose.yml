@@ -1,9 +1,5 @@
 version: "3.9"
 services:
-  front :
-    build: tchatchers_front/
-    ports:
-      - "80:80"
   postgres:
     image: postgres
     restart: always
@@ -23,5 +19,9 @@ services:
     build: tchatchers_back/
     ports:
       - "8080:8080"
+  front :
+    build: tchatchers_front/
+    ports:
+      - "80:80"
 volumes:
   db:

@@ -1774,6 +1774,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "headers",
+ "tchatchers_core",
  "tokio",
 ]
 
