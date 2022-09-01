@@ -1,7 +1,7 @@
 [workspace]
 
 members = [
-    "tchatchers_core",
     "tchatchers_back",
+    "tchatchers_back/tchatchers_core",
     "tchatchers_front",
 ]
