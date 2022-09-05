@@ -23,6 +23,8 @@ impl Component for Navbar {
                     <span class="font-semibold text-xl tracking-tight">{ "tchatchers" }</span>
                 </Link<Route>>
                 <div>
+                    <Navlink label="Sign in" link={Route::SignIn} />
+                    <Navlink label="Sign up" link={Route::SignUp} />
                     <Navlink label="Settings" link={Route::Settings} />
                 </div>
             </nav>

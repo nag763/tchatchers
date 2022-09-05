@@ -1,0 +1,15 @@
+[watch]
+watch = ["src/"]
+
+[serve]
+address = "127.0.0.1"
+port = 3000
+open = false
+
+[[proxy]]
+backend = "ws://localhost:8080/ws"
+ws = true
+
+[[proxy]]
+rewrite = "/api/"
+backend = "http://localhost:8080/api"

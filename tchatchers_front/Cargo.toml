@@ -9,7 +9,7 @@ edition = "2021"
 derive_more = "0.99.17"
 futures = "0.3.23"
 gloo-console = "0.2.3"
-gloo-net = "0.2.3"
+gloo-net = "0.2.4"
 gloo-timers = "0.2.4"
 log = "0.4.17"
 reqwasm = "0.5.0"
@@ -17,7 +17,8 @@ serde = { version = "1.0.143", features = ["derive"] }
 serde_json = "1.0.85"
 wasm-bindgen = "0.2.82"
 wasm-bindgen-futures = "0.4.32"
-web-sys = "0.3.59"
+web-sys = { version = "0.3.59", features = ["HtmlButtonElement"]}
 yew = "0.19.3"
 yew-agent = "0.1.0"
 yew-router = "0.16.0"
+tchatchers_core = { path = "../tchatchers_back/tchatchers_core"}

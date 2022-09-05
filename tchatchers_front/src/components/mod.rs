@@ -6,4 +6,6 @@ pub(crate) mod filters;
 pub(crate) mod navbar;
 pub(crate) mod navlink;
 pub(crate) mod settings;
+pub(crate) mod signin;
+pub(crate) mod signup;
 pub(crate) mod type_bar;

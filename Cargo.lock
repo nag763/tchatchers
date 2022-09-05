@@ -1799,6 +1799,7 @@ dependencies = [
  "reqwasm",
  "serde",
  "serde_json",
+ "tchatchers_core",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
