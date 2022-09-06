@@ -10,3 +10,4 @@ axum = { version = "0.5.15" , features = ["ws", "headers"] }
 headers = "0.3"
 tokio = { version = "1.0", features = ["full"] }
 tchatchers_core = { path = "./tchatchers_core", features = ["back"] }
+sqlx-core = { version = "0.6.1", features = ["postgres"] }

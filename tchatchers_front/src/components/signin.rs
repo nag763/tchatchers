@@ -13,7 +13,7 @@ impl Component for SignIn {
         Self
     }
 
-    fn view(&self, ctx: &Context<Self>) -> Html {
+    fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
             <>
             <input type="text" />

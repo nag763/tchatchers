@@ -1,21 +1,32 @@
 use axum::{
     extract::ws::{Message, WebSocket, WebSocketUpgrade},
-    extract::{Json, Path},
+    extract::{Extension, Json, Path},
     http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
     Router,
 };
+use sqlx_core::postgres::PgPool;
 use std::net::SocketAddr;
+use std::sync::Arc;
 use tchatchers_core::user::{InsertableUser, User};
+
+struct State {
+    pool: PgPool,
+}
 
 #[tokio::main]
 async fn main() {
+    let shared_state = Arc::new(State {
+        pool: tchatchers_core::pool::get_pool().await,
+    });
+
     let app = Router::new()
         // top since it matches all routes
         .route("/ws", get(ws_handler))
         .route("/api/create_user", post(create_user))
-        .route("/api/login_exists/:login", get(login_exists));
+        .route("/api/login_exists/:login", get(login_exists))
+        .layer(Extension(shared_state));
 
     // run it with hyper
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
@@ -25,24 +36,28 @@ async fn main() {
         .unwrap();
 }
 
-async fn login_exists(Path(login): Path<String>) -> impl IntoResponse {
-    let pool = tchatchers_core::pool::get_pool().await;
-    let response_status: StatusCode = match User::login_exists(&login, &pool).await {
+async fn login_exists(
+    Path(login): Path<String>,
+    Extension(state): Extension<Arc<State>>,
+) -> impl IntoResponse {
+    let response_status: StatusCode = match User::login_exists(&login, &state.pool).await {
         false => StatusCode::OK,
         true => StatusCode::CONFLICT,
     };
     (response_status, ())
 }
 
-async fn create_user(Json(new_user): Json<InsertableUser>) -> impl IntoResponse {
-    let pool = tchatchers_core::pool::get_pool().await;
-    if User::login_exists(&new_user.login, &pool).await {
+async fn create_user(
+    Json(new_user): Json<InsertableUser>,
+    Extension(state): Extension<Arc<State>>,
+) -> impl IntoResponse {
+    if User::login_exists(&new_user.login, &state.pool).await {
         return (
             StatusCode::BAD_REQUEST,
             "A user with a similar login already exists",
         );
     }
-    match new_user.insert(&pool).await {
+    match new_user.insert(&state.pool).await {
         Ok(_) => (StatusCode::CREATED, "User created with success"),
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened"),
     }

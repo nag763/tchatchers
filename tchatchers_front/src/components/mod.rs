@@ -1,4 +1,5 @@
 pub(crate) mod chat;
+pub(crate) mod common;
 pub(crate) mod disconnected_bar;
 pub(crate) mod feed;
 pub(crate) mod filter;

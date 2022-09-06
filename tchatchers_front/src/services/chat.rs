@@ -1,7 +1,7 @@
 use crate::services::event_bus::{EventBus, Request};
 use futures::{channel::mpsc::Sender, SinkExt, StreamExt};
 use gloo_console::{debug, error, log};
-use reqwasm::websocket::{futures::WebSocket, Message, WebSocketError};
+use gloo_net::websocket::{futures::WebSocket, Message, WebSocketError};
 use wasm_bindgen_futures::spawn_local;
 use yew_agent::Dispatched;
 
@@ -23,7 +23,6 @@ impl WebsocketService {
 
         spawn_local(async move {
             while let Some(s) = in_rx.next().await {
-                log::debug!("got event from channel! {}", s);
                 write.send(Message::Text(s)).await.unwrap();
             }
         });
