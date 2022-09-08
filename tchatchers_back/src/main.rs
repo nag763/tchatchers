@@ -9,12 +9,15 @@ use axum::{
 use magic_crypt::{new_magic_crypt, MagicCrypt256, MagicCryptTrait};
 use sqlx_core::postgres::PgPool;
 use std::net::SocketAddr;
-use std::sync::Arc;
+use std::sync::{Arc};
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
 use tokio::time::{sleep, Duration};
+use tokio::sync::broadcast;
+use futures_util::{StreamExt, SinkExt};
 
 struct State {
     encrypter: MagicCrypt256,
+    tx: broadcast::Sender<String>,
     pool: PgPool,
 }
 
@@ -23,9 +26,11 @@ async fn main() {
     dotenv::dotenv().ok();
     let secret = std::env::var("SECRET").expect("No secret has been defined");
     let encrypter = new_magic_crypt!(&secret, 256);
+    let (tx, _rx) = broadcast::channel(100);
     let shared_state = Arc::new(State {
         encrypter,
         pool: tchatchers_core::pool::get_pool().await,
+        tx
     });
 
     let app = Router::new()
@@ -92,43 +97,43 @@ async fn create_user(
     }
 }
 
-async fn ws_handler(ws: WebSocketUpgrade) -> impl IntoResponse {
-    ws.on_upgrade(handle_socket)
+async fn ws_handler(ws: WebSocketUpgrade, Extension(state): Extension<Arc<State>>) -> impl IntoResponse {
+    ws.on_upgrade(|socket| handle_socket(socket, state))
 }
 
-async fn handle_socket(mut socket: WebSocket) {
-    loop {
-        if let Some(msg) = socket.recv().await {
-            if let Ok(msg) = msg {
-                match msg {
-                    Message::Text(t) => {
-                        let ret = match t.as_str() {
-                            "Ping" => "Pong",
-                            "Pong" => {
-                                return;
-                            }
-                            t => t,
-                        };
-                        socket.send(Message::Text(ret.into())).await.unwrap();
-                    }
-                    Message::Binary(_) => {
-                        println!("client sent binary data");
-                    }
-                    Message::Ping(_) => {
-                        println!("socket ping");
-                    }
-                    Message::Pong(_) => {
-                        println!("socket pong");
-                    }
-                    Message::Close(_) => {
-                        println!("client disconnected");
-                        return;
-                    }
-                }
-            } else {
-                println!("client disconnected");
-                return;
+async fn handle_socket(socket: WebSocket, state: Arc<State>) {
+    let (mut sender, mut receiver) = socket.split();
+    let mut rx = state.tx.subscribe();
+
+    let mut send_task = tokio::spawn(async move {
+        while let Ok(msg) = rx.recv().await {
+            // In any websocket error, break loop.
+            if sender.send(Message::Text(msg)).await.is_err() {
+                break;
             }
         }
-    }
+    });
+
+    let tx = state.tx.clone();
+
+    
+    // This task will receive messages from client and send them to broadcast subscribers.
+    let mut recv_task = tokio::spawn(async move {
+        while let Some(Ok(Message::Text(text))) = receiver.next().await {
+            // Add username before message.
+            let ret = match text.as_str() {
+                "Ping" => "Pong",
+                "Pong" => {break;}
+                t => t
+            };
+            let _ = tx.send(String::from(ret));
+        }
+    });
+
+    tokio::select! {
+        _ = (&mut send_task) => recv_task.abort(),
+        _ = (&mut recv_task) => send_task.abort(),
+    };
+
+
 }
