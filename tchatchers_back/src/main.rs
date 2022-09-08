@@ -13,12 +13,15 @@ use tchatchers_core::user::{InsertableUser, User};
 
 struct State {
     pool: PgPool,
+    secret: String
 }
 
 #[tokio::main]
 async fn main() {
+    dotenv::dotenv().ok();
     let shared_state = Arc::new(State {
         pool: tchatchers_core::pool::get_pool().await,
+        secret: std::env::var("SECRET").expect("No secret has been defined")
     });
 
     let app = Router::new()
@@ -57,7 +60,7 @@ async fn create_user(
             "A user with a similar login already exists",
         );
     }
-    match new_user.insert(&state.pool).await {
+    match new_user.insert(&state.secret, &state.pool).await {
         Ok(_) => (StatusCode::CREATED, "User created with success"),
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened"),
     }

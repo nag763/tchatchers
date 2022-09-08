@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 #[cfg(feature = "back")]
 use sqlx::postgres::PgQueryResult;
 #[cfg(feature = "back")]
@@ -52,10 +53,12 @@ impl User {
 
 #[cfg(feature = "back")]
 impl InsertableUser {
-    pub async fn insert(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+    pub async fn insert(&self, secret: &str, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+        let mc = new_magic_crypt!(secret, 256);
+        let encrypted_pwd = mc.encrypt_str_to_base64(&self.password);
         sqlx::query("INSERT INTO CHATTER(login, password, name) VALUES ($1,$2,$3)")
             .bind(&self.login)
-            .bind(&self.password)
+            .bind(&encrypted_pwd)
             .bind(&self.name)
             .execute(pool)
             .await
