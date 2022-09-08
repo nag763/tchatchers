@@ -11,3 +11,22 @@ pub fn waiting_for_response() -> Html {
         </p>
     }
 }
+
+#[derive(Clone, PartialEq, yew::Properties)]
+pub struct FormButtonProperties {
+    pub label: String,
+}
+
+#[function_component(FormButton)]
+pub fn form_button(props: &FormButtonProperties) -> Html {
+    html! {
+      <div class="flex items-center">
+        <div class="w-2/3"></div>
+        <div class="w-1/3">
+          <button class="shadow bg-purple-500 enabled:hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded" type="submit">
+          {&props.label}
+          </button>
+        </div>
+      </div>
+    }
+}

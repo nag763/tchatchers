@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 #[cfg(feature = "back")]
 use sqlx::postgres::PgQueryResult;
 #[cfg(feature = "back")]
@@ -53,14 +52,30 @@ impl User {
 
 #[cfg(feature = "back")]
 impl InsertableUser {
-    pub async fn insert(&self, secret: &str, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
-        let mc = new_magic_crypt!(secret, 256);
-        let encrypted_pwd = mc.encrypt_str_to_base64(&self.password);
+    pub async fn insert(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
         sqlx::query("INSERT INTO CHATTER(login, password, name) VALUES ($1,$2,$3)")
             .bind(&self.login)
-            .bind(&encrypted_pwd)
+            .bind(&self.password)
             .bind(&self.name)
             .execute(pool)
             .await
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct AuthenticableUser {
+    pub login: String,
+    pub password: String,
+}
+
+#[cfg(feature = "back")]
+impl AuthenticableUser {
+    pub async fn authenticate(&self, pool: &PgPool) -> Option<User> {
+        sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1 AND password=$2")
+            .bind(&self.login)
+            .bind(&self.password)
+            .fetch_optional(pool)
+            .await
+            .unwrap()
     }
 }

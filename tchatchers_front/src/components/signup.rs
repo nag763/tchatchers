@@ -1,28 +1,14 @@
-use crate::components::common::WaitingForResponse;
+use crate::components::common::{FormButton, WaitingForResponse};
 use crate::router::Route;
 use gloo_net::http::Request;
 use gloo_timers::callback::Timeout;
 use tchatchers_core::user::InsertableUser;
 use web_sys::HtmlInputElement;
-use yew::{function_component, html, Component, Context, Html, NodeRef, Properties};
+use yew::{html, Component, Context, Html, NodeRef, Properties};
 use yew_router::prelude::History;
 use yew_router::scope_ext::RouterScopeExt;
 
 const CHECK_LOGIN_AFTER: u32 = 250;
-
-#[function_component(SignUpButton)]
-pub fn sign_up_button() -> Html {
-    html! {
-      <div class="flex items-center">
-        <div class="w-2/3"></div>
-        <div class="w-1/3">
-          <button class="shadow bg-purple-500 enabled:hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded" type="submit">
-          {"Sign Up"}
-          </button>
-        </div>
-      </div>
-    }
-}
 
 pub enum Msg {
     SubmitForm,
@@ -34,6 +20,7 @@ pub enum Msg {
 pub struct Props;
 
 #[derive(Default)]
+
 pub struct SignUp {
     login: NodeRef,
     password: NodeRef,
@@ -125,7 +112,7 @@ impl Component for SignUp {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let end_of_form: Html = match self.wait_for_api {
-            false => html! { <SignUpButton /> },
+            false => html! { <FormButton label="Sign up" /> },
             true => html! { <WaitingForResponse /> },
         };
 
@@ -133,6 +120,7 @@ impl Component for SignUp {
             <>
                 <div class="flex items-center justify-center h-full">
                 <form class="w-full max-w-sm border-2 px-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
+                <h2 class="text-xl mb-10 text-center text-gray-500 font-bold">{"Sign up"}</h2>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">

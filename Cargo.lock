@@ -1881,6 +1881,7 @@ dependencies = [
  "axum",
  "dotenv",
  "headers",
+ "magic-crypt",
  "sqlx-core",
  "tchatchers_core",
  "tokio",
@@ -1890,7 +1891,6 @@ dependencies = [
 name = "tchatchers_core"
 version = "0.1.0"
 dependencies = [
- "magic-crypt",
  "serde",
  "sqlx",
 ]

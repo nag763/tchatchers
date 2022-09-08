@@ -9,6 +9,5 @@ back = ["dep:sqlx"]
 
 
 [dependencies]
-magic-crypt = "3.1.10"
 serde = { version = "1.0.144", features = ["derive"] }
 sqlx = { version = "0.6", features = [ "runtime-async-std-native-tls" , "postgres"], optional = true }
