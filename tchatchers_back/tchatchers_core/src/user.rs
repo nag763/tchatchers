@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::jwt::Jwt;
+use serde::{Deserialize, Serialize};
 #[cfg(feature = "back")]
 use sqlx::postgres::PgQueryResult;
 #[cfg(feature = "back")]

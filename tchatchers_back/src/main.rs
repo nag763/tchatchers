@@ -6,18 +6,18 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use futures_util::{SinkExt, StreamExt};
 use magic_crypt::{new_magic_crypt, MagicCrypt256, MagicCryptTrait};
 use sqlx_core::postgres::PgPool;
 use std::net::SocketAddr;
-use std::sync::{Arc};
-use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
+use std::sync::Arc;
 use tchatchers_core::jwt::Jwt;
-use tokio::time::{sleep, Duration};
+use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
 use tokio::sync::broadcast;
-use futures_util::{StreamExt, SinkExt};
+use tokio::time::{sleep, Duration};
 use tower_cookies::{Cookie, CookieManagerLayer, Cookies};
 
-const JWT_PATH : &str = "jwt";
+const JWT_PATH: &str = "jwt";
 
 struct State {
     encrypter: MagicCrypt256,
@@ -35,9 +35,9 @@ async fn main() {
     let (tx, _rx) = broadcast::channel(100);
     let shared_state = Arc::new(State {
         encrypter,
-        jwt_secret, 
+        jwt_secret,
         pool: tchatchers_core::pool::get_pool().await,
-        tx
+        tx,
     });
 
     let app = Router::new()
@@ -70,22 +70,20 @@ async fn login_exists(
     (response_status, ())
 }
 
-async fn logout(
-    cookies: Cookies
-) -> impl IntoResponse {
+async fn logout(cookies: Cookies) -> impl IntoResponse {
+    let mut jwt_cookie = Cookie::new(JWT_PATH, "");
+    jwt_cookie.set_path("/");
+    jwt_cookie.make_removal();
+    cookies.add(jwt_cookie);
     (StatusCode::OK, "")
 }
 
-async fn validate(
-    cookies: Cookies,
-    Extension(state): Extension<Arc<State>>,
-) -> impl IntoResponse {
+async fn validate(cookies: Cookies, Extension(state): Extension<Arc<State>>) -> impl IntoResponse {
     if let Some(cookie) = cookies.get(JWT_PATH) {
         let value = cookie.value();
-        Jwt::deserialize(value, &state.jwt_secret).unwrap();
         match Jwt::deserialize(value, &state.jwt_secret) {
             Ok(_) => (StatusCode::OK, ""),
-            Err(_) => (StatusCode::UNAUTHORIZED, "The jwt couldn't be deserialized")
+            Err(_) => (StatusCode::UNAUTHORIZED, "The jwt couldn't be deserialized"),
         }
     } else {
         (StatusCode::NOT_FOUND, "The JWT token hasn't been found")
@@ -95,7 +93,7 @@ async fn validate(
 async fn authenticate(
     Json(mut user): Json<AuthenticableUser>,
     Extension(state): Extension<Arc<State>>,
-    cookies: Cookies
+    cookies: Cookies,
 ) -> impl IntoResponse {
     user.password = state.encrypter.encrypt_str_to_base64(&user.password);
     let user = match user.authenticate(&state.pool).await {
@@ -140,7 +138,10 @@ async fn create_user(
     }
 }
 
-async fn ws_handler(ws: WebSocketUpgrade, Extension(state): Extension<Arc<State>>) -> impl IntoResponse {
+async fn ws_handler(
+    ws: WebSocketUpgrade,
+    Extension(state): Extension<Arc<State>>,
+) -> impl IntoResponse {
     ws.on_upgrade(|socket| handle_socket(socket, state))
 }
 
@@ -159,15 +160,16 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>) {
 
     let tx = state.tx.clone();
 
-    
     // This task will receive messages from client and send them to broadcast subscribers.
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(Message::Text(text))) = receiver.next().await {
             // Add username before message.
             let ret = match text.as_str() {
                 "Ping" => "Pong",
-                "Pong" => {break;}
-                t => t
+                "Pong" => {
+                    break;
+                }
+                t => t,
             };
             let _ = tx.send(String::from(ret));
         }
@@ -177,6 +179,4 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>) {
         _ = (&mut send_task) => recv_task.abort(),
         _ = (&mut recv_task) => send_task.abort(),
     };
-
-
 }

@@ -1,12 +1,12 @@
 use crate::components::common::{FormButton, WaitingForResponse};
 use crate::router::Route;
+use crate::services::auth_bus::EventBus;
 use gloo_net::http::Request;
 use tchatchers_core::user::AuthenticableUser;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Html, NodeRef, Properties};
-use yew_router::{history::History, scope_ext::RouterScopeExt};
-use crate::services::auth_bus::EventBus;
 use yew_agent::Dispatched;
+use yew_router::{history::History, scope_ext::RouterScopeExt};
 
 pub enum Msg {
     SubmitForm,

@@ -1,9 +1,9 @@
 use super::navlink::Navlink;
 use crate::router::Route;
-use yew::{html, Component, Context, Html, Properties};
-use yew_router::prelude::Link;
 use crate::services::auth_bus::EventBus;
+use yew::{html, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
+use yew_router::prelude::Link;
 
 pub enum Msg {
     AuthEvent(bool),
@@ -33,7 +33,7 @@ impl Component for Navbar {
             Msg::AuthEvent(e) => {
                 self.verified = e;
                 true
-            },
+            }
         }
     }
 

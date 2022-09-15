@@ -6,7 +6,6 @@ use crate::components::signup::SignUp;
 use yew::{html, Html};
 use yew_router::prelude::*;
 
-
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {
     #[at("/")]

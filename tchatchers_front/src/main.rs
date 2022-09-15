@@ -2,11 +2,11 @@ pub mod components;
 pub mod router;
 pub mod services;
 
+use crate::components::auth_checker::AuthChecker;
 use components::navbar::Navbar;
 use router::{switch, Route};
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::components::auth_checker::AuthChecker;
 
 #[macro_use]
 extern crate derive_more;

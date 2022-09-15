@@ -1,6 +1,6 @@
 use crate::user::User;
-use serde::{Serialize, Deserialize};
-use jsonwebtoken::{EncodingKey, Header, encode, Validation, DecodingKey, decode, Algorithm};
+use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Jwt {
@@ -16,18 +16,26 @@ impl From<User> for Jwt {
             id: user.id,
             login: user.login,
             name: user.name,
-            exp: usize::MAX
+            exp: usize::MAX,
         }
     }
 }
 
 impl Jwt {
     pub fn serialize(&self, secret: &str) -> Result<String, jsonwebtoken::errors::Error> {
-        encode(&Header::default(), &self,  &EncodingKey::from_secret(secret.as_ref()))
+        encode(
+            &Header::default(),
+            &self,
+            &EncodingKey::from_secret(secret.as_ref()),
+        )
     }
 
     pub fn deserialize(token: &str, secret: &str) -> Result<Self, jsonwebtoken::errors::Error> {
-        let token = decode::<Self>(token, &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256))?;
+        let token = decode::<Self>(
+            token,
+            &DecodingKey::from_secret(secret.as_ref()),
+            &Validation::new(Algorithm::HS256),
+        )?;
         Ok(token.claims)
     }
 }
