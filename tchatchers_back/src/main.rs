@@ -11,12 +11,17 @@ use sqlx_core::postgres::PgPool;
 use std::net::SocketAddr;
 use std::sync::{Arc};
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
+use tchatchers_core::jwt::Jwt;
 use tokio::time::{sleep, Duration};
 use tokio::sync::broadcast;
 use futures_util::{StreamExt, SinkExt};
+use tower_cookies::{Cookie, CookieManagerLayer, Cookies};
+
+const JWT_PATH : &str = "jwt";
 
 struct State {
     encrypter: MagicCrypt256,
+    jwt_secret: String,
     tx: broadcast::Sender<String>,
     pool: PgPool,
 }
@@ -24,11 +29,13 @@ struct State {
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().ok();
-    let secret = std::env::var("SECRET").expect("No secret has been defined");
-    let encrypter = new_magic_crypt!(&secret, 256);
+    let pwd_secret = std::env::var("PWD_SECRET").expect("No password secret has been defined");
+    let jwt_secret = std::env::var("JWT_SECRET").expect("No jwt secret has been defined");
+    let encrypter = new_magic_crypt!(&pwd_secret, 256);
     let (tx, _rx) = broadcast::channel(100);
     let shared_state = Arc::new(State {
         encrypter,
+        jwt_secret, 
         pool: tchatchers_core::pool::get_pool().await,
         tx
     });
@@ -39,7 +46,10 @@ async fn main() {
         .route("/api/create_user", post(create_user))
         .route("/api/login_exists/:login", get(login_exists))
         .route("/api/authenticate", post(authenticate))
-        .layer(Extension(shared_state));
+        .route("/api/logout", get(logout))
+        .route("/api/validate", get(validate))
+        .layer(Extension(shared_state))
+        .layer(CookieManagerLayer::new());
 
     // run it with hyper
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
@@ -60,9 +70,32 @@ async fn login_exists(
     (response_status, ())
 }
 
+async fn logout(
+    cookies: Cookies
+) -> impl IntoResponse {
+    (StatusCode::OK, "")
+}
+
+async fn validate(
+    cookies: Cookies,
+    Extension(state): Extension<Arc<State>>,
+) -> impl IntoResponse {
+    if let Some(cookie) = cookies.get(JWT_PATH) {
+        let value = cookie.value();
+        Jwt::deserialize(value, &state.jwt_secret).unwrap();
+        match Jwt::deserialize(value, &state.jwt_secret) {
+            Ok(_) => (StatusCode::OK, ""),
+            Err(_) => (StatusCode::UNAUTHORIZED, "The jwt couldn't be deserialized")
+        }
+    } else {
+        (StatusCode::NOT_FOUND, "The JWT token hasn't been found")
+    }
+}
+
 async fn authenticate(
     Json(mut user): Json<AuthenticableUser>,
     Extension(state): Extension<Arc<State>>,
+    cookies: Cookies
 ) -> impl IntoResponse {
     user.password = state.encrypter.encrypt_str_to_base64(&user.password);
     let user = match user.authenticate(&state.pool).await {
@@ -73,7 +106,17 @@ async fn authenticate(
         }
     };
     match user.is_authorized {
-        true => (StatusCode::OK, "Foo"),
+        true => {
+            let jwt = Jwt::from(user);
+            let serialized_jwt : String = jwt.serialize(&state.jwt_secret).unwrap();
+            let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
+            jwt_cookie.set_path("/");
+            jwt_cookie.make_permanent();
+            jwt_cookie.set_secure(true);
+            jwt_cookie.set_http_only(false);
+            cookies.add(jwt_cookie);
+            (StatusCode::OK, "")
+        }
         false => (StatusCode::UNAUTHORIZED, "This user's access has been revoked, contact an admin if you believe you should access this service")
     }
 }

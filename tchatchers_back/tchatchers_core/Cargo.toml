@@ -9,5 +9,6 @@ back = ["dep:sqlx"]
 
 
 [dependencies]
+jsonwebtoken = "8.1.1"
 serde = { version = "1.0.144", features = ["derive"] }
 sqlx = { version = "0.6", features = [ "runtime-async-std-native-tls" , "postgres"], optional = true }

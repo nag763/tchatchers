@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::jwt::Jwt;
 #[cfg(feature = "back")]
 use sqlx::postgres::PgQueryResult;
 #[cfg(feature = "back")]
@@ -6,8 +7,8 @@ use sqlx::FromRow;
 #[cfg(feature = "back")]
 use sqlx::PgPool;
 
-#[cfg(feature = "back")]
-#[derive(Serialize, Deserialize, FromRow, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[cfg_attr(feature = "back", derive(FromRow))]
 pub struct User {
     pub id: i32,
     pub login: String,
@@ -47,6 +48,17 @@ impl User {
             .fetch_all(pool)
             .await
             .unwrap()
+    }
+}
+
+impl From<Jwt> for User {
+    fn from(jwt: Jwt) -> User {
+        User {
+            id: jwt.id,
+            login: jwt.login,
+            name: jwt.name,
+            ..User::default()
+        }
     }
 }
 

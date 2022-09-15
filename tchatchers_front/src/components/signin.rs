@@ -5,6 +5,8 @@ use tchatchers_core::user::AuthenticableUser;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Html, NodeRef, Properties};
 use yew_router::{history::History, scope_ext::RouterScopeExt};
+use crate::services::auth_bus::EventBus;
+use yew_agent::Dispatched;
 
 pub enum Msg {
     SubmitForm,
@@ -55,6 +57,7 @@ impl Component for SignIn {
                         wasm_bindgen_futures::spawn_local(async move {
                             let resp = req.await.unwrap();
                             if resp.ok() {
+                                EventBus::dispatcher().send(true);
                                 link.history().unwrap().push(Route::Home);
                             } else {
                                 link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));

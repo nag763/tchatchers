@@ -2,30 +2,64 @@ use super::navlink::Navlink;
 use crate::router::Route;
 use yew::{html, Component, Context, Html, Properties};
 use yew_router::prelude::Link;
+use crate::services::auth_bus::EventBus;
+use yew_agent::{Bridge, Bridged};
+
+pub enum Msg {
+    AuthEvent(bool),
+}
 
 #[derive(Clone, PartialEq, Properties)]
-pub struct Props {}
+pub struct Props;
 
-pub struct Navbar;
+pub struct Navbar {
+    verified: bool,
+    _producer: Box<dyn Bridge<EventBus>>,
+}
 
 impl Component for Navbar {
-    type Message = ();
-    type Properties = Props;
+    type Message = Msg;
+    type Properties = ();
 
-    fn create(_ctx: &Context<Self>) -> Self {
-        Self
+    fn create(ctx: &Context<Self>) -> Self {
+        Self {
+            verified: false,
+            _producer: EventBus::bridge(ctx.link().callback(Msg::AuthEvent)),
+        }
+    }
+
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            Msg::AuthEvent(e) => {
+                self.verified = e;
+                true
+            },
+        }
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
+        let links = match self.verified {
+            true => html! {
+                <>
+                    <Navlink label="Settings" link={Route::Settings} />
+                    <Navlink label="Log out" link={Route::LogOut} />
+                </>
+            },
+            false => html! {
+                <>
+                    <Navlink label="Sign in" link={Route::SignIn} />
+                    <Navlink label="Sign up" link={Route::SignUp} />
+                </>
+            },
+        };
+
         html! {
             <nav class="flex items-center justify-between flex-wrap bg-gray-800 px-6 row-span-1">
                 <Link<Route> to={Route::Home} classes="flex items-center flex-shrink-0 text-white mr-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600 hover:animate-pulse">
                     <span class="font-semibold text-xl tracking-tight">{ "tchatchers" }</span>
                 </Link<Route>>
                 <div>
-                    <Navlink label="Sign in" link={Route::SignIn} />
-                    <Navlink label="Sign up" link={Route::SignUp} />
-                    <Navlink label="Settings" link={Route::Settings} />
+                    {links}
                 </div>
             </nav>
         }
