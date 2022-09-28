@@ -1,4 +1,4 @@
-use super::message::{WsMessage, WsMessageType};
+use super::message::{WsBusMessage, WsBusMessageType};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use yew_agent::{Agent, AgentLink, Context, HandlerId};
@@ -35,8 +35,8 @@ impl Agent for EventBus {
     fn handle_input(&mut self, msg: Self::Input, _id: HandlerId) {
         match msg {
             Request::EventBusMsg(s) => {
-                let msg = WsMessage {
-                    message_type: WsMessageType::Reply,
+                let msg = WsBusMessage {
+                    message_type: WsBusMessageType::Reply,
                     content: s.clone(),
                 };
                 let serialized_message = serde_json::to_string(&msg).unwrap();
@@ -45,8 +45,8 @@ impl Agent for EventBus {
                 }
             }
             Request::EventBusKeepAlive => {
-                let msg = WsMessage {
-                    message_type: WsMessageType::Pong,
+                let msg = WsBusMessage {
+                    message_type: WsBusMessageType::Pong,
                     content: String::from("Pong"),
                 };
                 let serialized_message = serde_json::to_string(&msg).unwrap();
@@ -60,8 +60,8 @@ impl Agent for EventBus {
                 }
             }
             Request::EventBusNotConnected => {
-                let msg = WsMessage {
-                    message_type: WsMessageType::NotConnected,
+                let msg = WsBusMessage {
+                    message_type: WsBusMessageType::NotConnected,
                     content: String::from("Error on connection"),
                 };
                 let serialized_message = serde_json::to_string(&msg).unwrap();
@@ -70,8 +70,8 @@ impl Agent for EventBus {
                 }
             }
             Request::EventBusClosed => {
-                let msg = WsMessage {
-                    message_type: WsMessageType::Closed,
+                let msg = WsBusMessage {
+                    message_type: WsBusMessageType::Closed,
                     content: String::from("Connection closed"),
                 };
                 let serialized_message = serde_json::to_string(&msg).unwrap();

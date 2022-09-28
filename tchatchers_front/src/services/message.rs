@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Display)]
 #[serde(rename_all = "camelCase")]
-pub enum WsMessageType {
+pub enum WsBusMessageType {
     Error,
     NotConnected,
     Reply,
@@ -14,7 +14,7 @@ pub enum WsMessageType {
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct WsMessage {
-    pub message_type: WsMessageType,
+pub struct WsBusMessage {
+    pub message_type: WsBusMessageType,
     pub content: String,
 }

@@ -1,5 +1,5 @@
-use sqlx::postgres::PgPoolOptions;
 use sqlx::postgres::PgConnectOptions;
+use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 
 pub async fn get_pool() -> PgPool {

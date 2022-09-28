@@ -1,10 +1,15 @@
+use crate::router::Route;
+use gloo_net::http::Request;
 use gloo_timers::callback::{Interval, Timeout};
+use tchatchers_core::ws_message::WsMessage;
 use wasm_bindgen::JsCast;
 use web_sys::{EventTarget, HtmlInputElement};
 use yew::{
     function_component, html, use_state, Callback, Component, Context, Html, InputEvent, NodeRef,
     Properties,
 };
+use yew_router::history::History;
+use yew_router::scope_ext::RouterScopeExt;
 
 const PROGRESS_REFRESH: u32 = 20;
 const TIMEOUT: u32 = 15_000;
@@ -65,6 +70,7 @@ pub struct TypeBar {
     progress_percentage: u32,
     cooldown: Option<Timeout>,
     progress: Option<Interval>,
+    jwt: String,
 }
 
 impl Component for TypeBar {
@@ -72,8 +78,26 @@ impl Component for TypeBar {
     type Properties = Props;
 
     fn create(_ctx: &Context<Self>) -> Self {
+        let window = web_sys::window().unwrap();
+        let document = window.document().unwrap();
+        let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();
+        let document_cookies = html_document.cookie().unwrap();
+        let cookies = &mut document_cookies.split(";");
+        let mut jwt_val: String = String::default();
+        while let Some(cookie) = cookies.next() {
+            if let Some(i) = cookie.find('=') {
+                let (key, val) = cookie.split_at(i + 1);
+                if key == "jwt=" {
+                    jwt_val = val.into();
+                }
+            }
+        }
+        if jwt_val == String::default() {
+            _ctx.link().history().unwrap().push(Route::SignIn);
+        }
         Self {
             can_post: true,
+            jwt: jwt_val,
             ..Self::default()
         }
     }
@@ -89,7 +113,14 @@ impl Component for TypeBar {
                     if !input.check_validity() {
                         return false;
                     }
-                    ctx.props().pass_message_to_ws.emit(input.value());
+                    let msg = WsMessage {
+                        jwt: Some(self.jwt.clone()),
+                        content: Some(input.value()),
+                        ..WsMessage::default()
+                    };
+                    ctx.props()
+                        .pass_message_to_ws
+                        .emit(serde_json::to_string(&msg).unwrap());
                     input.set_value("");
                 }
                 self.cooldown = Some({

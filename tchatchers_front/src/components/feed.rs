@@ -8,6 +8,7 @@ use crate::services::message::*;
 use gloo_net::http::Request;
 use gloo_timers::callback::Interval;
 use gloo_timers::callback::Timeout;
+use wasm_bindgen::JsCast;
 use yew::{html, Callback, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
 use yew_router::history::History;
@@ -59,9 +60,9 @@ impl Component for Feed {
         match msg {
             Msg::HandleMsg(s) => {
                 self.called_back = true;
-                let message: WsMessage = serde_json::from_str(&s).unwrap();
+                let message: WsBusMessage = serde_json::from_str(&s).unwrap();
                 match message.message_type {
-                    WsMessageType::NotConnected | WsMessageType::Closed => {
+                    WsBusMessageType::NotConnected | WsBusMessageType::Closed => {
                         gloo_console::error!("Not connected");
                         let req = Request::get("/api/validate").send();
                         let link = ctx.link().clone();
@@ -79,11 +80,11 @@ impl Component for Feed {
                             })
                         });
                     }
-                    WsMessageType::Reply => {
+                    WsBusMessageType::Reply => {
                         self.received_messages.push(message.content);
                         self.is_connected = true;
                     }
-                    WsMessageType::Pong => {
+                    WsBusMessageType::Pong => {
                         self.is_connected = true;
                     }
                     _ => {
@@ -112,7 +113,7 @@ impl Component for Feed {
                 let pass_message_to_ws = Callback::from(move |message: String| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar {pass_message_to_ws}/>}
+                html! {<TypeBar {pass_message_to_ws} />}
             }
             false => {
                 let link = ctx.link().clone();

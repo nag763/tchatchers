@@ -15,6 +15,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tchatchers_core::jwt::Jwt;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
+use tchatchers_core::ws_message::{WsMessage, WsMessageType};
 use tokio::sync::broadcast;
 use tokio::time::{sleep, Duration};
 use tower_cookies::{Cookie, CookieManagerLayer, Cookies};
@@ -178,14 +179,29 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>) {
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(Message::Text(text))) = receiver.next().await {
             // Add username before message.
-            let ret = match text.as_str() {
-                "Ping" => "Pong",
+            match text.as_str() {
+                "Ping" => {
+                    let _ = tx.send(String::from("Pong"));
+                }
                 "Pong" => {
                     break;
                 }
-                t => t,
+                t => {
+                    let msg: WsMessage = serde_json::from_str(t).unwrap();
+                    if let Some(jwt) = msg.jwt {
+                        if let Ok(jwt) = Jwt::deserialize(&jwt, &state.jwt_secret) {
+                            let user: User = jwt.into();
+                            let ws_message = WsMessage {
+                                message_type: WsMessageType::Receive,
+                                content: msg.content,
+                                author: Some(user.name),
+                                ..WsMessage::default()
+                            };
+                            let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
+                        }
+                    }
+                }
             };
-            let _ = tx.send(String::from(ret));
         }
     });
 
