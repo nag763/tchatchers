@@ -51,7 +51,6 @@ impl WebsocketService {
                         }
                         WebSocketError::ConnectionClose(e) => {
                             error!("The connection has been closed :", e.code);
-
                             event_bus.send(Request::EventBusClosed);
                         }
                         WebSocketError::MessageSendError(e) => {

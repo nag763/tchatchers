@@ -13,9 +13,7 @@ impl Component for AuthChecker {
     type Properties = Props;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        let req = Request::get("/api/validate")
-            .header("content-type", "application/json")
-            .send();
+        let req = Request::get("/api/validate").send();
         wasm_bindgen_futures::spawn_local(async move {
             let resp = req.await.unwrap();
             EventBus::dispatcher().send(resp.ok());

@@ -1,13 +1,17 @@
 use super::chat::Chat;
 use super::disconnected_bar::DisconnectedBar;
 use super::type_bar::TypeBar;
+use crate::router::Route;
 use crate::services::chat::WebsocketService;
 use crate::services::event_bus::EventBus;
 use crate::services::message::*;
+use gloo_net::http::Request;
 use gloo_timers::callback::Interval;
 use gloo_timers::callback::Timeout;
 use yew::{html, Callback, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
+use yew_router::history::History;
+use yew_router::scope_ext::RouterScopeExt;
 
 const REFRESH_WS_STATE_EVERY: u32 = 5000;
 
@@ -51,7 +55,7 @@ impl Component for Feed {
         }
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::HandleMsg(s) => {
                 self.called_back = true;
@@ -59,9 +63,17 @@ impl Component for Feed {
                 match message.message_type {
                     WsMessageType::NotConnected | WsMessageType::Closed => {
                         gloo_console::error!("Not connected");
+                        let req = Request::get("/api/validate").send();
+                        let link = ctx.link().clone();
+                        wasm_bindgen_futures::spawn_local(async move {
+                            let resp = req.await.unwrap();
+                            if resp.status() == 401 {
+                                link.history().unwrap().push(Route::SignIn);
+                            }
+                        });
+                        let link = ctx.link().clone();
                         self.is_connected = false;
                         self._ws_reconnect = Some({
-                            let link = _ctx.link().clone();
                             Interval::new(REFRESH_WS_STATE_EVERY, move || {
                                 link.send_message(Msg::CheckWsState)
                             })

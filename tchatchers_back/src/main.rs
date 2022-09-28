@@ -1,13 +1,15 @@
 use axum::{
     extract::ws::{Message, WebSocket, WebSocketUpgrade},
     extract::{Extension, Json, Path},
-    http::StatusCode,
-    response::IntoResponse,
+    http::{Request, StatusCode},
+    middleware::{self, Next},
+    response::{IntoResponse, Response},
     routing::{get, post},
     Router,
 };
 use futures_util::{SinkExt, StreamExt};
 use magic_crypt::{new_magic_crypt, MagicCrypt256, MagicCryptTrait};
+use regex::Regex;
 use sqlx_core::postgres::PgPool;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -16,6 +18,14 @@ use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
 use tokio::sync::broadcast;
 use tokio::time::{sleep, Duration};
 use tower_cookies::{Cookie, CookieManagerLayer, Cookies};
+
+#[macro_use]
+extern crate lazy_static;
+
+lazy_static! {
+    static ref JWT_COOKIE_HEADER: Regex =
+        Regex::new(r####"^jwt=(?P<token_val>[a-zA-Z0-9\._-]*)$"####).unwrap();
+}
 
 const JWT_PATH: &str = "jwt";
 
@@ -40,14 +50,18 @@ async fn main() {
         tx,
     });
 
+    let secured_routes = Router::new()
+        .route("/ws", get(ws_handler))
+        .layer(middleware::from_fn(secure_route));
+
     let app = Router::new()
         // top since it matches all routes
-        .route("/ws", get(ws_handler))
         .route("/api/create_user", post(create_user))
         .route("/api/login_exists/:login", get(login_exists))
         .route("/api/authenticate", post(authenticate))
         .route("/api/logout", get(logout))
         .route("/api/validate", get(validate))
+        .nest("", secured_routes)
         .layer(Extension(shared_state))
         .layer(CookieManagerLayer::new());
 
@@ -86,7 +100,7 @@ async fn validate(cookies: Cookies, Extension(state): Extension<Arc<State>>) -> 
             Err(_) => (StatusCode::UNAUTHORIZED, "The jwt couldn't be deserialized"),
         }
     } else {
-        (StatusCode::NOT_FOUND, "The JWT token hasn't been found")
+        (StatusCode::UNAUTHORIZED, "The JWT token hasn't been found")
     }
 }
 
@@ -179,4 +193,33 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>) {
         _ = (&mut send_task) => recv_task.abort(),
         _ = (&mut recv_task) => send_task.abort(),
     };
+}
+
+async fn secure_route<B>(req: Request<B>, next: Next<B>) -> Result<Response, impl IntoResponse> {
+    let headers = req.headers();
+    if let Some(cookie) = headers.get("cookie") {
+        let cookie_val = cookie.to_str().map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Couldn't find cookie value",
+            )
+        })?;
+        let captures = JWT_COOKIE_HEADER.captures(cookie_val).ok_or((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Regex couldn't find the cookie value",
+        ))?;
+        let value: &str = captures.name("token_val").unwrap().as_str();
+        match Jwt::deserialize(
+            value,
+            &req.extensions().get::<Arc<State>>().unwrap().jwt_secret,
+        ) {
+            Ok(_) => Ok(next.run(req).await),
+            Err(_) => Err((StatusCode::UNAUTHORIZED, "JWT invalid")),
+        }
+    } else {
+        Err((
+            StatusCode::UNAUTHORIZED,
+            "The route is only for authorized users, please log in.",
+        ))
+    }
 }
