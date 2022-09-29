@@ -1,16 +1,13 @@
 use super::navlink::Navlink;
 use crate::router::Route;
 use crate::services::auth_bus::EventBus;
-use yew::{html, Component, Context, Html, Properties};
+use yew::{html, Component, Context, Html};
 use yew_agent::{Bridge, Bridged};
 use yew_router::prelude::Link;
 
 pub enum Msg {
     AuthEvent(bool),
 }
-
-#[derive(Clone, PartialEq, Properties)]
-pub struct Props;
 
 pub struct Navbar {
     verified: bool,

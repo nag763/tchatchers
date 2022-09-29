@@ -1,15 +1,10 @@
 use crate::router::Route;
 use gloo_net::http::Request;
-use yew::{html, Component, Context, Html, Properties};
+use yew::{html, Component, Context, Html};
 use yew_router::{history::History, scope_ext::RouterScopeExt};
 
 pub enum Msg {
     AccessVerified(bool),
-}
-
-#[derive(Clone, PartialEq, Properties)]
-pub struct Props {
-    pub component: Html,
 }
 
 #[derive(Default)]
@@ -20,7 +15,7 @@ pub struct SecuredRoute {
 
 impl Component for SecuredRoute {
     type Message = Msg;
-    type Properties = Props;
+    type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self::default()
@@ -30,7 +25,6 @@ impl Component for SecuredRoute {
         match msg {
             Msg::AccessVerified(verified) => {
                 if verified {
-                    self.content = ctx.props().component.clone();
                     self.verified = true;
                 } else {
                     ctx.link().history().unwrap().push(Route::SignIn);

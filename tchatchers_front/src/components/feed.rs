@@ -8,9 +8,9 @@ use crate::services::message::*;
 use gloo_net::http::Request;
 use gloo_timers::callback::Interval;
 use gloo_timers::callback::Timeout;
-use wasm_bindgen::JsCast;
 use yew::{html, Callback, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
+use tchatchers_core::ws_message::WsMessage;
 use yew_router::history::History;
 use yew_router::scope_ext::RouterScopeExt;
 
@@ -27,7 +27,7 @@ pub enum Msg {
 pub struct Props;
 
 pub struct Feed {
-    received_messages: Vec<String>,
+    received_messages: Vec<WsMessage>,
     ws: WebsocketService,
     _producer: Box<dyn Bridge<EventBus>>,
     _ws_reconnect: Option<Interval>,
@@ -81,7 +81,7 @@ impl Component for Feed {
                         });
                     }
                     WsBusMessageType::Reply => {
-                        self.received_messages.push(message.content);
+                        self.received_messages.push(serde_json::from_str(&message.content).unwrap());
                         self.is_connected = true;
                     }
                     WsBusMessageType::Pong => {

@@ -1,5 +1,4 @@
 use crate::router::Route;
-use gloo_net::http::Request;
 use gloo_timers::callback::{Interval, Timeout};
 use tchatchers_core::ws_message::WsMessage;
 use wasm_bindgen::JsCast;
@@ -12,7 +11,7 @@ use yew_router::history::History;
 use yew_router::scope_ext::RouterScopeExt;
 
 const PROGRESS_REFRESH: u32 = 20;
-const TIMEOUT: u32 = 15_000;
+const TIMEOUT: u32 = 5_000;
 
 pub enum Msg {
     FileAttached(Option<String>),

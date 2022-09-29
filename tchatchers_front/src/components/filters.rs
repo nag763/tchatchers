@@ -1,14 +1,11 @@
 use super::filter::Filter;
-use yew::{html, Component, Context, Html, Properties};
-
-#[derive(Clone, PartialEq, Properties)]
-pub struct Props {}
+use yew::{html, Component, Context, Html};
 
 pub struct Filters;
 
 impl Component for Filters {
     type Message = ();
-    type Properties = Props;
+    type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self

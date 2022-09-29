@@ -1,6 +1,6 @@
 use crate::services::event_bus::{EventBus, Request};
 use futures::{channel::mpsc::Sender, SinkExt, StreamExt};
-use gloo_console::{debug, error, log};
+use gloo_console::{debug, error};
 use gloo_net::websocket::{futures::WebSocket, Message, WebSocketError};
 use wasm_bindgen_futures::spawn_local;
 use yew_agent::Dispatched;
@@ -31,7 +31,7 @@ impl WebsocketService {
             while let Some(msg) = read.next().await {
                 match msg {
                     Ok(Message::Text(data)) => {
-                        log!("from websocket:", &data);
+                        debug!("from websocket:", &data);
                         match data.as_str() {
                             "Pong" => event_bus.send(Request::EventBusKeepAlive),
                             _ => event_bus.send(Request::EventBusMsg(data)),
