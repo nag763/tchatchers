@@ -2,7 +2,7 @@ use sqlx::postgres::PgConnectOptions;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 
-pub async fn get_pool() -> PgPool {
+pub async fn get_pg_pool() -> PgPool {
     let connect_options = PgConnectOptions::new()
         .host("pg.tchatche.rs")
         .database(&std::env::var("POSTGRES_DB").expect("No schema defined in .env"))
@@ -13,4 +13,9 @@ pub async fn get_pool() -> PgPool {
         .connect_with(connect_options)
         .await
         .unwrap()
+}
+
+pub async fn get_redis_pool() -> r2d2::Pool<redis::Client> {
+    let client = redis::Client::open("redis://redis.tchatche.rs/").unwrap();
+    r2d2::Pool::new(client).unwrap()
 }

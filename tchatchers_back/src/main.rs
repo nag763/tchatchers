@@ -8,13 +8,13 @@ use axum::{
     Router,
 };
 use futures_util::{SinkExt, StreamExt};
-use linked_hash_set::LinkedHashSet;
 use magic_crypt::{new_magic_crypt, MagicCrypt256, MagicCryptTrait};
 use regex::Regex;
 use sqlx_core::postgres::PgPool;
 use std::net::SocketAddr;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use tchatchers_core::jwt::Jwt;
+use tchatchers_core::room::Room;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
 use tokio::sync::broadcast;
@@ -35,8 +35,8 @@ struct State {
     encrypter: MagicCrypt256,
     jwt_secret: String,
     tx: broadcast::Sender<String>,
-    messages: Mutex<LinkedHashSet<WsMessage>>,
-    pool: PgPool,
+    pg_pool: PgPool,
+    redis_pool: r2d2::Pool<redis::Client>,
 }
 
 #[tokio::main]
@@ -49,9 +49,9 @@ async fn main() {
     let shared_state = Arc::new(State {
         encrypter,
         jwt_secret,
-        pool: tchatchers_core::pool::get_pool().await,
+        pg_pool: tchatchers_core::pool::get_pg_pool().await,
+        redis_pool: tchatchers_core::pool::get_redis_pool().await,
         tx,
-        messages: Mutex::new(LinkedHashSet::new()),
     });
 
     let secured_routes = Router::new()
@@ -81,7 +81,7 @@ async fn login_exists(
     Path(login): Path<String>,
     Extension(state): Extension<Arc<State>>,
 ) -> impl IntoResponse {
-    let response_status: StatusCode = match User::login_exists(&login, &state.pool).await {
+    let response_status: StatusCode = match User::login_exists(&login, &state.pg_pool).await {
         false => StatusCode::OK,
         true => StatusCode::CONFLICT,
     };
@@ -114,7 +114,7 @@ async fn authenticate(
     cookies: Cookies,
 ) -> impl IntoResponse {
     user.password = state.encrypter.encrypt_str_to_base64(&user.password);
-    let user = match user.authenticate(&state.pool).await {
+    let user = match user.authenticate(&state.pg_pool).await {
         Some(v) => v,
         None => {
             sleep(Duration::from_secs(3)).await;
@@ -141,7 +141,7 @@ async fn create_user(
     Json(mut new_user): Json<InsertableUser>,
     Extension(state): Extension<Arc<State>>,
 ) -> impl IntoResponse {
-    if User::login_exists(&new_user.login, &state.pool).await {
+    if User::login_exists(&new_user.login, &state.pg_pool).await {
         return (
             StatusCode::BAD_REQUEST,
             "A user with a similar login already exists",
@@ -150,7 +150,7 @@ async fn create_user(
 
     new_user.password = state.encrypter.encrypt_str_to_base64(&new_user.password);
 
-    match new_user.insert(&state.pool).await {
+    match new_user.insert(&state.pg_pool).await {
         Ok(_) => (StatusCode::CREATED, "User created with success"),
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened"),
     }
@@ -191,7 +191,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>) {
                 }
                 t => {
                     let msg: WsMessage = serde_json::from_str(t).unwrap();
-                    if let Some(jwt) = msg.jwt {
+                    if let (Some(jwt), Some(room)) = (msg.jwt, msg.room) {
                         if let Ok(jwt) = Jwt::deserialize(&jwt, &state.jwt_secret) {
                             let user: User = jwt.into();
                             match msg.message_type {
@@ -200,13 +200,23 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>) {
                                         message_type: WsMessageType::Receive,
                                         content: msg.content,
                                         author: Some(user.name),
+                                        room: Some(room.clone()),
                                         ..WsMessage::default()
                                     };
                                     let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
-                                    state.messages.lock().unwrap().insert(ws_message);
+
+                                    Room::publish_message_in_room(
+                                        &mut state.redis_pool.get().unwrap(),
+                                        &room,
+                                        ws_message.clone(),
+                                    );
                                 }
                                 WsMessageType::RetrieveMessages => {
-                                    for msg in state.messages.lock().unwrap().clone() {
+                                    let msgs = Room::find_messages_in_room(
+                                        &mut state.redis_pool.get().unwrap(),
+                                        &room,
+                                    );
+                                    for msg in msgs {
                                         let _ = tx.send(serde_json::to_string(&msg).unwrap());
                                     }
                                     let ws_message = WsMessage {

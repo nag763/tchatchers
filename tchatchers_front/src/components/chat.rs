@@ -6,6 +6,7 @@ use yew::{html, Component, Context, Html, Properties};
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub messages: LinkedHashSet<WsMessage>,
+    pub room: String,
 }
 
 pub struct Chat;
@@ -21,7 +22,16 @@ impl Component for Chat {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <>
-            {ctx.props().messages.iter().map(|m| {
+            {ctx.props().messages
+                .iter()
+                .filter(|m| {
+                    if let Some(room) = &m.room {
+                        room == &ctx.props().room
+                    } else {
+                        false
+                    }
+                }
+                ).map(|m| {
                 match &m.message_type {
                     WsMessageType::Receive => html!{<p>{format!("({}:{:02})[{}]: {}", m.timestamp.clone().hour(), m.timestamp.clone().minute(),m.author.clone().unwrap_or_default(), m.content.clone().unwrap_or_default())}</p>},
                     _ => html!{}

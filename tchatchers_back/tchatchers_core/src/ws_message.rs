@@ -27,4 +27,5 @@ pub struct WsMessage {
     pub author: Option<String>,
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
     pub timestamp: DateTime<Utc>,
+    pub room: Option<String>,
 }

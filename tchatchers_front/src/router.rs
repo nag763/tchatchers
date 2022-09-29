@@ -1,4 +1,5 @@
 use crate::components::feed::Feed;
+use crate::components::join_room::JoinRoom;
 use crate::components::logout::LogOut;
 use crate::components::settings::Settings;
 use crate::components::signin::SignIn;
@@ -9,7 +10,9 @@ use yew_router::prelude::*;
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {
     #[at("/")]
-    Home,
+    JoinRoom,
+    #[at("/r/:room")]
+    Room { room: String },
     #[at("/signin")]
     SignIn,
     #[at("/signup")]
@@ -22,7 +25,8 @@ pub enum Route {
 
 pub fn switch(route: &Route) -> Html {
     match route {
-        Route::Home => html! { <Feed /> },
+        Route::JoinRoom => html! { <JoinRoom /> },
+        Route::Room { room } => html! { <Feed room={room.clone()} /> },
         Route::SignIn => html! { <SignIn /> },
         Route::SignUp => html! { <SignUp /> },
         Route::Settings => html! { <Settings /> },
@@ -33,7 +37,8 @@ pub fn switch(route: &Route) -> Html {
 impl Route {
     pub fn requires_auth(&self) -> bool {
         match self {
-            Route::Home | Route::Settings => true,
+            Route::Room { room: _ } => true,
+            Route::Settings => true,
             _ => false,
         }
     }

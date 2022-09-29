@@ -57,6 +57,7 @@ pub fn file_attacher(props: &FileAttacherProps) -> Html {
 pub struct Props {
     pub pass_message_to_ws: Callback<String>,
     pub jwt: String,
+    pub room: String,
 }
 
 #[derive(Default)]
@@ -93,6 +94,7 @@ impl Component for TypeBar {
                     }
                     let msg = WsMessage {
                         jwt: Some(ctx.props().jwt.clone()),
+                        room: Some(ctx.props().room.clone()),
                         content: Some(input.value()),
                         ..WsMessage::default()
                     };

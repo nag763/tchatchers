@@ -58,7 +58,7 @@ impl Component for SignIn {
                             let resp = req.await.unwrap();
                             if resp.ok() {
                                 EventBus::dispatcher().send(true);
-                                link.history().unwrap().push(Route::Home);
+                                link.history().unwrap().push(Route::JoinRoom);
                             } else {
                                 link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
                             }

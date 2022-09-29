@@ -50,7 +50,7 @@ impl Component for Navbar {
             },
         };
         let logo_route = match self.verified {
-            true => Route::Home,
+            true => Route::JoinRoom,
             false => Route::SignIn,
         };
 

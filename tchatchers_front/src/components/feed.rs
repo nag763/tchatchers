@@ -26,7 +26,9 @@ pub enum Msg {
 }
 
 #[derive(Clone, PartialEq, Properties)]
-pub struct Props;
+pub struct Props {
+    pub room: String,
+}
 
 pub struct Feed {
     received_messages: LinkedHashSet<WsMessage>,
@@ -112,6 +114,7 @@ impl Component for Feed {
                         let msg = WsMessage {
                             jwt: Some(self.jwt.clone()),
                             message_type: WsMessageType::RetrieveMessages,
+                            room: Some(ctx.props().room.clone()),
                             ..WsMessage::default()
                         };
                         self.ws
@@ -146,7 +149,7 @@ impl Component for Feed {
                 let pass_message_to_ws = Callback::from(move |message: String| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar {pass_message_to_ws} jwt={self.jwt.clone()}/>}
+                html! {<TypeBar {pass_message_to_ws} jwt={self.jwt.clone()} room={ctx.props().room.clone()}/>}
             }
             false => {
                 let link = ctx.link().clone();
@@ -159,7 +162,7 @@ impl Component for Feed {
         html! {
             <div class="grid grid-rows-11 h-full">
                 <div class="row-span-10" >
-                    <Chat messages={self.received_messages.clone()} />
+                    <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} />
                 </div>
                 <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center border-y-2 bg-slate-100 shadow-xl block">
                     {component}
