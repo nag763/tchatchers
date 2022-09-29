@@ -187,7 +187,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>) {
                     let _ = tx.send(String::from("Pong"));
                 }
                 "Pong" => {
-                    break;
+                    continue;
                 }
                 t => {
                     let msg: WsMessage = serde_json::from_str(t).unwrap();
@@ -209,6 +209,12 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>) {
                                     for msg in state.messages.lock().unwrap().clone() {
                                         let _ = tx.send(serde_json::to_string(&msg).unwrap());
                                     }
+                                    let ws_message = WsMessage {
+                                        message_type: WsMessageType::MessagesRetrieved,
+                                        author: Some(user.name.clone()),
+                                        ..WsMessage::default()
+                                    };
+                                    let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
                                 }
                                 _ => {}
                             }

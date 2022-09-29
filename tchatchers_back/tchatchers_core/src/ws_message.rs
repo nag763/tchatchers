@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Default, PartialEq, Eq, Hash)]
@@ -7,6 +8,9 @@ pub enum WsMessageType {
     Send,
     Receive,
     RetrieveMessages,
+    MessagesRetrieved,
+    Reconnected,
+    Disconnected,
 }
 
 #[derive(
@@ -21,4 +25,6 @@ pub struct WsMessage {
     pub jwt: Option<String>,
     pub content: Option<String>,
     pub author: Option<String>,
+    #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    pub timestamp: DateTime<Utc>,
 }
