@@ -1,4 +1,3 @@
-use crate::router::Route;
 use gloo_timers::callback::{Interval, Timeout};
 use tchatchers_core::ws_message::WsMessage;
 use wasm_bindgen::JsCast;
@@ -7,8 +6,6 @@ use yew::{
     function_component, html, use_state, Callback, Component, Context, Html, InputEvent, NodeRef,
     Properties,
 };
-use yew_router::history::History;
-use yew_router::scope_ext::RouterScopeExt;
 
 const PROGRESS_REFRESH: u32 = 20;
 const TIMEOUT: u32 = 5_000;
@@ -59,6 +56,7 @@ pub fn file_attacher(props: &FileAttacherProps) -> Html {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub pass_message_to_ws: Callback<String>,
+    pub jwt: String,
 }
 
 #[derive(Default)]
@@ -69,7 +67,6 @@ pub struct TypeBar {
     progress_percentage: u32,
     cooldown: Option<Timeout>,
     progress: Option<Interval>,
-    jwt: String,
 }
 
 impl Component for TypeBar {
@@ -77,26 +74,8 @@ impl Component for TypeBar {
     type Properties = Props;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        let window = web_sys::window().unwrap();
-        let document = window.document().unwrap();
-        let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();
-        let document_cookies = html_document.cookie().unwrap();
-        let cookies = &mut document_cookies.split(";");
-        let mut jwt_val: String = String::default();
-        while let Some(cookie) = cookies.next() {
-            if let Some(i) = cookie.find('=') {
-                let (key, val) = cookie.split_at(i + 1);
-                if key == "jwt=" {
-                    jwt_val = val.into();
-                }
-            }
-        }
-        if jwt_val == String::default() {
-            _ctx.link().history().unwrap().push(Route::SignIn);
-        }
         Self {
             can_post: true,
-            jwt: jwt_val,
             ..Self::default()
         }
     }
@@ -113,7 +92,7 @@ impl Component for TypeBar {
                         return false;
                     }
                     let msg = WsMessage {
-                        jwt: Some(self.jwt.clone()),
+                        jwt: Some(ctx.props().jwt.clone()),
                         content: Some(input.value()),
                         ..WsMessage::default()
                     };

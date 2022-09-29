@@ -8,9 +8,11 @@ use crate::services::message::*;
 use gloo_net::http::Request;
 use gloo_timers::callback::Interval;
 use gloo_timers::callback::Timeout;
+use linked_hash_set::LinkedHashSet;
+use tchatchers_core::ws_message::{WsMessage, WsMessageType};
+use wasm_bindgen::JsCast;
 use yew::{html, Callback, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
-use tchatchers_core::ws_message::WsMessage;
 use yew_router::history::History;
 use yew_router::scope_ext::RouterScopeExt;
 
@@ -27,13 +29,14 @@ pub enum Msg {
 pub struct Props;
 
 pub struct Feed {
-    received_messages: Vec<WsMessage>,
+    received_messages: LinkedHashSet<WsMessage>,
     ws: WebsocketService,
     _producer: Box<dyn Bridge<EventBus>>,
     _ws_reconnect: Option<Interval>,
     _first_connect: Timeout,
     called_back: bool,
     is_connected: bool,
+    jwt: String,
 }
 
 impl Component for Feed {
@@ -42,8 +45,25 @@ impl Component for Feed {
 
     fn create(ctx: &Context<Self>) -> Self {
         let ws: WebsocketService = WebsocketService::new();
+        let window = web_sys::window().unwrap();
+        let document = window.document().unwrap();
+        let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();
+        let document_cookies = html_document.cookie().unwrap();
+        let cookies = &mut document_cookies.split(";");
+        let mut jwt_val: String = String::default();
+        while let Some(cookie) = cookies.next() {
+            if let Some(i) = cookie.find('=') {
+                let (key, val) = cookie.split_at(i + 1);
+                if key == "jwt=" {
+                    jwt_val = val.into();
+                }
+            }
+        }
+        if jwt_val == String::default() {
+            ctx.link().history().unwrap().push(Route::SignIn);
+        }
         Self {
-            received_messages: vec![],
+            received_messages: LinkedHashSet::new(),
             ws,
             _producer: EventBus::bridge(ctx.link().callback(Msg::HandleMsg)),
             is_connected: false,
@@ -53,6 +73,7 @@ impl Component for Feed {
                 let link = ctx.link().clone();
                 Timeout::new(1, move || link.send_message(Msg::CheckWsState))
             },
+            jwt: jwt_val,
         }
     }
 
@@ -81,11 +102,23 @@ impl Component for Feed {
                         });
                     }
                     WsBusMessageType::Reply => {
-                        self.received_messages.push(serde_json::from_str(&message.content).unwrap());
+                        self.received_messages
+                            .insert(serde_json::from_str(&message.content).unwrap());
                         self.is_connected = true;
                     }
                     WsBusMessageType::Pong => {
                         self.is_connected = true;
+
+                        let msg = WsMessage {
+                            jwt: Some(self.jwt.clone()),
+                            message_type: WsMessageType::RetrieveMessages,
+                            ..WsMessage::default()
+                        };
+                        self.ws
+                            .tx
+                            .clone()
+                            .try_send(serde_json::to_string(&msg).unwrap())
+                            .unwrap();
                     }
                     _ => {
                         self.is_connected = true;
@@ -113,7 +146,7 @@ impl Component for Feed {
                 let pass_message_to_ws = Callback::from(move |message: String| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar {pass_message_to_ws} />}
+                html! {<TypeBar {pass_message_to_ws} jwt={self.jwt.clone()}/>}
             }
             false => {
                 let link = ctx.link().clone();

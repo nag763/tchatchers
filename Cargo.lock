@@ -1155,6 +1155,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0f80d65747a3e43d1596c7c5492d95d5edddaabd45a7fcdb02b95f644164966"
 
 [[package]]
+name = "linked-hash-map"
+version = "0.5.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0717cef1bc8b636c6e1c1bbdefc09e6322da8a9321966e8928ef80d20f7f770f"
+
+[[package]]
+name = "linked_hash_set"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47186c6da4d81ca383c7c47c1bfc80f4b95f4720514d860a5407aaf4233f9588"
+dependencies = [
+ "linked-hash-map",
+]
+
+[[package]]
 name = "lock_api"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2024,6 +2039,7 @@ dependencies = [
  "futures-util",
  "headers",
  "lazy_static",
+ "linked_hash_set",
  "magic-crypt",
  "regex",
  "serde_json",
@@ -2053,6 +2069,7 @@ dependencies = [
  "gloo-console",
  "gloo-net",
  "gloo-timers",
+ "linked_hash_set",
  "serde",
  "serde_json",
  "tchatchers_core",

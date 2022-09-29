@@ -8,11 +8,12 @@ use axum::{
     Router,
 };
 use futures_util::{SinkExt, StreamExt};
+use linked_hash_set::LinkedHashSet;
 use magic_crypt::{new_magic_crypt, MagicCrypt256, MagicCryptTrait};
 use regex::Regex;
 use sqlx_core::postgres::PgPool;
 use std::net::SocketAddr;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tchatchers_core::jwt::Jwt;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
@@ -34,6 +35,7 @@ struct State {
     encrypter: MagicCrypt256,
     jwt_secret: String,
     tx: broadcast::Sender<String>,
+    messages: Mutex<LinkedHashSet<WsMessage>>,
     pool: PgPool,
 }
 
@@ -49,6 +51,7 @@ async fn main() {
         jwt_secret,
         pool: tchatchers_core::pool::get_pool().await,
         tx,
+        messages: Mutex::new(LinkedHashSet::new()),
     });
 
     let secured_routes = Router::new()
@@ -191,14 +194,29 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>) {
                     if let Some(jwt) = msg.jwt {
                         if let Ok(jwt) = Jwt::deserialize(&jwt, &state.jwt_secret) {
                             let user: User = jwt.into();
-                            let ws_message = WsMessage {
-                                message_type: WsMessageType::Receive,
-                                content: msg.content,
-                                author: Some(user.name),
-                                ..WsMessage::default()
-                            };
-                            let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
+                            match msg.message_type {
+                                WsMessageType::Send => {
+                                    let ws_message = WsMessage {
+                                        message_type: WsMessageType::Receive,
+                                        content: msg.content,
+                                        author: Some(user.name),
+                                        ..WsMessage::default()
+                                    };
+                                    let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
+                                    state.messages.lock().unwrap().insert(ws_message);
+                                }
+                                WsMessageType::RetrieveMessages => {
+                                    for msg in state.messages.lock().unwrap().clone() {
+                                        let _ = tx.send(serde_json::to_string(&msg).unwrap());
+                                    }
+                                }
+                                _ => {}
+                            }
+                        } else {
+                            break;
                         }
+                    } else {
+                        break;
                     }
                 }
             };
