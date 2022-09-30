@@ -3,7 +3,7 @@ use linked_hash_set::LinkedHashSet;
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
 use yew::{html, Component, Context, Html, Properties};
 
-#[derive(Clone, PartialEq, Properties)]
+#[derive(Clone, Eq, PartialEq, Properties)]
 pub struct Props {
     pub messages: LinkedHashSet<WsMessage>,
     pub room: String,

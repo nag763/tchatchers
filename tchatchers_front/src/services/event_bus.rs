@@ -37,7 +37,7 @@ impl Agent for EventBus {
             Request::EventBusMsg(s) => {
                 let msg = WsBusMessage {
                     message_type: WsBusMessageType::Reply,
-                    content: s.clone(),
+                    content: s,
                 };
                 let serialized_message = serde_json::to_string(&msg).unwrap();
                 for sub in self.subscribers.iter() {

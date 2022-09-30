@@ -1,6 +1,6 @@
 use yew::{html, Component, Context, Html, Properties};
 
-#[derive(Clone, PartialEq, Properties)]
+#[derive(Clone, PartialEq, Eq, Properties)]
 pub struct Props;
 
 pub struct Settings;

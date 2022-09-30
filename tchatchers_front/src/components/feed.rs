@@ -20,12 +20,12 @@ const REFRESH_WS_STATE_EVERY: u32 = 5000;
 
 #[derive(Clone)]
 pub enum Msg {
-    HandleMsg(String),
+    HandleWsInteraction(String),
     CheckWsState,
     TryReconnect,
 }
 
-#[derive(Clone, PartialEq, Properties)]
+#[derive(Clone, Eq, PartialEq, Properties)]
 pub struct Props {
     pub room: String,
 }
@@ -51,9 +51,9 @@ impl Component for Feed {
         let document = window.document().unwrap();
         let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();
         let document_cookies = html_document.cookie().unwrap();
-        let cookies = &mut document_cookies.split(";");
+        let cookies = &mut document_cookies.split(';');
         let mut jwt_val: String = String::default();
-        while let Some(cookie) = cookies.next() {
+        for cookie in cookies.by_ref() {
             if let Some(i) = cookie.find('=') {
                 let (key, val) = cookie.split_at(i + 1);
                 if key == "jwt=" {
@@ -67,7 +67,7 @@ impl Component for Feed {
         Self {
             received_messages: LinkedHashSet::new(),
             ws,
-            _producer: EventBus::bridge(ctx.link().callback(Msg::HandleMsg)),
+            _producer: EventBus::bridge(ctx.link().callback(Msg::HandleWsInteraction)),
             is_connected: false,
             called_back: false,
             _ws_reconnect: None,
@@ -81,7 +81,7 @@ impl Component for Feed {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::HandleMsg(s) => {
+            Msg::HandleWsInteraction(s) => {
                 self.called_back = true;
                 let message: WsBusMessage = serde_json::from_str(&s).unwrap();
                 match message.message_type {

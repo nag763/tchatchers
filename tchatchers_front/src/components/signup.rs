@@ -16,7 +16,7 @@ pub enum Msg {
     ErrorFromServer(String),
 }
 
-#[derive(Clone, PartialEq, Properties)]
+#[derive(Clone, PartialEq, Eq, Properties)]
 pub struct Props;
 
 #[derive(Default)]
@@ -79,7 +79,6 @@ impl Component for SignUp {
                     if login.min_length() <= login.value().len().try_into().unwrap() {
                         self.check_login = Some({
                             Timeout::new(CHECK_LOGIN_AFTER, move || {
-                                let login = login.clone();
                                 wasm_bindgen_futures::spawn_local(async move {
                                     let req = Request::get(&format!(
                                         "/api/login_exists/{}",

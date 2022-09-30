@@ -1,4 +1,4 @@
-use yew::{function_component, html};
+use yew::{function_component, html, Properties};
 
 #[function_component(WaitingForResponse)]
 pub fn waiting_for_response() -> Html {
@@ -12,7 +12,7 @@ pub fn waiting_for_response() -> Html {
     }
 }
 
-#[derive(Clone, PartialEq, yew::Properties)]
+#[derive(Clone, PartialEq, Eq, Properties)]
 pub struct FormButtonProperties {
     pub label: String,
 }

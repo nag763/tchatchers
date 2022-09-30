@@ -3,7 +3,7 @@ use gloo_net::http::Request;
 use yew::{html, Component, Context, Html, Properties};
 use yew_agent::Dispatched;
 
-#[derive(Clone, PartialEq, Properties)]
+#[derive(Clone, Eq, PartialEq, Properties)]
 pub struct Props {}
 
 pub struct AuthChecker;

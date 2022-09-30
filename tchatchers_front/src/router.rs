@@ -7,7 +7,7 @@ use crate::components::signup::SignUp;
 use yew::{html, Html};
 use yew_router::prelude::*;
 
-#[derive(Clone, Routable, PartialEq)]
+#[derive(Clone, Routable, PartialEq, Eq)]
 pub enum Route {
     #[at("/")]
     JoinRoom,
@@ -36,10 +36,6 @@ pub fn switch(route: &Route) -> Html {
 
 impl Route {
     pub fn requires_auth(&self) -> bool {
-        match self {
-            Route::Room { room: _ } => true,
-            Route::Settings => true,
-            _ => false,
-        }
+        matches!(self, Route::Room { room: _ } | Route::Settings)
     }
 }

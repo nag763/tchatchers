@@ -13,7 +13,7 @@ pub enum Msg {
     ErrorFromServer(String),
 }
 
-#[derive(Clone, PartialEq, Properties)]
+#[derive(Clone, PartialEq, Properties, Eq)]
 pub struct Props;
 
 #[derive(Default)]

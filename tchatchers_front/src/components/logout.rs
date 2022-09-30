@@ -6,7 +6,7 @@ use yew_agent::Dispatched;
 use yew_router::history::History;
 use yew_router::scope_ext::RouterScopeExt;
 
-#[derive(Clone, PartialEq, Properties)]
+#[derive(Clone, Eq, PartialEq, Properties)]
 pub struct Props;
 
 pub struct LogOut;

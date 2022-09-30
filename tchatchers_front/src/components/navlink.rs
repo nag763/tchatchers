@@ -2,7 +2,7 @@ use crate::router::Route;
 use yew::{html, Component, Context, Html, Properties};
 use yew_router::prelude::Link;
 
-#[derive(Clone, PartialEq, Properties)]
+#[derive(Clone, PartialEq, Eq, Properties)]
 pub struct Props {
     pub label: String,
     pub link: Route,
