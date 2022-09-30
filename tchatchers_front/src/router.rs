@@ -4,6 +4,7 @@ use crate::components::logout::LogOut;
 use crate::components::settings::Settings;
 use crate::components::signin::SignIn;
 use crate::components::signup::SignUp;
+use crate::components::not_found::NotFound;
 use yew::{html, Html};
 use yew_router::prelude::*;
 
@@ -21,6 +22,9 @@ pub enum Route {
     Settings,
     #[at("/logout")]
     LogOut,
+    #[not_found]
+    #[at("/404")]
+    NotFound
 }
 
 pub fn switch(route: &Route) -> Html {
@@ -31,6 +35,7 @@ pub fn switch(route: &Route) -> Html {
         Route::SignUp => html! { <SignUp /> },
         Route::Settings => html! { <Settings /> },
         Route::LogOut => html! { <LogOut /> },
+        Route::NotFound => html! { <NotFound />}
     }
 }
 

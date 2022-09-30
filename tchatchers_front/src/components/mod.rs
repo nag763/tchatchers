@@ -12,3 +12,4 @@ pub(crate) mod settings;
 pub(crate) mod signin;
 pub(crate) mod signup;
 pub(crate) mod type_bar;
+pub(crate) mod not_found;
