@@ -11,8 +11,9 @@ use futures_util::{SinkExt, StreamExt};
 use magic_crypt::{new_magic_crypt, MagicCrypt256, MagicCryptTrait};
 use regex::Regex;
 use sqlx_core::postgres::PgPool;
+use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tchatchers_core::jwt::Jwt;
 use tchatchers_core::room::Room;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
@@ -34,7 +35,7 @@ const JWT_PATH: &str = "jwt";
 struct State {
     encrypter: MagicCrypt256,
     jwt_secret: String,
-    tx: broadcast::Sender<String>,
+    txs: Mutex<HashMap<String, broadcast::Sender<String>>>,
     pg_pool: PgPool,
     redis_pool: r2d2::Pool<redis::Client>,
 }
@@ -45,17 +46,16 @@ async fn main() {
     let pwd_secret = std::env::var("PWD_SECRET").expect("No password secret has been defined");
     let jwt_secret = std::env::var("JWT_SECRET").expect("No jwt secret has been defined");
     let encrypter = new_magic_crypt!(&pwd_secret, 256);
-    let (tx, _rx) = broadcast::channel(100);
     let shared_state = Arc::new(State {
         encrypter,
         jwt_secret,
         pg_pool: tchatchers_core::pool::get_pg_pool().await,
         redis_pool: tchatchers_core::pool::get_redis_pool().await,
-        tx,
+        txs: Mutex::new(HashMap::new()),
     });
 
     let secured_routes = Router::new()
-        .route("/ws", get(ws_handler))
+        .route("/ws/:room", get(ws_handler))
         .layer(middleware::from_fn(secure_route));
 
     let app = Router::new()
@@ -159,13 +159,25 @@ async fn create_user(
 async fn ws_handler(
     ws: WebSocketUpgrade,
     Extension(state): Extension<Arc<State>>,
+    Path(room): Path<String>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(|socket| handle_socket(socket, state))
+    ws.on_upgrade(|socket| handle_socket(socket, state, room))
 }
 
-async fn handle_socket(socket: WebSocket, state: Arc<State>) {
+async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
     let (mut sender, mut receiver) = socket.split();
-    let mut rx = state.tx.subscribe();
+    let tx = {
+        let mut rooms = state.txs.lock().unwrap();
+        match rooms.get(&room) {
+            Some(v) => v.clone(),
+            None => {
+                let (tx, _rx) = broadcast::channel(1000);
+                rooms.insert(room, tx.clone());
+                tx
+            }
+        }
+    };
+    let mut rx = tx.subscribe();
 
     let mut send_task = tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
@@ -176,7 +188,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>) {
         }
     });
 
-    let tx = state.tx.clone();
+    //let tx = state.tx.clone();
 
     // This task will receive messages from client and send them to broadcast subscribers.
     let mut recv_task = tokio::spawn(async move {

@@ -46,7 +46,7 @@ impl Component for Feed {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let ws: WebsocketService = WebsocketService::new();
+        let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
         let window = web_sys::window().unwrap();
         let document = window.document().unwrap();
         let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();

@@ -23,15 +23,7 @@ impl Component for Chat {
         html! {
             <>
             {ctx.props().messages
-                .iter()
-                .filter(|m| {
-                    if let Some(room) = &m.room {
-                        room == &ctx.props().room
-                    } else {
-                        false
-                    }
-                }
-                ).map(|m| {
+                .iter().map(|m| {
                 match &m.message_type {
                     WsMessageType::Receive => html!{<p>{format!("({}:{:02})[{}]: {}", m.timestamp.clone().hour(), m.timestamp.clone().minute(),m.author.clone().unwrap_or_default(), m.content.clone().unwrap_or_default())}</p>},
                     _ => html!{}

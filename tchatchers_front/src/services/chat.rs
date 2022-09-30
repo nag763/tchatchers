@@ -11,9 +11,10 @@ pub struct WebsocketService {
 }
 
 impl WebsocketService {
-    pub fn new() -> Self {
+    pub fn new(room: &str) -> Self {
         let host = web_sys::window().unwrap().location().host().unwrap();
-        let ws_addr = format!("ws://{}/ws", host);
+        let ws_addr = format!("ws://localhost:8080/ws/{}", room);
+        gloo_console::log!("Route :", &ws_addr);
         let ws = WebSocket::open(&ws_addr).unwrap();
 
         let (mut write, mut read) = ws.split();
