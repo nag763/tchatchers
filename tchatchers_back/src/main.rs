@@ -211,7 +211,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
                                     let ws_message = WsMessage {
                                         message_type: WsMessageType::Receive,
                                         content: msg.content,
-                                        author: Some(user.name),
+                                        author: Some(user.into()),
                                         room: Some(room.clone()),
                                         ..WsMessage::default()
                                     };
@@ -233,7 +233,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
                                     }
                                     let ws_message = WsMessage {
                                         message_type: WsMessageType::MessagesRetrieved,
-                                        author: Some(user.name.clone()),
+                                        author: Some(user.into()),
                                         ..WsMessage::default()
                                     };
                                     let _ = tx.send(serde_json::to_string(&ws_message).unwrap());

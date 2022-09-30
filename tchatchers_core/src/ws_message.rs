@@ -1,3 +1,4 @@
+use crate::user::PartialUser;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
@@ -24,7 +25,8 @@ pub struct WsMessage {
     pub uuid: Uuid,
     pub jwt: Option<String>,
     pub content: Option<String>,
-    pub author: Option<String>,
+    pub author: Option<PartialUser>,
+    pub pfp: Option<String>,
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
     pub timestamp: DateTime<Utc>,
     pub room: Option<String>,

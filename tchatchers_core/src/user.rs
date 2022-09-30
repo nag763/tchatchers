@@ -15,6 +15,27 @@ pub struct User {
     pub password: String,
     pub is_authorized: bool,
     pub name: String,
+    pub pfp: Option<String>,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Default, PartialEq, Eq, Hash)]
+#[serde(rename_all = "camelCase")]
+pub struct PartialUser {
+    pub id: i32,
+    pub login: String,
+    pub name: String,
+    pub pfp: Option<String>,
+}
+
+impl From<User> for PartialUser {
+    fn from(user: User) -> PartialUser {
+        PartialUser {
+            id: user.id,
+            login: user.login,
+            name: user.name,
+            pfp: user.pfp,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -54,9 +75,9 @@ impl User {
 impl From<Jwt> for User {
     fn from(jwt: Jwt) -> User {
         User {
-            id: jwt.id,
-            login: jwt.login,
-            name: jwt.name,
+            id: jwt.user.id,
+            login: jwt.user.login,
+            name: jwt.user.name,
             ..User::default()
         }
     }

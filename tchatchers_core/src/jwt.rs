@@ -1,21 +1,17 @@
-use crate::user::User;
+use crate::user::{PartialUser, User};
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Jwt {
-    pub id: i32,
-    pub login: String,
-    pub name: String,
+    pub user: PartialUser,
     pub exp: usize,
 }
 
 impl From<User> for Jwt {
     fn from(user: User) -> Jwt {
         Jwt {
-            id: user.id,
-            login: user.login,
-            name: user.name,
+            user: user.into(),
             exp: usize::MAX,
         }
     }

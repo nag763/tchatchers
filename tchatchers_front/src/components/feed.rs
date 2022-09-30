@@ -8,7 +8,6 @@ use crate::services::message::*;
 use gloo_net::http::Request;
 use gloo_timers::callback::Interval;
 use gloo_timers::callback::Timeout;
-use linked_hash_set::LinkedHashSet;
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
 use wasm_bindgen::JsCast;
 use yew::{html, Callback, Component, Context, Html, Properties};
@@ -31,7 +30,7 @@ pub struct Props {
 }
 
 pub struct Feed {
-    received_messages: LinkedHashSet<WsMessage>,
+    received_messages: Vec<WsMessage>,
     ws: WebsocketService,
     _producer: Box<dyn Bridge<EventBus>>,
     _ws_reconnect: Option<Interval>,
@@ -65,7 +64,7 @@ impl Component for Feed {
             ctx.link().history().unwrap().push(Route::SignIn);
         }
         Self {
-            received_messages: LinkedHashSet::new(),
+            received_messages: vec![],
             ws,
             _producer: EventBus::bridge(ctx.link().callback(Msg::HandleWsInteraction)),
             is_connected: false,
@@ -105,7 +104,7 @@ impl Component for Feed {
                     }
                     WsBusMessageType::Reply => {
                         self.received_messages
-                            .insert(serde_json::from_str(&message.content).unwrap());
+                            .insert(0, serde_json::from_str(&message.content).unwrap());
                         self.is_connected = true;
                     }
                     WsBusMessageType::Pong => {
@@ -161,7 +160,7 @@ impl Component for Feed {
         };
         html! {
             <div class="grid grid-rows-11 h-full">
-                <div class="row-span-10" >
+                <div class="row-span-10 overflow-auto flex flex-col-reverse" >
                     <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} />
                 </div>
                 <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center border-y-2 bg-slate-100 shadow-xl block">
