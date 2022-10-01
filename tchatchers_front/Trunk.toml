@@ -14,3 +14,7 @@ ws = true
 [[proxy]]
 rewrite = "/api/"
 backend = "http://localhost:8080/api"
+
+[[proxy]]
+rewrite = "/static/"
+backend = "http://localhost:8080/static"

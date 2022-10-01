@@ -1,6 +1,8 @@
+use js_sys::ArrayBuffer;
+use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
-use web_sys::{EventTarget, InputEvent};
+use web_sys::{Event, EventTarget, FileReader, InputEvent};
 use yew::{function_component, html, use_state, Callback, Properties};
 
 #[function_component(WaitingForResponse)]
@@ -36,7 +38,7 @@ pub fn form_button(props: &FormButtonProperties) -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct FileAttacherProps {
-    pub on_file_attached: Callback<Option<String>>,
+    pub on_file_attached: Callback<Option<ArrayBuffer>>,
     pub disabled: bool,
     pub accept: Option<String>,
 }
@@ -50,12 +52,21 @@ pub fn file_attacher(props: &FileAttacherProps) -> Html {
     };
 
     let oninput_event = props.on_file_attached.clone();
+    let onload = Closure::wrap(Box::new(move |event: Event| {
+        let element = event.target().unwrap().dyn_into::<FileReader>().unwrap();
+        let data = element.result().unwrap();
+        let buffer: ArrayBuffer = data.dyn_into::<ArrayBuffer>().unwrap();
+        is_file_attached.set(true);
+        oninput_event.emit(Some(buffer));
+    }) as Box<dyn FnMut(_)>);
+    let fr = web_sys::FileReader::new().unwrap();
+
     let oninput = move |ie: InputEvent| {
         let target: Option<EventTarget> = ie.target();
         let input = target.and_then(|t| t.dyn_into::<HtmlInputElement>().ok());
-        let msg = input.map(|i| i.value());
-        is_file_attached.set(msg.is_some());
-        oninput_event.emit(msg);
+        let file = input.unwrap().files().unwrap();
+        fr.set_onloadend(Some(onload.as_ref().unchecked_ref()));
+        fr.read_as_array_buffer(&file.get(0).unwrap()).unwrap();
     };
 
     html! {

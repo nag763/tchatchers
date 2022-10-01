@@ -1,4 +1,5 @@
 use axum::{
+    body::Bytes,
     extract::ws::{Message, WebSocket, WebSocketUpgrade},
     extract::{Extension, Json, Path},
     http::{Request, StatusCode},
@@ -19,9 +20,12 @@ use tchatchers_core::room::Room;
 use tchatchers_core::user::UpdatableUser;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
+use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
 use tokio::sync::broadcast;
 use tokio::time::{sleep, Duration};
 use tower_cookies::{Cookie, CookieManagerLayer, Cookies};
+use uuid::Uuid;
 
 #[macro_use]
 extern crate lazy_static;
@@ -58,6 +62,8 @@ async fn main() {
     let secured_routes = Router::new()
         .route("/ws/:room", get(ws_handler))
         .route("/api/user", put(update_user))
+        .route("/api/pfp", post(upload_pfp))
+        .route("/static/:path", get(static_file))
         .layer(middleware::from_fn(secure_route));
 
     let app = Router::new()
@@ -77,6 +83,13 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+async fn static_file(Path(path): Path<String>) -> impl IntoResponse {
+    match tokio::fs::read(format!("./static/{}", &path)).await {
+        Ok(data) => (StatusCode::OK, data),
+        Err(_e) => (StatusCode::NOT_FOUND, vec![]),
+    }
 }
 
 async fn login_exists(
@@ -156,6 +169,13 @@ async fn create_user(
         Ok(_) => (StatusCode::CREATED, "User created with success"),
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened"),
     }
+}
+
+async fn upload_pfp(body: Bytes) -> impl IntoResponse {
+    let file_name = format!("/static/{}.jpg", Uuid::new_v4());
+    let mut file = File::create(format!(".{}", &file_name)).await.unwrap();
+    file.write_all(&body).await.unwrap();
+    (StatusCode::OK, file_name)
 }
 
 async fn update_user(
@@ -249,7 +269,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
                                     let ws_message = WsMessage {
                                         message_type: WsMessageType::Receive,
                                         content: msg.content,
-                                        author: Some(user.into()),
+                                        author: msg.author,
                                         room: Some(room.clone()),
                                         ..WsMessage::default()
                                     };
