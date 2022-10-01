@@ -14,6 +14,7 @@ use yew::{html, Callback, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
 use yew_router::history::History;
 use yew_router::scope_ext::RouterScopeExt;
+use yew_router::prelude::HistoryListener;
 
 const REFRESH_WS_STATE_EVERY: u32 = 5000;
 
@@ -22,6 +23,7 @@ pub enum Msg {
     HandleWsInteraction(String),
     CheckWsState,
     TryReconnect,
+    CutWs,
 }
 
 #[derive(Clone, Eq, PartialEq, Properties)]
@@ -38,6 +40,7 @@ pub struct Feed {
     called_back: bool,
     is_connected: bool,
     jwt: String,
+    _history_listener: HistoryListener
 }
 
 impl Component for Feed {
@@ -52,6 +55,7 @@ impl Component for Feed {
         let document_cookies = html_document.cookie().unwrap();
         let cookies = &mut document_cookies.split(';');
         let mut jwt_val: String = String::default();
+        let link = ctx.link().clone();
         for cookie in cookies.by_ref() {
             if let Some(i) = cookie.find('=') {
                 let (key, val) = cookie.split_at(i + 1);
@@ -75,6 +79,7 @@ impl Component for Feed {
                 Timeout::new(1, move || link.send_message(Msg::CheckWsState))
             },
             jwt: jwt_val,
+            _history_listener: ctx.link().history().unwrap().listen(move || link.send_message(Msg::CutWs))
         }
     }
 
@@ -136,6 +141,10 @@ impl Component for Feed {
                 gloo_console::debug!("Try reconnect by user");
                 self.called_back = false;
                 self.ws.tx.clone().try_send("Ping".into()).unwrap();
+                true
+            },
+            Msg::CutWs => {
+                self.ws.tx.clone().try_send("Close".into()).unwrap();
                 true
             }
         }

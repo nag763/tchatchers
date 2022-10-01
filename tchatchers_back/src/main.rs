@@ -230,12 +230,13 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
             Some(v) => v.clone(),
             None => {
                 let (tx, _rx) = broadcast::channel(1000);
-                rooms.insert(room, tx.clone());
+                rooms.insert(room.clone(), tx.clone());
                 tx
             }
         }
     };
     let mut rx = tx.subscribe();
+    println!("room {} , {} subscribed", &room, tx.receiver_count());
 
     let mut send_task = tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
@@ -253,6 +254,9 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
         while let Some(Ok(Message::Text(text))) = receiver.next().await {
             // Add username before message.
             match text.as_str() {
+                "Close" => {
+                    break;
+                },
                 "Ping" => {
                     let _ = tx.send(String::from("Pong"));
                 }

@@ -24,7 +24,7 @@ impl Room {
     }
 
     pub fn publish_message_in_room(conn: &mut Connection, room_name: &str, ws_message: WsMessage) {
-        redis::cmd("LPUSH")
+        redis::cmd("RPUSH")
             .arg(room_name)
             .arg(serde_json::to_string(&ws_message).unwrap())
             .query(conn)

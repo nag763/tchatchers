@@ -18,7 +18,7 @@ fn app() -> Html {
         <>
             <BrowserRouter>
                 <div class="h-screen grid grid-rows-12">
-                    <Navbar ></Navbar>
+                    <Navbar/>
                     <div class="row-span-11">
                         <Switch<Route> render={Switch::render(switch)} />
                     </div>
