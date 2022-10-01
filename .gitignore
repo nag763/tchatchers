@@ -1,4 +1,6 @@
 **/target/*
 **/tailwind.css
 **/dist
+tchatchers_back/static/*
+!tchatchers_back/static/.index
 .env
