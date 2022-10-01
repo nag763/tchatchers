@@ -3,8 +3,8 @@ use axum::{
     extract::{Extension, Json, Path},
     http::{Request, StatusCode},
     middleware::{self, Next},
-    response::{IntoResponse, Response},
-    routing::{get, post},
+    response::{IntoResponse, Redirect, Response},
+    routing::{get, post, put},
     Router,
 };
 use futures_util::{SinkExt, StreamExt};
@@ -16,6 +16,7 @@ use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use tchatchers_core::jwt::Jwt;
 use tchatchers_core::room::Room;
+use tchatchers_core::user::UpdatableUser;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
 use tokio::sync::broadcast;
@@ -56,6 +57,7 @@ async fn main() {
 
     let secured_routes = Router::new()
         .route("/ws/:room", get(ws_handler))
+        .route("/api/user", put(update_user))
         .layer(middleware::from_fn(secure_route));
 
     let app = Router::new()
@@ -153,6 +155,42 @@ async fn create_user(
     match new_user.insert(&state.pg_pool).await {
         Ok(_) => (StatusCode::CREATED, "User created with success"),
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened"),
+    }
+}
+
+async fn update_user(
+    Json(user): Json<UpdatableUser>,
+    Extension(state): Extension<Arc<State>>,
+    cookies: Cookies,
+) -> impl IntoResponse {
+    if let Some(cookie) = cookies.get(JWT_PATH) {
+        if let Ok(jwt) = Jwt::deserialize(&cookie.value(), &state.jwt_secret) {
+            if jwt.user.id == user.id {
+                match user.update(&state.pg_pool).await {
+                    Ok(_) => {
+                        let updated_user = User::find_by_id(user.id, &state.pg_pool).await.unwrap();
+                        let jwt = Jwt::from(updated_user);
+                        let serialized_jwt: String = jwt.serialize(&state.jwt_secret).unwrap();
+                        let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
+                        jwt_cookie.set_path("/");
+                        jwt_cookie.make_permanent();
+                        jwt_cookie.set_secure(true);
+                        jwt_cookie.set_http_only(false);
+                        cookies.add(jwt_cookie);
+                        (StatusCode::CREATED, "User updated with success").into_response()
+                    }
+                    Err(_) => {
+                        (StatusCode::INTERNAL_SERVER_ERROR, "An error happened").into_response()
+                    }
+                }
+            } else {
+                (StatusCode::FORBIDDEN, "You can't update another user").into_response()
+            }
+        } else {
+            Redirect::to("/logout").into_response()
+        }
+    } else {
+        (StatusCode::UNAUTHORIZED, "This route is protected").into_response()
     }
 }
 

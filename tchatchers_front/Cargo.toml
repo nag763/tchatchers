@@ -22,3 +22,4 @@ yew-router = "0.16.0"
 tchatchers_core = { path = "../tchatchers_core"}
 linked_hash_set = "0.1.4"
 chrono = { version = "0.4.22", features = ["serde"] }
+base64 = "0.13.0"

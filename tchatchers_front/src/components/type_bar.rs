@@ -1,11 +1,8 @@
+use crate::components::common::FileAttacher;
 use gloo_timers::callback::{Interval, Timeout};
 use tchatchers_core::ws_message::WsMessage;
-use wasm_bindgen::JsCast;
-use web_sys::{EventTarget, HtmlInputElement};
-use yew::{
-    function_component, html, use_state, Callback, Component, Context, Html, InputEvent, NodeRef,
-    Properties,
-};
+use web_sys::HtmlInputElement;
+use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
 
 const PROGRESS_REFRESH: u32 = 20;
 const TIMEOUT: u32 = 5_000;
@@ -16,41 +13,6 @@ pub enum Msg {
     SubmitForm,
     ReactivateFields,
     UpdateProgress,
-}
-
-#[derive(Properties, PartialEq)]
-pub struct FileAttacherProps {
-    pub on_file_attached: Callback<Option<String>>,
-    pub disabled: bool,
-}
-
-#[function_component(FileAttacher)]
-pub fn file_attacher(props: &FileAttacherProps) -> Html {
-    let is_file_attached = use_state(|| false);
-    let svg_path = match *is_file_attached {
-        true => "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
-        false => "M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13",
-    };
-
-    let oninput_event = props.on_file_attached.clone();
-    let oninput = move |ie: InputEvent| {
-        let target: Option<EventTarget> = ie.target();
-        let input = target.and_then(|t| t.dyn_into::<HtmlInputElement>().ok());
-        let msg = input.map(|i| i.value());
-        is_file_attached.set(msg.is_some());
-        oninput_event.emit(msg);
-    };
-
-    html! {
-        <>
-            <label for="file-upload">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d={svg_path} />
-                </svg>
-            </label>
-            <input id="file-upload" type="file" style="display: none;" disabled={props.disabled} {oninput}/>
-        </>
-    }
 }
 
 #[derive(Clone, PartialEq, Properties)]

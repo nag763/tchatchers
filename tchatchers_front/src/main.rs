@@ -1,6 +1,7 @@
 pub mod components;
 pub mod router;
 pub mod services;
+pub mod utils;
 
 use crate::components::auth_checker::AuthChecker;
 use components::navbar::Navbar;

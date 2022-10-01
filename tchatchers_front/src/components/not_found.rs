@@ -1,4 +1,4 @@
-use yew::{html, Component, Context, Html, Properties};
+use yew::{html, Component, Context, Html};
 
 pub struct NotFound;
 

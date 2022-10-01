@@ -9,6 +9,7 @@ use sqlx::PgPool;
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[cfg_attr(feature = "back", derive(FromRow))]
+#[serde(rename_all = "camelCase")]
 pub struct User {
     pub id: i32,
     pub login: String,
@@ -39,6 +40,15 @@ impl From<User> for PartialUser {
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdatableUser {
+    pub id: i32,
+    pub name: String,
+    pub pfp: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct InsertableUser {
     pub login: String,
     pub password: String,
@@ -90,6 +100,18 @@ impl InsertableUser {
             .bind(&self.login)
             .bind(&self.password)
             .bind(&self.name)
+            .execute(pool)
+            .await
+    }
+}
+
+#[cfg(feature = "back")]
+impl UpdatableUser {
+    pub async fn update(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query("UPDATE CHATTER SET name=$1, pfp=$2 WHERE id=$3")
+            .bind(&self.name)
+            .bind(&self.pfp)
+            .bind(&self.id)
             .execute(pool)
             .await
     }
