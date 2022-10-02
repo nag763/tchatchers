@@ -1,8 +1,7 @@
+use crate::extractor::JwtUserExtractor;
 use crate::State;
 use crate::JWT_PATH;
-use axum::{
-    extract::Path, http::StatusCode, response::IntoResponse, response::Redirect, Extension, Json,
-};
+use axum::{extract::Path, http::StatusCode, response::IntoResponse, Extension, Json};
 use magic_crypt::MagicCryptTrait;
 use std::sync::Arc;
 use tchatchers_core::jwt::Jwt;
@@ -77,53 +76,36 @@ pub async fn logout(cookies: Cookies) -> impl IntoResponse {
     (StatusCode::OK, "")
 }
 
-pub async fn validate(
-    cookies: Cookies,
-    Extension(state): Extension<Arc<State>>,
-) -> impl IntoResponse {
-    if let Some(cookie) = cookies.get(JWT_PATH) {
-        let value = cookie.value();
-        match Jwt::deserialize(value, &state.jwt_secret) {
-            Ok(_) => (StatusCode::OK, ""),
-            Err(_) => (StatusCode::UNAUTHORIZED, "The jwt couldn't be deserialized"),
-        }
-    } else {
-        (StatusCode::UNAUTHORIZED, "The JWT token hasn't been found")
+pub async fn validate(jwt: Option<JwtUserExtractor>) -> impl IntoResponse {
+    match jwt {
+        Some(_) => (StatusCode::OK, ""),
+        None => (StatusCode::UNAUTHORIZED, "You aren't logged in."),
     }
 }
 
 pub async fn update_user(
+    JwtUserExtractor { jwt }: JwtUserExtractor,
     Json(user): Json<UpdatableUser>,
     Extension(state): Extension<Arc<State>>,
     cookies: Cookies,
 ) -> impl IntoResponse {
-    if let Some(cookie) = cookies.get(JWT_PATH) {
-        if let Ok(jwt) = Jwt::deserialize(&cookie.value(), &state.jwt_secret) {
-            if jwt.user.id == user.id {
-                match user.update(&state.pg_pool).await {
-                    Ok(_) => {
-                        let updated_user = User::find_by_id(user.id, &state.pg_pool).await.unwrap();
-                        let jwt = Jwt::from(updated_user);
-                        let serialized_jwt: String = jwt.serialize(&state.jwt_secret).unwrap();
-                        let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
-                        jwt_cookie.set_path("/");
-                        jwt_cookie.make_permanent();
-                        jwt_cookie.set_secure(true);
-                        jwt_cookie.set_http_only(false);
-                        cookies.add(jwt_cookie);
-                        (StatusCode::CREATED, "User updated with success").into_response()
-                    }
-                    Err(_) => {
-                        (StatusCode::INTERNAL_SERVER_ERROR, "An error happened").into_response()
-                    }
-                }
-            } else {
-                (StatusCode::FORBIDDEN, "You can't update another user").into_response()
+    if jwt.user.id == user.id {
+        match user.update(&state.pg_pool).await {
+            Ok(_) => {
+                let updated_user = User::find_by_id(user.id, &state.pg_pool).await.unwrap();
+                let jwt = Jwt::from(updated_user);
+                let serialized_jwt: String = jwt.serialize(&state.jwt_secret).unwrap();
+                let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
+                jwt_cookie.set_path("/");
+                jwt_cookie.make_permanent();
+                jwt_cookie.set_secure(true);
+                jwt_cookie.set_http_only(false);
+                cookies.add(jwt_cookie);
+                (StatusCode::CREATED, "User updated with success").into_response()
             }
-        } else {
-            Redirect::to("/logout").into_response()
+            Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened").into_response(),
         }
     } else {
-        (StatusCode::UNAUTHORIZED, "This route is protected").into_response()
+        (StatusCode::FORBIDDEN, "You can't update another user").into_response()
     }
 }

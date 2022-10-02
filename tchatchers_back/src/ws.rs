@@ -1,36 +1,26 @@
+use crate::extractor::JwtUserExtractor;
 use crate::State;
-use crate::JWT_PATH;
 use axum::{
     extract::{ws::Message, ws::WebSocket, Path, WebSocketUpgrade},
-    response::{IntoResponse, Redirect},
+    response::IntoResponse,
     Extension,
 };
 use futures_util::{SinkExt, StreamExt};
 use std::sync::Arc;
 use tchatchers_core::{
-    jwt::Jwt,
     room::Room,
     user::PartialUser,
     ws_message::{WsMessage, WsMessageType},
 };
 use tokio::sync::broadcast;
-use tower_cookies::Cookies;
 
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
     Extension(state): Extension<Arc<State>>,
     Path(room): Path<String>,
-    cookies: Cookies,
+    JwtUserExtractor { jwt }: JwtUserExtractor,
 ) -> impl IntoResponse {
-    if let Some(cookie) = cookies.get(JWT_PATH) {
-        if let Ok(jwt) = Jwt::deserialize(&cookie.value(), &state.jwt_secret) {
-            ws.on_upgrade(|socket| handle_socket(socket, state, room, jwt.user))
-        } else {
-            Redirect::to("/logout").into_response()
-        }
-    } else {
-        Redirect::to("/signin").into_response()
-    }
+    ws.on_upgrade(|socket| handle_socket(socket, state, room, jwt.user))
 }
 
 async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String, user: PartialUser) {

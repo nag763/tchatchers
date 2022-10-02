@@ -1,7 +1,8 @@
 pub mod api;
-pub mod middleware;
+pub mod extractor;
 pub mod ws;
 
+use crate::extractor::JwtUserExtractor;
 use api::pfp::*;
 use api::user::*;
 use axum::{
@@ -12,7 +13,6 @@ use axum::{
     Router,
 };
 use magic_crypt::{new_magic_crypt, MagicCrypt256};
-use middleware::secure_route;
 use sqlx_core::postgres::PgPool;
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -48,20 +48,16 @@ async fn main() {
         txs: Mutex::new(HashMap::new()),
     });
 
-    let secured_routes = Router::new()
-        .route("/ws/:room", get(ws_handler))
-        .route("/api/user", put(update_user))
-        .route("/api/pfp", post(upload_pfp))
-        .route("/static/:path", get(static_file))
-        .layer(axum::middleware::from_fn(secure_route));
-
     let app = Router::new()
         .route("/api/user", post(create_user))
         .route("/api/login_exists/:login", get(login_exists))
         .route("/api/authenticate", post(authenticate))
         .route("/api/logout", get(logout))
         .route("/api/validate", get(validate))
-        .nest("", secured_routes)
+        .route("/api/user", put(update_user))
+        .route("/api/pfp", post(upload_pfp))
+        .route("/ws/:room", get(ws_handler))
+        .route("/static/:path", get(static_file))
         .layer(Extension(shared_state))
         .layer(CookieManagerLayer::new());
 
@@ -73,7 +69,10 @@ async fn main() {
         .unwrap();
 }
 
-async fn static_file(Path(path): Path<String>) -> impl IntoResponse {
+async fn static_file(
+    JwtUserExtractor { jwt: _jwt }: JwtUserExtractor,
+    Path(path): Path<String>,
+) -> impl IntoResponse {
     match tokio::fs::read(format!("./static/{}", &path)).await {
         Ok(data) => (StatusCode::OK, data),
         Err(_e) => (StatusCode::NOT_FOUND, vec![]),
