@@ -5,16 +5,18 @@ use crate::router::Route;
 use crate::services::chat::WebsocketService;
 use crate::services::event_bus::EventBus;
 use crate::services::message::*;
+use crate::utils::jwt::get_jwt_public_part;
 use gloo_net::http::Request;
 use gloo_timers::callback::Interval;
 use gloo_timers::callback::Timeout;
+use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
 use wasm_bindgen::JsCast;
 use yew::{html, Callback, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
 use yew_router::history::History;
-use yew_router::scope_ext::RouterScopeExt;
 use yew_router::prelude::HistoryListener;
+use yew_router::scope_ext::RouterScopeExt;
 
 const REFRESH_WS_STATE_EVERY: u32 = 5000;
 
@@ -40,7 +42,8 @@ pub struct Feed {
     called_back: bool,
     is_connected: bool,
     jwt: String,
-    _history_listener: HistoryListener
+    user: PartialUser,
+    _history_listener: HistoryListener,
 }
 
 impl Component for Feed {
@@ -55,6 +58,7 @@ impl Component for Feed {
         let document_cookies = html_document.cookie().unwrap();
         let cookies = &mut document_cookies.split(';');
         let mut jwt_val: String = String::default();
+        let mut user: PartialUser = PartialUser::default();
         let link = ctx.link().clone();
         for cookie in cookies.by_ref() {
             if let Some(i) = cookie.find('=') {
@@ -66,6 +70,8 @@ impl Component for Feed {
         }
         if jwt_val == String::default() {
             ctx.link().history().unwrap().push(Route::SignIn);
+        } else {
+            user = get_jwt_public_part(&jwt_val);
         }
         Self {
             received_messages: vec![],
@@ -74,12 +80,17 @@ impl Component for Feed {
             is_connected: false,
             called_back: false,
             _ws_reconnect: None,
+            user,
             _first_connect: {
                 let link = ctx.link().clone();
                 Timeout::new(1, move || link.send_message(Msg::CheckWsState))
             },
             jwt: jwt_val,
-            _history_listener: ctx.link().history().unwrap().listen(move || link.send_message(Msg::CutWs))
+            _history_listener: ctx
+                .link()
+                .history()
+                .unwrap()
+                .listen(move || link.send_message(Msg::CutWs)),
         }
     }
 
@@ -108,24 +119,34 @@ impl Component for Feed {
                         });
                     }
                     WsBusMessageType::Reply => {
-                        self.received_messages
-                            .insert(0, serde_json::from_str(&message.content).unwrap());
+                        let msg: WsMessage = serde_json::from_str(&message.content).unwrap();
+                        match msg.to {
+                            Some(v) if v != self.user => {
+                                return true;
+                            }
+                            _ => {
+                                self.received_messages.insert(0, msg);
+                            }
+                        }
                         self.is_connected = true;
                     }
                     WsBusMessageType::Pong => {
                         self.is_connected = true;
 
-                        let msg = WsMessage {
-                            jwt: Some(self.jwt.clone()),
-                            message_type: WsMessageType::RetrieveMessages,
-                            room: Some(ctx.props().room.clone()),
-                            ..WsMessage::default()
-                        };
-                        self.ws
-                            .tx
-                            .clone()
-                            .try_send(serde_json::to_string(&msg).unwrap())
-                            .unwrap();
+                        if self.received_messages.is_empty() {
+                            let msg = WsMessage {
+                                jwt: Some(self.jwt.clone()),
+                                message_type: WsMessageType::RetrieveMessages,
+                                author: Some(self.user.clone()),
+                                room: Some(ctx.props().room.clone()),
+                                ..WsMessage::default()
+                            };
+                            self.ws
+                                .tx
+                                .clone()
+                                .try_send(serde_json::to_string(&msg).unwrap())
+                                .unwrap();
+                        }
                     }
                     _ => {
                         self.is_connected = true;
@@ -142,7 +163,7 @@ impl Component for Feed {
                 self.called_back = false;
                 self.ws.tx.clone().try_send("Ping".into()).unwrap();
                 true
-            },
+            }
             Msg::CutWs => {
                 self.ws.tx.clone().try_send("Close".into()).unwrap();
                 true
@@ -157,7 +178,7 @@ impl Component for Feed {
                 let pass_message_to_ws = Callback::from(move |message: String| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar {pass_message_to_ws} jwt={self.jwt.clone()} room={ctx.props().room.clone()}/>}
+                html! {<TypeBar {pass_message_to_ws} jwt={self.jwt.clone()} user={self.user.clone()} room={ctx.props().room.clone()}/>}
             }
             false => {
                 let link = ctx.link().clone();

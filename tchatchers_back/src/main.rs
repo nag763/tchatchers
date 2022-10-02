@@ -236,7 +236,6 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
         }
     };
     let mut rx = tx.subscribe();
-    println!("room {} , {} subscribed", &room, tx.receiver_count());
 
     let mut send_task = tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
@@ -247,8 +246,6 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
         }
     });
 
-    //let tx = state.tx.clone();
-
     // This task will receive messages from client and send them to broadcast subscribers.
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(Message::Text(text))) = receiver.next().await {
@@ -256,7 +253,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
             match text.as_str() {
                 "Close" => {
                     break;
-                },
+                }
                 "Ping" => {
                     let _ = tx.send(String::from("Pong"));
                 }
@@ -290,8 +287,11 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
                                         &mut state.redis_pool.get().unwrap(),
                                         &room,
                                     );
-                                    for msg in msgs {
-                                        let _ = tx.send(serde_json::to_string(&msg).unwrap());
+                                    let author = msg.author;
+                                    for mut retrieved_msg in msgs {
+                                        retrieved_msg.to = author.clone();
+                                        let _ =
+                                            tx.send(serde_json::to_string(&retrieved_msg).unwrap());
                                     }
                                     let ws_message = WsMessage {
                                         message_type: WsMessageType::MessagesRetrieved,

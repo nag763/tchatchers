@@ -1,14 +1,9 @@
 use crate::components::common::FileAttacher;
-use crate::router::Route;
-use crate::utils::jwt::get_jwt_public_part;
 use gloo_timers::callback::{Interval, Timeout};
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::WsMessage;
-use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
-use yew_router::history::History;
-use yew_router::scope_ext::RouterScopeExt;
 
 const PROGRESS_REFRESH: u32 = 20;
 const TIMEOUT: u32 = 5_000;
@@ -26,6 +21,7 @@ pub struct Props {
     pub pass_message_to_ws: Callback<String>,
     pub jwt: String,
     pub room: String,
+    pub user: PartialUser,
 }
 
 #[derive(Default)]
@@ -36,33 +32,14 @@ pub struct TypeBar {
     progress_percentage: u32,
     cooldown: Option<Timeout>,
     progress: Option<Interval>,
-    user: PartialUser,
 }
 
 impl Component for TypeBar {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(ctx: &Context<Self>) -> Self {
-        let window = web_sys::window().unwrap();
-        let document = window.document().unwrap();
-        let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();
-        let document_cookies = html_document.cookie().unwrap();
-        let cookies = &mut document_cookies.split(';');
-        let mut user: PartialUser = PartialUser::default();
-        for cookie in cookies.by_ref() {
-            if let Some(i) = cookie.find('=') {
-                let (key, val) = cookie.split_at(i + 1);
-                if key == "jwt=" {
-                    user = get_jwt_public_part(val.into());
-                }
-            }
-        }
-        if user == PartialUser::default() {
-            ctx.link().history().unwrap().push(Route::SignIn);
-        }
+    fn create(_ctx: &Context<Self>) -> Self {
         Self {
-            user,
             can_post: true,
             ..Self::default()
         }
@@ -82,7 +59,7 @@ impl Component for TypeBar {
                     let msg = WsMessage {
                         jwt: Some(ctx.props().jwt.clone()),
                         room: Some(ctx.props().room.clone()),
-                        author: Some(self.user.clone().into()),
+                        author: Some(ctx.props().user.clone().into()),
                         content: Some(input.value()),
                         ..WsMessage::default()
                     };
