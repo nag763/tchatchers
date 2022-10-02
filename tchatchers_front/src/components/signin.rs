@@ -1,7 +1,7 @@
 use crate::components::common::{FormButton, WaitingForResponse};
 use crate::router::Route;
 use crate::services::auth_bus::EventBus;
-use gloo_net::http::Request;
+use crate::utils::requester::Requester;
 use tchatchers_core::user::AuthenticableUser;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Html, NodeRef, Properties};
@@ -42,21 +42,17 @@ impl Component for SignIn {
                 ) {
                     let inputs = vec![&login, &password];
                     if inputs.iter().all(|i| i.check_validity()) {
-                        let req = Request::post("/api/authenticate")
-                            .header("content-type", "application/json")
-                            .body(Some(&wasm_bindgen::JsValue::from_str(
-                                &serde_json::to_string(&AuthenticableUser {
-                                    login: login.value(),
-                                    password: password.value(),
-                                })
-                                .unwrap(),
-                            )))
-                            .send();
                         let link = ctx.link().clone();
                         self.wait_for_api = true;
+                        let payload = AuthenticableUser {
+                            login: login.value(),
+                            password: password.value(),
+                        };
+                        let mut req = Requester::<AuthenticableUser>::post("/api/authenticate");
+                        req.is_json(true).body(Some(payload));
                         wasm_bindgen_futures::spawn_local(async move {
-                            let resp = req.await.unwrap();
-                            if resp.ok() {
+                            let resp = req.send().await;
+                            if resp.status().is_success() {
                                 EventBus::dispatcher().send(true);
                                 link.history().unwrap().push(Route::JoinRoom);
                             } else {

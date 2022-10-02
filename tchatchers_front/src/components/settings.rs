@@ -3,6 +3,7 @@ use crate::components::common::FormButton;
 use crate::components::common::WaitingForResponse;
 use crate::router::Route;
 use crate::utils::jwt::get_jwt_public_part;
+use crate::utils::requester::Requester;
 use gloo_net::http::Request;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::UpdatableUser;
@@ -73,22 +74,18 @@ impl Component for Settings {
                 self.server_error = None;
                 if let Some(name) = self.name.cast::<HtmlInputElement>() {
                     if name.check_validity() {
-                        let req = Request::put("/api/user")
-                            .header("content-type", "application/json")
-                            .body(Some(&wasm_bindgen::JsValue::from_str(
-                                &serde_json::to_string(&UpdatableUser {
-                                    id: self.user.id,
-                                    name: name.value(),
-                                    pfp: self.pfp.clone(),
-                                })
-                                .unwrap(),
-                            )))
-                            .send();
+                        let payload = UpdatableUser {
+                            id: self.user.id,
+                            name: name.value(),
+                            pfp: self.pfp.clone(),
+                        };
+                        let mut req = Requester::<UpdatableUser>::put("/api/user");
+                        req.is_json(true).body(Some(payload));
                         let link = ctx.link().clone();
                         self.wait_for_api = true;
                         wasm_bindgen_futures::spawn_local(async move {
-                            let resp = req.await.unwrap();
-                            if resp.ok() {
+                            let resp = req.send().await;
+                            if resp.status().is_success() {
                                 link.send_message(Msg::ProfileUpdated);
                             } else {
                                 link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));

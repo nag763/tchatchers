@@ -1,4 +1,3 @@
-pub(crate) mod auth_checker;
 pub(crate) mod chat;
 pub(crate) mod common;
 pub(crate) mod disconnected_bar;

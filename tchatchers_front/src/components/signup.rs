@@ -1,5 +1,6 @@
 use crate::components::common::{FormButton, WaitingForResponse};
 use crate::router::Route;
+use crate::utils::requester::Requester;
 use gloo_net::http::Request;
 use gloo_timers::callback::Timeout;
 use tchatchers_core::user::InsertableUser;
@@ -49,22 +50,18 @@ impl Component for SignUp {
                 ) {
                     let inputs = vec![&login, &name, &password];
                     if inputs.iter().all(|i| i.check_validity()) {
-                        let req = Request::post("/api/create_user")
-                            .header("content-type", "application/json")
-                            .body(Some(&wasm_bindgen::JsValue::from_str(
-                                &serde_json::to_string(&InsertableUser {
-                                    login: login.value(),
-                                    name: name.value(),
-                                    password: password.value(),
-                                })
-                                .unwrap(),
-                            )))
-                            .send();
                         let link = ctx.link().clone();
                         self.wait_for_api = true;
+                        let payload = InsertableUser {
+                            login: login.value(),
+                            name: name.value(),
+                            password: password.value(),
+                        };
+                        let mut req = Requester::<InsertableUser>::post("/api/user");
+                        req.is_json(true).body(Some(payload));
                         wasm_bindgen_futures::spawn_local(async move {
-                            let resp = req.await.unwrap();
-                            if resp.ok() {
+                            let resp = req.send().await;
+                            if resp.status().is_success() {
                                 link.history().unwrap().push(Route::SignIn);
                             } else {
                                 link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));

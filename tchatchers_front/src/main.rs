@@ -3,7 +3,6 @@ pub mod router;
 pub mod services;
 pub mod utils;
 
-use crate::components::auth_checker::AuthChecker;
 use components::navbar::Navbar;
 use router::{switch, Route};
 use yew::prelude::*;
@@ -24,7 +23,6 @@ fn app() -> Html {
                     </div>
                 </div>
             </BrowserRouter>
-            <AuthChecker/>
         </>
     }
 }
