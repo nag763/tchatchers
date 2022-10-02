@@ -1,44 +1,32 @@
+pub mod api;
+pub mod middleware;
+pub mod ws;
+
+use api::pfp::*;
+use api::user::*;
 use axum::{
-    body::Bytes,
-    extract::ws::{Message, WebSocket, WebSocketUpgrade},
-    extract::{Extension, Json, Path},
-    http::{Request, StatusCode},
-    middleware::{self, Next},
-    response::{IntoResponse, Redirect, Response},
+    extract::{Extension, Path},
+    http::StatusCode,
+    response::IntoResponse,
     routing::{get, post, put},
     Router,
 };
-use futures_util::{SinkExt, StreamExt};
-use magic_crypt::{new_magic_crypt, MagicCrypt256, MagicCryptTrait};
-use regex::Regex;
+use magic_crypt::{new_magic_crypt, MagicCrypt256};
+use middleware::secure_route;
 use sqlx_core::postgres::PgPool;
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
-use tchatchers_core::jwt::Jwt;
-use tchatchers_core::room::Room;
-use tchatchers_core::user::PartialUser;
-use tchatchers_core::user::UpdatableUser;
-use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
-use tchatchers_core::ws_message::{WsMessage, WsMessageType};
-use tokio::fs::File;
-use tokio::io::AsyncWriteExt;
 use tokio::sync::broadcast;
-use tokio::time::{sleep, Duration};
-use tower_cookies::{Cookie, CookieManagerLayer, Cookies};
-use uuid::Uuid;
+use tower_cookies::CookieManagerLayer;
+use ws::ws_handler;
 
 #[macro_use]
 extern crate lazy_static;
 
-lazy_static! {
-    static ref JWT_COOKIE_HEADER: Regex =
-        Regex::new(r####"^jwt=(?P<token_val>[a-zA-Z0-9\._-]*)$"####).unwrap();
-}
-
 const JWT_PATH: &str = "jwt";
 
-struct State {
+pub struct State {
     encrypter: MagicCrypt256,
     jwt_secret: String,
     txs: Mutex<HashMap<String, broadcast::Sender<String>>>,
@@ -65,11 +53,10 @@ async fn main() {
         .route("/api/user", put(update_user))
         .route("/api/pfp", post(upload_pfp))
         .route("/static/:path", get(static_file))
-        .layer(middleware::from_fn(secure_route));
+        .layer(axum::middleware::from_fn(secure_route));
 
     let app = Router::new()
-        // top since it matches all routes
-        .route("/api/create_user", post(create_user))
+        .route("/api/user", post(create_user))
         .route("/api/login_exists/:login", get(login_exists))
         .route("/api/authenticate", post(authenticate))
         .route("/api/logout", get(logout))
@@ -90,260 +77,5 @@ async fn static_file(Path(path): Path<String>) -> impl IntoResponse {
     match tokio::fs::read(format!("./static/{}", &path)).await {
         Ok(data) => (StatusCode::OK, data),
         Err(_e) => (StatusCode::NOT_FOUND, vec![]),
-    }
-}
-
-async fn login_exists(
-    Path(login): Path<String>,
-    Extension(state): Extension<Arc<State>>,
-) -> impl IntoResponse {
-    let response_status: StatusCode = match User::login_exists(&login, &state.pg_pool).await {
-        false => StatusCode::OK,
-        true => StatusCode::CONFLICT,
-    };
-    (response_status, ())
-}
-
-async fn logout(cookies: Cookies) -> impl IntoResponse {
-    let mut jwt_cookie = Cookie::new(JWT_PATH, "");
-    jwt_cookie.set_path("/");
-    jwt_cookie.make_removal();
-    cookies.add(jwt_cookie);
-    (StatusCode::OK, "")
-}
-
-async fn validate(cookies: Cookies, Extension(state): Extension<Arc<State>>) -> impl IntoResponse {
-    if let Some(cookie) = cookies.get(JWT_PATH) {
-        let value = cookie.value();
-        match Jwt::deserialize(value, &state.jwt_secret) {
-            Ok(_) => (StatusCode::OK, ""),
-            Err(_) => (StatusCode::UNAUTHORIZED, "The jwt couldn't be deserialized"),
-        }
-    } else {
-        (StatusCode::UNAUTHORIZED, "The JWT token hasn't been found")
-    }
-}
-
-async fn authenticate(
-    Json(mut user): Json<AuthenticableUser>,
-    Extension(state): Extension<Arc<State>>,
-    cookies: Cookies,
-) -> impl IntoResponse {
-    user.password = state.encrypter.encrypt_str_to_base64(&user.password);
-    let user = match user.authenticate(&state.pg_pool).await {
-        Some(v) => v,
-        None => {
-            sleep(Duration::from_secs(3)).await;
-            return (StatusCode::NOT_FOUND, "We couldn't connect you, please ensure that the login and password are correct before trying again");
-        }
-    };
-    match user.is_authorized {
-        true => {
-            let jwt = Jwt::from(user);
-            let serialized_jwt : String = jwt.serialize(&state.jwt_secret).unwrap();
-            let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
-            jwt_cookie.set_path("/");
-            jwt_cookie.make_permanent();
-            jwt_cookie.set_secure(true);
-            jwt_cookie.set_http_only(false);
-            cookies.add(jwt_cookie);
-            (StatusCode::OK, "")
-        }
-        false => (StatusCode::UNAUTHORIZED, "This user's access has been revoked, contact an admin if you believe you should access this service")
-    }
-}
-
-async fn create_user(
-    Json(mut new_user): Json<InsertableUser>,
-    Extension(state): Extension<Arc<State>>,
-) -> impl IntoResponse {
-    if User::login_exists(&new_user.login, &state.pg_pool).await {
-        return (
-            StatusCode::BAD_REQUEST,
-            "A user with a similar login already exists",
-        );
-    }
-
-    new_user.password = state.encrypter.encrypt_str_to_base64(&new_user.password);
-
-    match new_user.insert(&state.pg_pool).await {
-        Ok(_) => (StatusCode::CREATED, "User created with success"),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened"),
-    }
-}
-
-async fn upload_pfp(body: Bytes) -> impl IntoResponse {
-    let file_name = format!("/static/{}.jpg", Uuid::new_v4());
-    let mut file = File::create(format!(".{}", &file_name)).await.unwrap();
-    file.write_all(&body).await.unwrap();
-    (StatusCode::OK, file_name)
-}
-
-async fn update_user(
-    Json(user): Json<UpdatableUser>,
-    Extension(state): Extension<Arc<State>>,
-    cookies: Cookies,
-) -> impl IntoResponse {
-    if let Some(cookie) = cookies.get(JWT_PATH) {
-        if let Ok(jwt) = Jwt::deserialize(&cookie.value(), &state.jwt_secret) {
-            if jwt.user.id == user.id {
-                match user.update(&state.pg_pool).await {
-                    Ok(_) => {
-                        let updated_user = User::find_by_id(user.id, &state.pg_pool).await.unwrap();
-                        let jwt = Jwt::from(updated_user);
-                        let serialized_jwt: String = jwt.serialize(&state.jwt_secret).unwrap();
-                        let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
-                        jwt_cookie.set_path("/");
-                        jwt_cookie.make_permanent();
-                        jwt_cookie.set_secure(true);
-                        jwt_cookie.set_http_only(false);
-                        cookies.add(jwt_cookie);
-                        (StatusCode::CREATED, "User updated with success").into_response()
-                    }
-                    Err(_) => {
-                        (StatusCode::INTERNAL_SERVER_ERROR, "An error happened").into_response()
-                    }
-                }
-            } else {
-                (StatusCode::FORBIDDEN, "You can't update another user").into_response()
-            }
-        } else {
-            Redirect::to("/logout").into_response()
-        }
-    } else {
-        (StatusCode::UNAUTHORIZED, "This route is protected").into_response()
-    }
-}
-
-async fn ws_handler(
-    ws: WebSocketUpgrade,
-    Extension(state): Extension<Arc<State>>,
-    Path(room): Path<String>,
-    cookies: Cookies,
-) -> impl IntoResponse {
-    if let Some(cookie) = cookies.get(JWT_PATH) {
-        if let Ok(jwt) = Jwt::deserialize(&cookie.value(), &state.jwt_secret) {
-            ws.on_upgrade(|socket| handle_socket(socket, state, room, jwt.user))
-        } else {
-            Redirect::to("/logout").into_response()
-        }
-    } else {
-        Redirect::to("/signin").into_response()
-    }
-}
-
-async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String, user: PartialUser) {
-    let (mut sender, mut receiver) = socket.split();
-    let tx = {
-        let mut rooms = state.txs.lock().unwrap();
-        match rooms.get(&room) {
-            Some(v) => v.clone(),
-            None => {
-                let (tx, _rx) = broadcast::channel(1000);
-                rooms.insert(room.clone(), tx.clone());
-                tx
-            }
-        }
-    };
-    let mut rx = tx.subscribe();
-
-    let mut send_task = tokio::spawn(async move {
-        while let Ok(msg) = rx.recv().await {
-            // In any websocket error, break loop.
-            if sender.send(Message::Text(msg)).await.is_err() {
-                break;
-            }
-        }
-    });
-
-    // This task will receive messages from client and send them to broadcast subscribers.
-    let mut recv_task = tokio::spawn(async move {
-        while let Some(Ok(Message::Text(text))) = receiver.next().await {
-            // Add username before message.
-            match text.as_str() {
-                "Close" => {
-                    break;
-                }
-                "Ping" => {
-                    let _ = tx.send(String::from("Pong"));
-                }
-                "Pong" => {
-                    continue;
-                }
-                t => {
-                    let msg: WsMessage = serde_json::from_str(t).unwrap();
-                    match msg.message_type {
-                        WsMessageType::Send => {
-                            let ws_message = WsMessage {
-                                message_type: WsMessageType::Receive,
-                                content: msg.content,
-                                author: msg.author,
-                                room: Some(room.clone()),
-                                ..WsMessage::default()
-                            };
-                            let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
-
-                            Room::publish_message_in_room(
-                                &mut state.redis_pool.get().unwrap(),
-                                &room,
-                                ws_message.clone(),
-                            );
-                        }
-                        WsMessageType::RetrieveMessages => {
-                            let msgs = Room::find_messages_in_room(
-                                &mut state.redis_pool.get().unwrap(),
-                                &room,
-                            );
-                            let author = msg.author;
-                            for mut retrieved_msg in msgs {
-                                retrieved_msg.to = author.clone();
-                                let _ = tx.send(serde_json::to_string(&retrieved_msg).unwrap());
-                            }
-                            let ws_message = WsMessage {
-                                message_type: WsMessageType::MessagesRetrieved,
-                                author: Some(user.clone().into()),
-                                ..WsMessage::default()
-                            };
-                            let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
-                        }
-                        _ => {}
-                    }
-                }
-            };
-        }
-    });
-
-    tokio::select! {
-        _ = (&mut send_task) => recv_task.abort(),
-        _ = (&mut recv_task) => send_task.abort(),
-    };
-}
-
-async fn secure_route<B>(req: Request<B>, next: Next<B>) -> Result<Response, impl IntoResponse> {
-    let headers = req.headers();
-    if let Some(cookie) = headers.get("cookie") {
-        let cookie_val = cookie.to_str().map_err(|_| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Couldn't find cookie value",
-            )
-        })?;
-        let captures = JWT_COOKIE_HEADER.captures(cookie_val).ok_or((
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Regex couldn't find the cookie value",
-        ))?;
-        let value: &str = captures.name("token_val").unwrap().as_str();
-        match Jwt::deserialize(
-            value,
-            &req.extensions().get::<Arc<State>>().unwrap().jwt_secret,
-        ) {
-            Ok(_) => Ok(next.run(req).await),
-            Err(_) => Err((StatusCode::UNAUTHORIZED, "JWT invalid")),
-        }
-    } else {
-        Err((
-            StatusCode::UNAUTHORIZED,
-            "The route is only for authorized users, please log in.",
-        ))
     }
 }
