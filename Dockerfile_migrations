@@ -1,8 +1,8 @@
-FROM rust:1.63
+FROM rust:1.64
 
 WORKDIR /home/usr/migrations
 
-COPY ./migrations ./
+COPY ./migrations ./migrations
 
 COPY .env ./
 

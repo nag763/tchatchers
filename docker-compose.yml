@@ -24,11 +24,19 @@ services:
     build: 
       context: ./ 
       dockerfile: Dockerfile_back
+  migrations :
+    depends_on:
+      - postgres
+    links:
+      - postgres:pg.tchatche.rs
+    build: 
+      context: ./ 
+      dockerfile: Dockerfile_migrations
   front :
     depends_on:
       - back
     links:
-      - back:back
+      - back:back.tchatche.rs
     build: 
       context: ./ 
       dockerfile: Dockerfile_front
