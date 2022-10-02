@@ -1,4 +1,5 @@
 use chrono::{Datelike, Timelike};
+use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
 use yew::{html, Component, Context, Html, Properties};
 
@@ -6,6 +7,7 @@ use yew::{html, Component, Context, Html, Properties};
 pub struct Props {
     pub messages: Vec<WsMessage>,
     pub room: String,
+    pub user: PartialUser,
 }
 
 pub struct Chat;
@@ -31,18 +33,34 @@ impl Component for Chat {
                     Some(v) => v.clone(),
                     None => "/assets/no_pfp.webp".into(),
                 };
-                html!{
-            <div class="flex w-full mt-2 space-x-3 max-w-xs px-3">
-                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300" title={author.name.clone()}>
-                <img class="h-10 w-10 rounded-full" src={pfp.clone()} alt="No img"/>
-            </div>
+                if author != &ctx.props().user {
+                    html! {
+                        <div class="flex w-full mt-2 space-x-3 max-w-xs px-3">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300" title={author.name.clone()}>
+                            <img class="h-10 w-10 rounded-full" src={pfp.clone()} alt="No img"/>
+                        </div>
+                            <div>
+                                <div class="bg-gray-300 mb-2 p-3 rounded-r-lg rounded-bl-lg" title={format!("on {:02}/{:02}/{} at {}:{:02}", m.timestamp.clone().day(), m.timestamp.clone().month(), m.timestamp.clone().year(), m.timestamp.clone().hour(), m.timestamp.clone().minute())}>
+                                    <p class="text-sm">{m.content.clone().unwrap_or_default()}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    }
+                } else {
+                    html! {
+                        <div class="flex w-full mt-2 space-x-3 max-w-xs ml-auto justify-end px-3">
                 <div>
-                    <div class="bg-gray-300 mb-2 p-3 rounded-r-lg rounded-bl-lg" title={format!("on {:02}/{:02}/{} at {}:{:02}", m.timestamp.clone().day(), m.timestamp.clone().month(), m.timestamp.clone().year(), m.timestamp.clone().hour(), m.timestamp.clone().minute())}>
+                    <div class="bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg mb-2" title={format!("on {:02}/{:02}/{} at {}:{:02}", m.timestamp.clone().day(), m.timestamp.clone().month(), m.timestamp.clone().year(), m.timestamp.clone().hour(), m.timestamp.clone().minute())}>
                         <p class="text-sm">{m.content.clone().unwrap_or_default()}</p>
                     </div>
                 </div>
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300">
+                            <img class="h-10 w-10 rounded-full" src={pfp.clone()} alt="No img"/>
+                </div>
             </div>
-            }
+                    }
+                }
             } else {
                 html!{<></>}
             }
