@@ -41,7 +41,6 @@ pub struct Feed {
     _first_connect: Timeout,
     called_back: bool,
     is_connected: bool,
-    jwt: String,
     user: PartialUser,
     _history_listener: HistoryListener,
 }
@@ -85,7 +84,6 @@ impl Component for Feed {
                 let link = ctx.link().clone();
                 Timeout::new(1, move || link.send_message(Msg::CheckWsState))
             },
-            jwt: jwt_val,
             _history_listener: ctx
                 .link()
                 .history()
@@ -135,7 +133,6 @@ impl Component for Feed {
 
                         if self.received_messages.is_empty() {
                             let msg = WsMessage {
-                                jwt: Some(self.jwt.clone()),
                                 message_type: WsMessageType::RetrieveMessages,
                                 author: Some(self.user.clone()),
                                 room: Some(ctx.props().room.clone()),
@@ -178,7 +175,7 @@ impl Component for Feed {
                 let pass_message_to_ws = Callback::from(move |message: String| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar {pass_message_to_ws} jwt={self.jwt.clone()} user={self.user.clone()} room={ctx.props().room.clone()}/>}
+                html! {<TypeBar {pass_message_to_ws} user={self.user.clone()} room={ctx.props().room.clone()}/>}
             }
             false => {
                 let link = ctx.link().clone();

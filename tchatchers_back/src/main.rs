@@ -17,6 +17,7 @@ use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use tchatchers_core::jwt::Jwt;
 use tchatchers_core::room::Room;
+use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::UpdatableUser;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, User};
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
@@ -218,11 +219,20 @@ async fn ws_handler(
     ws: WebSocketUpgrade,
     Extension(state): Extension<Arc<State>>,
     Path(room): Path<String>,
+    cookies: Cookies,
 ) -> impl IntoResponse {
-    ws.on_upgrade(|socket| handle_socket(socket, state, room))
+    if let Some(cookie) = cookies.get(JWT_PATH) {
+        if let Ok(jwt) = Jwt::deserialize(&cookie.value(), &state.jwt_secret) {
+            ws.on_upgrade(|socket| handle_socket(socket, state, room, jwt.user))
+        } else {
+            Redirect::to("/logout").into_response()
+        }
+    } else {
+        Redirect::to("/signin").into_response()
+    }
 }
 
-async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
+async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String, user: PartialUser) {
     let (mut sender, mut receiver) = socket.split();
     let tx = {
         let mut rooms = state.txs.lock().unwrap();
@@ -262,51 +272,41 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String) {
                 }
                 t => {
                     let msg: WsMessage = serde_json::from_str(t).unwrap();
-                    if let (Some(jwt), Some(room)) = (msg.jwt, msg.room) {
-                        if let Ok(jwt) = Jwt::deserialize(&jwt, &state.jwt_secret) {
-                            let user: User = jwt.into();
-                            match msg.message_type {
-                                WsMessageType::Send => {
-                                    let ws_message = WsMessage {
-                                        message_type: WsMessageType::Receive,
-                                        content: msg.content,
-                                        author: msg.author,
-                                        room: Some(room.clone()),
-                                        ..WsMessage::default()
-                                    };
-                                    let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
+                    match msg.message_type {
+                        WsMessageType::Send => {
+                            let ws_message = WsMessage {
+                                message_type: WsMessageType::Receive,
+                                content: msg.content,
+                                author: msg.author,
+                                room: Some(room.clone()),
+                                ..WsMessage::default()
+                            };
+                            let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
 
-                                    Room::publish_message_in_room(
-                                        &mut state.redis_pool.get().unwrap(),
-                                        &room,
-                                        ws_message.clone(),
-                                    );
-                                }
-                                WsMessageType::RetrieveMessages => {
-                                    let msgs = Room::find_messages_in_room(
-                                        &mut state.redis_pool.get().unwrap(),
-                                        &room,
-                                    );
-                                    let author = msg.author;
-                                    for mut retrieved_msg in msgs {
-                                        retrieved_msg.to = author.clone();
-                                        let _ =
-                                            tx.send(serde_json::to_string(&retrieved_msg).unwrap());
-                                    }
-                                    let ws_message = WsMessage {
-                                        message_type: WsMessageType::MessagesRetrieved,
-                                        author: Some(user.into()),
-                                        ..WsMessage::default()
-                                    };
-                                    let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
-                                }
-                                _ => {}
-                            }
-                        } else {
-                            break;
+                            Room::publish_message_in_room(
+                                &mut state.redis_pool.get().unwrap(),
+                                &room,
+                                ws_message.clone(),
+                            );
                         }
-                    } else {
-                        break;
+                        WsMessageType::RetrieveMessages => {
+                            let msgs = Room::find_messages_in_room(
+                                &mut state.redis_pool.get().unwrap(),
+                                &room,
+                            );
+                            let author = msg.author;
+                            for mut retrieved_msg in msgs {
+                                retrieved_msg.to = author.clone();
+                                let _ = tx.send(serde_json::to_string(&retrieved_msg).unwrap());
+                            }
+                            let ws_message = WsMessage {
+                                message_type: WsMessageType::MessagesRetrieved,
+                                author: Some(user.clone().into()),
+                                ..WsMessage::default()
+                            };
+                            let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
+                        }
+                        _ => {}
                     }
                 }
             };

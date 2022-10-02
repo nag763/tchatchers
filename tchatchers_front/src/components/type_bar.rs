@@ -19,7 +19,6 @@ pub enum Msg {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub pass_message_to_ws: Callback<String>,
-    pub jwt: String,
     pub room: String,
     pub user: PartialUser,
 }
@@ -57,7 +56,6 @@ impl Component for TypeBar {
                         return false;
                     }
                     let msg = WsMessage {
-                        jwt: Some(ctx.props().jwt.clone()),
                         room: Some(ctx.props().room.clone()),
                         author: Some(ctx.props().user.clone().into()),
                         content: Some(input.value()),

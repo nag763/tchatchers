@@ -23,7 +23,6 @@ pub struct WsMessage {
     pub message_type: WsMessageType,
     #[derivative(Default(value = "Uuid::new_v4()"))]
     pub uuid: Uuid,
-    pub jwt: Option<String>,
     pub content: Option<String>,
     pub author: Option<PartialUser>,
     pub to: Option<PartialUser>,
