@@ -33,7 +33,7 @@ impl Component for Chat {
                     Some(v) => v.clone(),
                     None => "/assets/no_pfp.webp".into(),
                 };
-                if author != &ctx.props().user {
+                if author.id != ctx.props().user.id {
                     html! {
                         <div class="flex w-full mt-2 space-x-3 max-w-xs px-3">
                             <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300" title={author.name.clone()}>
