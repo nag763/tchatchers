@@ -2,12 +2,11 @@ use crate::components::common::FileAttacher;
 use crate::components::common::FormButton;
 use crate::components::common::WaitingForResponse;
 use crate::router::Route;
-use crate::utils::jwt::get_jwt_public_part;
+use crate::utils::jwt::get_user;
 use crate::utils::requester::Requester;
 use gloo_net::http::Request;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::UpdatableUser;
-use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
 use yew_router::history::History;
@@ -47,23 +46,14 @@ impl Component for Settings {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::FetchJwt => {
-                let window = web_sys::window().unwrap();
-                let document = window.document().unwrap();
-                let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();
-                let document_cookies = html_document.cookie().unwrap();
-                let cookies = &mut document_cookies.split(';');
-                let mut user: PartialUser = PartialUser::default();
-                for cookie in cookies.by_ref() {
-                    if let Some(i) = cookie.find('=') {
-                        let (key, val) = cookie.split_at(i + 1);
-                        if key == "jwt=" {
-                            user = get_jwt_public_part(val.into());
-                        }
+                let user = match get_user() {
+                    Ok(v) => v,
+                    Err(e) => {
+                        gloo_console::log!("Error while attempting to get the user :", e);
+                        ctx.link().history().unwrap().push(Route::SignIn);
+                        PartialUser::default()
                     }
-                }
-                if user == PartialUser::default() {
-                    ctx.link().history().unwrap().push(Route::SignIn);
-                }
+                };
                 self.user = user.clone();
                 self.pfp = user.pfp;
                 true

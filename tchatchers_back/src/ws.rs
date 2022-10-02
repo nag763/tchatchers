@@ -92,7 +92,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String, user:
                             }
                             let ws_message = WsMessage {
                                 message_type: WsMessageType::MessagesRetrieved,
-                                author: Some(user.clone().into()),
+                                author: Some(user.clone()),
                                 ..WsMessage::default()
                             };
                             let _ = tx.send(serde_json::to_string(&ws_message).unwrap());

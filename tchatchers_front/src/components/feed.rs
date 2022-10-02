@@ -5,13 +5,12 @@ use crate::router::Route;
 use crate::services::chat::WebsocketService;
 use crate::services::event_bus::EventBus;
 use crate::services::message::*;
-use crate::utils::jwt::get_jwt_public_part;
+use crate::utils::jwt::get_user;
 use gloo_net::http::Request;
 use gloo_timers::callback::Interval;
 use gloo_timers::callback::Timeout;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
-use wasm_bindgen::JsCast;
 use yew::{html, Callback, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
 use yew_router::history::History;
@@ -51,27 +50,15 @@ impl Component for Feed {
 
     fn create(ctx: &Context<Self>) -> Self {
         let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
-        let window = web_sys::window().unwrap();
-        let document = window.document().unwrap();
-        let html_document = document.dyn_into::<web_sys::HtmlDocument>().unwrap();
-        let document_cookies = html_document.cookie().unwrap();
-        let cookies = &mut document_cookies.split(';');
-        let mut jwt_val: String = String::default();
-        let mut user: PartialUser = PartialUser::default();
         let link = ctx.link().clone();
-        for cookie in cookies.by_ref() {
-            if let Some(i) = cookie.find('=') {
-                let (key, val) = cookie.split_at(i + 1);
-                if key == "jwt=" {
-                    jwt_val = val.into();
-                }
+        let user = match get_user() {
+            Ok(v) => v,
+            Err(e) => {
+                gloo_console::log!("Error while attempting to get the user :", e);
+                link.history().unwrap().push(Route::SignIn);
+                PartialUser::default()
             }
-        }
-        if jwt_val == String::default() {
-            ctx.link().history().unwrap().push(Route::SignIn);
-        } else {
-            user = get_jwt_public_part(&jwt_val);
-        }
+        };
         Self {
             received_messages: vec![],
             ws,

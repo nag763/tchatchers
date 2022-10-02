@@ -4,6 +4,7 @@ pub mod services;
 pub mod utils;
 
 use components::navbar::Navbar;
+use components::auth_checker::AuthChecker;
 use router::{switch, Route};
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -22,6 +23,7 @@ fn app() -> Html {
                         <Switch<Route> render={Switch::render(switch)} />
                     </div>
                 </div>
+            <AuthChecker />
             </BrowserRouter>
         </>
     }

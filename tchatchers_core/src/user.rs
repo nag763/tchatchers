@@ -39,7 +39,7 @@ impl From<User> for PartialUser {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdatableUser {
     pub id: i32,
@@ -47,7 +47,7 @@ pub struct UpdatableUser {
     pub pfp: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct InsertableUser {
     pub login: String,
@@ -117,7 +117,7 @@ impl UpdatableUser {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct AuthenticableUser {
     pub login: String,
     pub password: String,

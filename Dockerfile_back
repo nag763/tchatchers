@@ -1,0 +1,13 @@
+FROM rust:1.63
+
+WORKDIR /home/usr/back/
+
+COPY tchatchers_back/ ./
+
+COPY tchatchers_core/ ../tchatchers_core/
+
+COPY .env ./
+
+RUN cargo b --release
+
+CMD cargo r --release

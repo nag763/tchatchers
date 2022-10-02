@@ -1,0 +1,41 @@
+FROM node as asset_builder
+
+WORKDIR /home/usr/front
+
+COPY ./tchatchers_front/src ./src
+
+COPY ./tchatchers_front/Cargo.toml ./Cargo.toml
+
+COPY ./tchatchers_front/tailwind.config.js ./tailwind.config.js
+
+COPY ./tchatchers_front/index.html ./index.html
+
+COPY ./tchatchers_front/install_assets.sh ./install_assets.sh
+
+RUN mkdir assets
+
+RUN bash install_assets.sh
+
+FROM rust:1.63 as src_builder
+
+WORKDIR /usr/tchatchers/front
+
+COPY --from=asset_builder /home/usr/front /usr/tchatchers/front
+
+COPY ./tchatchers_core ../tchatchers_core
+
+COPY ./tchatchers_front/favicon.ico ./favicon.ico
+
+RUN rustup target add wasm32-unknown-unknown
+
+RUN cargo install trunk
+
+RUN trunk build --release
+
+FROM nginx
+
+COPY --from=src_builder /usr/tchatchers/front/dist /usr/share/nginx/html
+
+COPY /tchatchers_front/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
