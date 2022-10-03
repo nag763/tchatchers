@@ -42,6 +42,7 @@ services:
       dockerfile: Dockerfile_front
     ports:
       - "80:80"
+      - "443:443"
 volumes:
   db:
   redis:
