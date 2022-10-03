@@ -14,7 +14,7 @@ impl WebsocketService {
     pub fn new(room: &str) -> Self {
         let location = web_sys::window().unwrap().location();
         let host = location.host().unwrap();
-        let protocol = location.host().unwrap();
+        let protocol = location.protocol().unwrap();
         let ws_protocol = match protocol.as_str() {
             "https:" => "wss:",
             _ => "ws:"
