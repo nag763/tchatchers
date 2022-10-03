@@ -6,7 +6,7 @@ use tchatchers_core::jwt::Jwt;
 
 lazy_static! {
     static ref JWT_COOKIE_HEADER: Regex =
-        Regex::new(r####"^jwt=(?P<token_val>[a-zA-Z0-9\._-]*)$"####).unwrap();
+        Regex::new(r####"jwt=(?P<token_val>[a-zA-Z0-9\._-]*)"####).unwrap();
 }
 
 pub struct JwtUserExtractor {
