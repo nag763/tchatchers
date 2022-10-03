@@ -33,6 +33,8 @@ services:
       context: ./ 
       dockerfile: Dockerfile_migrations
   front :
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - back
     links:
