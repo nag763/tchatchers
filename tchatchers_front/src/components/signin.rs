@@ -1,6 +1,8 @@
 use crate::components::common::{FormButton, WaitingForResponse};
+use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::auth_bus::EventBus;
+use crate::services::toast_bus::ToastBus;
 use crate::utils::requester::Requester;
 use tchatchers_core::user::AuthenticableUser;
 use web_sys::HtmlInputElement;
@@ -55,6 +57,10 @@ impl Component for SignIn {
                             if resp.status().is_success() {
                                 EventBus::dispatcher().send(true);
                                 link.history().unwrap().push(Route::JoinRoom);
+                                ToastBus::dispatcher().send(Alert {
+                                    is_success: true,
+                                    content: "You logged in with success".into(),
+                                });
                             } else {
                                 link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
                             }

@@ -1,10 +1,12 @@
 use super::chat::Chat;
 use super::disconnected_bar::DisconnectedBar;
 use super::type_bar::TypeBar;
+use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::chat::WebsocketService;
 use crate::services::event_bus::EventBus;
 use crate::services::message::*;
+use crate::services::toast_bus::ToastBus;
 use crate::utils::jwt::get_user;
 use gloo_net::http::Request;
 use gloo_timers::callback::Interval;
@@ -12,6 +14,7 @@ use gloo_timers::callback::Timeout;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
 use yew::{html, Callback, Component, Context, Html, Properties};
+use yew_agent::Dispatched;
 use yew_agent::{Bridge, Bridged};
 use yew_router::history::History;
 use yew_router::prelude::HistoryListener;
@@ -40,6 +43,7 @@ pub struct Feed {
     _first_connect: Timeout,
     called_back: bool,
     is_connected: bool,
+    is_closed: bool,
     user: PartialUser,
     _history_listener: HistoryListener,
 }
@@ -56,6 +60,10 @@ impl Component for Feed {
             Err(e) => {
                 gloo_console::log!("Error while attempting to get the user :", e);
                 link.history().unwrap().push(Route::SignIn);
+                ToastBus::dispatcher().send(Alert {
+                    is_success: false,
+                    content: "Please authenticate prior accessing the app functionnalities.".into(),
+                });
                 PartialUser::default()
             }
         };
@@ -66,6 +74,7 @@ impl Component for Feed {
             is_connected: false,
             called_back: false,
             _ws_reconnect: None,
+            is_closed: false,
             user,
             _first_connect: {
                 let link = ctx.link().clone();
@@ -86,22 +95,24 @@ impl Component for Feed {
                 let message: WsBusMessage = serde_json::from_str(&s).unwrap();
                 match message.message_type {
                     WsBusMessageType::NotConnected | WsBusMessageType::Closed => {
-                        gloo_console::error!("Not connected");
-                        let req = Request::get("/api/validate").send();
-                        let link = ctx.link().clone();
-                        wasm_bindgen_futures::spawn_local(async move {
-                            let resp = req.await.unwrap();
-                            if resp.status() == 401 {
-                                link.history().unwrap().push(Route::SignIn);
-                            }
-                        });
-                        let link = ctx.link().clone();
-                        self.is_connected = false;
-                        self._ws_reconnect = Some({
-                            Interval::new(REFRESH_WS_STATE_EVERY, move || {
-                                link.send_message(Msg::CheckWsState)
-                            })
-                        });
+                        if !self.is_closed {
+                            gloo_console::error!("Not connected");
+                            let req = Request::get("/api/validate").send();
+                            let link = ctx.link().clone();
+                            wasm_bindgen_futures::spawn_local(async move {
+                                let resp = req.await.unwrap();
+                                if resp.status() == 401 {
+                                    link.history().unwrap().push(Route::SignIn);
+                                }
+                            });
+                            let link = ctx.link().clone();
+                            self.is_connected = false;
+                            self._ws_reconnect = Some({
+                                Interval::new(REFRESH_WS_STATE_EVERY, move || {
+                                    link.send_message(Msg::CheckWsState)
+                                })
+                            });
+                        }
                     }
                     WsBusMessageType::Reply => {
                         let msg: WsMessage = serde_json::from_str(&message.content).unwrap();
@@ -150,6 +161,8 @@ impl Component for Feed {
             }
             Msg::CutWs => {
                 self.ws.tx.clone().try_send("Close".into()).unwrap();
+                self.is_closed = true;
+                self._ws_reconnect = None;
                 true
             }
         }

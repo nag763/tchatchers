@@ -12,4 +12,5 @@ pub(crate) mod secured_route;
 pub(crate) mod settings;
 pub(crate) mod signin;
 pub(crate) mod signup;
+pub(crate) mod toast;
 pub(crate) mod type_bar;

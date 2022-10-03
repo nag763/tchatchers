@@ -1,5 +1,7 @@
+use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::auth_bus::EventBus;
+use crate::services::toast_bus::ToastBus;
 use gloo_net::http::Request;
 use yew::{html, Component, Context, Html, Properties};
 use yew_agent::Dispatched;
@@ -25,6 +27,10 @@ impl Component for LogOut {
         wasm_bindgen_futures::spawn_local(async move {
             req.await.unwrap();
             EventBus::dispatcher().send(false);
+            ToastBus::dispatcher().send(Alert {
+                is_success: true,
+                content: "You logged out with success".into(),
+            });
             link.history().unwrap().push(Route::SignIn);
         });
 

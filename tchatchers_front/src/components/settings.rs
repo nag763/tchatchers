@@ -1,7 +1,9 @@
 use crate::components::common::FileAttacher;
 use crate::components::common::FormButton;
 use crate::components::common::WaitingForResponse;
+use crate::components::toast::Alert;
 use crate::router::Route;
+use crate::services::toast_bus::ToastBus;
 use crate::utils::jwt::get_user;
 use crate::utils::requester::Requester;
 use gloo_net::http::Request;
@@ -9,6 +11,7 @@ use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::UpdatableUser;
 use web_sys::HtmlInputElement;
 use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
+use yew_agent::Dispatched;
 use yew_router::history::History;
 use yew_router::scope_ext::RouterScopeExt;
 
@@ -51,6 +54,12 @@ impl Component for Settings {
                     Err(e) => {
                         gloo_console::log!("Error while attempting to get the user :", e);
                         ctx.link().history().unwrap().push(Route::SignIn);
+                        ToastBus::dispatcher().send(Alert {
+                            is_success: false,
+                            content:
+                                "Please authenticate prior accessing the app functionnalities."
+                                    .into(),
+                        });
                         PartialUser::default()
                     }
                 };
@@ -77,6 +86,10 @@ impl Component for Settings {
                             let resp = req.send().await;
                             if resp.status().is_success() {
                                 link.send_message(Msg::ProfileUpdated);
+                                ToastBus::dispatcher().send(Alert {
+                                    is_success: true,
+                                    content: "Your profile has been updated with success".into(),
+                                });
                             } else {
                                 link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
                             }

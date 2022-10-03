@@ -5,6 +5,7 @@ pub mod utils;
 
 use components::auth_checker::AuthChecker;
 use components::navbar::Navbar;
+use components::toast::Toast;
 use router::{switch, Route};
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -19,6 +20,7 @@ fn app() -> Html {
             <BrowserRouter>
                 <div class="h-screen grid grid-rows-12">
                     <Navbar/>
+            <Toast />
                     <div class="row-span-11">
                         <Switch<Route> render={Switch::render(switch)} />
                     </div>

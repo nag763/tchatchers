@@ -22,8 +22,8 @@ pub fn get_user() -> Result<PartialUser, &'static str> {
     for cookie in cookies.by_ref() {
         if let Some(i) = cookie.find('=') {
             let (key, val) = cookie.split_at(i + 1);
-            if key == "jwt=" {
-                jwt_val = val.into();
+            if key.trim() == "jwt=" {
+                jwt_val = val.trim().into();
             }
         }
     }

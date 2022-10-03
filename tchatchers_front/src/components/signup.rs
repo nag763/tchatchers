@@ -1,11 +1,14 @@
 use crate::components::common::{FormButton, WaitingForResponse};
+use crate::components::toast::Alert;
 use crate::router::Route;
+use crate::services::toast_bus::ToastBus;
 use crate::utils::requester::Requester;
 use gloo_net::http::Request;
 use gloo_timers::callback::Timeout;
 use tchatchers_core::user::InsertableUser;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Html, NodeRef, Properties};
+use yew_agent::Dispatched;
 use yew_router::prelude::History;
 use yew_router::scope_ext::RouterScopeExt;
 
@@ -62,6 +65,10 @@ impl Component for SignUp {
                         wasm_bindgen_futures::spawn_local(async move {
                             let resp = req.send().await;
                             if resp.status().is_success() {
+                                ToastBus::dispatcher().send(Alert {
+                                    is_success: true,
+                                    content: "User created with success".into(),
+                                });
                                 link.history().unwrap().push(Route::SignIn);
                             } else {
                                 link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
