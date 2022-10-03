@@ -124,7 +124,7 @@ impl Component for SignUp {
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" ref={&self.login} oninput={ctx.link().callback(|_| Msg::OnLoginChanged)}/>
+                      <input class="peer bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" ref={&self.login} oninput={ctx.link().callback(|_| Msg::OnLoginChanged)}/>
                     </div>
                   </div>
                   <div class="md:flex md:items-center mb-6">
@@ -134,7 +134,7 @@ impl Component for SignUp {
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500 visited:invalid:border-red-500 focus:invalid:border-red-500 invalid:visited:border-red-500" id="inline-full-name" type="text" required=true minlength="2" ref={&self.name} />
+                      <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-zinc-500 visited:invalid:border-red-500 focus:invalid:border-red-500 invalid:visited:border-red-500" id="inline-full-name" type="text" required=true minlength="2" ref={&self.name} />
                     </div>
                   </div>
                   <div class="md:flex md:items-center mb-6">
@@ -144,7 +144,7 @@ impl Component for SignUp {
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-password" type="password" required=true minlength="4" ref={&self.password} />
+                      <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-password" type="password" required=true minlength="4" ref={&self.password} />
                     </div>
                   </div>
                   <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.server_error.is_none()}>

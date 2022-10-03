@@ -55,9 +55,9 @@ impl Component for Navbar {
         };
 
         html! {
-            <nav class="flex items-center justify-between flex-wrap bg-gray-800 px-6 row-span-1">
+            <nav class="flex items-center justify-between flex-wrap bg-zinc-800 px-6 row-span-1">
                 <Link<Route> to={logo_route} classes="flex items-center flex-shrink-0 text-white mr-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600 hover:animate-pulse">
-                    <span class="font-semibold text-xl tracking-tight">{ "tchatchers" }</span>
+                    <img src="/favicon.ico" class="h-16 w-16"/>
                 </Link<Route>>
                 <div>
                     {links}

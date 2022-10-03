@@ -147,7 +147,7 @@ impl Component for Settings {
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" value={self.user.login.clone()} disabled=true/>
+                      <input class="peer bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" value={self.user.login.clone()} disabled=true/>
                     </div>
                     </div>
                   <div class="md:flex md:items-center mb-6">
@@ -157,7 +157,7 @@ impl Component for Settings {
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" ref={&self.name} value={self.user.name.clone()}/>
+                      <input class="peer bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" ref={&self.name} value={self.user.name.clone()}/>
                     </div>
                   </div>
                   <div class="md:flex md:items-center mb-6">

@@ -17,7 +17,7 @@ pub fn try_reconnect(props: &TryReconnectProps) -> Html {
             <span>
             {"You are currently disconnected"}
             </span>
-            <button class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full h-10 border-solid border-2 border-indigo-500 h-10" onclick={onclick} >
+            <button class="hover:bg-indigo-900 text-white font-bold py-2 px-4 rounded-full h-10 border-solid border-2 bg-zinc-800 h-10" onclick={onclick} >
             {"Reconnect"}
             </button>
         </div>

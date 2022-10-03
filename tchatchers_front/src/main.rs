@@ -3,8 +3,8 @@ pub mod router;
 pub mod services;
 pub mod utils;
 
-use components::navbar::Navbar;
 use components::auth_checker::AuthChecker;
+use components::navbar::Navbar;
 use router::{switch, Route};
 use yew::prelude::*;
 use yew_router::prelude::*;

@@ -17,7 +17,7 @@ impl WebsocketService {
         let protocol = location.protocol().unwrap();
         let ws_protocol = match protocol.as_str() {
             "https:" => "wss:",
-            _ => "ws:"
+            _ => "ws:",
         };
         let ws_addr = format!("{}//{}/ws/{}", ws_protocol, host, room);
         let ws = WebSocket::open(&ws_addr).unwrap();

@@ -41,7 +41,7 @@ impl Component for JoinRoom {
         html! {
             <>
                 <div class="flex items-center justify-center h-full">
-                <form class="w-full max-w-sm border-2 px-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
+                <form class="w-full max-w-sm border-2 px-6 py-6 lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
 
                 <h2 class="text-xl mb-10 text-center text-gray-500 font-bold">{"Join a room"}</h2>
                   <div class="md:flex md:items-center mb-6">
@@ -51,7 +51,7 @@ impl Component for JoinRoom {
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="1" ref={&self.room_name} />
+                      <input class="peer bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="1" ref={&self.room_name} />
                     </div>
                   </div>
                   <FormButton label="Join room" />

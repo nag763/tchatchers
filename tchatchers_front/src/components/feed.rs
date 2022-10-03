@@ -177,7 +177,7 @@ impl Component for Feed {
                 <div class="row-span-10 overflow-auto flex flex-col-reverse" >
                     <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={self.user.clone()} />
                 </div>
-                <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center border-y-2 bg-slate-100 shadow-xl block">
+                <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center block">
                     {component}
                 </div>
             </div>
