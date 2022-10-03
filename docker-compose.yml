@@ -24,6 +24,8 @@ services:
     build: 
       context: ./ 
       dockerfile: Dockerfile_back
+    volumes:
+      - static:/home/usr/back/static
   migrations :
     depends_on:
       - postgres
@@ -48,3 +50,4 @@ services:
 volumes:
   db:
   redis:
+  static:
