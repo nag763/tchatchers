@@ -13,11 +13,11 @@ pub fn try_reconnect(props: &TryReconnectProps) -> Html {
         onclick_event.emit(());
     };
     html! {
-        <div class="flex items-center justify-center gap-2 lg:gap-12">
+        <div class="flex items-center justify-center gap-2 lg:gap-12 dark:text-gray-200">
             <span>
             {"You are currently disconnected"}
             </span>
-            <button class="hover:bg-indigo-900 text-white font-bold py-2 px-4 rounded-full h-10 border-solid border-2 bg-zinc-800 h-10" onclick={onclick} >
+            <button class="shadow bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded-md" onclick={onclick} >
             {"Reconnect"}
             </button>
         </div>

@@ -173,7 +173,7 @@ impl Component for Feed {
             }
         };
         html! {
-            <div class="grid grid-rows-11 h-full">
+            <div class="grid grid-rows-11 h-full dark:bg-zinc-800">
                 <div class="row-span-10 overflow-auto flex flex-col-reverse" >
                     <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={self.user.clone()} />
                 </div>
