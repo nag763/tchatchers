@@ -26,6 +26,8 @@ COPY ./tchatchers_core ../tchatchers_core
 
 COPY ./tchatchers_front/favicon.ico ./favicon.ico
 
+COPY ./tchatchers_front/assets/no_pfp.web ./assets/no_pfp.web
+
 RUN rustup target add wasm32-unknown-unknown
 
 RUN cargo install trunk
