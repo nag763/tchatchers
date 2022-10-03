@@ -35,8 +35,8 @@ impl Component for LogOut {
         });
 
         html! {
-            <>
-            </>
+            <div class="dark:bg-zinc-800">
+            <div/>
         }
     }
 }
