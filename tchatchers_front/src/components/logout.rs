@@ -31,7 +31,7 @@ impl Component for LogOut {
                 is_success: true,
                 content: "You logged out with success".into(),
             });
-            link.history().unwrap().push(Route::SignIn);
+            link.history().unwrap().replace(Route::SignIn);
         });
 
         html! {
