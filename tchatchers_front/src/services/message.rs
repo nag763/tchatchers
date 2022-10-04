@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Display)]
+#[derive(Serialize, Deserialize, Display, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub enum WsBusMessageType {
     Error,

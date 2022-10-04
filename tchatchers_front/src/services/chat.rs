@@ -73,7 +73,7 @@ impl WebsocketService {
         Self { tx: in_tx }
     }
 
-    pub fn close(&mut self) {
-        self.tx.close_channel();
+    pub async fn close(&mut self) {
+        self.tx.close().await.unwrap();
     }
 }

@@ -9,7 +9,6 @@ use crate::services::message::*;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::jwt::get_user;
 use gloo_net::http::Request;
-use gloo_timers::callback::Interval;
 use gloo_timers::callback::Timeout;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
@@ -19,8 +18,6 @@ use yew_agent::{Bridge, Bridged};
 use yew_router::history::History;
 use yew_router::prelude::HistoryListener;
 use yew_router::scope_ext::RouterScopeExt;
-
-const REFRESH_WS_STATE_EVERY: u32 = 5000;
 
 #[derive(Clone)]
 pub enum Msg {
@@ -39,7 +36,6 @@ pub struct Feed {
     received_messages: Vec<WsMessage>,
     ws: WebsocketService,
     _producer: Box<dyn Bridge<EventBus>>,
-    _ws_reconnect: Option<Interval>,
     _first_connect: Timeout,
     called_back: bool,
     is_connected: bool,
@@ -73,7 +69,6 @@ impl Component for Feed {
             _producer: EventBus::bridge(ctx.link().callback(Msg::HandleWsInteraction)),
             is_connected: false,
             called_back: false,
-            _ws_reconnect: None,
             is_closed: false,
             user,
             _first_connect: {
@@ -105,13 +100,7 @@ impl Component for Feed {
                                     link.history().unwrap().push(Route::SignIn);
                                 }
                             });
-                            let link = ctx.link().clone();
                             self.is_connected = false;
-                            self._ws_reconnect = Some({
-                                Interval::new(REFRESH_WS_STATE_EVERY, move || {
-                                    link.send_message(Msg::CheckWsState)
-                                })
-                            });
                         }
                     }
                     WsBusMessageType::Reply => {
@@ -154,15 +143,19 @@ impl Component for Feed {
                 false
             }
             Msg::TryReconnect => {
-                gloo_console::debug!("Try reconnect by user");
-                self.called_back = false;
+                let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
+                self.ws = ws;
                 self.ws.tx.clone().try_send("Ping".into()).unwrap();
+                self.called_back = false;
                 true
             }
             Msg::CutWs => {
                 self.ws.tx.clone().try_send("Close".into()).unwrap();
                 self.is_closed = true;
-                self._ws_reconnect = None;
+                let mut ws = self.ws.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    ws.close().await;
+                });
                 true
             }
         }
