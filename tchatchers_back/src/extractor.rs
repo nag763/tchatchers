@@ -1,3 +1,8 @@
+//! Defines the extractors used by the different webservices.
+
+// Copyright ⓒ 2022 LABEYE Loïc
+// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
+
 use crate::State;
 use axum::{async_trait, extract::FromRequest, extract::RequestParts, http::StatusCode};
 use regex::Regex;
@@ -9,9 +14,10 @@ lazy_static! {
         Regex::new(r####"jwt=(?P<token_val>[a-zA-Z0-9\._-]*)"####).unwrap();
 }
 
-pub struct JwtUserExtractor {
-    pub jwt: Jwt,
-}
+/// Extracts the JWT from the request.
+///
+/// The JWT should be sent as a cookie to the server.
+pub struct JwtUserExtractor(pub Jwt);
 
 #[async_trait]
 impl<B> FromRequest<B> for JwtUserExtractor
@@ -38,7 +44,7 @@ where
                 value,
                 &req.extensions().get::<Arc<State>>().unwrap().jwt_secret,
             ) {
-                Ok(v) => Ok(JwtUserExtractor { jwt: v }),
+                Ok(v) => Ok(JwtUserExtractor(v)),
                 Err(_) => Err((StatusCode::UNAUTHORIZED, "JWT invalid")),
             }
         } else {

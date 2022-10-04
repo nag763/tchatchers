@@ -22,3 +22,5 @@ chrono = { version = "0.4.22", features = ["serde"] }
 r2d2 = "0.8.10"
 redis = "0.21.6"
 uuid = { version = "1.1.2", features = ["v4", "serde", "js"] }
+tower-http = { version = "0.3.0", features = ["trace"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

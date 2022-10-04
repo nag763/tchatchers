@@ -1,3 +1,8 @@
+//! Gathers all the API used to do CRUD operations on user entity.
+
+// Copyright ⓒ 2022 LABEYE Loïc
+// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
+
 use crate::extractor::JwtUserExtractor;
 use crate::State;
 use crate::JWT_PATH;
@@ -9,6 +14,14 @@ use tchatchers_core::user::{AuthenticableUser, InsertableUser, UpdatableUser, Us
 use tokio::time::{sleep, Duration};
 use tower_cookies::{Cookie, Cookies};
 
+/// Creates a user.
+///
+/// The password will be encrypted server side.
+///
+/// # Arguments
+///
+/// - new_user : The user to insert in database.
+/// - state : The data shared across thread.
 pub async fn create_user(
     Json(mut new_user): Json<InsertableUser>,
     Extension(state): Extension<Arc<State>>,
@@ -28,6 +41,14 @@ pub async fn create_user(
     }
 }
 
+/// Check whether a login exists or not.
+///
+/// Useful when it is needed to create a new user for instance.
+///
+/// # Arguments
+///
+/// - login : The login to check.
+/// - state : The data shared across thread.
 pub async fn login_exists(
     Path(login): Path<String>,
     Extension(state): Extension<Arc<State>>,
@@ -39,6 +60,15 @@ pub async fn login_exists(
     (response_status, ())
 }
 
+/// Authenticate a user.
+///
+/// If the call to the service is successful, an authentication cookie will be
+/// added to the user's browser.
+///
+/// # Arguments
+/// - user : The user to authenticate.
+/// - state : The data shared across thread.
+/// - cookies : The user's cookies.
 pub async fn authenticate(
     Json(mut user): Json<AuthenticableUser>,
     Extension(state): Extension<Arc<State>>,
@@ -68,6 +98,13 @@ pub async fn authenticate(
     }
 }
 
+/// Log the user out.
+///
+/// This will erase the cookie from the user's browser.
+///
+/// # Arguments
+///
+/// - cookies : The user's cookies.
 pub async fn logout(cookies: Cookies) -> impl IntoResponse {
     let mut jwt_cookie = Cookie::new(JWT_PATH, "");
     jwt_cookie.set_path("/");
@@ -76,6 +113,12 @@ pub async fn logout(cookies: Cookies) -> impl IntoResponse {
     (StatusCode::OK, "")
 }
 
+/// Checks whether the authentication is legit, or if the user is authenticated
+/// or not.
+///
+/// # Arguments
+///
+/// - jwt : The user's authentication token.
 pub async fn validate(jwt: Option<JwtUserExtractor>) -> impl IntoResponse {
     match jwt {
         Some(_) => (StatusCode::OK, ""),
@@ -83,8 +126,18 @@ pub async fn validate(jwt: Option<JwtUserExtractor>) -> impl IntoResponse {
     }
 }
 
+/// Update the user's informations.
+///
+/// There is a check server side to ensure that the user is only able to update
+/// himself.
+///
+/// # Arguments
+/// - jwt : The user authentication token.
+/// - user : the new informations to update the user.
+/// - state : The data shared across thread.
+/// - cookies : The user's cookies.
 pub async fn update_user(
-    JwtUserExtractor { jwt }: JwtUserExtractor,
+    JwtUserExtractor(jwt): JwtUserExtractor,
     Json(user): Json<UpdatableUser>,
     Extension(state): Extension<Arc<State>>,
     cookies: Cookies,

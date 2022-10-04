@@ -1,3 +1,10 @@
+//! The websocket is used to communicate between users within rooms.
+//! 
+//! Websockets are isolated to each others, with one existing for each room.
+
+// Copyright ⓒ 2022 LABEYE Loïc
+// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
+
 use crate::extractor::JwtUserExtractor;
 use crate::State;
 use axum::{
@@ -14,15 +21,31 @@ use tchatchers_core::{
 };
 use tokio::sync::broadcast;
 
+/// The HTTP entry point.
+///
+/// # Arguments
+///
+/// - ws : The 'Upgrade' header, mandatory.
+/// - state : The data shared across threads, used to retrieve existing rooms.
+/// - room : the room name.
+/// - jwt : The authenticated user infos.
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
     Extension(state): Extension<Arc<State>>,
     Path(room): Path<String>,
-    JwtUserExtractor { jwt }: JwtUserExtractor,
+    JwtUserExtractor(jwt): JwtUserExtractor,
 ) -> impl IntoResponse {
     ws.on_upgrade(|socket| handle_socket(socket, state, room, jwt.user))
 }
 
+/// The socket handler
+///
+/// # Arguments
+///
+/// - socket : The struct used to communicate between the client and the server.
+/// - state : The data shared across threads.
+/// - room : The room name.
+/// - user : The connected user's infos.
 async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String, user: PartialUser) {
     let (mut sender, mut receiver) = socket.split();
     let tx = {
