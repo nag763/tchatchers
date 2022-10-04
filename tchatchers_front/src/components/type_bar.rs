@@ -80,6 +80,9 @@ impl Component for TypeBar {
             }
             Msg::ReactivateFields => {
                 self.can_post = true;
+                self.cooldown = None;
+                self.progress = None;
+                self.progress_percentage = 0;
                 true
             }
             _ => false,
