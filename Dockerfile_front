@@ -38,6 +38,6 @@ FROM nginx
 
 COPY --from=src_builder /usr/tchatchers/front/dist /usr/share/nginx/html
 
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx.conf /etc/nginx/nginx.cong
 
 EXPOSE 80
