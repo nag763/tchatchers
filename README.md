@@ -56,3 +56,9 @@ front and backend
 |nginx               |Reverse proxy server        |latest |
 |Postgres            |SQL engine                  |latest |
 |Redis               |Key value NoSQL engine      |latest |
+
+## Postgres schema
+
+Made with one of my other tools, [doteur](https://github.com/nag763/doteur).
+
+![img](https://raw.githubusercontent.com/nag763/tchatchers/main/.github/schema.jpeg)
