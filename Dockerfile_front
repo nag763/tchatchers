@@ -28,19 +28,11 @@ COPY ./tchatchers_front/favicon.ico ./favicon.ico
 
 COPY ./tchatchers_front/assets/no_pfp.webp ./assets/no_pfp.webp
 
-RUN apt-get update
-
-RUN apt-get install clang -y
-
 RUN rustup target add wasm32-unknown-unknown
 
 RUN cargo install trunk
 
-RUN cargo install wasm-opt
-
 RUN trunk build --release
-
-RUN wasm-opt -Os -o dist/*.wasm dist/*.wasm
 
 FROM nginx
 
