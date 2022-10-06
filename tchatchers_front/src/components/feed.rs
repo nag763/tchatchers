@@ -1,3 +1,5 @@
+// Copyright ⓒ 2022 LABEYE Loïc
+// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use super::chat::Chat;
 use super::disconnected_bar::DisconnectedBar;
 use super::type_bar::TypeBar;

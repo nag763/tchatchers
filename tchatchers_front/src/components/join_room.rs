@@ -1,3 +1,5 @@
+// Copyright ⓒ 2022 LABEYE Loïc
+// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::common::FormButton;
 use crate::router::Route;
 use web_sys::HtmlInputElement;
