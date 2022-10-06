@@ -32,7 +32,11 @@ RUN rustup target add wasm32-unknown-unknown
 
 RUN cargo install trunk
 
+RUN cargo install wasm-opt
+
 RUN trunk build --release
+
+RUN wasm-opt -Os -o dist/*.wasm dist/*.wasm
 
 FROM nginx
 
