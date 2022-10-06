@@ -28,6 +28,10 @@ COPY ./tchatchers_front/favicon.ico ./favicon.ico
 
 COPY ./tchatchers_front/assets/no_pfp.webp ./assets/no_pfp.webp
 
+RUN apt-get update
+
+RUN apt-get install clang
+
 RUN rustup target add wasm32-unknown-unknown
 
 RUN cargo install trunk
