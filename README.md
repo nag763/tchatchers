@@ -61,4 +61,4 @@ front and backend
 
 Made with one of my other tools, [doteur](https://github.com/nag763/doteur).
 
-![img](https://raw.githubusercontent.com/nag763/tchatchers/main/.github/schema.png)
+![img](https://raw.githubusercontent.com/nag763/tchatchers/main/.github/schema.jpeg)
