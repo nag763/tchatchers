@@ -52,7 +52,7 @@ impl Component for TypeBar {
                     }
                     let msg = WsMessage {
                         room: Some(ctx.props().room.clone()),
-                        author: Some(ctx.props().user.clone().into()),
+                        author: Some(ctx.props().user.clone()),
                         content: Some(input.value()),
                         ..WsMessage::default()
                     };
