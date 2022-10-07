@@ -17,6 +17,10 @@
 * :moon: Supports browser's dark mode.
 * :sparkles: Simple yet elegant UI.
 
+## How to access the application
+
+The application is deployed on https://tchatche.rs and should be compatible with any modern navigator.
+
 ## About
 
 tchatche.rs is an application used to help clients to communicate between each others. It is built with yew.rs and axum servers in order to provide blazing fast responses and strong API. It is also using Postgres and Redis services in order to store the user data and retrieve the room messages.
@@ -57,8 +61,22 @@ front and backend
 |Postgres            |SQL engine                  |latest |
 |Redis               |Key value NoSQL engine      |latest |
 
+## Production project architecture
+
+![](https://raw.githubusercontent.com/nag763/tchatchers/17a4e86adb1c26259c3890e3303d6a67d3dd70df/.github/application_schema.jpg)
+
+The production architecture consists of several layers :
+* <u>The client</u>, who uses the application and interacts with the different ressources.
+* <u>The proxy layer</u>, that defines some security constraints such as BruteForce mitigation, the HTTPS connection, the read time out and HTTP headers. This layer is the sole entry point for the client to the application, as others aren't publicly reachable since they are on another network.
+* <u>The applicative layer :</u> One part being the frontend built in WASM, so static assets in production, another part being the backend, built in axum, so running as a task. It is important to note that in production, only the backend part exists, since the frontend and proxy are on the same image. Besides, only the backend can access to the data layer within the network.
+* <u>The data layer :</u> Mainly used for persistence. While Postgres will contain the data about the users, redis will store the messages that have been sent in the chatrooms. Postgres schema can be found right below, redis one is as simple as `ROOM_NAME[KEY]=MESSAGES[LIST]`.
+
 ## Postgres schema
 
 Made with one of my other tools, [doteur](https://github.com/nag763/doteur).
 
 ![img](https://raw.githubusercontent.com/nag763/tchatchers/main/.github/schema.jpeg)
+
+## Personnal objectives behind this project, feedback
+
+My goal with this project was to learn more about both WASM and Websocket technologies besides of perfecting my Rust knowledge. It was really nice to build such a project and I hope it can inspire or help other peoples to built similar tools. I think the code is pretty good (even though it should be perfectible) on the back and core projects, but quite perfectible on the front one. It is to note that there are still some bugs remaining.
