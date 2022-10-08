@@ -30,7 +30,7 @@ impl Component for JoinRoom {
                 if let Some(room_name) = self.room_name.cast::<HtmlInputElement>() {
                     if room_name.check_validity() {
                         ctx.link().history().unwrap().push(Route::Room {
-                            room: room_name.value(),
+                            room: room_name.value().to_lowercase(),
                         });
                     }
                 }
