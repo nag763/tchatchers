@@ -14,6 +14,7 @@ pub struct Alert {
 pub enum Msg {
     NewToast(Alert),
     Hide,
+    StopBounce,
 }
 
 pub struct Toast {
@@ -21,6 +22,7 @@ pub struct Toast {
     is_success: bool,
     visible: bool,
     cooldown: Option<Timeout>,
+    stop_bounce: Option<Timeout>,
     _producer: Box<dyn Bridge<ToastBus>>,
 }
 
@@ -34,6 +36,7 @@ impl Component for Toast {
             is_success: false,
             visible: false,
             cooldown: None,
+            stop_bounce: None,
             _producer: ToastBus::bridge(ctx.link().callback(Msg::NewToast)),
         }
     }
@@ -46,11 +49,18 @@ impl Component for Toast {
                 self.visible = true;
                 self.cooldown = Some({
                     let link = ctx.link().clone();
-                    Timeout::new(3000, move || link.send_message(Msg::Hide))
+                    Timeout::new(3_000, move || link.send_message(Msg::Hide))
+                });
+                self.stop_bounce = Some({
+                    let link = ctx.link().clone();
+                    Timeout::new(500, move || link.send_message(Msg::StopBounce))
                 });
             }
             Msg::Hide => {
                 self.visible = false;
+            },
+            Msg::StopBounce => {
+                self.stop_bounce = None;
             }
         }
         true
@@ -72,8 +82,12 @@ impl Component for Toast {
 
                     },
         };
+        let bouncer : &str = match self.stop_bounce {
+            Some(_) => "animate-bounce",
+            None => ""
+        };
         html! {
-                    <div class="absolute right-3 bottom-5 md:bottom-10 md:right-10" hidden={!self.visible}>
+                    <div class={format!("absolute right-3 bottom-5 md:bottom-10 md:right-10 {}", bouncer)} hidden={!self.visible}>
             <div id="toast-success" class="flex items-center p-4 mb-4 w-full max-w-xs text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-zinc-900" role="alert">
                 {icon}
             <div class="ml-3 text-sm font-normal">{self.msg.as_str()}</div>
