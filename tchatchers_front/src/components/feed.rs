@@ -54,6 +54,7 @@ impl Component for Feed {
     fn create(ctx: &Context<Self>) -> Self {
         let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
         let link = ctx.link().clone();
+        let tx = ws.tx.clone();
         let user = match get_user() {
             Ok(v) => v,
             Err(e) => {
@@ -83,7 +84,11 @@ impl Component for Feed {
                 .link()
                 .history()
                 .unwrap()
-                .listen(move || link.send_message(Msg::CutWs)),
+                .listen(move || {
+                    let mut tx = tx.clone();
+                    tx.try_send("Close".into()).unwrap();
+                    link.send_message(Msg::CutWs)
+                }),
         }
     }
 
@@ -158,7 +163,6 @@ impl Component for Feed {
                 true
             }
             Msg::CutWs => {
-                self.ws.tx.clone().try_send("Close".into()).unwrap();
                 self.is_closed = true;
                 let mut ws = self.ws.clone();
                 wasm_bindgen_futures::spawn_local(async move {
