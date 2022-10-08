@@ -82,3 +82,7 @@ Made with one of my other tools, [doteur](https://github.com/nag763/doteur).
 My goal with this project was to learn more about both WASM and Websocket technologies besides of perfecting my Rust knowledge. It was really nice to build such a project and I hope it can inspire or help other peoples to built similar tools. I think the code is pretty good (even though it should be perfectible) on the back and core projects, but quite perfectible on the front one. It is to note that there are still some bugs remaining.
 
 My feeling is that both Rust and WASM have a pretty good future when it comes to frontend apps. The backend side of Rust already has several frameworks that are making it a reliable language when it comes to handling data logic, and the development of yew.rs or similar technologies in the future could be a game changer for the interest users and firms have toward the language. 
+
+## Special thanks
+
+Thanks to the Rust community for all their advices and their time reviewing my project, it's always a pleasure to be part of such a community. :blush: :crab:
