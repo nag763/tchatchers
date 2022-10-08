@@ -81,7 +81,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String, user:
                 "Ping" => {
                     let _ = tx.send(String::from("Pong"));
                 }
-                "Pong" => {
+                "Pong" | "Keep Alive" => {
                     continue;
                 }
                 t => {

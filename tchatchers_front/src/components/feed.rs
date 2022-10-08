@@ -11,7 +11,7 @@ use crate::services::message::*;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::jwt::get_user;
 use gloo_net::http::Request;
-use gloo_timers::callback::Timeout;
+use gloo_timers::callback::{Timeout, Interval};
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessage, WsMessageType};
 use yew::{html, Callback, Component, Context, Html, Properties};
@@ -41,6 +41,7 @@ pub struct Feed {
     _first_connect: Timeout,
     called_back: bool,
     is_connected: bool,
+    ws_keep_alive: Option<Interval>,
     is_closed: bool,
     user: PartialUser,
     _history_listener: HistoryListener,
@@ -72,6 +73,7 @@ impl Component for Feed {
             is_connected: false,
             called_back: false,
             is_closed: false,
+            ws_keep_alive: None,
             user,
             _first_connect: {
                 let link = ctx.link().clone();
@@ -116,6 +118,10 @@ impl Component for Feed {
                             }
                         }
                         self.is_connected = true;
+                        self.ws_keep_alive = {
+                            let tx = self.ws.tx.clone();
+                            Some(Interval::new(30_000, move || tx.clone().try_send("Keep Alive".into()).unwrap()))
+                        }
                     }
                     WsBusMessageType::Pong => {
                         self.is_connected = true;
