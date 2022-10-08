@@ -7,7 +7,6 @@ use crate::extractor::JwtUserExtractor;
 use crate::State;
 use crate::JWT_PATH;
 use axum::{extract::Path, http::StatusCode, response::IntoResponse, Extension, Json};
-use magic_crypt::MagicCryptTrait;
 use std::sync::Arc;
 use tchatchers_core::jwt::Jwt;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, UpdatableUser, User};
@@ -23,7 +22,7 @@ use tower_cookies::{Cookie, Cookies};
 /// - new_user : The user to insert in database.
 /// - state : The data shared across thread.
 pub async fn create_user(
-    Json(mut new_user): Json<InsertableUser>,
+    Json(new_user): Json<InsertableUser>,
     Extension(state): Extension<Arc<State>>,
 ) -> impl IntoResponse {
     if User::login_exists(&new_user.login, &state.pg_pool).await {
@@ -32,8 +31,6 @@ pub async fn create_user(
             "A user with a similar login already exists",
         );
     }
-
-    new_user.password = state.encrypter.encrypt_str_to_base64(&new_user.password);
 
     match new_user.insert(&state.pg_pool).await {
         Ok(_) => (StatusCode::CREATED, "User created with success"),
@@ -70,11 +67,10 @@ pub async fn login_exists(
 /// - state : The data shared across thread.
 /// - cookies : The user's cookies.
 pub async fn authenticate(
-    Json(mut user): Json<AuthenticableUser>,
+    Json(user): Json<AuthenticableUser>,
     Extension(state): Extension<Arc<State>>,
     cookies: Cookies,
 ) -> impl IntoResponse {
-    user.password = state.encrypter.encrypt_str_to_base64(&user.password);
     let user = match user.authenticate(&state.pg_pool).await {
         Some(v) => v,
         None => {

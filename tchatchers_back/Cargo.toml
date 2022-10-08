@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 axum = { version = "0.5.15", features = ["ws", "headers", "multipart"] }
 headers = "0.3"
-magic-crypt = "3.1.10"
 tokio = { version = "1.0", features = ["full", "fs"] }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 sqlx-core = { version = "0.6.1", features = ["postgres"] }

@@ -21,7 +21,6 @@ use axum::{
     routing::{get, post, put},
     Router,
 };
-use magic_crypt::{new_magic_crypt, MagicCrypt256};
 use sqlx_core::postgres::PgPool;
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -39,8 +38,6 @@ const JWT_PATH: &str = "jwt";
 
 /// The data that is shared across the processes.
 pub struct State {
-    /// The password encryption mechanism.
-    encrypter: MagicCrypt256,
     /// The secret to encrypt the JWT.
     jwt_secret: String,
     /// The WS rooms, with the key being the room name.
@@ -63,11 +60,8 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let pwd_secret = std::env::var("PWD_SECRET").expect("No password secret has been defined");
     let jwt_secret = std::env::var("JWT_SECRET").expect("No jwt secret has been defined");
-    let encrypter = new_magic_crypt!(&pwd_secret, 256);
     let shared_state = Arc::new(State {
-        encrypter,
         jwt_secret,
         pg_pool: tchatchers_core::pool::get_pg_pool().await,
         redis_pool: tchatchers_core::pool::get_redis_pool().await,

@@ -14,6 +14,9 @@ use sqlx::postgres::PgQueryResult;
 use sqlx::FromRow;
 #[cfg(feature = "back")]
 use sqlx::PgPool;
+#[cfg(feature = "back")]
+use rand::Rng;
+
 
 /// The in base structure, which should never be shared between components and
 /// apps.
@@ -115,7 +118,7 @@ impl From<User> for PartialUser {
 pub struct InsertableUser {
     /// The user log in.
     pub login: String,
-    /// The user password, should be encrypted prior being insert.
+    /// The user password, should be raw prior being insert.
     pub password: String,
     /// The name of the user.
     pub name: String,
@@ -129,9 +132,12 @@ impl InsertableUser {
     ///
     /// - pool : The connection pool.
     pub async fn insert(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+        let salt: [u8; 32] = rand::thread_rng().gen();
+        let config = argon2::Config::default();
+        let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
         sqlx::query("INSERT INTO CHATTER(login, password, name) VALUES ($1,$2,$3)")
             .bind(&self.login)
-            .bind(&self.password)
+            .bind(&hash)
             .bind(&self.name)
             .execute(pool)
             .await
@@ -183,11 +189,15 @@ impl AuthenticableUser {
     ///
     /// - pool : The connection pool.
     pub async fn authenticate(&self, pool: &PgPool) -> Option<User> {
-        sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1 AND password=$2")
+        let user: User = sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1 AND is_authorized=true")
             .bind(&self.login)
-            .bind(&self.password)
             .fetch_optional(pool)
             .await
-            .unwrap()
+            .unwrap()?;
+        match argon2::verify_encoded(&user.password, self.password.as_bytes()).unwrap() {
+            true => Some(user),
+            false => None
+        }
+
     }
 }
