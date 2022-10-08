@@ -78,7 +78,7 @@ pub fn file_attacher(props: &FileAttacherProps) -> Html {
                     <path stroke-linecap="round" stroke-linejoin="round" d={svg_path} />
                 </svg>
             </label>
-            <input id="file-upload" type="file" style="display: none;" disabled={props.disabled} {oninput} accept={props.accept.clone().unwrap_or_default()} />
+            <input id="file-upload" type="file" hidden=true disabled={props.disabled} {oninput} accept={props.accept.clone().unwrap_or_default()} />
         </>
     }
 }
