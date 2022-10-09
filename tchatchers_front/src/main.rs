@@ -22,7 +22,6 @@ use components::toast::Toast;
 use router::{switch, Route};
 use yew::prelude::*;
 use yew_router::prelude::*;
-use yew_side_effect::title::Title;
 
 #[macro_use]
 extern crate derive_more;
@@ -32,7 +31,6 @@ fn app() -> Html {
     html! {
         <>
             <BrowserRouter>
-                <Title value="tchatche.rs"/>
                 <div class="h-screen grid grid-rows-12">
                     <Navbar/>
             <Toast />
