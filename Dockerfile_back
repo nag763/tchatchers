@@ -1,4 +1,4 @@
-FROM rust:1.64
+FROM rust:1.64 as builder
 
 WORKDIR /home/usr/back/
 
@@ -6,8 +6,22 @@ COPY tchatchers_back/ ./
 
 COPY tchatchers_core/ ../tchatchers_core/
 
+RUN cargo install --path .
+
+FROM rust:1.64
+
+WORKDIR /home/usr/back/
+
+COPY --from=builder /usr/local/cargo/bin/tchatchers_back /usr/local/cargo/bin/tchatchers_back
+
 COPY .env ./
 
-RUN cargo b --release
+RUN adduser runner && chown -R runner ./
 
-CMD cargo r --release
+RUN chmod 111 /usr/local/cargo/bin/tchatchers_back
+
+RUN chmod 400 .env
+
+USER runner
+
+CMD tchatchers_back
