@@ -40,12 +40,4 @@ COPY --from=src_builder /usr/tchatchers/front/dist /usr/share/nginx/html
 
 COPY ./nginx.conf /etc/nginx/nginx.conf
 
-RUN chmod 440 -R /usr/share/nginx/html
-
-RUN chmod 440 -R /etc/nginx
-
-RUN adduser runner && chown -R runner ./
-
-USER runner
-
 EXPOSE 80
