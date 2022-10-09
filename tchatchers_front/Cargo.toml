@@ -23,3 +23,4 @@ chrono = { version = "0.4.22", features = ["serde"] }
 base64 = "0.13.0"
 js-sys = "0.3.60"
 reqwest-wasm = "0.11.0"
+yew-side-effect = "0.2.0"
