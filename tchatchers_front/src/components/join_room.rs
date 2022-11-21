@@ -2,6 +2,7 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::common::FormButton;
 use crate::router::Route;
+use crate::utils::jwt::get_user;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Html, NodeRef};
 use yew_router::history::History;
@@ -20,7 +21,14 @@ impl Component for JoinRoom {
     type Message = Msg;
     type Properties = ();
 
-    fn create(_ctx: &Context<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
+        match get_user() {
+            Ok(_) => (),
+            Err(e) => {
+                gloo_console::warn!("Following errror happened when user joined root page {}", e);
+                ctx.link().history().unwrap().push(Route::SignIn);
+            }
+        };
         Self::default()
     }
 
