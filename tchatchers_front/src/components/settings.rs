@@ -169,9 +169,9 @@ impl Component for Settings {
         let pfp = match &self.user.pfp {
             None => match &self.pfp {
                 Some(_) => {
-                    html! {<span>{"Your new profile picture is ready to be uploaded"}</span>}
+                    html! {<span class="dark:text-gray-300">{"Your new profile picture is ready to be uploaded"}</span>}
                 }
-                None => html! { <span>{"You don't have any profile picture so far"}</span> },
+                None => html! { <span class="dark:text-gray-300">{"You don't have any profile picture so far"}</span> },
             },
             Some(v) => html! { <><img class="h-10 w-10 rounded-full" src={v.clone()} /></> },
         };
@@ -219,7 +219,7 @@ impl Component for Settings {
                       {"Your profile picture"}
                       </label>
                     </div>
-                    <div class="md:w-2/3 flex justify-center items-center space-x-4 mt-2">
+                    <div class="md:w-2/3 flex justify-center items-center space-x-4 mt-2 dark:text-gray-200">
                     {pfp}
                     <FileAttacher disabled=false accept={Some(String::from(".png,.webp,.jpg,.jpg"))} on_file_attached={Callback::from(move |file_path: Option<js_sys::ArrayBuffer>| {
                         link.send_message(Msg::UploadNewPfp (file_path));
