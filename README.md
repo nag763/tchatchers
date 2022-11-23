@@ -17,6 +17,17 @@
 * :moon: Supports browser's dark mode.
 * :sparkles: Simple yet elegant UI.
 
+## Foreword (10/10/2022)
+
+I know there is room for improvement in some areas for this project notably :
+* some security points (ie CSRF protection)
+* some code quality (some elements of my frontend project could be better)
+* some logic (websocket logic is a bit shaky sometimes)
+
+But I think that overall the goals I wanted to attain with this project have been achieved and I don't feel like improving this project would be worth it since the only and sole goal of this project was to be an entry point into yew.rs and WASM.
+
+I hope this project can be useful to anyone wanting to build any more or less advanced similar application. :blush:
+
 ## How to access the application
 
 The application is deployed on https://tchatche.rs and should be compatible with any modern navigator.
