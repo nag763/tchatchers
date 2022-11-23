@@ -3,9 +3,11 @@
 use js_sys::ArrayBuffer;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
-use web_sys::HtmlInputElement;
 use web_sys::{Event, EventTarget, FileReader, InputEvent};
+use web_sys::{HtmlInputElement, MouseEvent};
 use yew::{function_component, html, use_state, Callback, Properties};
+
+use super::modal::MODAL_OPENER_CLASS;
 
 #[function_component(WaitingForResponse)]
 pub fn waiting_for_response() -> Html {
@@ -19,9 +21,11 @@ pub fn waiting_for_response() -> Html {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Properties)]
+#[derive(Clone, PartialEq, Properties)]
 pub struct FormButtonProperties {
     pub label: String,
+    pub callback: Option<Callback<()>>,
+    pub is_modal_opener: Option<bool>,
 }
 
 #[function_component(FormButton)]
@@ -30,11 +34,32 @@ pub fn form_button(props: &FormButtonProperties) -> Html {
       <div class="flex items-center">
         <div class="w-2/3"></div>
         <div class="w-1/3">
-          <button class="shadow bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded" type="submit">
-          {&props.label}
-          </button>
+          <AppButton is_modal_opener={props.is_modal_opener} label={props.label.clone()} callback={props.callback.clone()} />
         </div>
       </div>
+    }
+}
+
+#[function_component(AppButton)]
+pub fn app_button(props: &FormButtonProperties) -> Html {
+    let button_type: &str = match props.callback {
+        Some(_) => "button",
+        None => "submit",
+    };
+    let callback = props.callback.clone();
+    let onclick = move |_: MouseEvent| {
+        if let Some(callback) = callback.clone() {
+            callback.emit(());
+        }
+    };
+    let additionnal_class: &str = match props.is_modal_opener {
+        Some(v) if v => MODAL_OPENER_CLASS,
+        _ => "",
+    };
+    html! {
+        <button class={format!("shadow bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded {}", additionnal_class)} type={button_type} {onclick}>
+            {&props.label}
+        </button>
     }
 }
 

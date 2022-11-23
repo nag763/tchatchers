@@ -1,7 +1,7 @@
 //! Server of the application
 //!
 //! It is used to communicate directly with the front end and be a layer between
-//! the file systems (ie the profile pictures), the services (ie Postgres and 
+//! the file systems (ie the profile pictures), the services (ie Postgres and
 //! Redis) and communicate then in a convenient way with the client application.
 
 // Copyright ⓒ 2022 LABEYE Loïc
@@ -18,7 +18,7 @@ use axum::{
     extract::{Extension, Path},
     http::StatusCode,
     response::IntoResponse,
-    routing::{get, post, put},
+    routing::{get, post},
     Router,
 };
 use sqlx_core::postgres::PgPool;
@@ -50,7 +50,6 @@ pub struct State {
 
 #[tokio::main]
 async fn main() {
-    
     dotenv::dotenv().ok();
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
@@ -69,12 +68,14 @@ async fn main() {
     });
 
     let app = Router::new()
-        .route("/api/user", post(create_user))
+        .route(
+            "/api/user",
+            post(create_user).put(update_user).delete(delete_user),
+        )
         .route("/api/login_exists/:login", get(login_exists))
         .route("/api/authenticate", post(authenticate))
         .route("/api/logout", get(logout))
         .route("/api/validate", get(validate))
-        .route("/api/user", put(update_user))
         .route("/api/pfp", post(upload_pfp))
         .route("/ws/:room", get(ws_handler))
         .route("/static/:path", get(static_file))

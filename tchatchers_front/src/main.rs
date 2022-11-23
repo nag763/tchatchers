@@ -1,6 +1,6 @@
 //! This part of the applicaiton is about the frontend
 //!
-//! The front end communicates through HTTP calls and WS with the frontend, and 
+//! The front end communicates through HTTP calls and WS with the frontend, and
 //! is built with WASM.
 
 // Copyright ⓒ 2022 LABEYE Loïc
@@ -17,6 +17,7 @@ pub mod services;
 pub mod utils;
 
 use components::auth_checker::AuthChecker;
+use components::modal::Modal;
 use components::navbar::Navbar;
 use components::toast::Toast;
 use router::{switch, Route};
@@ -33,7 +34,8 @@ fn app() -> Html {
             <BrowserRouter>
                 <div class="h-screen grid grid-rows-12">
                     <Navbar/>
-            <Toast />
+                    <Toast />
+                    <Modal />
                     <div class="row-span-11">
                         <Switch<Route> render={Switch::render(switch)} />
                     </div>

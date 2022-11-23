@@ -158,3 +158,13 @@ pub async fn update_user(
         (StatusCode::FORBIDDEN, "You can't update another user").into_response()
     }
 }
+
+pub async fn delete_user(
+    JwtUserExtractor(jwt): JwtUserExtractor,
+    Extension(state): Extension<Arc<State>>,
+) -> impl IntoResponse {
+    match User::delete_one(jwt.user.id, &state.pg_pool).await {
+        Ok(_) => (StatusCode::OK, "User updated with success").into_response(),
+        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened").into_response(),
+    }
+}

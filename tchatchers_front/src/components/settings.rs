@@ -1,10 +1,11 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
+use crate::components::common::AppButton;
 use crate::components::common::FileAttacher;
-use crate::components::common::FormButton;
 use crate::components::common::WaitingForResponse;
 use crate::components::toast::Alert;
 use crate::router::Route;
+use crate::services::modal_bus::ModalBus;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::jwt::get_user;
 use crate::utils::requester::Requester;
@@ -17,6 +18,8 @@ use yew_agent::Dispatched;
 use yew_router::history::History;
 use yew_router::scope_ext::RouterScopeExt;
 
+use super::modal::ModalContent;
+
 pub enum Msg {
     UploadNewPfp(Option<js_sys::ArrayBuffer>),
     PfpUpdated(String),
@@ -24,6 +27,8 @@ pub enum Msg {
     ErrorFromServer(String),
     ProfileUpdated,
     FetchJwt,
+    ConfirmDeletion,
+    DeletionConfirmed,
 }
 
 #[derive(Clone, PartialEq, Eq, Properties)]
@@ -131,6 +136,32 @@ impl Component for Settings {
                 ctx.link().send_message(Msg::FetchJwt);
                 true
             }
+            Msg::ConfirmDeletion => {
+                let link = ctx.link().clone();
+                ModalBus::dispatcher().send(ModalContent {
+                    title: "You are about to delete your account".into(),
+                    msg: "This action is not reversible, understand that none of the messages you sent will be deleted.".into(),
+                    decline_text: Some("I changed, my mind, don't delete my account".into()),
+                    accept_text: Some("Understood, farewell".into()),
+                    accept_callback: Some(Callback::from(move |_: ()| {link.send_message(Msg::DeletionConfirmed)})),
+                    ..ModalContent::default()
+                });
+                false
+            }
+            Msg::DeletionConfirmed => {
+                let req = Requester::<()>::delete("/api/user");
+                let link = ctx.link().clone();
+                self.wait_for_api = true;
+                wasm_bindgen_futures::spawn_local(async move {
+                    let resp = req.send().await;
+                    if resp.status().is_success() {
+                        link.history().unwrap().push(Route::LogOut);
+                    } else {
+                        link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
+                    }
+                });
+                true
+            }
         }
     }
 
@@ -147,8 +178,15 @@ impl Component for Settings {
         let link = ctx.link().clone();
         let end_of_form = match self.wait_for_api {
             true => html! { <WaitingForResponse /> },
-            false => html! { <FormButton label="Update" /> },
+            false => html! { <AppButton label="Update" /> },
         };
+        let delete_profile = match self.wait_for_api {
+            true => html! { <WaitingForResponse /> },
+            false => {
+                html! { <AppButton label="Delete" is_modal_opener=true callback={Callback::from(move |_ :()| {link.send_message(Msg::ConfirmDeletion)})}/> }
+            }
+        };
+        let link = ctx.link().clone();
         html! {
             <>
                 <div class="flex items-center justify-center h-full dark:bg-zinc-800">
@@ -194,7 +232,13 @@ impl Component for Settings {
                   <small class="flex mt-4 mb-2 items-center text-green-500" hidden={self.ok_msg.is_none()}>
                     {self.ok_msg.as_ref().unwrap_or(&String::new())}
                   </small>
-                  {end_of_form}
+                  <div class="flex items-center">
+                  <div class="w-1/3"></div>
+                  <div class="flex flex-row w-2/3 justify-end space-x-3">
+                     {delete_profile}
+                     {end_of_form}
+                  </div>
+                </div>
                 </form>
                 </div>
             </>

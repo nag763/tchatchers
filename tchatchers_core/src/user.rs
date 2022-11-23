@@ -7,6 +7,8 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use crate::jwt::Jwt;
+#[cfg(feature = "back")]
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "back")]
 use sqlx::postgres::PgQueryResult;
@@ -14,9 +16,6 @@ use sqlx::postgres::PgQueryResult;
 use sqlx::FromRow;
 #[cfg(feature = "back")]
 use sqlx::PgPool;
-#[cfg(feature = "back")]
-use rand::Rng;
-
 
 /// The in base structure, which should never be shared between components and
 /// apps.
@@ -70,6 +69,13 @@ impl User {
             .await
             .unwrap();
         row.0
+    }
+
+    pub async fn delete_one(id: i32, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query("DELETE FROM CHATTER WHERE id=$1")
+            .bind(id)
+            .execute(pool)
+            .await
     }
 }
 
@@ -189,15 +195,15 @@ impl AuthenticableUser {
     ///
     /// - pool : The connection pool.
     pub async fn authenticate(&self, pool: &PgPool) -> Option<User> {
-        let user: User = sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1 AND is_authorized=true")
-            .bind(&self.login)
-            .fetch_optional(pool)
-            .await
-            .unwrap()?;
+        let user: User =
+            sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1 AND is_authorized=true")
+                .bind(&self.login)
+                .fetch_optional(pool)
+                .await
+                .unwrap()?;
         match argon2::verify_encoded(&user.password, self.password.as_bytes()).unwrap() {
             true => Some(user),
-            false => None
+            false => None,
         }
-
     }
 }

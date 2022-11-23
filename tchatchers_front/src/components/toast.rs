@@ -58,7 +58,7 @@ impl Component for Toast {
             }
             Msg::Hide => {
                 self.visible = false;
-            },
+            }
             Msg::StopBounce => {
                 self.stop_bounce = None;
             }
@@ -82,9 +82,9 @@ impl Component for Toast {
 
                     },
         };
-        let bouncer : &str = match self.stop_bounce {
+        let bouncer: &str = match self.stop_bounce {
             Some(_) => "animate-bounce",
-            None => ""
+            None => "",
         };
         html! {
                     <div class={format!("absolute right-3 bottom-5 md:bottom-10 md:right-10 {}", bouncer)} hidden={!self.visible}>

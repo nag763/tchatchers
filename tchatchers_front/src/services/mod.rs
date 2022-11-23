@@ -14,3 +14,5 @@ pub mod event_bus;
 pub mod message;
 /// Event Bus used to display toasts.
 pub mod toast_bus;
+
+pub mod modal_bus;

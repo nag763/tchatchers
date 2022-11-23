@@ -1,5 +1,5 @@
 //! The websocket is used to communicate between users within rooms.
-//! 
+//!
 //! Websockets are isolated to each others, with one existing for each room.
 
 // Copyright ⓒ 2022 LABEYE Loïc

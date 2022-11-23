@@ -8,6 +8,7 @@ pub(crate) mod disconnected_bar;
 pub(crate) mod feed;
 pub(crate) mod join_room;
 pub(crate) mod logout;
+pub(crate) mod modal;
 pub(crate) mod navbar;
 pub(crate) mod navlink;
 pub(crate) mod not_found;
