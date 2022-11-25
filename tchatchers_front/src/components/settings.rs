@@ -171,7 +171,9 @@ impl Component for Settings {
                 Some(_) => {
                     html! {<span class="dark:text-gray-300">{"Your new profile picture is ready to be uploaded"}</span>}
                 }
-                None => html! { <span class="dark:text-gray-300">{"You don't have any profile picture so far"}</span> },
+                None => {
+                    html! { <span class="dark:text-gray-300">{"You don't have any profile picture so far"}</span> }
+                }
             },
             Some(v) => html! { <><img class="h-10 w-10 rounded-full" src={v.clone()} /></> },
         };
