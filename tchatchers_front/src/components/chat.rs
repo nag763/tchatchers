@@ -51,7 +51,9 @@ fn message(message_properties: &MessageProperties) -> Html {
         timestamp.minute()
     );
     let class: &str = match message_properties.is_user {
-        true => "bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg mb-2 text-sm break-when-needed",
+        true => {
+            "bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg mb-2 text-sm break-when-needed"
+        }
         false => "bg-gray-300 mb-2 p-3 rounded-r-lg rounded-bl-lg text-sm break-when-needed",
     };
     html! {
@@ -104,7 +106,11 @@ impl Component for Chat {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let mut iterator = ctx.props().messages.iter();
+        let mut iterator = ctx
+            .props()
+            .messages
+            .iter()
+            .filter(|m| m.message_type == WsMessageType::Receive);
         let mut next_element_opt = iterator.next();
         let mut html_content: Vec<Html> = Vec::with_capacity(ctx.props().messages.len());
         let current_user_id = ctx.props().user.id;
@@ -116,7 +122,9 @@ impl Component for Chat {
                     current_element.content.clone(),
                 ) {
                     let display_pfp = match next_element_opt {
-                        Some(next_element) => {
+                        Some(next_element)
+                            if next_element.message_type == WsMessageType::Receive =>
+                        {
                             if let Some(next_author) = &next_element.author {
                                 next_author.id != author.id
                             } else {
