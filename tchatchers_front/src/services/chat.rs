@@ -22,6 +22,7 @@ impl WebsocketService {
             "https:" => "wss:",
             _ => "ws:",
         };
+        let host = "localhost:8080";
         let ws_addr = format!("{}//{}/ws/{}", ws_protocol, host, room);
         let ws = WebSocket::open(&ws_addr).unwrap();
 
