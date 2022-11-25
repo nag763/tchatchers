@@ -4,14 +4,15 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use crate::extractor::JwtUserExtractor;
-use crate::State;
+use crate::AppState;
 use crate::JWT_PATH;
-use axum::{extract::Path, http::StatusCode, response::IntoResponse, Extension, Json};
+use axum::extract::State;
+use axum::{extract::Path, http::StatusCode, response::IntoResponse, Json};
+use axum_extra::extract::cookie::{Cookie, CookieJar};
 use std::sync::Arc;
 use tchatchers_core::jwt::Jwt;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, UpdatableUser, User};
 use tokio::time::{sleep, Duration};
-use tower_cookies::{Cookie, Cookies};
 
 /// Creates a user.
 ///
@@ -22,19 +23,19 @@ use tower_cookies::{Cookie, Cookies};
 /// - new_user : The user to insert in database.
 /// - state : The data shared across thread.
 pub async fn create_user(
+    State(state): State<Arc<AppState>>,
     Json(new_user): Json<InsertableUser>,
-    Extension(state): Extension<Arc<State>>,
 ) -> impl IntoResponse {
     if User::login_exists(&new_user.login, &state.pg_pool).await {
-        return (
+        return Err((
             StatusCode::BAD_REQUEST,
             "A user with a similar login already exists",
-        );
+        ));
     }
 
     match new_user.insert(&state.pg_pool).await {
-        Ok(_) => (StatusCode::CREATED, "User created with success"),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened"),
+        Ok(_) => Ok((StatusCode::CREATED, "User created with success")),
+        Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened")),
     }
 }
 
@@ -48,7 +49,7 @@ pub async fn create_user(
 /// - state : The data shared across thread.
 pub async fn login_exists(
     Path(login): Path<String>,
-    Extension(state): Extension<Arc<State>>,
+    State(state): State<Arc<AppState>>,
 ) -> impl IntoResponse {
     let response_status: StatusCode = match User::login_exists(&login, &state.pg_pool).await {
         false => StatusCode::OK,
@@ -65,17 +66,17 @@ pub async fn login_exists(
 /// # Arguments
 /// - user : The user to authenticate.
 /// - state : The data shared across thread.
-/// - cookies : The user's cookies.
+/// - cookie_jar : The user's cookies.
 pub async fn authenticate(
+    cookie_jar: CookieJar,
+    State(state): State<Arc<AppState>>,
     Json(user): Json<AuthenticableUser>,
-    Extension(state): Extension<Arc<State>>,
-    cookies: Cookies,
 ) -> impl IntoResponse {
     let user = match user.authenticate(&state.pg_pool).await {
         Some(v) => v,
         None => {
             sleep(Duration::from_secs(3)).await;
-            return (StatusCode::NOT_FOUND, "We couldn't connect you, please ensure that the login and password are correct before trying again");
+            return Err((StatusCode::NOT_FOUND, "We couldn't connect you, please ensure that the login and password are correct before trying again"));
         }
     };
     match user.is_authorized {
@@ -87,10 +88,10 @@ pub async fn authenticate(
             jwt_cookie.make_permanent();
             jwt_cookie.set_secure(true);
             jwt_cookie.set_http_only(false);
-            cookies.add(jwt_cookie);
-            (StatusCode::OK, "")
+            let cookie_jar = cookie_jar.add(jwt_cookie);
+            Ok((StatusCode::OK, cookie_jar))
         }
-        false => (StatusCode::UNAUTHORIZED, "This user's access has been revoked, contact an admin if you believe you should access this service")
+        false => Err((StatusCode::UNAUTHORIZED, "This user's access has been revoked, contact an admin if you believe you should access this service"))
     }
 }
 
@@ -100,13 +101,12 @@ pub async fn authenticate(
 ///
 /// # Arguments
 ///
-/// - cookies : The user's cookies.
-pub async fn logout(cookies: Cookies) -> impl IntoResponse {
-    let mut jwt_cookie = Cookie::new(JWT_PATH, "");
-    jwt_cookie.set_path("/");
-    jwt_cookie.make_removal();
-    cookies.add(jwt_cookie);
-    (StatusCode::OK, "")
+/// - cookie_jar : The user's cookies.
+pub async fn logout(cookie_jar: CookieJar) -> impl IntoResponse {
+    let mut cookie = Cookie::named(JWT_PATH);
+    cookie.set_path("/");
+    let new_jar = cookie_jar.remove(cookie);
+    (StatusCode::OK, new_jar).into_response()
 }
 
 /// Checks whether the authentication is legit, or if the user is authenticated
@@ -117,8 +117,8 @@ pub async fn logout(cookies: Cookies) -> impl IntoResponse {
 /// - jwt : The user's authentication token.
 pub async fn validate(jwt: Option<JwtUserExtractor>) -> impl IntoResponse {
     match jwt {
-        Some(_) => (StatusCode::OK, ""),
-        None => (StatusCode::UNAUTHORIZED, "You aren't logged in."),
+        Some(_) => Ok((StatusCode::OK, "")),
+        None => Err((StatusCode::UNAUTHORIZED, "You aren't logged in.")),
     }
 }
 
@@ -131,12 +131,12 @@ pub async fn validate(jwt: Option<JwtUserExtractor>) -> impl IntoResponse {
 /// - jwt : The user authentication token.
 /// - user : the new informations to update the user.
 /// - state : The data shared across thread.
-/// - cookies : The user's cookies.
+/// - cookie_jar : The user's cookies.
 pub async fn update_user(
     JwtUserExtractor(jwt): JwtUserExtractor,
+    State(state): State<Arc<AppState>>,
+    cookie_jar: CookieJar,
     Json(user): Json<UpdatableUser>,
-    Extension(state): Extension<Arc<State>>,
-    cookies: Cookies,
 ) -> impl IntoResponse {
     if jwt.user.id == user.id {
         match user.update(&state.pg_pool).await {
@@ -149,22 +149,22 @@ pub async fn update_user(
                 jwt_cookie.make_permanent();
                 jwt_cookie.set_secure(true);
                 jwt_cookie.set_http_only(false);
-                cookies.add(jwt_cookie);
-                (StatusCode::CREATED, "User updated with success").into_response()
+                let new_jar = cookie_jar.add(jwt_cookie);
+                Ok((StatusCode::CREATED, new_jar, "User updated with success"))
             }
-            Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened").into_response(),
+            Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened")),
         }
     } else {
-        (StatusCode::FORBIDDEN, "You can't update another user").into_response()
+        Err((StatusCode::FORBIDDEN, "You can't update another user"))
     }
 }
 
 pub async fn delete_user(
     JwtUserExtractor(jwt): JwtUserExtractor,
-    Extension(state): Extension<Arc<State>>,
+    State(state): State<Arc<AppState>>,
 ) -> impl IntoResponse {
     match User::delete_one(jwt.user.id, &state.pg_pool).await {
-        Ok(_) => (StatusCode::OK, "User updated with success").into_response(),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened").into_response(),
+        Ok(_) => Ok((StatusCode::OK, "User updated with success")),
+        Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened")),
     }
 }

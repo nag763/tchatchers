@@ -3,8 +3,12 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use crate::State;
-use axum::{async_trait, extract::FromRequest, extract::RequestParts, http::StatusCode};
+use crate::AppState;
+use axum::{
+    async_trait,
+    extract::FromRequestParts,
+    http::{request::Parts, StatusCode},
+};
 use regex::Regex;
 use std::sync::Arc;
 use tchatchers_core::jwt::Jwt;
@@ -20,14 +24,14 @@ lazy_static! {
 pub struct JwtUserExtractor(pub Jwt);
 
 #[async_trait]
-impl<B> FromRequest<B> for JwtUserExtractor
-where
-    B: Send,
-{
+impl FromRequestParts<Arc<AppState>> for JwtUserExtractor {
     type Rejection = (StatusCode, &'static str);
 
-    async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let headers = req.headers();
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &Arc<AppState>,
+    ) -> Result<Self, Self::Rejection> {
+        let headers = &parts.headers;
         if let Some(cookie) = headers.get("cookie") {
             let cookie_val = cookie.to_str().map_err(|_| {
                 (
@@ -40,10 +44,7 @@ where
                 "You are not logged in, please log in prior accessing this service.",
             ))?;
             let value: &str = captures.name("token_val").unwrap().as_str();
-            match Jwt::deserialize(
-                value,
-                &req.extensions().get::<Arc<State>>().unwrap().jwt_secret,
-            ) {
+            match Jwt::deserialize(value, &state.jwt_secret) {
                 Ok(v) => Ok(JwtUserExtractor(v)),
                 Err(_) => Err((StatusCode::UNAUTHORIZED, "JWT invalid")),
             }

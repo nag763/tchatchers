@@ -5,15 +5,15 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
+use std::sync::Arc;
+
 use crate::extractor::JwtUserExtractor;
-use crate::State;
+use crate::AppState;
 use axum::{
-    extract::{ws::Message, ws::WebSocket, Path, WebSocketUpgrade},
+    extract::{ws::Message, ws::WebSocket, Path, State, WebSocketUpgrade},
     response::IntoResponse,
-    Extension,
 };
 use futures_util::{SinkExt, StreamExt};
-use std::sync::Arc;
 use tchatchers_core::{
     room::Room,
     user::PartialUser,
@@ -31,7 +31,7 @@ use tokio::sync::broadcast;
 /// - jwt : The authenticated user infos.
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
-    Extension(state): Extension<Arc<State>>,
+    State(state): State<Arc<AppState>>,
     Path(room): Path<String>,
     JwtUserExtractor(jwt): JwtUserExtractor,
 ) -> impl IntoResponse {
@@ -46,7 +46,7 @@ pub async fn ws_handler(
 /// - state : The data shared across threads.
 /// - room : The room name.
 /// - user : The connected user's infos.
-async fn handle_socket(socket: WebSocket, state: Arc<State>, room: String, user: PartialUser) {
+async fn handle_socket(socket: WebSocket, state: Arc<AppState>, room: String, user: PartialUser) {
     let (mut sender, mut receiver) = socket.split();
     let tx = {
         let mut rooms = state.txs.lock().unwrap();

@@ -15,7 +15,7 @@ use crate::extractor::JwtUserExtractor;
 use api::pfp::*;
 use api::user::*;
 use axum::{
-    extract::{Extension, Path},
+    extract::Path,
     http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
@@ -26,7 +26,6 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use tokio::sync::broadcast;
-use tower_cookies::CookieManagerLayer;
 use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use ws::ws_handler;
@@ -37,7 +36,7 @@ extern crate lazy_static;
 const JWT_PATH: &str = "jwt";
 
 /// The data that is shared across the processes.
-pub struct State {
+pub struct AppState {
     /// The secret to encrypt the JWT.
     jwt_secret: String,
     /// The WS rooms, with the key being the room name.
@@ -60,7 +59,7 @@ async fn main() {
         .init();
 
     let jwt_secret = std::env::var("JWT_SECRET").expect("No jwt secret has been defined");
-    let shared_state = Arc::new(State {
+    let shared_state = Arc::new(AppState {
         jwt_secret,
         pg_pool: tchatchers_core::pool::get_pg_pool().await,
         redis_pool: tchatchers_core::pool::get_redis_pool().await,
@@ -79,12 +78,11 @@ async fn main() {
         .route("/api/pfp", post(upload_pfp))
         .route("/ws/:room", get(ws_handler))
         .route("/static/:path", get(static_file))
-        .layer(Extension(shared_state))
+        .with_state(shared_state)
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::default().include_headers(true)),
-        )
-        .layer(CookieManagerLayer::new());
+        );
 
     // run it with hyper
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
