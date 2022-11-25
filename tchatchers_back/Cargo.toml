@@ -8,18 +8,16 @@ edition = "2021"
 [dependencies]
 axum = { version = "0.6", features = ["ws", "headers", "multipart"] }
 headers = "0.3"
-tokio = { version = "1.0", features = ["full", "fs"] }
+tokio = { version = "1.0", features = ["full"] }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 sqlx-core = { version = "0.6.1", features = ["postgres"] }
 dotenv = "0.15.0"
 futures-util = "0.3.24"
-regex = "1.6.0"
-lazy_static = "1.4.0"
 serde_json = "1.0.85"
 chrono = { version = "0.4.22", features = ["serde"] }
 r2d2 = "0.8.10"
 redis = "0.21.6"
 uuid = { version = "1.1.2", features = ["v4", "serde", "js"] }
-tower-http = { version = "0.3.0", features = ["trace"] }
+tower-http = { version = "0.3.0", features = ["trace", "fs"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 axum-extra = { version = "0.4.0", features = ["cookie"] }

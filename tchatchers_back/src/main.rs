@@ -11,13 +11,11 @@ pub mod api;
 pub mod extractor;
 pub mod ws;
 
-use crate::extractor::JwtUserExtractor;
 use api::pfp::*;
 use api::user::*;
+use axum::routing::get_service;
 use axum::{
-    extract::Path,
     http::StatusCode,
-    response::IntoResponse,
     routing::{get, post},
     Router,
 };
@@ -26,12 +24,10 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use tokio::sync::broadcast;
+use tower_http::services::ServeDir;
 use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use ws::ws_handler;
-
-#[macro_use]
-extern crate lazy_static;
 
 const JWT_PATH: &str = "jwt";
 
@@ -77,7 +73,11 @@ async fn main() {
         .route("/api/validate", get(validate))
         .route("/api/pfp", post(upload_pfp))
         .route("/ws/:room", get(ws_handler))
-        .route("/static/:path", get(static_file))
+        .nest_service(
+            "/static",
+            get_service(ServeDir::new("static"))
+                .handle_error(|_| async { (StatusCode::NOT_FOUND, "File not found") }),
+        )
         .with_state(shared_state)
         .layer(
             TraceLayer::new_for_http()
@@ -90,22 +90,4 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
-}
-
-/// Service used to serve the static files.
-///
-/// Th user must be authenticated to access those files.
-///
-/// # Argumments
-///
-/// - jwt : The user authentication token.
-/// - path : The path the user would like to access.
-async fn static_file(
-    JwtUserExtractor(_jwt): JwtUserExtractor,
-    Path(path): Path<String>,
-) -> impl IntoResponse {
-    match tokio::fs::read(format!("./static/{}", &path)).await {
-        Ok(data) => (StatusCode::OK, data),
-        Err(_e) => (StatusCode::NOT_FOUND, vec![]),
-    }
 }
