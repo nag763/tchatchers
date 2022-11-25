@@ -51,15 +51,11 @@ fn message(message_properties: &MessageProperties) -> Html {
         timestamp.minute()
     );
     let class: &str = match message_properties.is_user {
-        true => "bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg mb-2",
-        false => "bg-gray-300 mb-2 p-3 rounded-r-lg rounded-bl-lg",
+        true => "bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg mb-2 text-sm break-when-needed",
+        false => "bg-gray-300 mb-2 p-3 rounded-r-lg rounded-bl-lg text-sm break-when-needed",
     };
     html! {
-        <div>
-            <div {class} {title}>
-                <p class="text-sm">{message_properties.content.as_str()}</p>
-            </div>
-        </div>
+        <p {class} {title} >{message_properties.content.as_str()}</p>
     }
 }
 
