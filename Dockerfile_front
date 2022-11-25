@@ -8,6 +8,8 @@ COPY ./tchatchers_front/Cargo.toml ./Cargo.toml
 
 COPY ./tchatchers_front/tailwind.config.js ./tailwind.config.js
 
+COPY ./tchatchers_front/main.css ./main.css
+
 COPY ./tchatchers_front/index.html ./index.html
 
 COPY ./tchatchers_front/install_assets.sh ./install_assets.sh
