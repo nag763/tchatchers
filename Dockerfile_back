@@ -18,7 +18,7 @@ COPY .env ./
 
 RUN adduser runner && chown -R runner ./
 
-RUN chown -R /usr/home/back/static
+RUN chown -R runner /usr/home/back/static
 
 RUN chmod 111 /usr/local/cargo/bin/tchatchers_back
 
