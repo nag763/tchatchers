@@ -5,7 +5,11 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use std::sync::Arc;
+use std::{
+    collections::HashMap,
+    ops::{Deref, DerefMut},
+    sync::Arc,
+};
 
 use crate::extractor::JwtUserExtractor;
 use crate::AppState;
@@ -20,6 +24,23 @@ use tchatchers_core::{
     ws_message::{WsMessage, WsMessageType},
 };
 use tokio::sync::broadcast;
+
+#[derive(Default, Debug)]
+pub struct WsRooms(HashMap<String, broadcast::Sender<String>>);
+
+impl Deref for WsRooms {
+    type Target = HashMap<String, broadcast::Sender<String>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for WsRooms {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 /// The HTTP entry point.
 ///

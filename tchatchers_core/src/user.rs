@@ -170,7 +170,7 @@ impl UpdatableUser {
         sqlx::query("UPDATE CHATTER SET name=$1, pfp=$2 WHERE id=$3")
             .bind(&self.name)
             .bind(&self.pfp)
-            .bind(&self.id)
+            .bind(self.id)
             .execute(pool)
             .await
     }

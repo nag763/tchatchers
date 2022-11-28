@@ -20,14 +20,13 @@ use axum::{
     Router,
 };
 use sqlx_core::postgres::PgPool;
-use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
-use tokio::sync::broadcast;
 use tower_http::services::ServeDir;
 use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use ws::ws_handler;
+use ws::WsRooms;
 
 const JWT_PATH: &str = "jwt";
 
@@ -36,7 +35,7 @@ pub struct AppState {
     /// The secret to encrypt the JWT.
     jwt_secret: String,
     /// The WS rooms, with the key being the room name.
-    txs: Mutex<HashMap<String, broadcast::Sender<String>>>,
+    txs: Mutex<WsRooms>,
     /// The Postgres pool.
     pg_pool: PgPool,
     /// The Redis pool.
@@ -59,7 +58,7 @@ async fn main() {
         jwt_secret,
         pg_pool: tchatchers_core::pool::get_pg_pool().await,
         redis_pool: tchatchers_core::pool::get_redis_pool().await,
-        txs: Mutex::new(HashMap::new()),
+        txs: Mutex::new(WsRooms::default()),
     });
 
     let app = Router::new()
