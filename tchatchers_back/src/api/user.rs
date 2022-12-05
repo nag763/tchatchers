@@ -51,11 +51,10 @@ pub async fn login_exists(
     Path(login): Path<String>,
     State(state): State<Arc<AppState>>,
 ) -> impl IntoResponse {
-    let response_status: StatusCode = match User::login_exists(&login, &state.pg_pool).await {
+    match User::login_exists(&login, &state.pg_pool).await {
         false => StatusCode::OK,
         true => StatusCode::CONFLICT,
     };
-    (response_status, ())
 }
 
 /// Authenticate a user.
@@ -72,15 +71,11 @@ pub async fn authenticate(
     State(state): State<Arc<AppState>>,
     Json(user): Json<AuthenticableUser>,
 ) -> impl IntoResponse {
-    let user = match user.authenticate(&state.pg_pool).await {
-        Some(v) => v,
-        None => {
+    let Some(user) = user.authenticate(&state.pg_pool).await else {
             sleep(Duration::from_secs(3)).await;
             return Err((StatusCode::NOT_FOUND, "We couldn't connect you, please ensure that the login and password are correct before trying again"));
-        }
     };
-    match user.is_authorized {
-        true => {
+    if user.is_authorized {
             let jwt = Jwt::from(user);
             let serialized_jwt : String = jwt.serialize(&state.jwt_secret).unwrap();
             let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
@@ -90,8 +85,8 @@ pub async fn authenticate(
             jwt_cookie.set_http_only(false);
             let cookie_jar = cookie_jar.add(jwt_cookie);
             Ok((StatusCode::OK, cookie_jar))
-        }
-        false => Err((StatusCode::UNAUTHORIZED, "This user's access has been revoked, contact an admin if you believe you should access this service"))
+        } else {
+        Err((StatusCode::UNAUTHORIZED, "This user's access has been revoked, contact an admin if you believe you should access this service"))
     }
 }
 
@@ -138,9 +133,10 @@ pub async fn update_user(
     cookie_jar: CookieJar,
     Json(user): Json<UpdatableUser>,
 ) -> impl IntoResponse {
-    if jwt.user.id == user.id {
-        match user.update(&state.pg_pool).await {
-            Ok(_) => {
+    if jwt.user.id == user.id {}
+        let Ok(_ret) =  user.update(&state.pg_pool).await else {
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened"));
+        };
                 let updated_user = User::find_by_id(user.id, &state.pg_pool).await.unwrap();
                 let jwt = Jwt::from(updated_user);
                 let serialized_jwt: String = jwt.serialize(&state.jwt_secret).unwrap();
@@ -151,12 +147,6 @@ pub async fn update_user(
                 jwt_cookie.set_http_only(false);
                 let new_jar = cookie_jar.add(jwt_cookie);
                 Ok((StatusCode::CREATED, new_jar, "User updated with success"))
-            }
-            Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened")),
-        }
-    } else {
-        Err((StatusCode::FORBIDDEN, "You can't update another user"))
-    }
 }
 
 pub async fn delete_user(

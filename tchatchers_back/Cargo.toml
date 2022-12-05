@@ -18,6 +18,7 @@ chrono = { version = "0.4.22", features = ["serde"] }
 r2d2 = "0.8.10"
 redis = "0.21.6"
 uuid = { version = "1.1.2", features = ["v4", "serde", "js"] }
-tower-http = { version = "0.3.0", features = ["trace", "fs"] }
+tower-http = { version = "0.3.3", features = ["trace", "fs"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 axum-extra = { version = "0.4.0", features = ["cookie"] }
+tracing = "0.1.37"

@@ -28,16 +28,15 @@ impl FromRequestParts<Arc<AppState>> for JwtUserExtractor {
     ) -> Result<Self, Self::Rejection> {
         let headers = &parts.headers;
         let cookie_jar: CookieJar = CookieJar::from_headers(headers);
-        if let Some(cookie) = cookie_jar.get(JWT_PATH) {
-            match Jwt::deserialize(cookie.value(), &state.jwt_secret) {
-                Ok(v) => Ok(JwtUserExtractor(v)),
-                Err(_) => Err((StatusCode::UNAUTHORIZED, "JWT invalid")),
-            }
-        } else {
-            Err((
+        let Some(cookie) = cookie_jar.get(JWT_PATH)  else {
+            return Err((
                 StatusCode::UNAUTHORIZED,
                 "This route requires authentication",
-            ))
+            ));
+        };
+        match Jwt::deserialize(cookie.value(), &state.jwt_secret) {
+            Ok(v) => Ok(JwtUserExtractor(v)),
+            Err(_) => Err((StatusCode::UNAUTHORIZED, "JWT invalid")),
         }
     }
 }
