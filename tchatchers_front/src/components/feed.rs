@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use super::chat::Chat;
@@ -17,8 +19,6 @@ use tchatchers_core::ws_message::{WsMessage, WsMessageType};
 use yew::{html, Callback, Component, Context, Html, Properties};
 use yew_agent::Dispatched;
 use yew_agent::{Bridge, Bridged};
-use yew_router::history::History;
-use yew_router::prelude::HistoryListener;
 use yew_router::scope_ext::RouterScopeExt;
 
 #[derive(Clone)]
@@ -44,7 +44,6 @@ pub struct Feed {
     ws_keep_alive: Option<Interval>,
     is_closed: bool,
     user: PartialUser,
-    _history_listener: HistoryListener,
 }
 
 impl Component for Feed {
@@ -54,12 +53,11 @@ impl Component for Feed {
     fn create(ctx: &Context<Self>) -> Self {
         let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
         let link = ctx.link().clone();
-        let tx = ws.tx.clone();
         let user = match get_user() {
             Ok(v) => v,
             Err(e) => {
                 gloo_console::log!("Error while attempting to get the user :", e);
-                link.history().unwrap().push(Route::SignIn);
+                link.navigator().unwrap().push(&Route::SignIn);
                 ToastBus::dispatcher().send(Alert {
                     is_success: false,
                     content: "Please authenticate prior accessing the app functionnalities.".into(),
@@ -67,10 +65,14 @@ impl Component for Feed {
                 PartialUser::default()
             }
         };
+        let cb = {
+            let link = ctx.link().clone();
+            move |msg| link.send_message(Msg::HandleWsInteraction(msg))
+        };
         Self {
             received_messages: vec![],
             ws,
-            _producer: EventBus::bridge(ctx.link().callback(Msg::HandleWsInteraction)),
+            _producer: EventBus::bridge(Rc::new(cb)),
             is_connected: false,
             called_back: false,
             is_closed: false,
@@ -80,11 +82,6 @@ impl Component for Feed {
                 let link = ctx.link().clone();
                 Timeout::new(1, move || link.send_message(Msg::CheckWsState))
             },
-            _history_listener: ctx.link().history().unwrap().listen(move || {
-                let mut tx = tx.clone();
-                tx.try_send("Close".into()).unwrap();
-                link.send_message(Msg::CutWs)
-            }),
         }
     }
 
@@ -102,7 +99,7 @@ impl Component for Feed {
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.await.unwrap();
                                 if resp.status() == 401 {
-                                    link.history().unwrap().push(Route::SignIn);
+                                    link.navigator().unwrap().push(&Route::SignIn);
                                 }
                             });
                             self.is_connected = false;
@@ -198,5 +195,10 @@ impl Component for Feed {
                 </div>
             </div>
         }
+    }
+
+    fn destroy(&mut self, ctx: &Context<Self>) {
+        self.ws.tx.try_send("Close".into()).unwrap();
+        ctx.link().send_message(Msg::CutWs)
     }
 }

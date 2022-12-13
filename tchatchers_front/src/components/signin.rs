@@ -10,7 +10,7 @@ use tchatchers_core::user::AuthenticableUser;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Html, NodeRef, Properties};
 use yew_agent::Dispatched;
-use yew_router::{history::History, scope_ext::RouterScopeExt};
+use yew_router::scope_ext::RouterScopeExt;
 
 pub enum Msg {
     SubmitForm,
@@ -58,7 +58,7 @@ impl Component for SignIn {
                             let resp = req.send().await;
                             if resp.status().is_success() {
                                 EventBus::dispatcher().send(true);
-                                link.history().unwrap().push(Route::JoinRoom);
+                                link.navigator().unwrap().push(&Route::JoinRoom);
                                 ToastBus::dispatcher().send(Alert {
                                     is_success: true,
                                     content: "You logged in with success".into(),

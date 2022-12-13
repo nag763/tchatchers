@@ -3,6 +3,7 @@
 use super::navlink::Navlink;
 use crate::router::Route;
 use crate::services::auth_bus::EventBus;
+use std::rc::Rc;
 use yew::{html, Component, Context, Html};
 use yew_agent::{Bridge, Bridged};
 use yew_router::prelude::Link;
@@ -21,9 +22,13 @@ impl Component for Navbar {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
+        let cb = {
+            let link = ctx.link().clone();
+            move |val| link.send_message(Msg::AuthEvent(val))
+        };
         Self {
             verified: false,
-            _producer: EventBus::bridge(ctx.link().callback(Msg::AuthEvent)),
+            _producer: EventBus::bridge(Rc::new(cb)),
         }
     }
 

@@ -3,20 +3,20 @@
 
 use crate::components::toast::Alert;
 use std::collections::HashSet;
-use yew_agent::{Agent, AgentLink, Context, HandlerId};
+use yew_agent::{HandlerId, Public, Worker, WorkerLink};
 
 pub struct ToastBus {
-    link: AgentLink<ToastBus>,
+    link: WorkerLink<ToastBus>,
     subscribers: HashSet<HandlerId>,
 }
 
-impl Agent for ToastBus {
-    type Reach = Context<Self>;
+impl Worker for ToastBus {
+    type Reach = Public<Self>;
     type Message = ();
     type Input = Alert;
     type Output = Alert;
 
-    fn create(link: AgentLink<Self>) -> Self {
+    fn create(link: WorkerLink<Self>) -> Self {
         Self {
             link,
             subscribers: HashSet::new(),
@@ -37,5 +37,9 @@ impl Agent for ToastBus {
 
     fn disconnected(&mut self, id: HandlerId) {
         self.subscribers.remove(&id);
+    }
+
+    fn name_of_resource() -> &'static str {
+        "toast_worker.js"
     }
 }

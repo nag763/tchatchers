@@ -5,7 +5,6 @@ use crate::router::Route;
 use crate::utils::jwt::get_user;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Html, NodeRef};
-use yew_router::history::History;
 use yew_router::scope_ext::RouterScopeExt;
 
 pub enum Msg {
@@ -26,7 +25,7 @@ impl Component for JoinRoom {
             Ok(_) => (),
             Err(e) => {
                 gloo_console::warn!("Following errror happened when user joined root page {}", e);
-                ctx.link().history().unwrap().push(Route::SignIn);
+                ctx.link().navigator().unwrap().push(&Route::SignIn);
             }
         };
         Self::default()
@@ -37,7 +36,7 @@ impl Component for JoinRoom {
             Msg::SubmitForm => {
                 if let Some(room_name) = self.room_name.cast::<HtmlInputElement>() {
                     if room_name.check_validity() {
-                        ctx.link().history().unwrap().push(Route::Room {
+                        ctx.link().navigator().unwrap().push(&Route::Room {
                             room: room_name.value().to_lowercase(),
                         });
                     }

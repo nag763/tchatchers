@@ -7,7 +7,6 @@ use crate::services::toast_bus::ToastBus;
 use gloo_net::http::Request;
 use yew::{html, Component, Context, Html, Properties};
 use yew_agent::Dispatched;
-use yew_router::history::History;
 use yew_router::scope_ext::RouterScopeExt;
 
 #[derive(Clone, Eq, PartialEq, Properties)]
@@ -33,7 +32,7 @@ impl Component for LogOut {
                 is_success: true,
                 content: "You logged out with success".into(),
             });
-            link.history().unwrap().replace(Route::SignIn);
+            link.navigator().unwrap().replace(&Route::SignIn);
         });
 
         html! {

@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::common::AppButton;
@@ -6,6 +8,7 @@ use crate::components::common::WaitingForResponse;
 use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::modal_bus::ModalBus;
+use crate::services::modal_bus::ModalBusContent;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::jwt::get_user;
 use crate::utils::requester::Requester;
@@ -14,8 +17,9 @@ use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::UpdatableUser;
 use web_sys::HtmlInputElement;
 use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
+use yew_agent::Bridge;
+use yew_agent::Bridged;
 use yew_agent::Dispatched;
-use yew_router::history::History;
 use yew_router::scope_ext::RouterScopeExt;
 
 use super::modal::ModalContent;
@@ -34,7 +38,6 @@ pub enum Msg {
 #[derive(Clone, PartialEq, Eq, Properties)]
 pub struct Props;
 
-#[derive(Default)]
 pub struct Settings {
     user: PartialUser,
     name: NodeRef,
@@ -42,6 +45,7 @@ pub struct Settings {
     wait_for_api: bool,
     server_error: Option<String>,
     ok_msg: Option<String>,
+    producer: Box<dyn Bridge<ModalBus>>,
 }
 
 impl Component for Settings {
@@ -50,7 +54,23 @@ impl Component for Settings {
 
     fn create(ctx: &Context<Self>) -> Self {
         ctx.link().send_message(Msg::FetchJwt);
-        Self { ..Self::default() }
+        let cb = {
+            let link = ctx.link().clone();
+            move |mc| {
+                if let ModalBusContent::Yes = mc {
+                    link.send_message(Msg::DeletionConfirmed)
+                }
+            }
+        };
+        Self {
+            user: PartialUser::default(),
+            name: NodeRef::default(),
+            pfp: None,
+            wait_for_api: false,
+            server_error: None,
+            ok_msg: None,
+            producer: ModalBus::bridge(Rc::new(cb)),
+        }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -60,7 +80,7 @@ impl Component for Settings {
                     Ok(v) => v,
                     Err(e) => {
                         gloo_console::log!("Error while attempting to get the user :", e);
-                        ctx.link().history().unwrap().push(Route::SignIn);
+                        ctx.link().navigator().unwrap().push(&Route::SignIn);
                         ToastBus::dispatcher().send(Alert {
                             is_success: false,
                             content:
@@ -137,15 +157,13 @@ impl Component for Settings {
                 true
             }
             Msg::ConfirmDeletion => {
-                let link = ctx.link().clone();
-                ModalBus::dispatcher().send(ModalContent {
+                let mc : ModalContent = ModalContent {
                     title: "You are about to delete your account".into(),
                     msg: "This action is not reversible, understand that none of the messages you sent will be deleted.".into(),
                     decline_text: Some("I changed, my mind, don't delete my account".into()),
                     accept_text: Some("Understood, farewell".into()),
-                    accept_callback: Some(Callback::from(move |_: ()| {link.send_message(Msg::DeletionConfirmed)})),
-                    ..ModalContent::default()
-                });
+                };
+                self.producer.send(ModalBusContent::PopModal(mc));
                 false
             }
             Msg::DeletionConfirmed => {
@@ -155,7 +173,7 @@ impl Component for Settings {
                 wasm_bindgen_futures::spawn_local(async move {
                     let resp = req.send().await;
                     if resp.status().is_success() {
-                        link.history().unwrap().push(Route::LogOut);
+                        link.navigator().unwrap().push(&Route::LogOut);
                     } else {
                         link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
                     }

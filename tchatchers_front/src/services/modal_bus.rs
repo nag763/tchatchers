@@ -2,21 +2,29 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use crate::components::modal::ModalContent;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use yew_agent::{Agent, AgentLink, Context, HandlerId};
+use yew_agent::{HandlerId, Public, Worker, WorkerLink};
 
 pub struct ModalBus {
-    link: AgentLink<ModalBus>,
+    link: WorkerLink<ModalBus>,
     subscribers: HashSet<HandlerId>,
 }
 
-impl Agent for ModalBus {
-    type Reach = Context<Self>;
-    type Message = ();
-    type Input = ModalContent;
-    type Output = ModalContent;
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ModalBusContent {
+    Yes,
+    No,
+    PopModal(ModalContent),
+}
 
-    fn create(link: AgentLink<Self>) -> Self {
+impl Worker for ModalBus {
+    type Reach = Public<Self>;
+    type Message = ();
+    type Input = ModalBusContent;
+    type Output = ModalBusContent;
+
+    fn create(link: WorkerLink<Self>) -> Self {
         Self {
             link,
             subscribers: HashSet::new(),
@@ -37,5 +45,9 @@ impl Agent for ModalBus {
 
     fn disconnected(&mut self, id: HandlerId) {
         self.subscribers.remove(&id);
+    }
+
+    fn name_of_resource() -> &'static str {
+        "modal_worker.js"
     }
 }

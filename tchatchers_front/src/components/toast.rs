@@ -1,11 +1,14 @@
+use std::rc::Rc;
+
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::services::toast_bus::ToastBus;
 use gloo_timers::callback::Timeout;
+use serde::{Deserialize, Serialize};
 use yew::{html, Component, Context, Html};
 use yew_agent::{Bridge, Bridged};
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Alert {
     pub is_success: bool,
     pub content: String,
@@ -31,13 +34,17 @@ impl Component for Toast {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
+        let cb = {
+            let link = ctx.link().clone();
+            move |e| link.send_message(Msg::NewToast(e))
+        };
         Self {
             msg: String::default(),
             is_success: false,
             visible: false,
             cooldown: None,
             stop_bounce: None,
-            _producer: ToastBus::bridge(ctx.link().callback(Msg::NewToast)),
+            _producer: ToastBus::bridge(Rc::new(cb)),
         }
     }
 

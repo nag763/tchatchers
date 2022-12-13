@@ -1,27 +1,27 @@
-use gloo_timers::callback::Timeout;
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use crate::services::modal_bus::ModalBus;
+use crate::services::modal_bus::{ModalBus, ModalBusContent};
+use gloo_timers::callback::Timeout;
+use serde::{Deserialize, Serialize};
+use std::rc::Rc;
 use wasm_bindgen::{prelude::Closure, JsCast};
 use web_sys::{Element, EventTarget, MouseEvent};
-use yew::{html, Callback, Component, Context, Html};
+use yew::{html, Component, Context, Html};
 use yew_agent::{Bridge, Bridged};
 
 const MODAL_ID: &str = "modal";
 pub const MODAL_OPENER_CLASS: &str = "modal-opener";
 
-#[derive(Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct ModalContent {
     pub title: String,
     pub msg: String,
     pub decline_text: Option<String>,
     pub accept_text: Option<String>,
-    pub decline_callback: Option<Callback<()>>,
-    pub accept_callback: Option<Callback<()>>,
 }
 
 pub enum Msg {
-    CloseSelf,
+    CloseSelf(Option<ModalBusContent>),
     PopModal(ModalContent),
     StopBounce,
 }
@@ -29,7 +29,7 @@ pub enum Msg {
 pub struct Modal {
     modal_content: ModalContent,
     visible: bool,
-    _producer: Box<dyn Bridge<ModalBus>>,
+    producer: Box<dyn Bridge<ModalBus>>,
     stop_bounce: Option<Timeout>,
 }
 
@@ -38,17 +38,28 @@ impl Component for Modal {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
+        let cb = {
+            let link = ctx.link().clone();
+            move |mc| {
+                if let ModalBusContent::PopModal(mbc) = mc {
+                    link.send_message(Msg::PopModal(mbc))
+                }
+            }
+        };
         Self {
             modal_content: ModalContent::default(),
             visible: false,
-            _producer: ModalBus::bridge(ctx.link().callback(Msg::PopModal)),
+            producer: ModalBus::bridge(Rc::new(cb)),
             stop_bounce: None,
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::CloseSelf => {
+            Msg::CloseSelf(mbc) => {
+                if let Some(mbc) = mbc {
+                    self.producer.send(mbc);
+                }
                 self.visible = false;
                 true
             }
@@ -77,21 +88,12 @@ impl Component for Modal {
             Some(v) => v,
             None => "Ok",
         };
-        let modal_content = self.modal_content.clone();
         let link = ctx.link().clone();
-        let decline_callback = move |_: MouseEvent| {
-            if let Some(cb) = modal_content.decline_callback.clone() {
-                cb.emit(());
-            }
-            link.send_message(Msg::CloseSelf)
-        };
-        let modal_content = self.modal_content.clone();
+        let decline_callback =
+            move |_: MouseEvent| link.send_message(Msg::CloseSelf(Some(ModalBusContent::No)));
         let link = ctx.link().clone();
         let accept_callback = move |_: MouseEvent| {
-            if let Some(cb) = modal_content.accept_callback.clone() {
-                cb.emit(());
-            }
-            link.send_message(Msg::CloseSelf);
+            link.send_message(Msg::CloseSelf(Some(ModalBusContent::Yes)));
         };
 
         let link = ctx.link().clone();
@@ -103,7 +105,7 @@ impl Component for Modal {
                     element.closest(&format!("#{},.{}", MODAL_ID, MODAL_OPENER_CLASS))
                 {
                     if maybe_undefined_element.is_none() {
-                        link.send_message(Msg::CloseSelf);
+                        link.send_message(Msg::CloseSelf(None));
                     }
                 }
             }
@@ -127,7 +129,7 @@ impl Component for Modal {
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 {&self.modal_content.title}
                             </h3>
-                            <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="defaultModal" onclick={ctx.link().callback(|_| Msg::CloseSelf)}>
+                            <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="defaultModal" onclick={ctx.link().callback(|_| Msg::CloseSelf(None))}>
                                 <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
                                 <span class="sr-only">{"Close modal"}</span>
                             </button>

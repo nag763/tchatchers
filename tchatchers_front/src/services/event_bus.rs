@@ -4,7 +4,7 @@
 use super::message::{WsBusMessage, WsBusMessageType};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use yew_agent::{Agent, AgentLink, Context, HandlerId};
+use yew_agent::{HandlerId, Public, Worker, WorkerLink};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Request {
@@ -16,17 +16,17 @@ pub enum Request {
 }
 
 pub struct EventBus {
-    link: AgentLink<EventBus>,
+    link: WorkerLink<EventBus>,
     subscribers: HashSet<HandlerId>,
 }
 
-impl Agent for EventBus {
-    type Reach = Context<Self>;
+impl Worker for EventBus {
     type Message = ();
     type Input = Request;
     type Output = String;
+    type Reach = Public<Self>;
 
-    fn create(link: AgentLink<Self>) -> Self {
+    fn create(link: WorkerLink<Self>) -> Self {
         Self {
             link,
             subscribers: HashSet::new(),
@@ -91,5 +91,9 @@ impl Agent for EventBus {
 
     fn disconnected(&mut self, id: HandlerId) {
         self.subscribers.remove(&id);
+    }
+
+    fn name_of_resource() -> &'static str {
+        "chat_worker.js"
     }
 }

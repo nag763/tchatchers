@@ -11,7 +11,6 @@ use tchatchers_core::user::InsertableUser;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Html, NodeRef, Properties};
 use yew_agent::Dispatched;
-use yew_router::prelude::History;
 use yew_router::scope_ext::RouterScopeExt;
 
 const CHECK_LOGIN_AFTER: u32 = 250;
@@ -71,7 +70,7 @@ impl Component for SignUp {
                                     is_success: true,
                                     content: "User created with success".into(),
                                 });
-                                link.history().unwrap().push(Route::SignIn);
+                                link.navigator().unwrap().push(&Route::SignIn);
                             } else {
                                 link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
                             }

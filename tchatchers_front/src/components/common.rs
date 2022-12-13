@@ -5,7 +5,7 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::{Event, EventTarget, FileReader, InputEvent};
 use web_sys::{HtmlInputElement, MouseEvent};
-use yew::{function_component, html, use_state, Callback, Properties};
+use yew::{function_component, html, use_state, Callback, Html, Properties};
 
 use super::modal::MODAL_OPENER_CLASS;
 

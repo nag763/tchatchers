@@ -3,7 +3,7 @@
 use crate::router::Route;
 use gloo_net::http::Request;
 use yew::{html, Component, Context, Html};
-use yew_router::{history::History, scope_ext::RouterScopeExt};
+use yew_router::scope_ext::RouterScopeExt;
 
 pub enum Msg {
     AccessVerified(bool),
@@ -29,7 +29,7 @@ impl Component for SecuredRoute {
                 if verified {
                     self.verified = true;
                 } else {
-                    ctx.link().history().unwrap().push(Route::SignIn);
+                    ctx.link().navigator().unwrap().push(&Route::SignIn);
                 }
                 true
             }

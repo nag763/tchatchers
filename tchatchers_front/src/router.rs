@@ -40,10 +40,10 @@ pub enum Route {
 }
 
 /// Function used to switch the main component's view.
-pub fn switch(route: &Route) -> Html {
+pub fn switch(route: Route) -> Html {
     match route {
         Route::JoinRoom => html! { <JoinRoom /> },
-        Route::Room { room } => html! { <Feed room={room.clone()} /> },
+        Route::Room { room } => html! { <Feed room={room} /> },
         Route::SignIn => html! { <SignIn /> },
         Route::SignUp => html! { <SignUp /> },
         Route::Settings => html! { <Settings /> },

@@ -18,18 +18,6 @@ impl<T> Requester<T>
 where
     T: serde::Serialize + std::default::Default + Clone,
 {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn get(endpoint: &str) -> Self {
-        Self {
-            method: Some(Method::GET),
-            endpoint: Some(String::from(endpoint)),
-            ..Self::default()
-        }
-    }
-
     pub fn post(endpoint: &str) -> Self {
         Self {
             method: Some(Method::POST),
@@ -56,16 +44,6 @@ where
 
     pub fn body(&mut self, body: Option<T>) -> &mut Self {
         self.payload = body;
-        self
-    }
-
-    pub fn method(&mut self, method: Option<Method>) -> &mut Self {
-        self.method = method;
-        self
-    }
-
-    pub fn endpoint(&mut self, endpoint: Option<String>) -> &mut Self {
-        self.endpoint = endpoint;
         self
     }
 
