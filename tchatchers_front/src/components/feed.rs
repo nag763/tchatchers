@@ -15,7 +15,8 @@ use crate::utils::jwt::get_user;
 use gloo_net::http::Request;
 use gloo_timers::callback::{Interval, Timeout};
 use tchatchers_core::user::PartialUser;
-use tchatchers_core::ws_message::{WsMessage, WsMessageType};
+use tchatchers_core::ws_message::{WsMessage, WsMessageContent};
+use uuid::Uuid;
 use yew::{html, Callback, Component, Context, Html, Properties};
 use yew_agent::Dispatched;
 use yew_agent::{Bridge, Bridged};
@@ -35,7 +36,7 @@ pub struct Props {
 }
 
 pub struct Feed {
-    received_messages: Vec<WsMessage>,
+    received_messages: Vec<WsMessageContent>,
     ws: WebsocketService,
     _producer: Box<dyn Bridge<EventBus>>,
     _first_connect: Timeout,
@@ -44,6 +45,7 @@ pub struct Feed {
     ws_keep_alive: Option<Interval>,
     is_closed: bool,
     user: PartialUser,
+    session_id: Uuid,
 }
 
 impl Component for Feed {
@@ -82,6 +84,7 @@ impl Component for Feed {
                 let link = ctx.link().clone();
                 Timeout::new(1, move || link.send_message(Msg::CheckWsState))
             },
+            session_id: Uuid::new_v4(),
         }
     }
 
@@ -107,13 +110,18 @@ impl Component for Feed {
                     }
                     WsBusMessageType::Reply => {
                         let msg: WsMessage = serde_json::from_str(&message.content).unwrap();
-                        match msg.to {
-                            Some(v) if v != self.user => {
-                                return true;
+                        match msg {
+                            WsMessage::Receive(msg_content) => {
+                                self.received_messages.insert(0, msg_content)
                             }
-                            _ => {
-                                self.received_messages.insert(0, msg);
+                            WsMessage::MessagesRetrieved {
+                                mut messages,
+                                session_id,
+                            } if session_id == self.session_id => {
+                                self.received_messages.append(&mut messages)
                             }
+
+                            _ => (),
                         }
                         self.is_connected = true;
                         self.ws_keep_alive = {
@@ -127,12 +135,7 @@ impl Component for Feed {
                         self.is_connected = true;
 
                         if self.received_messages.is_empty() {
-                            let msg = WsMessage {
-                                message_type: WsMessageType::RetrieveMessages,
-                                author: Some(self.user.clone()),
-                                room: Some(ctx.props().room.clone()),
-                                ..WsMessage::default()
-                            };
+                            let msg = WsMessage::RetrieveMessages(self.session_id);
                             self.ws
                                 .tx
                                 .clone()

@@ -2,7 +2,7 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use chrono::{DateTime, Datelike, Timelike, Utc};
 use tchatchers_core::user::PartialUser;
-use tchatchers_core::ws_message::{WsMessage, WsMessageType};
+use tchatchers_core::ws_message::WsMessageContent;
 use yew::{function_component, html, Component, Context, Html, Properties};
 
 const DEFAULT_PFP: &str = "/assets/no_pfp.webp";
@@ -90,7 +90,7 @@ fn user_chat(user_chat_properties: &UserChatProperties) -> Html {
 
 #[derive(Clone, Eq, PartialEq, Properties)]
 pub struct Props {
-    pub messages: Vec<WsMessage>,
+    pub messages: Vec<WsMessageContent>,
     pub room: String,
     pub user: PartialUser,
 }
@@ -106,38 +106,19 @@ impl Component for Chat {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let mut iterator = ctx
-            .props()
-            .messages
-            .iter()
-            .filter(|m| m.message_type == WsMessageType::Receive);
+        let mut iterator = ctx.props().messages.iter();
         let mut next_element_opt = iterator.next();
         let mut html_content: Vec<Html> = Vec::with_capacity(ctx.props().messages.len());
         let current_user_id = ctx.props().user.id;
         while let Some(current_element) = std::mem::replace(&mut next_element_opt, iterator.next())
         {
-            if current_element.message_type == WsMessageType::Receive {
-                if let (Some(author), Some(content)) = (
-                    current_element.author.clone(),
-                    current_element.content.clone(),
-                ) {
-                    let display_pfp = match next_element_opt {
-                        Some(next_element)
-                            if next_element.message_type == WsMessageType::Receive =>
-                        {
-                            if let Some(next_author) = &next_element.author {
-                                next_author.id != author.id
-                            } else {
-                                false
-                            }
-                        }
-                        // Chat list is built in reverse order, so last built element is actually the first message,
-                        // so we display the pfp for the first message
-                        _ => true,
-                    };
-                    html_content.push(html! { <UserChat pfp={author.pfp.unwrap_or_else(|| DEFAULT_PFP.into())} content={content} author={author.name.clone()} is_user={author.id == current_user_id} timestamp={current_element.timestamp} {display_pfp}/> });
-                }
-            }
+            let display_pfp = match next_element_opt {
+                Some(next_element) => next_element.author.id != current_element.author.id,
+                // Chat list is built in reverse order, so last built element is actually the first message,
+                // so we display the pfp for the first message
+                _ => true,
+            };
+            html_content.push(html! { <UserChat pfp={current_element.author.pfp.clone().unwrap_or_else(|| DEFAULT_PFP.into())} content={current_element.content.clone()} author={current_element.author.name.clone()} is_user={current_element.author.id == current_user_id} timestamp={current_element.timestamp} {display_pfp}/> });
         }
         html_content.into_iter().collect::<Html>()
     }

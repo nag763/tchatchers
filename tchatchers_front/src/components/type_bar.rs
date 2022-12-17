@@ -1,8 +1,8 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::WsMessage;
+use tchatchers_core::{user::PartialUser, ws_message::WsMessageContent};
 use web_sys::HtmlInputElement;
 use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
 
@@ -37,16 +37,16 @@ impl Component for TypeBar {
                     if !input.check_validity() {
                         return false;
                     }
-                    let msg = WsMessage {
-                        room: Some(ctx.props().room.clone()),
-                        author: Some(ctx.props().user.clone()),
-                        content: Some(input.value()),
-                        ..WsMessage::default()
+                    let msg = WsMessageContent {
+                        room: ctx.props().room.clone(),
+                        author: ctx.props().user.clone(),
+                        content: input.value(),
+                        ..WsMessageContent::default()
                     };
                     gloo_console::log!("Emit");
                     ctx.props()
                         .pass_message_to_ws
-                        .emit(serde_json::to_string(&msg).unwrap());
+                        .emit(serde_json::to_string(&WsMessage::Send(msg)).unwrap());
                     input.set_value("");
                 }
 
