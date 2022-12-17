@@ -17,7 +17,7 @@ web-sys = { version = "0.3.60", features = ["HtmlDocument", "FileReader"] }
 yew = { version = "0.20.0", features = ["csr"] }
 yew-agent = "0.2.0"
 yew-router = "0.17.0"
-tchatchers_core = { path = "../tchatchers_core"}
+tchatchers_core = { path = "../tchatchers_core", features = ["front"] }
 linked_hash_set = "0.1.4"
 chrono = { version = "0.4.22", features = ["serde"] }
 base64 = "0.13.0"

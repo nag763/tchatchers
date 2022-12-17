@@ -4,14 +4,12 @@
 /// The auth bus is a data bus used to indicate to the other components the
 /// state of the user authentication.
 pub mod auth_bus;
-/// This component connects to the backend through websockets in order to chat
-/// with other users.
-pub mod chat;
 /// The event bus is used to transmit the content of websocket messages to the
 /// components.
-pub mod event_bus;
-/// Wrapper for messages received by the backend.
-pub mod message;
+pub mod chat_bus;
+/// This component connects to the backend through websockets in order to chat
+/// with other users.
+pub mod chat_service;
 /// Event Bus used to display toasts.
 pub mod toast_bus;
 

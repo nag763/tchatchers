@@ -5,6 +5,7 @@ edition = "2021"
 
 [features]
 back = ["dep:sqlx", "dep:redis", "dep:r2d2", "dep:rust-argon2"]
+front = []
 
 
 [dependencies]

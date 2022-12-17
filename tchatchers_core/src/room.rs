@@ -6,7 +6,7 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use crate::ws_message::WsMessage;
+use crate::ws_message::{WsMessage, WsMessageContent};
 use redis::Connection;
 
 /// A room gather a list of messages sent by users.
@@ -22,7 +22,7 @@ impl Room {
     ///
     /// - conn : The redis connection pool.
     /// - room_name : The name of the room.
-    pub fn find_messages_in_room(conn: &mut Connection, room_name: &str) -> Vec<WsMessage> {
+    pub fn find_messages_in_room(conn: &mut Connection, room_name: &str) -> Vec<WsMessageContent> {
         let messages: Vec<String> = redis::cmd("LRANGE")
             .arg(room_name)
             .arg("0")
@@ -32,6 +32,7 @@ impl Room {
         messages
             .iter()
             .map(|m| serde_json::from_str(m).unwrap())
+            .rev()
             .collect()
     }
 
@@ -42,7 +43,11 @@ impl Room {
     /// - conn : The connection pool.
     /// - room_name : The name of the room.
     /// - ws_message : The message to be added to the room.
-    pub fn publish_message_in_room(conn: &mut Connection, room_name: &str, ws_message: WsMessage) {
+    pub fn publish_message_in_room(
+        conn: &mut Connection,
+        room_name: &str,
+        ws_message: WsMessageContent,
+    ) {
         redis::cmd("RPUSH")
             .arg(room_name)
             .arg(serde_json::to_string(&ws_message).unwrap())

@@ -21,7 +21,7 @@ use futures_util::{SinkExt, StreamExt};
 use tchatchers_core::{
     room::Room,
     user::PartialUser,
-    ws_message::{WsMessage, WsMessageType},
+    ws_message::{WsMessage, WsMessageContent},
 };
 use tokio::sync::broadcast;
 
@@ -94,57 +94,46 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>, room: String, us
     // This task will receive messages from client and send them to broadcast subscribers.
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(Message::Text(text))) = receiver.next().await {
-            // Add username before message.
-            match text.as_str() {
-                "Close" => {
-                    break;
-                }
-                "Ping" => {
-                    let _ = tx.send(String::from("Pong"));
-                }
-                "Pong" | "Keep Alive" => {
-                    continue;
-                }
-                t => {
-                    let msg: WsMessage = serde_json::from_str(t).unwrap();
-                    match msg.message_type {
-                        WsMessageType::Send => {
-                            let ws_message = WsMessage {
-                                message_type: WsMessageType::Receive,
-                                content: msg.content,
-                                author: msg.author,
-                                room: Some(room.clone()),
-                                ..WsMessage::default()
-                            };
-                            let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
-
-                            Room::publish_message_in_room(
-                                &mut state.redis_pool.get().unwrap(),
-                                &room,
-                                ws_message.clone(),
-                            );
-                        }
-                        WsMessageType::RetrieveMessages => {
-                            let msgs = Room::find_messages_in_room(
-                                &mut state.redis_pool.get().unwrap(),
-                                &room,
-                            );
-                            let author = msg.author;
-                            for mut retrieved_msg in msgs {
-                                retrieved_msg.to = author.clone();
-                                let _ = tx.send(serde_json::to_string(&retrieved_msg).unwrap());
-                            }
-                            let ws_message = WsMessage {
-                                message_type: WsMessageType::MessagesRetrieved,
-                                author: Some(user.clone()),
-                                ..WsMessage::default()
-                            };
-                            let _ = tx.send(serde_json::to_string(&ws_message).unwrap());
-                        }
-                        _ => {}
+            if let Ok(msg) = serde_json::from_str(text.as_str()) {
+                match msg {
+                    WsMessage::Close => break,
+                    WsMessage::Ping => {
+                        let _ = tx.send(serde_json::to_string(&WsMessage::Pong).unwrap());
                     }
+                    WsMessage::Pong | WsMessage::ClientKeepAlive => continue,
+                    WsMessage::Send(ws_message) => {
+                        let _ = tx.send(
+                            serde_json::to_string(&WsMessage::Receive(ws_message.clone())).unwrap(),
+                        );
+
+                        Room::publish_message_in_room(
+                            &mut state.redis_pool.get().unwrap(),
+                            &room,
+                            ws_message,
+                        );
+                    }
+                    WsMessage::RetrieveMessages(session_id) => {
+                        let messages: Vec<WsMessageContent> = Room::find_messages_in_room(
+                            &mut state.redis_pool.get().unwrap(),
+                            &room,
+                        )
+                        .iter_mut()
+                        .map(|mut m| {
+                            m.to = Some(user.clone());
+                            m.clone()
+                        })
+                        .collect();
+                        let _ = tx.send(
+                            serde_json::to_string(&WsMessage::MessagesRetrieved {
+                                messages,
+                                session_id,
+                            })
+                            .unwrap(),
+                        );
+                    }
+                    _ => {}
                 }
-            };
+            }
         }
     });
 

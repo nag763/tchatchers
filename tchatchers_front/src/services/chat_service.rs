@@ -1,10 +1,11 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use crate::services::event_bus::{EventBus, Request};
+use crate::services::chat_bus::ChatBus;
 use futures::{channel::mpsc::Sender, SinkExt, StreamExt};
 use gloo_console::{debug, error};
 use gloo_net::websocket::{futures::WebSocket, Message, WebSocketError};
+use tchatchers_core::ws_message::WsMessage;
 use wasm_bindgen_futures::spawn_local;
 use yew_agent::Dispatched;
 
@@ -28,7 +29,7 @@ impl WebsocketService {
         let (mut write, mut read) = ws.split();
 
         let (in_tx, mut in_rx) = futures::channel::mpsc::channel::<String>(1000);
-        let mut event_bus = EventBus::dispatcher();
+        let mut event_bus = ChatBus::dispatcher();
 
         spawn_local(async move {
             while let Some(s) = in_rx.next().await {
@@ -40,31 +41,30 @@ impl WebsocketService {
             while let Some(msg) = read.next().await {
                 match msg {
                     Ok(Message::Text(data)) => {
-                        debug!("from websocket:", &data);
-                        match data.as_str() {
-                            "Pong" => event_bus.send(Request::EventBusKeepAlive),
-                            _ => event_bus.send(Request::EventBusMsg(data)),
+                        if let Ok(msg) = serde_json::from_str(&data) {
+                            event_bus.send(msg);
                         }
                     }
                     Ok(Message::Bytes(b)) => {
                         let decoded = std::str::from_utf8(&b);
                         if let Ok(val) = decoded {
-                            debug!("from websocket: {}", val);
-                            event_bus.send(Request::EventBusMsg(val.into()));
+                            if let Ok(msg) = serde_json::from_str(val) {
+                                event_bus.send(msg);
+                            }
                         }
                     }
                     Err(e) => match e {
                         WebSocketError::ConnectionError => {
                             error!("Error on connection");
-                            event_bus.send(Request::EventBusNotConnected);
+                            event_bus.send(WsMessage::ClientDisconnected);
                         }
                         WebSocketError::ConnectionClose(e) => {
                             error!("The connection has been closed :", e.code);
-                            event_bus.send(Request::EventBusClosed);
+                            event_bus.send(WsMessage::ConnectionClosed);
                         }
                         WebSocketError::MessageSendError(e) => {
                             error!("Error while sending message", e.to_string());
-                            event_bus.send(Request::EventBusErr(e.to_string()))
+                            event_bus.send(WsMessage::ErrorOnMessage(e.to_string()))
                         }
                         _ => error!("Unexpected error while communicating with distant ws"),
                     },

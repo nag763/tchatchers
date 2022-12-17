@@ -2444,6 +2444,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tchatchers_core",
+ "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",

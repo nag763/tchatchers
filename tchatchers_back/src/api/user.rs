@@ -76,16 +76,16 @@ pub async fn authenticate(
             return Err((StatusCode::NOT_FOUND, "We couldn't connect you, please ensure that the login and password are correct before trying again"));
     };
     if user.is_authorized {
-            let jwt = Jwt::from(user);
-            let serialized_jwt : String = jwt.serialize(&state.jwt_secret).unwrap();
-            let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
-            jwt_cookie.set_path("/");
-            jwt_cookie.make_permanent();
-            jwt_cookie.set_secure(true);
-            jwt_cookie.set_http_only(false);
-            let cookie_jar = cookie_jar.add(jwt_cookie);
-            Ok((StatusCode::OK, cookie_jar))
-        } else {
+        let jwt = Jwt::from(user);
+        let serialized_jwt: String = jwt.serialize(&state.jwt_secret).unwrap();
+        let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
+        jwt_cookie.set_path("/");
+        jwt_cookie.make_permanent();
+        jwt_cookie.set_secure(true);
+        jwt_cookie.set_http_only(false);
+        let cookie_jar = cookie_jar.add(jwt_cookie);
+        Ok((StatusCode::OK, cookie_jar))
+    } else {
         Err((StatusCode::UNAUTHORIZED, "This user's access has been revoked, contact an admin if you believe you should access this service"))
     }
 }
@@ -134,19 +134,19 @@ pub async fn update_user(
     Json(user): Json<UpdatableUser>,
 ) -> impl IntoResponse {
     if jwt.user.id == user.id {}
-        let Ok(_ret) =  user.update(&state.pg_pool).await else {
+    let Ok(_ret) =  user.update(&state.pg_pool).await else {
             return Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened"));
         };
-                let updated_user = User::find_by_id(user.id, &state.pg_pool).await.unwrap();
-                let jwt = Jwt::from(updated_user);
-                let serialized_jwt: String = jwt.serialize(&state.jwt_secret).unwrap();
-                let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
-                jwt_cookie.set_path("/");
-                jwt_cookie.make_permanent();
-                jwt_cookie.set_secure(true);
-                jwt_cookie.set_http_only(false);
-                let new_jar = cookie_jar.add(jwt_cookie);
-                Ok((StatusCode::CREATED, new_jar, "User updated with success"))
+    let updated_user = User::find_by_id(user.id, &state.pg_pool).await.unwrap();
+    let jwt = Jwt::from(updated_user);
+    let serialized_jwt: String = jwt.serialize(&state.jwt_secret).unwrap();
+    let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
+    jwt_cookie.set_path("/");
+    jwt_cookie.make_permanent();
+    jwt_cookie.set_secure(true);
+    jwt_cookie.set_http_only(false);
+    let new_jar = cookie_jar.add(jwt_cookie);
+    Ok((StatusCode::CREATED, new_jar, "User updated with success"))
 }
 
 pub async fn delete_user(

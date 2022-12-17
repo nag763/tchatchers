@@ -15,52 +15,69 @@ use uuid::Uuid;
 /// Some WS messages are containing data that have to be transmitted to everyone
 /// in the room (ie Send) or actions to run either on client side
 /// (MessagesRetrieved) or server side (RetrieveMessages)
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
-pub enum WsMessageType {
+pub enum WsMessage {
     /// Content to be shared among all subscribers of the application.
-    #[default]
-    Send,
+    Send(WsMessageContent),
     /// Content to be displayed on client side.
-    Receive,
+    Receive(WsMessageContent),
     /// Action sent by a client to retrieve all messages of the room.
     ///
     /// Useful when a client connects to a chat that had messages before he
     /// joined.
-    RetrieveMessages,
+    RetrieveMessages(Uuid),
     /// Information sent by the server to inform all the messages have been
     /// retrieved and sent to the client.
-    MessagesRetrieved,
+    MessagesRetrieved {
+        messages: Vec<WsMessageContent>,
+        session_id: Uuid,
+    },
+    Pong,
+    Ping,
+    Close,
+    ClientKeepAlive,
     /// Action to inform the server that the client reconnected.
-    Reconnected,
+    #[cfg(feature = "front")]
+    ClientReconnected,
+    #[cfg(feature = "front")]
     /// Action to inform the server that the client disconnected.
-    Disconnected,
+    ClientDisconnected,
+    #[cfg(feature = "front")]
+    ConnectionClosed,
+    #[cfg(feature = "front")]
+    ErrorOnMessage(String),
 }
 
 /// Standard used to communicate inside WS between the client and the server
 /// applications.
 #[derive(
-    Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash,
+    Debug,
+    Clone,
+    serde::Serialize,
+    serde::Deserialize,
+    derivative::Derivative,
+    PartialEq,
+    Eq,
+    Hash,
+    Default,
 )]
 #[serde(rename_all = "camelCase")]
-#[derivative(Default)]
-pub struct WsMessage {
-    /// The type of message.
-    pub message_type: WsMessageType,
+pub struct WsMessageContent {
     /// The message identifier, must be unique.
     #[derivative(Default(value = "Uuid::new_v4()"))]
     pub uuid: Uuid,
     /// The content of the message.
-    pub content: Option<String>,
+    pub content: String,
     /// The author of the message.
     ///
     /// Is empty when the message is emitted by the server.
-    pub author: Option<PartialUser>,
+    pub author: PartialUser,
     /// To whom the message is directed.
     pub to: Option<PartialUser>,
     /// When the message has been emitted.
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
     pub timestamp: DateTime<Utc>,
     /// The room on which the message has been emitted.
-    pub room: Option<String>,
+    pub room: String,
 }

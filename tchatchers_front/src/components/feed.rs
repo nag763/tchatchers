@@ -7,9 +7,8 @@ use super::disconnected_bar::DisconnectedBar;
 use super::type_bar::TypeBar;
 use crate::components::toast::Alert;
 use crate::router::Route;
-use crate::services::chat::WebsocketService;
-use crate::services::event_bus::EventBus;
-use crate::services::message::*;
+use crate::services::chat_bus::ChatBus;
+use crate::services::chat_service::WebsocketService;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::jwt::get_user;
 use gloo_net::http::Request;
@@ -24,7 +23,7 @@ use yew_router::scope_ext::RouterScopeExt;
 
 #[derive(Clone)]
 pub enum Msg {
-    HandleWsInteraction(String),
+    HandleWsInteraction(Box<WsMessage>),
     CheckWsState,
     TryReconnect,
     CutWs,
@@ -38,7 +37,7 @@ pub struct Props {
 pub struct Feed {
     received_messages: Vec<WsMessageContent>,
     ws: WebsocketService,
-    _producer: Box<dyn Bridge<EventBus>>,
+    _producer: Box<dyn Bridge<ChatBus>>,
     _first_connect: Timeout,
     called_back: bool,
     is_connected: bool,
@@ -69,12 +68,12 @@ impl Component for Feed {
         };
         let cb = {
             let link = ctx.link().clone();
-            move |msg| link.send_message(Msg::HandleWsInteraction(msg))
+            move |msg| link.send_message(Msg::HandleWsInteraction(Box::new(msg)))
         };
         Self {
             received_messages: vec![],
             ws,
-            _producer: EventBus::bridge(Rc::new(cb)),
+            _producer: ChatBus::bridge(Rc::new(cb)),
             is_connected: false,
             called_back: false,
             is_closed: false,
@@ -90,11 +89,10 @@ impl Component for Feed {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::HandleWsInteraction(s) => {
+            Msg::HandleWsInteraction(message) => {
                 self.called_back = true;
-                let message: WsBusMessage = serde_json::from_str(&s).unwrap();
-                match message.message_type {
-                    WsBusMessageType::NotConnected | WsBusMessageType::Closed => {
+                match *message {
+                    WsMessage::ClientDisconnected | WsMessage::ConnectionClosed => {
                         if !self.is_closed {
                             gloo_console::error!("Not connected");
                             let req = Request::get("/api/validate").send();
@@ -105,33 +103,20 @@ impl Component for Feed {
                                     link.navigator().unwrap().push(&Route::SignIn);
                                 }
                             });
+                            self.ws_keep_alive = None;
                             self.is_connected = false;
                         }
                     }
-                    WsBusMessageType::Reply => {
-                        let msg: WsMessage = serde_json::from_str(&message.content).unwrap();
-                        match msg {
-                            WsMessage::Receive(msg_content) => {
-                                self.received_messages.insert(0, msg_content)
-                            }
-                            WsMessage::MessagesRetrieved {
-                                mut messages,
-                                session_id,
-                            } if session_id == self.session_id => {
-                                self.received_messages.append(&mut messages)
-                            }
-
-                            _ => (),
-                        }
-                        self.is_connected = true;
-                        self.ws_keep_alive = {
-                            let tx = self.ws.tx.clone();
-                            Some(Interval::new(30_000, move || {
-                                tx.clone().try_send("Keep Alive".into()).unwrap()
-                            }))
-                        }
+                    WsMessage::Receive(msg_content) => {
+                        self.received_messages.insert(0, msg_content)
                     }
-                    WsBusMessageType::Pong => {
+                    WsMessage::MessagesRetrieved {
+                        mut messages,
+                        session_id,
+                    } if session_id == self.session_id => {
+                        self.received_messages.append(&mut messages)
+                    }
+                    WsMessage::Pong => {
                         self.is_connected = true;
 
                         if self.received_messages.is_empty() {
@@ -141,6 +126,12 @@ impl Component for Feed {
                                 .clone()
                                 .try_send(serde_json::to_string(&msg).unwrap())
                                 .unwrap();
+                            self.ws_keep_alive = {
+                                let tx = self.ws.tx.clone();
+                                Some(Interval::new(30_000, move || {
+                                    tx.clone().try_send("Keep Alive".into()).unwrap()
+                                }))
+                            }
                         }
                     }
                     _ => {
@@ -150,13 +141,21 @@ impl Component for Feed {
                 true
             }
             Msg::CheckWsState => {
-                self.ws.tx.clone().try_send("Ping".into()).unwrap();
+                self.ws
+                    .tx
+                    .clone()
+                    .try_send(serde_json::to_string(&WsMessage::Ping).unwrap())
+                    .unwrap();
                 false
             }
             Msg::TryReconnect => {
                 let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
                 self.ws = ws;
-                self.ws.tx.clone().try_send("Ping".into()).unwrap();
+                self.ws
+                    .tx
+                    .clone()
+                    .try_send(serde_json::to_string(&WsMessage::Ping).unwrap())
+                    .unwrap();
                 self.called_back = false;
                 true
             }
@@ -201,7 +200,10 @@ impl Component for Feed {
     }
 
     fn destroy(&mut self, ctx: &Context<Self>) {
-        self.ws.tx.try_send("Close".into()).unwrap();
+        self.ws
+            .tx
+            .try_send(serde_json::to_string(&WsMessage::Close).unwrap())
+            .unwrap();
         ctx.link().send_message(Msg::CutWs)
     }
 }
