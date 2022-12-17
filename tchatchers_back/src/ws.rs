@@ -20,7 +20,6 @@ use axum::{
 use futures_util::{SinkExt, StreamExt};
 use tchatchers_core::{
     room::Room,
-    user::PartialUser,
     ws_message::{WsMessage, WsMessageContent},
 };
 use tokio::sync::broadcast;
@@ -54,9 +53,9 @@ pub async fn ws_handler(
     ws: WebSocketUpgrade,
     State(state): State<Arc<AppState>>,
     Path(room): Path<String>,
-    JwtUserExtractor(jwt): JwtUserExtractor,
+    JwtUserExtractor(_jwt): JwtUserExtractor,
 ) -> impl IntoResponse {
-    ws.on_upgrade(|socket| handle_socket(socket, state, room, jwt.user))
+    ws.on_upgrade(|socket| handle_socket(socket, state, room))
 }
 
 /// The socket handler
@@ -67,7 +66,7 @@ pub async fn ws_handler(
 /// - state : The data shared across threads.
 /// - room : The room name.
 /// - user : The connected user's infos.
-async fn handle_socket(socket: WebSocket, state: Arc<AppState>, room: String, user: PartialUser) {
+async fn handle_socket(socket: WebSocket, state: Arc<AppState>, room: String) {
     let (mut sender, mut receiver) = socket.split();
     let tx = {
         let mut rooms = state.txs.lock().unwrap();
@@ -116,13 +115,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>, room: String, us
                         let messages: Vec<WsMessageContent> = Room::find_messages_in_room(
                             &mut state.redis_pool.get().unwrap(),
                             &room,
-                        )
-                        .iter_mut()
-                        .map(|mut m| {
-                            m.to = Some(user.clone());
-                            m.clone()
-                        })
-                        .collect();
+                        );
                         let _ = tx.send(
                             serde_json::to_string(&WsMessage::MessagesRetrieved {
                                 messages,

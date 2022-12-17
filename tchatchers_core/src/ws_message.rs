@@ -73,8 +73,6 @@ pub struct WsMessageContent {
     ///
     /// Is empty when the message is emitted by the server.
     pub author: PartialUser,
-    /// To whom the message is directed.
-    pub to: Option<PartialUser>,
     /// When the message has been emitted.
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
     pub timestamp: DateTime<Utc>,
