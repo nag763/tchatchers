@@ -1,13 +1,7 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use crate::components::feed::Feed;
-use crate::components::join_room::JoinRoom;
-use crate::components::logout::LogOut;
-use crate::components::not_found::NotFound;
-use crate::components::settings::Settings;
-use crate::components::signin::SignIn;
-use crate::components::signup::SignUp;
+use crate::components::prelude::*;
 use yew::{html, Html};
 use yew_router::prelude::*;
 

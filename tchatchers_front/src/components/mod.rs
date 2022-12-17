@@ -18,3 +18,17 @@ pub mod signin;
 pub mod signup;
 pub mod toast;
 pub mod type_bar;
+
+pub mod prelude {
+    pub use super::auth_checker::AuthChecker;
+    pub use super::feed::Feed;
+    pub use super::modal::Modal;
+    pub use super::logout::LogOut;
+    pub use super::navbar::Navbar;
+    pub use super::not_found::NotFound;
+    pub use super::settings::Settings;
+    pub use super::signin::SignIn;
+    pub use super::signup::SignUp;
+    pub use super::toast::Toast;
+    pub use super::join_room::JoinRoom;
+}
