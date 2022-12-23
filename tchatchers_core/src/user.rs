@@ -6,9 +6,11 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
+use crate::common::RE_LIMITED_CHARS;
 use crate::jwt::Jwt;
 #[cfg(feature = "back")]
 use rand::Rng;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "back")]
 use sqlx::postgres::PgQueryResult;
@@ -17,6 +19,13 @@ use sqlx::FromRow;
 #[cfg(feature = "back")]
 use sqlx::PgPool;
 use validator::Validate;
+use validator::ValidationError;
+
+lazy_static! {
+    static ref RE_ONE_LOWERCASE_CHAR: Regex = Regex::new(r"[a-z]+").unwrap();
+    static ref RE_ONE_NUMBER: Regex = Regex::new(r"[0-9]+").unwrap();
+    static ref RE_ONE_UPPERCASE_CHAR: Regex = Regex::new(r"[A-Z]+").unwrap();
+}
 
 /// The in base structure, which should never be shared between components and
 /// apps.
@@ -119,18 +128,41 @@ impl From<User> for PartialUser {
     }
 }
 
+fn password_strengh(password: &str) -> Result<(), ValidationError> {
+    if !RE_ONE_LOWERCASE_CHAR.is_match(password)
+        || !RE_ONE_UPPERCASE_CHAR.is_match(password)
+        || !RE_ONE_NUMBER.is_match(password)
+    {
+        Err(ValidationError::new("security_constraints_not_matched"))
+    } else {
+        Ok(())
+    }
+}
+
 /// Structure used only to create new DB entities.
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct InsertableUser {
     /// The user log in.
-    #[validate(length(min = 3, max = 32))]
+    #[validate(
+        length(min = 3, max = 32),
+        regex(path = "RE_LIMITED_CHARS", code = "limited_chars")
+    )]
     pub login: String,
     /// The user password, should be raw prior being insert.
-    #[validate(length(min = 8, max = 128))]
+    #[validate(
+        length(min = 8, max = 128),
+        custom(
+            function = "password_strengh",
+            code = "security_constraints_not_matched"
+        )
+    )]
     pub password: String,
     /// The name of the user.
-    #[validate(length(min = 3, max = 16))]
+    #[validate(
+        length(min = 3, max = 16),
+        regex(path = "RE_LIMITED_CHARS", code = "limited_chars")
+    )]
     pub name: String,
 }
 
@@ -159,7 +191,10 @@ impl InsertableUser {
 #[serde(rename_all = "camelCase")]
 pub struct UpdatableUser {
     pub id: i32,
-    #[validate(length(min = 3, max = 16))]
+    #[validate(
+        length(min = 3, max = 16),
+        regex(path = "RE_LIMITED_CHARS", code = "limited_chars")
+    )]
     pub name: String,
     pub pfp: Option<String>,
 }

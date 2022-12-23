@@ -2450,12 +2450,15 @@ dependencies = [
 name = "tchatchers_core"
 version = "0.1.0"
 dependencies = [
+ "axum",
  "chrono",
  "derivative",
  "jsonwebtoken",
+ "lazy_static",
  "r2d2",
  "rand",
  "redis",
+ "regex",
  "rust-argon2",
  "serde",
  "serde_json",

@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+#[cfg(feature = "back")]
+use axum::{http::StatusCode, response::IntoResponse};
 use validator::ValidationErrors;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -28,7 +30,16 @@ impl Display for ValidationErrorMessage {
                 "The {} doesn't respect the length constraints",
                 self.field
             ),
+            "limited_chars" => write!(f, "The {} doesn't respect the scope of chars allowed.\nOnly letters, numbers, dashes and underscores are allowed.", self.field),
+            "security_constraints_not_matched" => write!(f, "The {} doesn't match the security constraints.\nIt is required to have at least one uppercase character, one lowercase character and one number in the {}.", self.field, self.field),
             _ => write!(f, "An error happened druing the validation of the form"),
         }
+    }
+}
+
+#[cfg(feature = "back")]
+impl IntoResponse for ValidationErrorMessage {
+    fn into_response(self) -> axum::response::Response {
+        (StatusCode::BAD_REQUEST, self.to_string()).into_response()
     }
 }

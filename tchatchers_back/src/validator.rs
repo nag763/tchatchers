@@ -4,7 +4,7 @@ use axum::{
     async_trait,
     body::HttpBody,
     extract::{rejection::JsonRejection, FromRequest},
-    http::{Request, StatusCode},
+    http::Request,
     response::IntoResponse,
     BoxError, Json as JsonAxum,
 };
@@ -26,8 +26,7 @@ impl IntoResponse for JsonValidatorRejection {
             JsonValidatorRejection::ValidationRejection(errors) => {
                 let validation_error_message: ValidationErrorMessage =
                     ValidationErrorMessage::from(errors);
-                let error_message = validation_error_message.to_string();
-                (StatusCode::BAD_REQUEST, error_message).into_response()
+                validation_error_message.into_response()
             }
         }
     }

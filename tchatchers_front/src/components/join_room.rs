@@ -3,17 +3,21 @@
 use crate::components::common::FormButton;
 use crate::router::Route;
 use crate::utils::jwt::get_user;
+use tchatchers_core::{room::RoomNameValidator, validation_error_message::ValidationErrorMessage};
+use validator::Validate;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Html, NodeRef};
 use yew_router::scope_ext::RouterScopeExt;
 
 pub enum Msg {
     SubmitForm,
+    VerificationError(String),
 }
 
 #[derive(Default)]
 pub struct JoinRoom {
     room_name: NodeRef,
+    verification_error: Option<String>,
 }
 
 impl Component for JoinRoom {
@@ -34,13 +38,24 @@ impl Component for JoinRoom {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::SubmitForm => {
+                self.verification_error = None;
                 if let Some(room_name) = self.room_name.cast::<HtmlInputElement>() {
                     if room_name.check_validity() {
-                        ctx.link().navigator().unwrap().push(&Route::Room {
-                            room: room_name.value().to_lowercase(),
-                        });
+                        let room_name = room_name.value();
+                        if let Err(e) = RoomNameValidator::from(room_name.clone()).validate() {
+                            ctx.link().send_message(Msg::VerificationError(
+                                ValidationErrorMessage::from(e).to_string(),
+                            ));
+                        } else {
+                            ctx.link().navigator().unwrap().push(&Route::Room {
+                                room: room_name.to_lowercase(),
+                            });
+                        }
                     }
                 }
+            }
+            Msg::VerificationError(error) => {
+                self.verification_error = Some(error);
             }
         }
         true
@@ -63,6 +78,9 @@ impl Component for JoinRoom {
                       <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="1" ref={&self.room_name} />
                     </div>
                   </div>
+                    <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.verification_error.is_none()}>
+                        {self.verification_error.as_ref().unwrap_or(&String::new())}
+                    </small>
                   <FormButton label="Join room" />
                 </form>
                 </div>

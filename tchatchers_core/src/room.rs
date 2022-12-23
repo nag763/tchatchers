@@ -6,15 +6,22 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
+use crate::common::RE_LIMITED_CHARS;
+#[cfg(feature = "back")]
 use crate::ws_message::{WsMessage, WsMessageContent};
+#[cfg(feature = "back")]
 use redis::Connection;
+use validator::Validate;
 
 /// A room gather a list of messages sent by users.
+///
+#[cfg(feature = "back")]
 pub struct Room {
     /// The list of messages, ordered from the oldest to the newest.
     pub messages: Vec<WsMessage>,
 }
 
+#[cfg(feature = "back")]
 impl Room {
     /// Returns all the messages persisted in a room.
     ///
@@ -53,5 +60,20 @@ impl Room {
             .arg(serde_json::to_string(&ws_message).unwrap())
             .query(conn)
             .unwrap()
+    }
+}
+
+#[derive(Debug, Validate)]
+pub struct RoomNameValidator {
+    #[validate(
+        length(min = 1, max = 128),
+        regex(path = "RE_LIMITED_CHARS", code = "limited_chars")
+    )]
+    name: String,
+}
+
+impl From<String> for RoomNameValidator {
+    fn from(value: String) -> Self {
+        Self { name: value }
     }
 }

@@ -13,9 +13,11 @@ use crate::services::toast_bus::ToastBus;
 use crate::utils::jwt::get_user;
 use gloo_net::http::Request;
 use gloo_timers::callback::{Interval, Timeout};
+use tchatchers_core::room::RoomNameValidator;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessage, WsMessageContent};
 use uuid::Uuid;
+use validator::Validate;
 use yew::{html, Callback, Component, Context, Html, Properties};
 use yew_agent::Dispatched;
 use yew_agent::{Bridge, Bridged};
@@ -45,6 +47,7 @@ pub struct Feed {
     is_closed: bool,
     user: PartialUser,
     session_id: Uuid,
+    room_name_checked: bool,
 }
 
 impl Component for Feed {
@@ -84,6 +87,7 @@ impl Component for Feed {
                 Timeout::new(1, move || link.send_message(Msg::CheckWsState))
             },
             session_id: Uuid::new_v4(),
+            room_name_checked: false,
         }
     }
 
@@ -103,6 +107,19 @@ impl Component for Feed {
                                     link.navigator().unwrap().push(&Route::SignIn);
                                 }
                             });
+                            if !self.room_name_checked {
+                                if let Err(_e) =
+                                    RoomNameValidator::from(ctx.props().room.clone()).validate()
+                                {
+                                    ToastBus::dispatcher().send(Alert {
+                                        is_success: false,
+                                        content: "The room name you tried to join is not valid, please select one within this screen.".into(),
+                                    });
+                                    ctx.link().navigator().unwrap().push(&Route::JoinRoom);
+                                } else {
+                                    self.room_name_checked = true;
+                                }
+                            }
                             self.ws_keep_alive = None;
                             self.is_connected = false;
                         }

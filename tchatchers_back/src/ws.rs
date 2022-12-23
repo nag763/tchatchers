@@ -19,10 +19,12 @@ use axum::{
 };
 use futures_util::{SinkExt, StreamExt};
 use tchatchers_core::{
-    room::Room,
+    room::{Room, RoomNameValidator},
+    validation_error_message::ValidationErrorMessage,
     ws_message::{WsMessage, WsMessageContent},
 };
 use tokio::sync::broadcast;
+use validator::Validate;
 
 #[derive(Default, Debug)]
 pub struct WsRooms(HashMap<String, broadcast::Sender<String>>);
@@ -55,7 +57,11 @@ pub async fn ws_handler(
     Path(room): Path<String>,
     JwtUserExtractor(_jwt): JwtUserExtractor,
 ) -> impl IntoResponse {
-    ws.on_upgrade(|socket| handle_socket(socket, state, room))
+    let room_name_validator: RoomNameValidator = RoomNameValidator::from(room.clone());
+    if let Err(e) = room_name_validator.validate() {
+        return Err(ValidationErrorMessage::from(e).into_response());
+    }
+    Ok(ws.on_upgrade(|socket| handle_socket(socket, state, room)))
 }
 
 /// The socket handler
