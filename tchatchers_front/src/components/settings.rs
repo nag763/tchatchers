@@ -15,6 +15,8 @@ use crate::utils::requester::Requester;
 use gloo_net::http::Request;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::UpdatableUser;
+use tchatchers_core::validation_error_message::ValidationErrorMessage;
+use validator::Validate;
 use web_sys::HtmlInputElement;
 use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
 use yew_agent::Bridge;
@@ -105,22 +107,31 @@ impl Component for Settings {
                             name: name.value(),
                             pfp: self.pfp.clone(),
                         };
-                        let mut req = Requester::<UpdatableUser>::put("/api/user");
-                        req.is_json(true).body(Some(payload));
-                        let link = ctx.link().clone();
-                        self.wait_for_api = true;
-                        wasm_bindgen_futures::spawn_local(async move {
-                            let resp = req.send().await;
-                            if resp.status().is_success() {
-                                link.send_message(Msg::ProfileUpdated);
-                                ToastBus::dispatcher().send(Alert {
-                                    is_success: true,
-                                    content: "Your profile has been updated with success".into(),
-                                });
-                            } else {
-                                link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
-                            }
-                        });
+                        if let Err(e) = payload.validate() {
+                            let message: ValidationErrorMessage = e.into();
+                            ctx.link()
+                                .send_message(Msg::ErrorFromServer(message.to_string()));
+                        } else {
+                            let mut req = Requester::<UpdatableUser>::put("/api/user");
+                            req.is_json(true).body(Some(payload));
+                            let link = ctx.link().clone();
+                            self.wait_for_api = true;
+                            wasm_bindgen_futures::spawn_local(async move {
+                                let resp = req.send().await;
+                                if resp.status().is_success() {
+                                    link.send_message(Msg::ProfileUpdated);
+                                    ToastBus::dispatcher().send(Alert {
+                                        is_success: true,
+                                        content: "Your profile has been updated with success"
+                                            .into(),
+                                    });
+                                } else {
+                                    link.send_message(Msg::ErrorFromServer(
+                                        resp.text().await.unwrap(),
+                                    ));
+                                }
+                            });
+                        }
                     }
                 }
                 true
@@ -220,7 +231,7 @@ impl Component for Settings {
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" value={self.user.login.clone()} disabled=true/>
+                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="32" value={self.user.login.clone()} disabled=true/>
                     </div>
                     </div>
                   <div class="md:flex md:items-center mb-6">
@@ -230,7 +241,7 @@ impl Component for Settings {
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" ref={&self.name} value={self.user.name.clone()}/>
+                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.name} value={self.user.name.clone()}/>
                     </div>
                   </div>
                   <div class="md:flex md:items-center mb-6">

@@ -20,3 +20,4 @@ serde = { version = "1.0.144", features = ["derive"] }
 serde_json = "1.0.85"
 sqlx = { version = "0.6", features = [ "runtime-async-std-native-tls" , "postgres"], optional = true }
 uuid = { version = "1.1.2", features = ["v4", "serde", "js"] }
+validator = { version = "0.16.0", features = ["derive"] }

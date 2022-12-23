@@ -8,6 +8,8 @@ use crate::utils::requester::Requester;
 use gloo_net::http::Request;
 use gloo_timers::callback::Timeout;
 use tchatchers_core::user::InsertableUser;
+use tchatchers_core::validation_error_message::ValidationErrorMessage;
+use validator::Validate;
 use web_sys::HtmlInputElement;
 use yew::{html, Component, Context, Html, NodeRef, Properties};
 use yew_agent::Dispatched;
@@ -61,20 +63,27 @@ impl Component for SignUp {
                             name: name.value(),
                             password: password.value(),
                         };
-                        let mut req = Requester::<InsertableUser>::post("/api/user");
-                        req.is_json(true).body(Some(payload));
-                        wasm_bindgen_futures::spawn_local(async move {
-                            let resp = req.send().await;
-                            if resp.status().is_success() {
-                                ToastBus::dispatcher().send(Alert {
-                                    is_success: true,
-                                    content: "User created with success".into(),
-                                });
-                                link.navigator().unwrap().push(&Route::SignIn);
-                            } else {
-                                link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
-                            }
-                        });
+                        if let Err(e) = payload.validate() {
+                            let message: ValidationErrorMessage = e.into();
+                            link.send_message(Msg::ErrorFromServer(message.to_string()));
+                        } else {
+                            let mut req = Requester::<InsertableUser>::post("/api/user");
+                            req.is_json(true).body(Some(payload));
+                            wasm_bindgen_futures::spawn_local(async move {
+                                let resp = req.send().await;
+                                if resp.status().is_success() {
+                                    ToastBus::dispatcher().send(Alert {
+                                        is_success: true,
+                                        content: "User created with success".into(),
+                                    });
+                                    link.navigator().unwrap().push(&Route::SignIn);
+                                } else {
+                                    link.send_message(Msg::ErrorFromServer(
+                                        resp.text().await.unwrap(),
+                                    ));
+                                }
+                            });
+                        }
                     }
                 }
                 true
@@ -132,7 +141,7 @@ impl Component for SignUp {
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" ref={&self.login} oninput={ctx.link().callback(|_| Msg::OnLoginChanged)}/>
+                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="32" ref={&self.login} oninput={ctx.link().callback(|_| Msg::OnLoginChanged)}/>
                     </div>
                   </div>
                   <div class="md:flex md:items-center mb-6">
@@ -142,7 +151,7 @@ impl Component for SignUp {
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" type="text" required=true minlength="2" ref={&self.name} />
+                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" type="text" required=true minlength="3" maxlength="16" ref={&self.name} />
                     </div>
                   </div>
                   <div class="md:flex md:items-center mb-6">
@@ -152,7 +161,7 @@ impl Component for SignUp {
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-password" type="password" required=true minlength="4" ref={&self.password} />
+                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-password" type="password" required=true minlength="8" maxlength="128" ref={&self.password} />
                     </div>
                   </div>
                   <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.server_error.is_none()}>

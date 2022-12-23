@@ -4,10 +4,11 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use crate::extractor::JwtUserExtractor;
+use crate::validator::Json;
 use crate::AppState;
 use crate::JWT_PATH;
 use axum::extract::State;
-use axum::{extract::Path, http::StatusCode, response::IntoResponse, Json};
+use axum::{extract::Path, http::StatusCode, response::IntoResponse};
 use axum_extra::extract::cookie::{Cookie, CookieJar};
 use std::sync::Arc;
 use tchatchers_core::jwt::Jwt;

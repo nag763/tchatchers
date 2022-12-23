@@ -16,6 +16,7 @@ use sqlx::postgres::PgQueryResult;
 use sqlx::FromRow;
 #[cfg(feature = "back")]
 use sqlx::PgPool;
+use validator::Validate;
 
 /// The in base structure, which should never be shared between components and
 /// apps.
@@ -119,14 +120,17 @@ impl From<User> for PartialUser {
 }
 
 /// Structure used only to create new DB entities.
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct InsertableUser {
     /// The user log in.
+    #[validate(length(min = 3, max = 32))]
     pub login: String,
     /// The user password, should be raw prior being insert.
+    #[validate(length(min = 8, max = 128))]
     pub password: String,
     /// The name of the user.
+    #[validate(length(min = 3, max = 16))]
     pub name: String,
 }
 
@@ -151,10 +155,11 @@ impl InsertableUser {
 }
 
 /// The updatabale structure, should only be used to update a db entity.
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdatableUser {
     pub id: i32,
+    #[validate(length(min = 3, max = 16))]
     pub name: String,
     pub pfp: Option<String>,
 }
@@ -177,7 +182,7 @@ impl UpdatableUser {
 }
 
 /// Structure used to authenticate a user.
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Validate)]
 pub struct AuthenticableUser {
     /// The login of the user, has to exist in database.
     pub login: String,
