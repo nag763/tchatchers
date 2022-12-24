@@ -33,6 +33,7 @@ pub enum WsMessage {
         messages: Vec<WsMessageContent>,
         session_id: Uuid,
     },
+    MessageUpdated(Vec<WsMessageContent>),
     Pong,
     Ping,
     Close,
@@ -47,10 +48,9 @@ pub enum WsMessage {
     ConnectionClosed,
     #[cfg(feature = "front")]
     ErrorOnMessage(String),
+    Seen(Vec<WsMessageContent>),
 }
 
-/// Standard used to communicate inside WS between the client and the server
-/// applications.
 #[derive(
     Debug,
     Clone,
@@ -61,7 +61,21 @@ pub enum WsMessage {
     Eq,
     Hash,
     Default,
+    Copy,
 )]
+pub enum WsReceptionStatus {
+    #[default]
+    NotSent,
+    Sent,
+    Seen,
+}
+
+/// Standard used to communicate inside WS between the client and the server
+/// applications.
+#[derive(
+    Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash,
+)]
+#[derivative(Default)]
 #[serde(rename_all = "camelCase")]
 pub struct WsMessageContent {
     /// The message identifier, must be unique.
@@ -78,4 +92,5 @@ pub struct WsMessageContent {
     pub timestamp: DateTime<Utc>,
     /// The room on which the message has been emitted.
     pub room: String,
+    pub reception_status: WsReceptionStatus,
 }

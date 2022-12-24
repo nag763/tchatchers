@@ -15,7 +15,7 @@ use gloo_net::http::Request;
 use gloo_timers::callback::{Interval, Timeout};
 use tchatchers_core::room::RoomNameValidator;
 use tchatchers_core::user::PartialUser;
-use tchatchers_core::ws_message::{WsMessage, WsMessageContent};
+use tchatchers_core::ws_message::{WsMessage, WsMessageContent, WsReceptionStatus};
 use uuid::Uuid;
 use validator::Validate;
 use yew::{html, Callback, Component, Context, Html, Properties};
@@ -125,13 +125,43 @@ impl Component for Feed {
                         }
                     }
                     WsMessage::Receive(msg_content) => {
-                        self.received_messages.insert(0, msg_content)
+                        self.received_messages.insert(0, msg_content.clone());
+                        if msg_content.reception_status == WsReceptionStatus::Sent
+                            && msg_content.author.id != self.user.id
+                        {
+                            self.ws
+                                .tx
+                                .clone()
+                                .try_send(
+                                    serde_json::to_string(&WsMessage::Seen(vec![msg_content]))
+                                        .unwrap(),
+                                )
+                                .unwrap();
+                        }
                     }
                     WsMessage::MessagesRetrieved {
                         mut messages,
                         session_id,
                     } if session_id == self.session_id => {
-                        self.received_messages.append(&mut messages)
+                        let messages_seen: Vec<WsMessageContent> = messages
+                            .clone()
+                            .into_iter()
+                            .filter(|message| {
+                                message.reception_status == WsReceptionStatus::Sent
+                                    && message.author.id != self.user.id
+                            })
+                            .collect();
+                        self.received_messages.append(&mut messages);
+
+                        if !messages_seen.is_empty() {
+                            self.ws
+                                .tx
+                                .clone()
+                                .try_send(
+                                    serde_json::to_string(&WsMessage::Seen(messages_seen)).unwrap(),
+                                )
+                                .unwrap();
+                        }
                     }
                     WsMessage::Pong => {
                         self.is_connected = true;
@@ -148,6 +178,25 @@ impl Component for Feed {
                                 Some(Interval::new(30_000, move || {
                                     tx.clone().try_send("Keep Alive".into()).unwrap()
                                 }))
+                            }
+                        }
+                    }
+                    WsMessage::MessageUpdated(msg_content) => {
+                        for message in msg_content {
+                            if let Some(index) =
+                                self.received_messages
+                                    .iter()
+                                    .enumerate()
+                                    .find_map(|(i, msg)| {
+                                        if msg.uuid == message.uuid {
+                                            Some(i)
+                                        } else {
+                                            None
+                                        }
+                                    })
+                            {
+                                let _ =
+                                    std::mem::replace(&mut self.received_messages[index], message);
                             }
                         }
                     }

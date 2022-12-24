@@ -2,7 +2,7 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use chrono::{DateTime, Datelike, Timelike, Utc};
 use tchatchers_core::user::PartialUser;
-use tchatchers_core::ws_message::WsMessageContent;
+use tchatchers_core::ws_message::{WsMessageContent, WsReceptionStatus};
 use yew::{function_component, html, Component, Context, Html, Properties};
 
 const DEFAULT_PFP: &str = "/assets/no_pfp.webp";
@@ -37,6 +37,7 @@ struct MessageProperties {
     pub timestamp: DateTime<Utc>,
     #[prop_or_default]
     pub is_user: bool,
+    pub reception_status: WsReceptionStatus,
 }
 
 #[function_component(Message)]
@@ -52,12 +53,37 @@ fn message(message_properties: &MessageProperties) -> Html {
     );
     let class: &str = match message_properties.is_user {
         true => {
-            "bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg mb-2 text-sm break-when-needed"
+            "relative bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg mb-2 text-sm break-when-needed"
         }
-        false => "bg-gray-300 mb-2 p-3 rounded-r-lg rounded-bl-lg text-sm break-when-needed",
+        false => "relative bg-gray-300 mb-2 p-3 rounded-r-lg rounded-bl-lg text-sm break-when-needed",
+    };
+    let reception_checkmark = match message_properties.reception_status {
+        WsReceptionStatus::Sent if message_properties.is_user => Some(html! {
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-2 h-2">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+
+        }),
+        WsReceptionStatus::Seen if message_properties.is_user => Some(html! {
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-2 h-2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+
+        }),
+        _ => None,
     };
     html! {
-        <p {class} {title} >{message_properties.content.as_str()}</p>
+        <p {title} class="flex">
+            // <span class="mb-2 flex flex-col-reverse" hidden={reception_checkmark.is_none()}>
+            //     {reception_checkmark}
+            // </span>
+            <span {class}>
+            {message_properties.content.as_str()}
+                <span class="absolute right-0 bottom-0 pb-1 pr-1">
+                {reception_checkmark}
+                </span>
+            </span>
+        </p>
     }
 }
 
@@ -72,6 +98,7 @@ struct UserChatProperties {
     pub pfp: String,
     #[prop_or(true)]
     pub display_pfp: bool,
+    pub reception_status: WsReceptionStatus,
 }
 
 #[function_component(UserChat)]
@@ -83,7 +110,7 @@ fn user_chat(user_chat_properties: &UserChatProperties) -> Html {
     html! {
         <div {class}>
             <ProfilePicture pfp={user_chat_properties.pfp.clone()} author={user_chat_properties.author.clone()} display_pfp={user_chat_properties.display_pfp} />
-            <Message content={user_chat_properties.content.clone()} is_user={user_chat_properties.is_user} timestamp={user_chat_properties.timestamp} />
+            <Message reception_status={user_chat_properties.reception_status} content={user_chat_properties.content.clone()} is_user={user_chat_properties.is_user} timestamp={user_chat_properties.timestamp} />
         </div>
     }
 }
@@ -118,7 +145,7 @@ impl Component for Chat {
                 // so we display the pfp for the first message
                 _ => true,
             };
-            html_content.push(html! { <UserChat pfp={current_element.author.pfp.clone().unwrap_or_else(|| DEFAULT_PFP.into())} content={current_element.content.clone()} author={current_element.author.name.clone()} is_user={current_element.author.id == current_user_id} timestamp={current_element.timestamp} {display_pfp}/> });
+            html_content.push(html! { <UserChat pfp={current_element.author.pfp.clone().unwrap_or_else(|| DEFAULT_PFP.into())} reception_status={current_element.reception_status} content={current_element.content.clone()} author={current_element.author.name.clone()} is_user={current_element.author.id == current_user_id} timestamp={current_element.timestamp} {display_pfp}/> });
         }
         html_content.into_iter().collect::<Html>()
     }

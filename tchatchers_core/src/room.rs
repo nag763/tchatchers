@@ -53,13 +53,37 @@ impl Room {
     pub fn publish_message_in_room(
         conn: &mut Connection,
         room_name: &str,
-        ws_message: WsMessageContent,
+        ws_message: &WsMessageContent,
     ) {
         redis::cmd("RPUSH")
             .arg(room_name)
-            .arg(serde_json::to_string(&ws_message).unwrap())
+            .arg(serde_json::to_string(ws_message).unwrap())
             .query(conn)
             .unwrap()
+    }
+
+    pub fn update_messages(
+        conn: &mut Connection,
+        room_name: &str,
+        updated_ws_messages: &Vec<WsMessageContent>,
+    ) {
+        let messages = Self::find_messages_in_room(conn, room_name);
+        for updated_message in updated_ws_messages {
+            if let Some(i) = messages.iter().enumerate().find_map(|(i, msg)| {
+                if updated_message.uuid == msg.uuid {
+                    Some(i)
+                } else {
+                    None
+                }
+            }) {
+                let _: bool = redis::cmd("LSET")
+                    .arg(room_name)
+                    .arg(messages.len() - 1 - i)
+                    .arg(serde_json::to_string(&updated_message).unwrap())
+                    .query(conn)
+                    .unwrap();
+            }
+        }
     }
 }
 

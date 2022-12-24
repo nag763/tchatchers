@@ -21,7 +21,7 @@ use futures_util::{SinkExt, StreamExt};
 use tchatchers_core::{
     room::{Room, RoomNameValidator},
     validation_error_message::ValidationErrorMessage,
-    ws_message::{WsMessage, WsMessageContent},
+    ws_message::{WsMessage, WsMessageContent, WsReceptionStatus},
 };
 use tokio::sync::broadcast;
 use validator::Validate;
@@ -106,16 +106,15 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>, room: String) {
                         let _ = tx.send(serde_json::to_string(&WsMessage::Pong).unwrap());
                     }
                     WsMessage::Pong | WsMessage::ClientKeepAlive => continue,
-                    WsMessage::Send(ws_message) => {
-                        let _ = tx.send(
-                            serde_json::to_string(&WsMessage::Receive(ws_message.clone())).unwrap(),
-                        );
-
+                    WsMessage::Send(mut ws_message) => {
+                        ws_message.reception_status = WsReceptionStatus::Sent;
                         Room::publish_message_in_room(
                             &mut state.redis_pool.get().unwrap(),
                             &room,
-                            ws_message,
+                            &ws_message,
                         );
+                        let _ = tx
+                            .send(serde_json::to_string(&WsMessage::Receive(ws_message)).unwrap());
                     }
                     WsMessage::RetrieveMessages(session_id) => {
                         let messages: Vec<WsMessageContent> = Room::find_messages_in_room(
@@ -127,6 +126,26 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>, room: String) {
                                 messages,
                                 session_id,
                             })
+                            .unwrap(),
+                        );
+                    }
+                    WsMessage::Seen(messages) => {
+                        let updated_messages: Vec<WsMessageContent> = messages
+                            .into_iter()
+                            .map(|mut m| {
+                                m.reception_status = WsReceptionStatus::Seen;
+                                m
+                            })
+                            .collect();
+                        Room::update_messages(
+                            &mut state.redis_pool.get().unwrap(),
+                            &room,
+                            &updated_messages,
+                        );
+                        let _ = tx.send(
+                            serde_json::to_string(&WsMessage::MessageUpdated(
+                                updated_messages.to_vec(),
+                            ))
                             .unwrap(),
                         );
                     }
