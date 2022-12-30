@@ -3,7 +3,8 @@
 use chrono::{DateTime, Datelike, Timelike, Utc};
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessageContent, WsReceptionStatus};
-use yew::{function_component, html, Component, Context, Html, Properties};
+use uuid::Uuid;
+use yew::{function_component, html, Component, Context, Html, Properties, use_state};
 
 const DEFAULT_PFP: &str = "/assets/no_pfp.webp";
 
@@ -35,6 +36,7 @@ fn profile_picture(profile_picture_properties: &ProfilePictureProperties) -> Htm
 struct MessageProperties {
     pub content: String,
     pub timestamp: DateTime<Utc>,
+    pub uuid: Uuid,
     #[prop_or_default]
     pub is_user: bool,
     pub reception_status: WsReceptionStatus,
@@ -72,24 +74,29 @@ fn message(message_properties: &MessageProperties) -> Html {
         }),
         _ => None,
     };
+    let div_class = match message_properties.is_user {
+        true => "flex ",
+        false => "flex flex-row-reverse"
+    };
+
+    let hide_timestamp = use_state(|| true);
     html! {
-        <p {title} class="flex">
-            // <span class="mb-2 flex flex-col-reverse" hidden={reception_checkmark.is_none()}>
-            //     {reception_checkmark}
-            // </span>
-            <span {class}>
-            {message_properties.content.as_str()}
-                <span class="absolute right-0 bottom-0 pb-1 pr-1">
-                {reception_checkmark}
-                </span>
-            </span>
-        </p>
+        <div id={message_properties.uuid.to_string()} class={div_class}>
+            <small hidden={*hide_timestamp} class="dark:text-white mx-2">{&title}</small>
+            <p {title} class={class} onclick={move |_me| hide_timestamp.set(!*hide_timestamp)} >
+                {message_properties.content.as_str()}
+                    <span class="absolute right-0 bottom-0 pb-1 pr-1">
+                    {reception_checkmark}
+                    </span>
+            </p>
+        </div>
     }
 }
 
 #[derive(Properties, PartialEq)]
 struct UserChatProperties {
     pub content: String,
+    pub uuid: Uuid,
     pub timestamp: DateTime<Utc>,
     #[prop_or_default]
     pub is_user: bool,
@@ -110,7 +117,7 @@ fn user_chat(user_chat_properties: &UserChatProperties) -> Html {
     html! {
         <div {class}>
             <ProfilePicture pfp={user_chat_properties.pfp.clone()} author={user_chat_properties.author.clone()} display_pfp={user_chat_properties.display_pfp} />
-            <Message reception_status={user_chat_properties.reception_status} content={user_chat_properties.content.clone()} is_user={user_chat_properties.is_user} timestamp={user_chat_properties.timestamp} />
+            <Message uuid={user_chat_properties.uuid} reception_status={user_chat_properties.reception_status} content={user_chat_properties.content.clone()} is_user={user_chat_properties.is_user} timestamp={user_chat_properties.timestamp} />
         </div>
     }
 }
@@ -145,7 +152,7 @@ impl Component for Chat {
                 // so we display the pfp for the first message
                 _ => true,
             };
-            html_content.push(html! { <UserChat pfp={current_element.author.pfp.clone().unwrap_or_else(|| DEFAULT_PFP.into())} reception_status={current_element.reception_status} content={current_element.content.clone()} author={current_element.author.name.clone()} is_user={current_element.author.id == current_user_id} timestamp={current_element.timestamp} {display_pfp}/> });
+            html_content.push(html! { <UserChat uuid={current_element.uuid} pfp={current_element.author.pfp.clone().unwrap_or_else(|| DEFAULT_PFP.into())} reception_status={current_element.reception_status} content={current_element.content.clone()} author={current_element.author.name.clone()} is_user={current_element.author.id == current_user_id} timestamp={current_element.timestamp} {display_pfp}/> });
         }
         html_content.into_iter().collect::<Html>()
     }

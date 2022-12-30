@@ -43,7 +43,6 @@ impl Component for TypeBar {
                         content: input.value(),
                         ..WsMessageContent::default()
                     };
-                    gloo_console::log!("Emit");
                     ctx.props()
                         .pass_message_to_ws
                         .emit(serde_json::to_string(&WsMessage::Send(msg)).unwrap());
