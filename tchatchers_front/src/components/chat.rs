@@ -55,9 +55,9 @@ fn message(message_properties: &MessageProperties) -> Html {
     );
     let class: &str = match message_properties.is_user {
         true => {
-            "relative bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg mb-2 text-sm break-when-needed"
+            "relative bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg mb-2 text-sm break-when-needed max-w-xs"
         }
-        false => "relative bg-gray-300 mb-2 p-3 rounded-r-lg rounded-bl-lg text-sm break-when-needed",
+        false => "relative bg-gray-300 mb-2 p-3 rounded-r-lg rounded-bl-lg text-sm break-when-needed max-w-xs",
     };
     let reception_checkmark = match message_properties.reception_status {
         WsReceptionStatus::Sent if message_properties.is_user => Some(html! {
@@ -110,10 +110,13 @@ struct UserChatProperties {
 
 #[function_component(UserChat)]
 fn user_chat(user_chat_properties: &UserChatProperties) -> Html {
-    let class = match user_chat_properties.is_user {
-        true => "flex flex-row-reverse w-full mt-2 space-x-3 space-x-reverse max-w-xs ml-auto px-3",
-        false => "flex w-full mt-2 space-x-3 max-w-xs px-3",
+    let mut class : String = match user_chat_properties.is_user {
+        true => "flex flex-row-reverse w-full space-x-3 space-x-reverse ml-auto px-3".into(),
+        false => "flex w-full space-x-3 px-3".into(),
     };
+    if user_chat_properties.display_pfp {
+        class = class + " mt-3";
+    }
     html! {
         <div {class}>
             <ProfilePicture pfp={user_chat_properties.pfp.clone()} author={user_chat_properties.author.clone()} display_pfp={user_chat_properties.display_pfp} />
