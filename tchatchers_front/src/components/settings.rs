@@ -59,7 +59,7 @@ impl Component for Settings {
         let cb = {
             let link = ctx.link().clone();
             move |mc| {
-                if let ModalBusContent::Yes = mc {
+                if let ModalBusContent::Outcome(true) = mc {
                     link.send_message(Msg::DeletionConfirmed)
                 }
             }
@@ -170,7 +170,7 @@ impl Component for Settings {
             Msg::ConfirmDeletion => {
                 let mc : ModalContent = ModalContent {
                     title: "You are about to delete your account".into(),
-                    msg: "This action is not reversible, understand that none of the messages you sent will be deleted.".into(),
+                    msg: "This action is not reversible, once your account is deleted, there is no way for you to get it back.".into(),
                     decline_text: Some("I changed, my mind, don't delete my account".into()),
                     accept_text: Some("Understood, farewell".into()),
                 };

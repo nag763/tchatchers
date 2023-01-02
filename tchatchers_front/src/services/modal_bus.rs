@@ -13,9 +13,8 @@ pub struct ModalBus {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ModalBusContent {
-    Yes,
-    No,
     PopModal(ModalContent),
+    Outcome(bool)
 }
 
 impl Worker for ModalBus {
