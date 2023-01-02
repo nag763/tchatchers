@@ -54,9 +54,9 @@ front and backend
 |--------------------|----------------------------|-------|
 |Rust                |Programming language        |1.64   |
 |Tailwind            |Stylesheets                 |3.X    |
-|yew.rs              |WASM Frontend framework     |0.19   |
-|axum                |rust server                 |0.5.4  |
-|trunk-s             |Rust development WASM server|0.16   |
+|yew.rs              |WASM Frontend framework     |0.20   |
+|axum                |rust server                 |0.6.1  |
+|trunk-rs            |Rust development WASM server|0.16   |
 |nginx               |Reverse proxy server        |latest |
 |Postgres            |SQL engine                  |latest |
 |Redis               |Key value NoSQL engine      |latest |
