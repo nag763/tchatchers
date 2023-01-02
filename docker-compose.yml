@@ -9,11 +9,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
-  redis:
-    image: redis:7.0.2
-    restart: always
-    volumes: 
-      - redis:/data
   back :
     links:
       - postgres:pg.tchatche.rs
@@ -26,14 +21,6 @@ services:
       dockerfile: Dockerfile_back
     volumes:
       - static:/home/usr/back/static
-  migrations :
-    depends_on:
-      - postgres
-    links:
-      - postgres:pg.tchatche.rs
-    build: 
-      context: ./ 
-      dockerfile: Dockerfile_migrations
   front :
     volumes:
       - /etc/letsencrypt:/usr/nginx/home/certs:ro

@@ -53,9 +53,11 @@ async fn main() {
         .init();
 
     let jwt_secret = std::env::var("JWT_SECRET").expect("No jwt secret has been defined");
+    let pg_pool = tchatchers_core::pool::get_pg_pool().await;
+    sqlx::migrate!().run(&pg_pool).await.expect("Could not apply migrations on the database");
     let shared_state = Arc::new(AppState {
         jwt_secret,
-        pg_pool: tchatchers_core::pool::get_pg_pool().await,
+        pg_pool,
         txs: Mutex::new(WsRooms::default()),
     });
 

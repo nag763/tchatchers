@@ -11,13 +11,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
-  redis:
-    image: redis:7.0.2
-    restart: always
-    volumes: 
-      - redis:/data
-    ports:
-      - "6379:6379"
 volumes:
   db:
   redis:
