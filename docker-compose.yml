@@ -12,10 +12,8 @@ services:
   back :
     links:
       - postgres:pg.tchatche.rs
-      - redis:redis.tchatche.rs
     depends_on:
       - postgres
-      - redis
     build: 
       context: ./ 
       dockerfile: Dockerfile_back
@@ -36,5 +34,4 @@ services:
       - "443:443"
 volumes:
   db:
-  redis:
   static:
