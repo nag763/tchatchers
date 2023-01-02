@@ -19,7 +19,7 @@ use axum::{
 };
 use futures_util::{SinkExt, StreamExt};
 use tchatchers_core::{
-    room::{Room, RoomNameValidator},
+    room::RoomNameValidator,
     validation_error_message::ValidationErrorMessage,
     ws_message::{WsMessage, WsMessageContent, WsReceptionStatus},
 };
@@ -108,19 +108,17 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>, room: String) {
                     WsMessage::Pong | WsMessage::ClientKeepAlive => continue,
                     WsMessage::Send(mut ws_message) => {
                         ws_message.reception_status = WsReceptionStatus::Sent;
-                        Room::publish_message_in_room(
-                            &mut state.redis_pool.get().unwrap(),
-                            &room,
-                            &ws_message,
-                        );
-                        let _ = tx
-                            .send(serde_json::to_string(&WsMessage::Receive(ws_message)).unwrap());
+                        if let Err(e) = ws_message.persist(&state.pg_pool).await {
+                            tracing::error!("An error happened while saving a message : {:?}", e);
+                        } else {
+                            let _ = tx.send(
+                                serde_json::to_string(&WsMessage::Receive(ws_message)).unwrap(),
+                            );
+                        }
                     }
                     WsMessage::RetrieveMessages(session_id) => {
-                        let messages: Vec<WsMessageContent> = Room::find_messages_in_room(
-                            &mut state.redis_pool.get().unwrap(),
-                            &room,
-                        );
+                        let messages: Vec<WsMessageContent> =
+                            WsMessageContent::query_all_for_room(&room, &state.pg_pool).await;
                         let _ = tx.send(
                             serde_json::to_string(&WsMessage::MessagesRetrieved {
                                 messages,
@@ -130,24 +128,18 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>, room: String) {
                         );
                     }
                     WsMessage::Seen(messages) => {
-                        let updated_messages: Vec<WsMessageContent> = messages
-                            .into_iter()
-                            .map(|mut m| {
-                                m.reception_status = WsReceptionStatus::Seen;
-                                m
-                            })
-                            .collect();
-                        Room::update_messages(
-                            &mut state.redis_pool.get().unwrap(),
-                            &room,
-                            &updated_messages,
-                        );
-                        let _ = tx.send(
-                            serde_json::to_string(&WsMessage::MessageUpdated(
-                                updated_messages.to_vec(),
-                            ))
-                            .unwrap(),
-                        );
+                        if let Err(e) =
+                            WsMessageContent::mark_as_seen(&messages, &state.pg_pool).await
+                        {
+                            tracing::error!(
+                                "An error happened while updating the messsages : {:?}.",
+                                e
+                            );
+                        } else {
+                            let _ = tx.send(
+                                serde_json::to_string(&WsMessage::MessagesSeen(messages)).unwrap(),
+                            );
+                        }
                     }
                     _ => {}
                 }

@@ -4,7 +4,7 @@ use chrono::{DateTime, Datelike, Timelike, Utc};
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessageContent, WsReceptionStatus};
 use uuid::Uuid;
-use yew::{function_component, html, Component, Context, Html, Properties, use_state};
+use yew::{function_component, html, use_state, Component, Context, Html, Properties};
 
 const DEFAULT_PFP: &str = "/assets/no_pfp.webp";
 
@@ -76,7 +76,7 @@ fn message(message_properties: &MessageProperties) -> Html {
     };
     let div_class = match message_properties.is_user {
         true => "flex ",
-        false => "flex flex-row-reverse"
+        false => "flex flex-row-reverse",
     };
 
     let hide_timestamp = use_state(|| true);
@@ -110,12 +110,12 @@ struct UserChatProperties {
 
 #[function_component(UserChat)]
 fn user_chat(user_chat_properties: &UserChatProperties) -> Html {
-    let mut class : String = match user_chat_properties.is_user {
+    let mut class: String = match user_chat_properties.is_user {
         true => "flex flex-row-reverse w-full space-x-3 space-x-reverse ml-auto px-3".into(),
         false => "flex w-full space-x-3 px-3".into(),
     };
     if user_chat_properties.display_pfp {
-        class = class + " mt-3";
+        class += " mt-3";
     }
     html! {
         <div {class}>

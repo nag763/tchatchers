@@ -39,8 +39,6 @@ pub struct AppState {
     txs: Mutex<WsRooms>,
     /// The Postgres pool.
     pg_pool: PgPool,
-    /// The Redis pool.
-    redis_pool: r2d2::Pool<redis::Client>,
 }
 
 #[tokio::main]
@@ -58,7 +56,6 @@ async fn main() {
     let shared_state = Arc::new(AppState {
         jwt_secret,
         pg_pool: tchatchers_core::pool::get_pg_pool().await,
-        redis_pool: tchatchers_core::pool::get_redis_pool().await,
         txs: Mutex::new(WsRooms::default()),
     });
 

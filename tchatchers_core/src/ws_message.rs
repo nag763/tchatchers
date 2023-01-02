@@ -33,7 +33,7 @@ pub enum WsMessage {
         messages: Vec<WsMessageContent>,
         session_id: Uuid,
     },
-    MessageUpdated(Vec<WsMessageContent>),
+    MessagesSeen(Vec<Uuid>),
     Pong,
     Ping,
     Close,
@@ -48,7 +48,7 @@ pub enum WsMessage {
     ConnectionClosed,
     #[cfg(feature = "front")]
     ErrorOnMessage(String),
-    Seen(Vec<WsMessageContent>),
+    Seen(Vec<Uuid>),
 }
 
 #[derive(
@@ -63,11 +63,13 @@ pub enum WsMessage {
     Default,
     Copy,
 )]
+#[cfg_attr(feature = "back", derive(sqlx::Type))]
+#[repr(i32)]
 pub enum WsReceptionStatus {
     #[default]
-    NotSent,
-    Sent,
-    Seen,
+    NotSent = 1,
+    Sent = 2,
+    Seen = 3,
 }
 
 /// Standard used to communicate inside WS between the client and the server
@@ -76,6 +78,7 @@ pub enum WsReceptionStatus {
     Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash,
 )]
 #[derivative(Default)]
+#[cfg_attr(feature = "back", derive(sqlx::FromRow))]
 #[serde(rename_all = "camelCase")]
 pub struct WsMessageContent {
     /// The message identifier, must be unique.
@@ -86,6 +89,7 @@ pub struct WsMessageContent {
     /// The author of the message.
     ///
     /// Is empty when the message is emitted by the server.
+    #[cfg_attr(feature = "back", sqlx(flatten))]
     pub author: PartialUser,
     /// When the message has been emitted.
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
@@ -93,4 +97,41 @@ pub struct WsMessageContent {
     /// The room on which the message has been emitted.
     pub room: String,
     pub reception_status: WsReceptionStatus,
+}
+
+#[cfg(feature = "back")]
+impl WsMessageContent {
+    pub async fn query_all_for_room(room_name: &str, pool: &sqlx::PgPool) -> Vec<Self> {
+        sqlx::query_as("SELECT * FROM MESSAGE m INNER JOIN CHATTER c ON m.author = c.id WHERE room=$1 ORDER BY timestamp DESC LIMIT 100 ")
+            .bind(room_name)
+            .fetch_all(pool)
+            .await
+            .unwrap()
+    }
+
+    pub async fn persist(
+        &self,
+        pool: &sqlx::PgPool,
+    ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
+        sqlx::query("INSERT INTO MESSAGE(uuid, content, author, timestamp, room, reception_status) VALUES ($1,$2,$3,$4,$5,$6)")
+            .bind(self.uuid)
+            .bind(&self.content)
+            .bind(self.author.id)
+            .bind(self.timestamp)
+            .bind(&self.room)
+            .bind(self.reception_status)
+            .execute(pool)
+            .await
+    }
+
+    pub async fn mark_as_seen(
+        messages_uuid: &Vec<Uuid>,
+        pool: &sqlx::PgPool,
+    ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
+        sqlx::query("UPDATE MESSAGE SET reception_status=$1 WHERE uuid = ANY($2)")
+            .bind(WsReceptionStatus::Seen)
+            .bind(messages_uuid)
+            .execute(pool)
+            .await
+    }
 }

@@ -105,6 +105,7 @@ impl From<Jwt> for User {
 /// It is containing limited data, which is convenient and secure during
 /// exchanges. Thus, this is the struct used in JWT.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Default, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "back", derive(sqlx::FromRow))]
 #[serde(rename_all = "camelCase")]
 pub struct PartialUser {
     /// In base id of the user.

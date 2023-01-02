@@ -24,9 +24,3 @@ pub async fn get_pg_pool() -> PgPool {
         .await
         .unwrap()
 }
-
-/// Returns a redis pool from the user env.
-pub async fn get_redis_pool() -> r2d2::Pool<redis::Client> {
-    let client = redis::Client::open("redis://redis.tchatche.rs/").unwrap();
-    r2d2::Pool::new(client).unwrap()
-}

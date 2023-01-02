@@ -133,7 +133,7 @@ impl Component for Feed {
                                 .tx
                                 .clone()
                                 .try_send(
-                                    serde_json::to_string(&WsMessage::Seen(vec![msg_content]))
+                                    serde_json::to_string(&WsMessage::Seen(vec![msg_content.uuid]))
                                         .unwrap(),
                                 )
                                 .unwrap();
@@ -143,13 +143,14 @@ impl Component for Feed {
                         mut messages,
                         session_id,
                     } if session_id == self.session_id => {
-                        let messages_seen: Vec<WsMessageContent> = messages
+                        let messages_seen: Vec<Uuid> = messages
                             .clone()
                             .into_iter()
                             .filter(|message| {
                                 message.reception_status == WsReceptionStatus::Sent
                                     && message.author.id != self.user.id
                             })
+                            .map(|m| m.uuid)
                             .collect();
                         self.received_messages.append(&mut messages);
 
@@ -181,22 +182,10 @@ impl Component for Feed {
                             }
                         }
                     }
-                    WsMessage::MessageUpdated(msg_content) => {
-                        for message in msg_content {
-                            if let Some(index) =
-                                self.received_messages
-                                    .iter()
-                                    .enumerate()
-                                    .find_map(|(i, msg)| {
-                                        if msg.uuid == message.uuid {
-                                            Some(i)
-                                        } else {
-                                            None
-                                        }
-                                    })
-                            {
-                                let _ =
-                                    std::mem::replace(&mut self.received_messages[index], message);
+                    WsMessage::MessagesSeen(msgs_uuid) => {
+                        for mut msg in self.received_messages.iter_mut() {
+                            if msgs_uuid.contains(&msg.uuid) {
+                                msg.reception_status = WsReceptionStatus::Seen;
                             }
                         }
                     }
