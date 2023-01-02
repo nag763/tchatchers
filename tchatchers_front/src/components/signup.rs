@@ -32,6 +32,7 @@ pub struct SignUp {
     login: NodeRef,
     password: NodeRef,
     name: NodeRef,
+    password_confirmation: NodeRef,
     check_login: Option<Timeout>,
     wait_for_api: bool,
     server_error: Option<String>,
@@ -49,10 +50,11 @@ impl Component for SignUp {
         match msg {
             Msg::SubmitForm => {
                 self.server_error = None;
-                if let (Some(login), Some(name), Some(password)) = (
+                if let (Some(login), Some(name), Some(password), Some(password_confirmation)) = (
                     self.login.cast::<HtmlInputElement>(),
                     self.name.cast::<HtmlInputElement>(),
                     self.password.cast::<HtmlInputElement>(),
+                    self.password_confirmation.cast::<HtmlInputElement>(),
                 ) {
                     let inputs = vec![&login, &name, &password];
                     if inputs.iter().all(|i| i.check_validity()) {
@@ -66,6 +68,10 @@ impl Component for SignUp {
                         if let Err(e) = payload.validate() {
                             let message: ValidationErrorMessage = e.into();
                             link.send_message(Msg::ErrorFromServer(message.to_string()));
+                        } else if !password.value().eq(&password_confirmation.value()) {
+                            password.set_value("");
+                            password_confirmation.set_value("");
+                            link.send_message(Msg::ErrorFromServer("The passwords do not match, please try again.".into()));
                         } else {
                             let mut req = Requester::<InsertableUser>::post("/api/user");
                             req.is_json(true).body(Some(payload));
@@ -162,6 +168,16 @@ impl Component for SignUp {
                     </div>
                     <div class="md:w-2/3">
                       <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-password" type="password" required=true minlength="8" maxlength="128" ref={&self.password} />
+                    </div>
+                  </div>
+                  <div class="md:flex md:items-center mb-6">
+                    <div class="md:w-1/3">
+                      <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-password">
+                      {"Confirm your password"}
+                      </label>
+                    </div>
+                    <div class="md:w-2/3">
+                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-password" type="password" required=true minlength="8" maxlength="128" ref={&self.password_confirmation} />
                     </div>
                   </div>
                   <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.server_error.is_none()}>
