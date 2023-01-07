@@ -2,42 +2,30 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::toast::Alert;
 use crate::router::Route;
-use crate::services::auth_bus::EventBus;
 use crate::services::toast_bus::ToastBus;
 use gloo_net::http::Request;
-use yew::{html, Component, Context, Html, Properties};
+use tchatchers_core::user::PartialUser;
+use yew::{html, Html, function_component, use_context, UseStateHandle};
 use yew_agent::Dispatched;
-use yew_router::scope_ext::RouterScopeExt;
+use yew_router::prelude::use_navigator;
 
-#[derive(Clone, Eq, PartialEq, Properties)]
-pub struct Props;
-
-pub struct LogOut;
-
-impl Component for LogOut {
-    type Message = ();
-    type Properties = Props;
-
-    fn create(_ctx: &Context<Self>) -> Self {
-        Self {}
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        let req = Request::get("/api/logout").send();
-        let link = ctx.link().clone();
-        wasm_bindgen_futures::spawn_local(async move {
-            req.await.unwrap();
-            EventBus::dispatcher().send(false);
-            ToastBus::dispatcher().send(Alert {
-                is_success: true,
-                content: "You logged out with success".into(),
-            });
-            link.navigator().unwrap().replace(&Route::SignIn);
+#[function_component(LogOut)]
+pub fn log_out_hoc() -> Html {
+    
+    let user = use_context::<UseStateHandle<Option<PartialUser>>>().expect("No user context");
+    let navigator = use_navigator().unwrap();
+    let req = Request::get("/api/logout").send();
+    wasm_bindgen_futures::spawn_local(async move {
+        req.await.unwrap();
+        user.set(None);
+        ToastBus::dispatcher().send(Alert {
+            is_success: true,
+            content: "You logged out with success".into(),
         });
-
-        html! {
-            <div class="dark:bg-zinc-800">
-            </div>
-        }
+        navigator.replace(&Route::SignIn);
+    });
+    html! {
+        <div class="dark:bg-zinc-800">
+        </div>
     }
 }

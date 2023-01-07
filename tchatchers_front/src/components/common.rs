@@ -34,7 +34,7 @@ pub fn form_button(props: &FormButtonProperties) -> Html {
       <div class="flex items-center">
         <div class="w-2/3"></div>
         <div class="w-1/3">
-          <AppButton is_modal_opener={props.is_modal_opener} label={props.label.clone()} callback={props.callback.clone()} />
+          <AppButton ..props.clone() />
         </div>
       </div>
     }

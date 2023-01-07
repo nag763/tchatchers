@@ -10,7 +10,6 @@ use crate::router::Route;
 use crate::services::chat_bus::ChatBus;
 use crate::services::chat_service::WebsocketService;
 use crate::services::toast_bus::ToastBus;
-use crate::utils::jwt::get_user;
 use gloo_net::http::Request;
 use gloo_timers::callback::{Interval, Timeout};
 use tchatchers_core::room::RoomNameValidator;
@@ -18,10 +17,25 @@ use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessage, WsMessageContent, WsReceptionStatus};
 use uuid::Uuid;
 use validator::Validate;
-use yew::{html, Callback, Component, Context, Html, Properties};
+use yew::{html, Callback, Component, Context, Html, Properties, function_component, use_context, UseStateHandle};
 use yew_agent::Dispatched;
 use yew_agent::{Bridge, Bridged};
 use yew_router::scope_ext::RouterScopeExt;
+
+#[derive(Properties, PartialEq, Clone)]
+pub struct FeedHOCProps {
+    pub room: String
+}
+
+#[function_component(FeedHOC)]
+pub fn feed_hoc(props: &FeedHOCProps) -> Html {
+
+    let context_user = use_context::<UseStateHandle<Option<PartialUser>>>();
+    let unwrapped_user = context_user.unwrap();
+    let user = unwrapped_user.as_ref().unwrap();
+
+    html! { <Feed room={props.room.clone()} user={user.clone()} /> }
+}
 
 #[derive(Clone)]
 pub enum Msg {
@@ -34,6 +48,7 @@ pub enum Msg {
 #[derive(Clone, Eq, PartialEq, Properties)]
 pub struct Props {
     pub room: String,
+    pub user: PartialUser
 }
 
 pub struct Feed {
@@ -45,7 +60,6 @@ pub struct Feed {
     is_connected: bool,
     ws_keep_alive: Option<Interval>,
     is_closed: bool,
-    user: PartialUser,
     session_id: Uuid,
     room_name_checked: bool,
 }
@@ -56,19 +70,6 @@ impl Component for Feed {
 
     fn create(ctx: &Context<Self>) -> Self {
         let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
-        let link = ctx.link().clone();
-        let user = match get_user() {
-            Ok(v) => v,
-            Err(e) => {
-                gloo_console::log!("Error while attempting to get the user :", e);
-                link.navigator().unwrap().push(&Route::SignIn);
-                ToastBus::dispatcher().send(Alert {
-                    is_success: false,
-                    content: "Please authenticate prior accessing the app functionnalities.".into(),
-                });
-                PartialUser::default()
-            }
-        };
         let cb = {
             let link = ctx.link().clone();
             move |msg| link.send_message(Msg::HandleWsInteraction(Box::new(msg)))
@@ -81,7 +82,6 @@ impl Component for Feed {
             called_back: false,
             is_closed: false,
             ws_keep_alive: None,
-            user,
             _first_connect: {
                 let link = ctx.link().clone();
                 Timeout::new(1, move || link.send_message(Msg::CheckWsState))
@@ -127,7 +127,7 @@ impl Component for Feed {
                     WsMessage::Receive(msg_content) => {
                         self.received_messages.insert(0, msg_content.clone());
                         if msg_content.reception_status == WsReceptionStatus::Sent
-                            && msg_content.author.id != self.user.id
+                            && msg_content.author.id != ctx.props().user.id
                         {
                             self.ws
                                 .tx
@@ -148,7 +148,7 @@ impl Component for Feed {
                             .into_iter()
                             .filter(|message| {
                                 message.reception_status == WsReceptionStatus::Sent
-                                    && message.author.id != self.user.id
+                                    && message.author.id != ctx.props().user.id
                             })
                             .map(|m| m.uuid)
                             .collect();
@@ -232,7 +232,7 @@ impl Component for Feed {
                 let pass_message_to_ws = Callback::from(move |message: String| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar {pass_message_to_ws} user={self.user.clone()} room={ctx.props().room.clone()}/>}
+                html! {<TypeBar {pass_message_to_ws} user={ctx.props().user.clone()} room={ctx.props().room.clone()}/>}
             }
             false => {
                 let link = ctx.link().clone();
@@ -245,7 +245,7 @@ impl Component for Feed {
         html! {
             <div class="grid grid-rows-11 h-full dark:bg-zinc-800">
                 <div class="row-span-10 overflow-auto flex flex-col-reverse" >
-                    <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={self.user.clone()} />
+                    <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={ctx.props().user.clone()} />
                 </div>
                 <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center block">
                     {component}

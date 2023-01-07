@@ -36,11 +36,11 @@ pub enum Route {
 /// Function used to switch the main component's view.
 pub fn switch(route: Route) -> Html {
     match route {
-        Route::JoinRoom => html! { <JoinRoom /> },
-        Route::Room { room } => html! { <Feed room={room} /> },
-        Route::SignIn => html! { <SignIn /> },
+        Route::JoinRoom => html! { <AuthGuard<JoinRoom> /> },
+        Route::Room { room } => html! { <AuthGuard<FeedHOC> {room} /> },
+        Route::SignIn => html! { <SignInHOC /> },
         Route::SignUp => html! { <SignUp /> },
-        Route::Settings => html! { <Settings /> },
+        Route::Settings => html! { <AuthGuard<SettingsHOC> /> },
         Route::LogOut => html! { <LogOut /> },
         Route::NotFound => html! { <NotFound />},
     }

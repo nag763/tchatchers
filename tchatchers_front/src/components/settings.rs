@@ -18,6 +18,9 @@ use tchatchers_core::user::UpdatableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
 use validator::Validate;
 use web_sys::HtmlInputElement;
+use yew::UseStateHandle;
+use yew::function_component;
+use yew::use_context;
 use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
 use yew_agent::Bridge;
 use yew_agent::Bridged;
@@ -26,28 +29,39 @@ use yew_router::scope_ext::RouterScopeExt;
 
 use super::modal::ModalContent;
 
+#[function_component(SettingsHOC)]
+pub fn feed_hoc() -> Html {
+
+    let context_user = use_context::<UseStateHandle<Option<PartialUser>>>();
+    let unwrapped_user = context_user.unwrap();
+
+    html! { <Settings user={unwrapped_user} /> }
+}
+
+
 pub enum Msg {
     UploadNewPfp(Option<js_sys::ArrayBuffer>),
     PfpUpdated(String),
     SubmitForm,
     ErrorFromServer(String),
     ProfileUpdated,
-    FetchJwt,
     ConfirmDeletion,
     DeletionConfirmed,
 }
 
-#[derive(Clone, PartialEq, Eq, Properties)]
-pub struct Props;
+#[derive(Clone, PartialEq, Properties)]
+pub struct Props {
+    user: UseStateHandle<Option<PartialUser>>,
+}
 
 pub struct Settings {
-    user: PartialUser,
     name: NodeRef,
     pfp: Option<String>,
     wait_for_api: bool,
     server_error: Option<String>,
     ok_msg: Option<String>,
     producer: Box<dyn Bridge<ModalBus>>,
+    user: PartialUser
 }
 
 impl Component for Settings {
@@ -55,7 +69,6 @@ impl Component for Settings {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        ctx.link().send_message(Msg::FetchJwt);
         let cb = {
             let link = ctx.link().clone();
             move |mc| {
@@ -65,9 +78,9 @@ impl Component for Settings {
             }
         };
         Self {
-            user: PartialUser::default(),
             name: NodeRef::default(),
             pfp: None,
+            user: ctx.props().user.as_ref().unwrap().clone(),
             wait_for_api: false,
             server_error: None,
             ok_msg: None,
@@ -77,25 +90,6 @@ impl Component for Settings {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::FetchJwt => {
-                let user = match get_user() {
-                    Ok(v) => v,
-                    Err(e) => {
-                        gloo_console::log!("Error while attempting to get the user :", e);
-                        ctx.link().navigator().unwrap().push(&Route::SignIn);
-                        ToastBus::dispatcher().send(Alert {
-                            is_success: false,
-                            content:
-                                "Please authenticate prior accessing the app functionnalities."
-                                    .into(),
-                        });
-                        PartialUser::default()
-                    }
-                };
-                self.user = user.clone();
-                self.pfp = user.pfp;
-                true
-            }
             Msg::SubmitForm => {
                 self.wait_for_api = true;
                 self.ok_msg = None;
@@ -163,8 +157,19 @@ impl Component for Settings {
             }
             Msg::ProfileUpdated => {
                 self.wait_for_api = false;
-                self.ok_msg = Some("Your profile has been updated with success.".into());
-                ctx.link().send_message(Msg::FetchJwt);
+                if let Ok(user) = get_user() {
+                    self.user = user.clone();
+                    ctx.props().user.set(Some(user));
+                    self.ok_msg = Some("Your profile has been updated with success.".into());
+                } else {
+                    ToastBus::dispatcher().send(Alert {
+                        is_success: true,
+                        content: "An unexpected error happened while updating your profile, please log in again"
+                            .into(),
+                    });
+                    ctx.link().navigator().unwrap().replace(&Route::LogOut);
+                }
+                
                 true
             }
             Msg::ConfirmDeletion => {

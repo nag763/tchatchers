@@ -1,9 +1,6 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-/// The auth bus is a data bus used to indicate to the other components the
-/// state of the user authentication.
-pub mod auth_bus;
 /// The event bus is used to transmit the content of websocket messages to the
 /// components.
 pub mod chat_bus;

@@ -3,22 +3,45 @@
 use crate::components::common::{FormButton, WaitingForResponse};
 use crate::components::toast::Alert;
 use crate::router::Route;
-use crate::services::auth_bus::EventBus;
 use crate::services::toast_bus::ToastBus;
+use crate::utils::jwt::get_user;
 use crate::utils::requester::Requester;
-use tchatchers_core::user::AuthenticableUser;
+use tchatchers_core::user::{AuthenticableUser, PartialUser};
 use web_sys::HtmlInputElement;
-use yew::{html, Component, Context, Html, NodeRef, Properties};
+use yew::{html, Component, Context, Html, NodeRef, Properties, function_component, use_context, UseStateHandle};
 use yew_agent::Dispatched;
+use yew_router::prelude::use_navigator;
 use yew_router::scope_ext::RouterScopeExt;
+
+#[function_component(SignInHOC)]
+pub fn sign_in_hoc() -> Html {
+
+    let user : UseStateHandle<Option<PartialUser>> = use_context::<UseStateHandle<Option<PartialUser>>>().expect("No user context");
+    user.set(None);
+    let navigator = use_navigator().unwrap();
+
+    if user.is_some() {
+        navigator.replace(&Route::JoinRoom);
+        ToastBus::dispatcher().send(Alert {
+            is_success: false,
+            content: "You are already logged in.".into(),
+        });
+        
+    }
+
+    html! { <SignIn {user}/> }
+}
 
 pub enum Msg {
     SubmitForm,
+    LoggedIn(PartialUser),
     ErrorFromServer(String),
 }
 
-#[derive(Clone, PartialEq, Properties, Eq)]
-pub struct Props;
+#[derive(Clone, PartialEq, Properties)]
+pub struct Props {
+    user: UseStateHandle<Option<PartialUser>>
+}
 
 #[derive(Default)]
 pub struct SignIn {
@@ -46,7 +69,6 @@ impl Component for SignIn {
                 ) {
                     let inputs = vec![&login, &password];
                     if inputs.iter().all(|i| i.check_validity()) {
-                        let link = ctx.link().clone();
                         self.wait_for_api = true;
                         let payload = AuthenticableUser {
                             login: login.value(),
@@ -54,15 +76,13 @@ impl Component for SignIn {
                         };
                         let mut req = Requester::<AuthenticableUser>::post("/api/authenticate");
                         req.is_json(true).body(Some(payload));
+                        let link = ctx.link().clone();
                         wasm_bindgen_futures::spawn_local(async move {
                             let resp = req.send().await;
                             if resp.status().is_success() {
-                                EventBus::dispatcher().send(true);
-                                link.navigator().unwrap().push(&Route::JoinRoom);
-                                ToastBus::dispatcher().send(Alert {
-                                    is_success: true,
-                                    content: "You logged in with success".into(),
-                                });
+                                if let Ok(new_user) = get_user() {
+                                    link.send_message(Msg::LoggedIn(new_user));
+                                }
                             } else {
                                 link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
                             }
@@ -79,6 +99,15 @@ impl Component for SignIn {
                 }
                 true
             }
+            Msg::LoggedIn(new_user) => {
+                ctx.props().user.set(Some(new_user));
+                ToastBus::dispatcher().send(Alert {
+                    is_success: true,
+                    content: "You logged in with success".into(),
+                });
+                ctx.link().navigator().unwrap().push(&Route::JoinRoom);
+                false
+            },
         }
     }
 

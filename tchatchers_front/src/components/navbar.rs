@@ -2,47 +2,36 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use super::navlink::Navlink;
 use crate::router::Route;
-use crate::services::auth_bus::EventBus;
-use std::rc::Rc;
-use yew::{html, Component, Context, Html};
-use yew_agent::{Bridge, Bridged};
+use tchatchers_core::user::PartialUser;
+use yew::{html, Component, Context, Html, use_context, Properties, function_component, UseStateHandle};
 use yew_router::prelude::Link;
 
-pub enum Msg {
-    AuthEvent(bool),
+#[function_component]
+pub fn NavbarHOC() -> Html {
+
+    let user = use_context::<UseStateHandle<Option<PartialUser>>>().expect("No user context");
+    html! { <Navbar user={(*user).clone()}/> }
 }
 
-pub struct Navbar {
-    verified: bool,
-    _producer: Box<dyn Bridge<EventBus>>,
+#[derive(Properties, PartialEq)]
+pub struct Props {
+    user: Option<PartialUser>
 }
+
+#[derive(Default, Debug, PartialEq)]
+pub struct Navbar;
 
 impl Component for Navbar {
-    type Message = Msg;
-    type Properties = ();
+    type Message = ();
+    type Properties = Props;
 
-    fn create(ctx: &Context<Self>) -> Self {
-        let cb = {
-            let link = ctx.link().clone();
-            move |val| link.send_message(Msg::AuthEvent(val))
-        };
-        Self {
-            verified: false,
-            _producer: EventBus::bridge(Rc::new(cb)),
-        }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Self::default()
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Msg::AuthEvent(e) => {
-                self.verified = e;
-                true
-            }
-        }
-    }
-
-    fn view(&self, _ctx: &Context<Self>) -> Html {
-        let links = match self.verified {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let is_user_logged_on =  ctx.props().user.is_some();
+        let links = match is_user_logged_on {
             true => html! {
                 <>
                     <Navlink label="Settings" link={Route::Settings} />
@@ -56,7 +45,7 @@ impl Component for Navbar {
                 </>
             },
         };
-        let logo_route = match self.verified {
+        let logo_route = match is_user_logged_on {
             true => Route::JoinRoom,
             false => Route::SignIn,
         };
