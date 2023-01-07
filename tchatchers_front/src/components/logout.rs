@@ -4,20 +4,19 @@ use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
 use gloo_net::http::Request;
-use tchatchers_core::user::PartialUser;
-use yew::{html, Html, function_component, use_context, UseStateHandle};
+use tchatchers_core::app_context::AppContext;
+use yew::{function_component, html, use_context, Html, UseStateHandle};
 use yew_agent::Dispatched;
 use yew_router::prelude::use_navigator;
 
 #[function_component(LogOut)]
 pub fn log_out_hoc() -> Html {
-    
-    let user = use_context::<UseStateHandle<Option<PartialUser>>>().expect("No user context");
+    let context = use_context::<UseStateHandle<Option<AppContext>>>().expect("No app context");
     let navigator = use_navigator().unwrap();
     let req = Request::get("/api/logout").send();
     wasm_bindgen_futures::spawn_local(async move {
         req.await.unwrap();
-        user.set(None);
+        context.set(None);
         ToastBus::dispatcher().send(Alert {
             is_success: true,
             content: "You logged out with success".into(),

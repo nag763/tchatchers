@@ -1,6 +1,7 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use js_sys::ArrayBuffer;
+use tchatchers_core::translation::Translation;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::{Event, EventTarget, FileReader, InputEvent};
@@ -106,4 +107,22 @@ pub fn file_attacher(props: &FileAttacherProps) -> Html {
             <input id="file-upload" type="file" hidden=true disabled={props.disabled} {oninput} accept={props.accept.clone().unwrap_or_default()} />
         </>
     }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct I18nProperties {
+    pub default: String,
+    pub label: String,
+    #[prop_or_default]
+    pub translation: Option<Translation>,
+}
+
+#[function_component(I18N)]
+pub fn i18n(props: &I18nProperties) -> Html {
+    if let Some(translation) = &props.translation {
+        if let Some(translated) = translation.get(&props.label) {
+            return html! {<>{translated}</>};
+        }
+    }
+    html! {<>{&props.default}</>}
 }

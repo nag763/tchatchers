@@ -12,29 +12,31 @@ use crate::services::chat_service::WebsocketService;
 use crate::services::toast_bus::ToastBus;
 use gloo_net::http::Request;
 use gloo_timers::callback::{Interval, Timeout};
+use tchatchers_core::app_context::AppContext;
 use tchatchers_core::room::RoomNameValidator;
-use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessage, WsMessageContent, WsReceptionStatus};
 use uuid::Uuid;
 use validator::Validate;
-use yew::{html, Callback, Component, Context, Html, Properties, function_component, use_context, UseStateHandle};
+use yew::{
+    function_component, html, use_context, Callback, Component, Context, Html, Properties,
+    UseStateHandle,
+};
 use yew_agent::Dispatched;
 use yew_agent::{Bridge, Bridged};
 use yew_router::scope_ext::RouterScopeExt;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct FeedHOCProps {
-    pub room: String
+    pub room: String,
 }
 
 #[function_component(FeedHOC)]
 pub fn feed_hoc(props: &FeedHOCProps) -> Html {
+    let app_context = use_context::<UseStateHandle<Option<AppContext>>>();
+    let unwrapped_context = app_context.unwrap();
+    let context = unwrapped_context.as_ref().unwrap();
 
-    let context_user = use_context::<UseStateHandle<Option<PartialUser>>>();
-    let unwrapped_user = context_user.unwrap();
-    let user = unwrapped_user.as_ref().unwrap();
-
-    html! { <Feed room={props.room.clone()} user={user.clone()} /> }
+    html! { <Feed room={props.room.clone()} context={context.clone()} /> }
 }
 
 #[derive(Clone)]
@@ -48,7 +50,7 @@ pub enum Msg {
 #[derive(Clone, Eq, PartialEq, Properties)]
 pub struct Props {
     pub room: String,
-    pub user: PartialUser
+    pub context: AppContext,
 }
 
 pub struct Feed {
@@ -127,7 +129,7 @@ impl Component for Feed {
                     WsMessage::Receive(msg_content) => {
                         self.received_messages.insert(0, msg_content.clone());
                         if msg_content.reception_status == WsReceptionStatus::Sent
-                            && msg_content.author.id != ctx.props().user.id
+                            && msg_content.author.id != ctx.props().context.user.id
                         {
                             self.ws
                                 .tx
@@ -148,7 +150,7 @@ impl Component for Feed {
                             .into_iter()
                             .filter(|message| {
                                 message.reception_status == WsReceptionStatus::Sent
-                                    && message.author.id != ctx.props().user.id
+                                    && message.author.id != ctx.props().context.user.id
                             })
                             .map(|m| m.uuid)
                             .collect();
@@ -232,7 +234,7 @@ impl Component for Feed {
                 let pass_message_to_ws = Callback::from(move |message: String| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar {pass_message_to_ws} user={ctx.props().user.clone()} room={ctx.props().room.clone()}/>}
+                html! {<TypeBar {pass_message_to_ws} user={ctx.props().context.user.clone()} room={ctx.props().room.clone()}/>}
             }
             false => {
                 let link = ctx.link().clone();
@@ -245,7 +247,7 @@ impl Component for Feed {
         html! {
             <div class="grid grid-rows-11 h-full dark:bg-zinc-800">
                 <div class="row-span-10 overflow-auto flex flex-col-reverse" >
-                    <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={ctx.props().user.clone()} />
+                    <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={ctx.props().context.user.clone()} />
                 </div>
                 <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center block">
                     {component}

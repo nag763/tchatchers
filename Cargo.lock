@@ -2455,6 +2455,7 @@ dependencies = [
  "axum",
  "chrono",
  "derivative",
+ "derive_more",
  "jsonwebtoken",
  "lazy_static",
  "rand",

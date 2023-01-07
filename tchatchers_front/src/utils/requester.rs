@@ -18,6 +18,14 @@ impl<T> Requester<T>
 where
     T: serde::Serialize + std::default::Default + Clone,
 {
+    pub fn get(endpoint: &str) -> Self {
+        Self {
+            method: Some(Method::GET),
+            endpoint: Some(String::from(endpoint)),
+            ..Self::default()
+        }
+    }
+
     pub fn post(endpoint: &str) -> Self {
         Self {
             method: Some(Method::POST),

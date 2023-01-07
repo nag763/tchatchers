@@ -12,6 +12,7 @@ pub mod extractor;
 pub mod validator;
 pub mod ws;
 
+use api::app_context::app_context;
 use api::pfp::*;
 use api::user::*;
 use axum::routing::get_service;
@@ -23,6 +24,7 @@ use axum::{
 use sqlx_core::postgres::PgPool;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
+use tchatchers_core::translation::TranslationManager;
 use tower_http::services::ServeDir;
 use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -39,6 +41,7 @@ pub struct AppState {
     txs: Mutex<WsRooms>,
     /// The Postgres pool.
     pg_pool: PgPool,
+    translation_manager: TranslationManager,
 }
 
 #[tokio::main]
@@ -54,8 +57,12 @@ async fn main() {
 
     let jwt_secret = std::env::var("JWT_SECRET").expect("No jwt secret has been defined");
     let pg_pool = tchatchers_core::pool::get_pg_pool().await;
-    sqlx::migrate!().run(&pg_pool).await.expect("Could not apply migrations on the database");
+    sqlx::migrate!()
+        .run(&pg_pool)
+        .await
+        .expect("Could not apply migrations on the database");
     let shared_state = Arc::new(AppState {
+        translation_manager: TranslationManager::init(&pg_pool).await,
         jwt_secret,
         pg_pool,
         txs: Mutex::new(WsRooms::default()),
@@ -71,6 +78,7 @@ async fn main() {
         .route("/api/logout", get(logout))
         .route("/api/validate", get(validate))
         .route("/api/pfp", post(upload_pfp))
+        .route("/api/app_context", get(app_context))
         .route("/ws/:room", get(ws_handler))
         .nest_service(
             "/static",

@@ -2,20 +2,21 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use super::navlink::Navlink;
 use crate::router::Route;
-use tchatchers_core::user::PartialUser;
-use yew::{html, Component, Context, Html, use_context, Properties, function_component, UseStateHandle};
+use tchatchers_core::app_context::AppContext;
+use yew::{
+    function_component, html, use_context, Component, Context, Html, Properties, UseStateHandle,
+};
 use yew_router::prelude::Link;
 
 #[function_component]
 pub fn NavbarHOC() -> Html {
-
-    let user = use_context::<UseStateHandle<Option<PartialUser>>>().expect("No user context");
-    html! { <Navbar user={(*user).clone()}/> }
+    let app_context = use_context::<UseStateHandle<Option<AppContext>>>().expect("No app context");
+    html! { <Navbar app_context={(*app_context).clone()}/> }
 }
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    user: Option<PartialUser>
+    app_context: Option<AppContext>,
 }
 
 #[derive(Default, Debug, PartialEq)]
@@ -30,7 +31,7 @@ impl Component for Navbar {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let is_user_logged_on =  ctx.props().user.is_some();
+        let is_user_logged_on = ctx.props().app_context.is_some();
         let links = match is_user_logged_on {
             true => html! {
                 <>

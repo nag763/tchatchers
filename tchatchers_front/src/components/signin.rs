@@ -4,43 +4,46 @@ use crate::components::common::{FormButton, WaitingForResponse};
 use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
-use crate::utils::jwt::get_user;
 use crate::utils::requester::Requester;
-use tchatchers_core::user::{AuthenticableUser, PartialUser};
+use tchatchers_core::app_context::AppContext;
+use tchatchers_core::user::AuthenticableUser;
 use web_sys::HtmlInputElement;
-use yew::{html, Component, Context, Html, NodeRef, Properties, function_component, use_context, UseStateHandle};
+use yew::{
+    function_component, html, use_context, Component, Context, Html, NodeRef, Properties,
+    UseStateHandle,
+};
 use yew_agent::Dispatched;
 use yew_router::prelude::use_navigator;
 use yew_router::scope_ext::RouterScopeExt;
 
+use super::common::I18N;
+
 #[function_component(SignInHOC)]
 pub fn sign_in_hoc() -> Html {
-
-    let user : UseStateHandle<Option<PartialUser>> = use_context::<UseStateHandle<Option<PartialUser>>>().expect("No user context");
-    user.set(None);
-    let navigator = use_navigator().unwrap();
-
-    if user.is_some() {
-        navigator.replace(&Route::JoinRoom);
-        ToastBus::dispatcher().send(Alert {
-            is_success: false,
-            content: "You are already logged in.".into(),
-        });
-        
+    let app_context: UseStateHandle<Option<AppContext>> =
+        use_context::<UseStateHandle<Option<AppContext>>>().expect("No app context");
+    {
+        let navigator = use_navigator().unwrap();
+        if app_context.is_some() {
+            navigator.replace(&Route::JoinRoom);
+            ToastBus::dispatcher().send(Alert {
+                is_success: false,
+                content: "You are already logged in.".into(),
+            });
+        }
     }
-
-    html! { <SignIn {user}/> }
+    html! { <SignIn {app_context}/> }
 }
 
 pub enum Msg {
     SubmitForm,
-    LoggedIn(PartialUser),
+    LoggedIn(AppContext),
     ErrorFromServer(String),
 }
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
-    user: UseStateHandle<Option<PartialUser>>
+    app_context: UseStateHandle<Option<AppContext>>,
 }
 
 #[derive(Default)]
@@ -80,8 +83,16 @@ impl Component for SignIn {
                         wasm_bindgen_futures::spawn_local(async move {
                             let resp = req.send().await;
                             if resp.status().is_success() {
-                                if let Ok(new_user) = get_user() {
-                                    link.send_message(Msg::LoggedIn(new_user));
+                                let req = Requester::<()>::get("/api/app_context");
+                                let resp = req.send().await;
+                                if resp.status().is_success() {
+                                    let app_context: AppContext =
+                                        serde_json::from_str(&resp.text().await.unwrap()).unwrap();
+                                    link.send_message(Msg::LoggedIn(app_context));
+                                } else {
+                                    link.send_message(Msg::ErrorFromServer(
+                                        resp.text().await.unwrap(),
+                                    ));
                                 }
                             } else {
                                 link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
@@ -99,15 +110,15 @@ impl Component for SignIn {
                 }
                 true
             }
-            Msg::LoggedIn(new_user) => {
-                ctx.props().user.set(Some(new_user));
+            Msg::LoggedIn(new_context) => {
+                ctx.props().app_context.set(Some(new_context));
                 ToastBus::dispatcher().send(Alert {
                     is_success: true,
                     content: "You logged in with success".into(),
                 });
                 ctx.link().navigator().unwrap().push(&Route::JoinRoom);
                 false
-            },
+            }
         }
     }
 
@@ -125,7 +136,7 @@ impl Component for SignIn {
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
-                      {"Login"}
+                        <I18N label={"login_field"} default={"Login"}/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
@@ -135,7 +146,7 @@ impl Component for SignIn {
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-password">
-                      {"Password"}
+                      <I18N label={"password_field"} default={"Password"}/>
                       </label>
                     </div>
                     <div class="md:w-2/3">

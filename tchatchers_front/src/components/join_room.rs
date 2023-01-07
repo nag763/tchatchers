@@ -2,7 +2,6 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::common::FormButton;
 use crate::router::Route;
-use crate::utils::jwt::get_user;
 use tchatchers_core::{room::RoomNameValidator, validation_error_message::ValidationErrorMessage};
 use validator::Validate;
 use web_sys::HtmlInputElement;
@@ -24,14 +23,7 @@ impl Component for JoinRoom {
     type Message = Msg;
     type Properties = ();
 
-    fn create(ctx: &Context<Self>) -> Self {
-        match get_user() {
-            Ok(_) => (),
-            Err(e) => {
-                gloo_console::warn!("Following errror happened when user joined root page {}", e);
-                ctx.link().navigator().unwrap().push(&Route::SignIn);
-            }
-        };
+    fn create(_ctx: &Context<Self>) -> Self {
         Self::default()
     }
 

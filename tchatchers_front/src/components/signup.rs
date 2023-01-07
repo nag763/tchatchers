@@ -71,7 +71,9 @@ impl Component for SignUp {
                         } else if !password.value().eq(&password_confirmation.value()) {
                             password.set_value("");
                             password_confirmation.set_value("");
-                            link.send_message(Msg::ErrorFromServer("The passwords do not match, please try again.".into()));
+                            link.send_message(Msg::ErrorFromServer(
+                                "The passwords do not match, please try again.".into(),
+                            ));
                         } else {
                             let mut req = Requester::<InsertableUser>::post("/api/user");
                             req.is_json(true).body(Some(payload));

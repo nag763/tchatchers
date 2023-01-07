@@ -47,6 +47,8 @@ pub struct User {
     pub name: String,
     /// The profile picture of the user.
     pub pfp: Option<String>,
+    /// The locale associated with the user.
+    pub locale_id: i32,
 }
 
 #[cfg(feature = "back")]
@@ -116,6 +118,8 @@ pub struct PartialUser {
     pub name: String,
     /// Profile picture of the user.
     pub pfp: Option<String>,
+    /// The locale associated with the user.
+    pub locale_id: i32,
 }
 
 impl From<User> for PartialUser {
@@ -125,6 +129,7 @@ impl From<User> for PartialUser {
             login: user.login,
             name: user.name,
             pfp: user.pfp,
+            locale_id: user.locale_id,
         }
     }
 }

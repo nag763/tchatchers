@@ -89,8 +89,9 @@ impl Component for Modal {
             None => "Ok",
         };
         let link = ctx.link().clone();
-        let decline_callback =
-            move |_: MouseEvent| link.send_message(Msg::CloseSelf(Some(ModalBusContent::Outcome(false))));
+        let decline_callback = move |_: MouseEvent| {
+            link.send_message(Msg::CloseSelf(Some(ModalBusContent::Outcome(false))))
+        };
         let link = ctx.link().clone();
         let accept_callback = move |_: MouseEvent| {
             link.send_message(Msg::CloseSelf(Some(ModalBusContent::Outcome(true))));
