@@ -75,7 +75,7 @@ pub async fn ws_handler(
 async fn handle_socket(socket: WebSocket, state: Arc<AppState>, room: String) {
     let (mut sender, mut receiver) = socket.split();
     let tx = {
-        let mut rooms = state.txs.lock().unwrap();
+        let mut rooms = state.txs.lock().await;
         match rooms.get(&room) {
             Some(v) => v.clone(),
             None => {

@@ -8,6 +8,7 @@
 
 use crate::common::RE_LIMITED_CHARS;
 use crate::jwt::Jwt;
+use crate::profile::Profile;
 #[cfg(feature = "back")]
 use rand::Rng;
 use regex::Regex;
@@ -49,6 +50,8 @@ pub struct User {
     pub pfp: Option<String>,
     /// The locale associated with the user.
     pub locale_id: i32,
+    #[cfg_attr(feature = "back", sqlx(rename = "profile_id"))]
+    pub profile: Profile,
 }
 
 #[cfg(feature = "back")]
@@ -120,6 +123,8 @@ pub struct PartialUser {
     pub pfp: Option<String>,
     /// The locale associated with the user.
     pub locale_id: i32,
+    // The profile of the user
+    pub profile: Profile,
 }
 
 impl From<User> for PartialUser {
@@ -130,6 +135,7 @@ impl From<User> for PartialUser {
             name: user.name,
             pfp: user.pfp,
             locale_id: user.locale_id,
+            profile: user.profile,
         }
     }
 }

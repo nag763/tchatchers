@@ -1,9 +1,10 @@
+#[cfg(feature = "back")]
+use crate::manager::ManagerError;
+use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     ops::{Deref, DerefMut},
 };
-
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "back", derive(sqlx::FromRow))]
@@ -24,7 +25,6 @@ impl DerefMut for Translation {
 }
 
 impl Translation {
-
     #[cfg(feature = "back")]
     async fn get_translations_for_locale(locale_id: i32, pool: &sqlx::PgPool) -> Self {
         let hashmap = sqlx::query_as("
@@ -42,16 +42,6 @@ impl Translation {
         Translation(hashmap)
     }
 
-
-    #[cfg(feature = "back")]
-    async fn get_locales(pool: &sqlx::PgPool) -> Vec<(i32,)> {
-        sqlx::query_as("SELECT loc.id FROM LOCALE loc")
-            .fetch_all(pool)
-            .await
-            .unwrap()
-    }
-
-
     #[cfg(feature = "front")]
     pub fn get_or_default(self, label: &str, default: &str) -> String {
         match self.get(label) {
@@ -59,15 +49,6 @@ impl Translation {
             None => default.to_string(),
         }
     }
-}
-
-#[cfg(feature = "back")]
-#[derive(Clone, Debug, Serialize, Deserialize, derive_more::Display)]
-pub enum TranslationManagerError {
-    #[display(fmt = "The translation manager hasn't been init.")]
-    NotInit,
-    #[display(fmt = "The locale hasn't been found, please use an existing locale.")]
-    LocaleDoesNotExist,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -80,13 +61,15 @@ pub struct TranslationManager {
 #[cfg(feature = "back")]
 impl TranslationManager {
     pub async fn init(pool: &sqlx::PgPool) -> TranslationManager {
-        let locales: Vec<(i32,)> = Translation::get_locales(pool).await;
+        use crate::locale::Locale;
+
+        let locales: Vec<Locale> = Locale::get_all(pool).await;
         let mut translations: HashMap<i32, Translation> =
             HashMap::with_capacity(locales.capacity());
-        for (locale,) in locales {
+        for locale in locales {
             translations.insert(
-                locale,
-                Translation::get_translations_for_locale(locale, pool).await,
+                locale.id,
+                Translation::get_translations_for_locale(locale.id, pool).await,
             );
         }
         TranslationManager {
@@ -95,16 +78,24 @@ impl TranslationManager {
         }
     }
 
-    pub async fn get_translations_for_locale(
+    pub fn get_translations_for_locale(
         &self,
         locale_id: i32,
-    ) -> Result<Translation, TranslationManagerError> {
+    ) -> Result<Translation, ManagerError<i32>> {
         if !self.init {
-            return Err(TranslationManagerError::NotInit);
+            return Err(ManagerError::NotInit);
         }
         let Some(translation) = self.translations.get(&locale_id) else {
-            return Err(TranslationManagerError::LocaleDoesNotExist);
+            return Err(ManagerError::NotBound(locale_id));
         };
         Ok(translation.clone())
+    }
+
+    pub fn get_all_translations(&self) -> Result<HashMap<i32, Translation>, ManagerError<i32>> {
+        if !self.init {
+            Err(ManagerError::NotInit)
+        } else {
+            Ok(self.translations.clone())
+        }
     }
 }

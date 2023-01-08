@@ -4,8 +4,13 @@
 pub mod app_context;
 pub(crate) mod common;
 pub mod jwt;
+pub mod locale;
+#[cfg(feature = "back")]
+pub mod manager;
+pub mod navlink;
 #[cfg(feature = "back")]
 pub mod pool;
+pub mod profile;
 pub mod room;
 pub mod translation;
 pub mod user;

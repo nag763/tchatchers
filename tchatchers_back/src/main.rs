@@ -12,10 +12,16 @@ pub mod extractor;
 pub mod validator;
 pub mod ws;
 
+use api::admin::translation::get_all_translations;
+use api::admin::translation::get_translations_for_locale;
+use api::admin::translation::reload_translations;
 use api::app_context::app_context;
+use api::locale::get_locale_id;
+use api::locale::get_locales;
 use api::pfp::*;
 use api::user::*;
 use axum::routing::get_service;
+use axum::routing::put;
 use axum::{
     http::StatusCode,
     routing::{get, post},
@@ -23,8 +29,10 @@ use axum::{
 };
 use sqlx_core::postgres::PgPool;
 use std::net::SocketAddr;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tchatchers_core::navlink::NavlinkManager;
 use tchatchers_core::translation::TranslationManager;
+use tokio::sync::Mutex;
 use tower_http::services::ServeDir;
 use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -41,7 +49,8 @@ pub struct AppState {
     txs: Mutex<WsRooms>,
     /// The Postgres pool.
     pg_pool: PgPool,
-    translation_manager: TranslationManager,
+    translation_manager: Mutex<TranslationManager>,
+    navlink_manager: Mutex<NavlinkManager>,
 }
 
 #[tokio::main]
@@ -62,10 +71,11 @@ async fn main() {
         .await
         .expect("Could not apply migrations on the database");
     let shared_state = Arc::new(AppState {
-        translation_manager: TranslationManager::init(&pg_pool).await,
+        navlink_manager: Mutex::new(NavlinkManager::init(&pg_pool).await),
+        translation_manager: Mutex::new(TranslationManager::init(&pg_pool).await),
         jwt_secret,
-        pg_pool,
         txs: Mutex::new(WsRooms::default()),
+        pg_pool,
     });
 
     let app = Router::new()
@@ -79,6 +89,16 @@ async fn main() {
         .route("/api/validate", get(validate))
         .route("/api/pfp", post(upload_pfp))
         .route("/api/app_context", get(app_context))
+        .route("/api/locale/", get(get_locales))
+        .route("/api/locale/:locale_id", get(get_locale_id))
+        .route(
+            "/api/admin/translation",
+            put(reload_translations).get(get_all_translations),
+        )
+        .route(
+            "/api/admin/translation/:locale_id",
+            get(get_translations_for_locale),
+        )
         .route("/ws/:room", get(ws_handler))
         .nest_service(
             "/static",
