@@ -123,6 +123,7 @@ pub struct PartialUser {
     pub pfp: Option<String>,
     /// The locale associated with the user.
     pub locale_id: i32,
+    #[cfg_attr(feature = "back", sqlx(rename = "profile_id"))]
     // The profile of the user
     pub profile: Profile,
 }
