@@ -1,0 +1,65 @@
+{
+  "build": {
+    "beforeBuildCommand": "trunk build ./tchatchers_front/index.html --release",
+    "beforeDevCommand": "echo e",
+    "devPath": "http://localhost:3000",
+    "distDir": "../tchatchers_front/dist"
+  },
+  "package": {
+    "productName": "tchatchers_client",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": true
+    },
+    "bundle": {
+      "active": true,
+      "category": "DeveloperTool",
+      "copyright": "",
+      "deb": {
+        "depends": []
+      },
+      "externalBin": [],
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "identifier": "nag763.tchatchers.app",
+      "longDescription": "",
+      "macOS": {
+        "entitlements": null,
+        "exceptionDomain": "",
+        "frameworks": [],
+        "providerShortName": null,
+        "signingIdentity": null
+      },
+      "resources": [],
+      "shortDescription": "",
+      "targets": "all",
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "updater": {
+      "active": false
+    },
+    "windows": [
+      {
+        "fullscreen": true,
+        "height": 600,
+        "resizable": true,
+        "title": "tchatchers",
+        "width": 800
+      }
+    ]
+  }
+}
