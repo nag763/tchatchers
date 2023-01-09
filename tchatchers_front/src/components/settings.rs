@@ -112,7 +112,7 @@ impl Component for Settings {
                             return true;
                         };
                         let Ok(timezone) = Tz::from_str(&timezone.value()) else {
-                            ctx.link().send_message(Msg::ErrorFromServer("The timezone you chosed isn't valid".into()));
+                            ctx.link().send_message(Msg::ErrorFromServer("Please use an existing timezone; the one you picked isn't valid".into()));
                             return true;
                         };
                         let payload = UpdatableUser {
@@ -285,7 +285,7 @@ impl Component for Settings {
                     </label>
                   </div>
                   <div class="md:w-2/3">
-                    <select class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.locale_id} >
+                    <select class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true ref={&self.locale_id} >
                         {self.context.available_locale.iter().map(|l|
                                 html! {<option value={l.id.to_string()} selected={l.id == self.context.user.locale_id}>{l.long_name.as_str()}</option>}
                         ).collect::<Html>()}
@@ -299,11 +299,13 @@ impl Component for Settings {
                     </label>
                   </div>
                   <div class="md:w-2/3">
-                    <select class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.timezone} >
+                  <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" list="timezones" required=true ref={&self.timezone} value={self.context.user.timezone.tz_name.clone()} />
+
+                    <datalist id="timezones" class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" type="text" required=true  >
                         {chrono_tz::TZ_VARIANTS.iter().map(|tz|
-                                html! {<option selected={tz.name().eq(&self.context.user.timezone.tz_name)} value={tz.name()}>{tz.name()}</option>}
+                                html! {<option value={tz.name()}>{tz.name()}</option>}
                         ).collect::<Html>()}
-                    </select>
+                    </datalist>
                   </div>
                 </div>
                   <div class="md:flex md:items-center mb-6">
