@@ -14,6 +14,7 @@ use std::sync::Arc;
 use tchatchers_core::jwt::Jwt;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, UpdatableUser, User};
 use tokio::time::{sleep, Duration};
+use tracing::log::error;
 
 /// Creates a user.
 ///
@@ -134,20 +135,24 @@ pub async fn update_user(
     cookie_jar: CookieJar,
     Json(user): Json<UpdatableUser>,
 ) -> impl IntoResponse {
-    if jwt.user.id == user.id {}
-    let Ok(_ret) =  user.update(&state.pg_pool).await else {
+    if jwt.user.id == user.id {
+        if let Err(err) = user.update(&state.pg_pool).await {
+            error!("An error happened while trying to update the record : \n---New record :{:#?}---\nError : {}", user, err);
             return Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened"));
         };
-    let updated_user = User::find_by_id(user.id, &state.pg_pool).await.unwrap();
-    let jwt = Jwt::from(updated_user);
-    let serialized_jwt: String = jwt.serialize(&state.jwt_secret).unwrap();
-    let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
-    jwt_cookie.set_path("/");
-    jwt_cookie.make_permanent();
-    jwt_cookie.set_secure(true);
-    jwt_cookie.set_http_only(false);
-    let new_jar = cookie_jar.add(jwt_cookie);
-    Ok((StatusCode::CREATED, new_jar, "User updated with success"))
+        let updated_user = User::find_by_id(user.id, &state.pg_pool).await.unwrap();
+        let jwt = Jwt::from(updated_user);
+        let serialized_jwt: String = jwt.serialize(&state.jwt_secret).unwrap();
+        let mut jwt_cookie = Cookie::new(JWT_PATH, serialized_jwt);
+        jwt_cookie.set_path("/");
+        jwt_cookie.make_permanent();
+        jwt_cookie.set_secure(true);
+        jwt_cookie.set_http_only(false);
+        let new_jar = cookie_jar.add(jwt_cookie);
+        Ok((StatusCode::CREATED, new_jar, "User updated with success"))
+    } else {
+        Err((StatusCode::UNAUTHORIZED, "You can't update other users"))
+    }
 }
 
 pub async fn delete_user(

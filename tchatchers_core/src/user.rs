@@ -210,6 +210,7 @@ pub struct UpdatableUser {
     )]
     pub name: String,
     pub pfp: Option<String>,
+    pub locale_id: i32,
 }
 
 #[cfg(feature = "back")]
@@ -220,9 +221,10 @@ impl UpdatableUser {
     ///
     /// - pool : The connection pool.
     pub async fn update(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
-        sqlx::query("UPDATE CHATTER SET name=$1, pfp=$2 WHERE id=$3")
+        sqlx::query("UPDATE CHATTER SET name=$1, pfp=$2, locale_id=$3 WHERE id=$4")
             .bind(&self.name)
             .bind(&self.pfp)
+            .bind(self.locale_id)
             .bind(self.id)
             .execute(pool)
             .await

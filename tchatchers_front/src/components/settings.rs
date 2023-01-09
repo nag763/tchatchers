@@ -54,6 +54,7 @@ pub struct Props {
 
 pub struct Settings {
     name: NodeRef,
+    locale_id: NodeRef,
     pfp: Option<String>,
     wait_for_api: bool,
     server_error: Option<String>,
@@ -77,6 +78,7 @@ impl Component for Settings {
         };
         Self {
             name: NodeRef::default(),
+            locale_id: NodeRef::default(),
             pfp: None,
             context: ctx.props().context.as_ref().unwrap().clone(),
             wait_for_api: false,
@@ -92,10 +94,18 @@ impl Component for Settings {
                 self.wait_for_api = true;
                 self.ok_msg = None;
                 self.server_error = None;
-                if let Some(name) = self.name.cast::<HtmlInputElement>() {
+                if let (Some(name), Some(locale_id)) = (
+                    self.name.cast::<HtmlInputElement>(),
+                    self.locale_id.cast::<HtmlInputElement>(),
+                ) {
                     if name.check_validity() {
+                        let Ok(locale_id) = locale_id.value().parse() else {
+                            ctx.link().send_message(Msg::ErrorFromServer("The given locale isn't valid".into()));
+                            return true;
+                        };
                         let payload = UpdatableUser {
                             id: self.context.user.id,
+                            locale_id,
                             name: name.value(),
                             pfp: self.pfp.clone(),
                         };
@@ -249,6 +259,20 @@ impl Component for Settings {
                       <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.name} value={self.context.user.name.clone()}/>
                     </div>
                   </div>
+                  <div class="md:flex md:items-center mb-6">
+                  <div class="md:w-1/3">
+                    <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                    <I18N label={"your_locale_field"} default={"Your locale"} translation={self.context.translation.clone()}/>
+                    </label>
+                  </div>
+                  <div class="md:w-2/3">
+                    <select class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.locale_id} >
+                        {self.context.available_locale.iter().map(|l|
+                                html! {<option value={l.id.to_string()} selected={l.id == self.context.user.locale_id}>{l.long_name.as_str()}</option>}
+                        ).collect::<Html>()}
+                    </select>
+                  </div>
+                </div>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">

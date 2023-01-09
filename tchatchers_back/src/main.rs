@@ -28,6 +28,7 @@ use axum::{
     Router,
 };
 use sqlx_core::postgres::PgPool;
+use tchatchers_core::locale::LocaleManager;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tchatchers_core::navlink::NavlinkManager;
@@ -51,6 +52,7 @@ pub struct AppState {
     pg_pool: PgPool,
     translation_manager: Mutex<TranslationManager>,
     navlink_manager: Mutex<NavlinkManager>,
+    locale_manager: LocaleManager,
 }
 
 #[tokio::main]
@@ -71,6 +73,7 @@ async fn main() {
         .await
         .expect("Could not apply migrations on the database");
     let shared_state = Arc::new(AppState {
+        locale_manager: LocaleManager::init(&pg_pool).await,
         navlink_manager: Mutex::new(NavlinkManager::init(&pg_pool).await),
         translation_manager: Mutex::new(TranslationManager::init(&pg_pool).await),
         jwt_secret,

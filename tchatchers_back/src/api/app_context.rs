@@ -5,7 +5,9 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use tchatchers_core::{app_context::AppContext, navlink::Navlink, translation::Translation};
+use tchatchers_core::{
+    app_context::AppContext, navlink::Navlink, translation::Translation,
+};
 
 use crate::{extractor::JwtUserExtractor, AppState};
 
@@ -25,9 +27,11 @@ pub async fn app_context(
         .await
         .get_navlink_for_profile(jwt.user.profile)
         .map_err(|e| e.into_response())?;
+    let available_locale = state.locale_manager.get_all().map_err(|e| e.into_response())?;
     Ok(Json(AppContext {
         user: jwt.user,
         navlink,
         translation,
+        available_locale
     }))
 }
