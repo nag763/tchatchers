@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use std::str::FromStr;
 
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
@@ -11,8 +12,12 @@ use crate::services::modal_bus::ModalBus;
 use crate::services::modal_bus::ModalBusContent;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::requester::Requester;
+use chrono::TimeZone;
+use chrono_tz::OffsetComponents;
+use chrono_tz::Tz;
 use gloo_net::http::Request;
 use tchatchers_core::app_context::AppContext;
+use tchatchers_core::timezone::Timezone;
 use tchatchers_core::user::UpdatableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
 use validator::Validate;
@@ -55,6 +60,7 @@ pub struct Props {
 pub struct Settings {
     name: NodeRef,
     locale_id: NodeRef,
+    timezone: NodeRef,
     pfp: Option<String>,
     wait_for_api: bool,
     server_error: Option<String>,
@@ -79,6 +85,7 @@ impl Component for Settings {
         Self {
             name: NodeRef::default(),
             locale_id: NodeRef::default(),
+            timezone: NodeRef::default(),
             pfp: None,
             context: ctx.props().context.as_ref().unwrap().clone(),
             wait_for_api: false,
@@ -94,13 +101,18 @@ impl Component for Settings {
                 self.wait_for_api = true;
                 self.ok_msg = None;
                 self.server_error = None;
-                if let (Some(name), Some(locale_id)) = (
+                if let (Some(name), Some(locale_id), Some(timezone)) = (
                     self.name.cast::<HtmlInputElement>(),
                     self.locale_id.cast::<HtmlInputElement>(),
+                    self.timezone.cast::<HtmlInputElement>(),
                 ) {
                     if name.check_validity() {
                         let Ok(locale_id) = locale_id.value().parse() else {
                             ctx.link().send_message(Msg::ErrorFromServer("The given locale isn't valid".into()));
+                            return true;
+                        };
+                        let Ok(timezone) = Tz::from_str(&timezone.value()) else {
+                            ctx.link().send_message(Msg::ErrorFromServer("The timezone you chosed isn't valid".into()));
                             return true;
                         };
                         let payload = UpdatableUser {
@@ -108,6 +120,13 @@ impl Component for Settings {
                             locale_id,
                             name: name.value(),
                             pfp: self.pfp.clone(),
+                            timezone: Timezone {
+                                tz_name: timezone.to_string(),
+                                tz_offset: timezone
+                                    .offset_from_utc_datetime(&chrono::Utc::now().naive_utc())
+                                    .base_utc_offset()
+                                    .num_seconds(),
+                            },
                         };
                         if let Err(e) = payload.validate() {
                             let message: ValidationErrorMessage = e.into();
@@ -269,6 +288,20 @@ impl Component for Settings {
                     <select class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.locale_id} >
                         {self.context.available_locale.iter().map(|l|
                                 html! {<option value={l.id.to_string()} selected={l.id == self.context.user.locale_id}>{l.long_name.as_str()}</option>}
+                        ).collect::<Html>()}
+                    </select>
+                  </div>
+                </div>
+                <div class="md:flex md:items-center mb-6">
+                  <div class="md:w-1/3">
+                    <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                    <I18N label={"your_tz_field"} default={"Your timezone"} translation={self.context.translation.clone()}/>
+                    </label>
+                  </div>
+                  <div class="md:w-2/3">
+                    <select class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.timezone} >
+                        {chrono_tz::TZ_VARIANTS.iter().map(|tz|
+                                html! {<option selected={tz.name().eq(&self.context.user.timezone.tz_name)} value={tz.name()}>{tz.name()}</option>}
                         ).collect::<Html>()}
                     </select>
                   </div>

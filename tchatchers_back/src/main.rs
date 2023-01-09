@@ -28,9 +28,9 @@ use axum::{
     Router,
 };
 use sqlx_core::postgres::PgPool;
-use tchatchers_core::locale::LocaleManager;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use tchatchers_core::locale::LocaleManager;
 use tchatchers_core::navlink::NavlinkManager;
 use tchatchers_core::translation::TranslationManager;
 use tokio::sync::Mutex;

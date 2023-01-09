@@ -1,6 +1,6 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use chrono::{DateTime, Datelike, Timelike, Utc};
+use chrono::{DateTime, Datelike, Duration, Timelike, Utc};
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessageContent, WsReceptionStatus};
 use uuid::Uuid;
@@ -146,6 +146,7 @@ impl Component for Chat {
         let mut iterator = ctx.props().messages.iter();
         let mut next_element_opt = iterator.next();
         let mut html_content: Vec<Html> = Vec::with_capacity(ctx.props().messages.len());
+        let user_offset = Duration::seconds(ctx.props().user.timezone.tz_offset);
         let current_user_id = ctx.props().user.id;
         while let Some(current_element) = std::mem::replace(&mut next_element_opt, iterator.next())
         {
@@ -155,7 +156,7 @@ impl Component for Chat {
                 // so we display the pfp for the first message
                 _ => true,
             };
-            html_content.push(html! { <UserChat uuid={current_element.uuid} pfp={current_element.author.pfp.clone().unwrap_or_else(|| DEFAULT_PFP.into())} reception_status={current_element.reception_status} content={current_element.content.clone()} author={current_element.author.name.clone()} is_user={current_element.author.id == current_user_id} timestamp={current_element.timestamp} {display_pfp}/> });
+            html_content.push(html! { <UserChat uuid={current_element.uuid} pfp={current_element.author.pfp.clone().unwrap_or_else(|| DEFAULT_PFP.into())} reception_status={current_element.reception_status} content={current_element.content.clone()} author={current_element.author.name.clone()} is_user={current_element.author.id == current_user_id} timestamp={current_element.timestamp + user_offset} {display_pfp}/> });
         }
         html_content.into_iter().collect::<Html>()
     }

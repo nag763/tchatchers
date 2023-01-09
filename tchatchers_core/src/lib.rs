@@ -12,6 +12,7 @@ pub mod navlink;
 pub mod pool;
 pub mod profile;
 pub mod room;
+pub mod timezone;
 pub mod translation;
 pub mod user;
 pub mod validation_error_message;
