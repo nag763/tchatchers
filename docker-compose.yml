@@ -10,6 +10,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
   back :
+    user: "${UID}:${GID}"
     links:
       - postgres:pg.tchatche.rs
     depends_on:
