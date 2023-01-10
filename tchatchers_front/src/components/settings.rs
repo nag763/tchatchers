@@ -299,13 +299,12 @@ impl Component for Settings {
                     </label>
                   </div>
                   <div class="md:w-2/3">
-                  <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" list="timezones" required=true ref={&self.timezone} value={self.context.user.timezone.tz_name.clone()} />
 
-                    <datalist id="timezones" class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" type="text" required=true  >
+                    <select class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" type="text" required=true ref={&self.timezone} >
                         {chrono_tz::TZ_VARIANTS.iter().map(|tz|
-                                html! {<option value={tz.name()}>{tz.name()}</option>}
+                                html! {<option selected={tz.name().eq(&self.context.user.timezone.tz_name)} value={tz.name()}>{tz.name()}</option>}
                         ).collect::<Html>()}
-                    </datalist>
+                    </select>
                   </div>
                 </div>
                   <div class="md:flex md:items-center mb-6">
