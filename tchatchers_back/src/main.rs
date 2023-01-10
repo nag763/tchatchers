@@ -71,9 +71,10 @@ async fn main() {
     dotenv::dotenv().ok();
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
-            std::env::var("RUST_LOG")
+            std::env::var("TOWER_LOG")
                 .unwrap_or_else(|_| "tower_http=debug".into()),
         ))
+        
         .with(tracing_subscriber::fmt::layer())
         .init();
 

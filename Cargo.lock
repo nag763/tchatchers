@@ -2510,6 +2510,7 @@ dependencies = [
  "sqlx-core",
  "tchatchers_core",
  "tokio",
+ "tower",
  "tower-http",
  "tracing",
  "tracing-subscriber",
@@ -2528,6 +2529,7 @@ dependencies = [
  "derive_more",
  "jsonwebtoken",
  "lazy_static",
+ "log",
  "rand",
  "regex",
  "rust-argon2",
@@ -2789,6 +2791,7 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
