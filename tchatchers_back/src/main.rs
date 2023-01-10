@@ -20,6 +20,7 @@ use api::locale::get_locale_id;
 use api::locale::get_locales;
 use api::pfp::*;
 use api::user::*;
+use axum::http::header::COOKIE;
 use axum::routing::get_service;
 use axum::routing::put;
 use axum::{
@@ -28,14 +29,24 @@ use axum::{
     Router,
 };
 use sqlx_core::postgres::PgPool;
+use std::iter::once;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tchatchers_core::locale::LocaleManager;
 use tchatchers_core::navlink::NavlinkManager;
 use tchatchers_core::translation::TranslationManager;
 use tokio::sync::Mutex;
+use tower::ServiceBuilder;
+use tower_http::request_id::MakeRequestUuid;
+use tower_http::sensitive_headers::SetSensitiveRequestHeadersLayer;
 use tower_http::services::ServeDir;
+use tower_http::trace::DefaultOnFailure;
+use tower_http::trace::DefaultOnRequest;
+use tower_http::trace::DefaultOnResponse;
 use tower_http::trace::{DefaultMakeSpan, TraceLayer};
+use tower_http::LatencyUnit;
+use tower_http::ServiceBuilderExt;
+use tracing::Level;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use ws::ws_handler;
 use ws::WsRooms;
@@ -61,7 +72,7 @@ async fn main() {
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
             std::env::var("RUST_LOG")
-                .unwrap_or_else(|_| "tchatchers_back=debug,tower_http=debug".into()),
+                .unwrap_or_else(|_| "tower_http=debug".into()),
         ))
         .with(tracing_subscriber::fmt::layer())
         .init();
@@ -111,7 +122,20 @@ async fn main() {
         .with_state(shared_state)
         .layer(
             TraceLayer::new_for_http()
-                .make_span_with(DefaultMakeSpan::default().include_headers(true)),
+                .make_span_with(DefaultMakeSpan::new().include_headers(true))
+                .on_request(DefaultOnRequest::new().level(Level::INFO))
+                .on_response(
+                    DefaultOnResponse::new()
+                        .level(Level::INFO)
+                        .latency_unit(LatencyUnit::Millis),
+                )
+                .on_failure(DefaultOnFailure::new().level(Level::ERROR)),
+        )
+        .layer(SetSensitiveRequestHeadersLayer::new(once(COOKIE)))
+        .layer(
+            ServiceBuilder::new()
+                .set_x_request_id(MakeRequestUuid)
+                .propagate_x_request_id(),
         );
 
     // run it with hyper
