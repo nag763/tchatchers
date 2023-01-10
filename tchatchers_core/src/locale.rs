@@ -36,9 +36,7 @@ pub struct LocaleManager {
 #[cfg(feature = "back")]
 impl LocaleManager {
     pub async fn init(pg_pool: &sqlx::PgPool) -> LocaleManager {
-        let locales =
-            Locale::get_all_sorted_by_name(pg_pool)
-                .await;
+        let locales = Locale::get_all_sorted_by_name(pg_pool).await;
         LocaleManager {
             locales,
             init: true,
@@ -48,7 +46,7 @@ impl LocaleManager {
     pub fn get(&self, locale_id: i32) -> Result<Locale, crate::manager::ManagerError<i32>> {
         if !self.init {
             Err(crate::manager::ManagerError::NotInit)
-        } else if let Some(value) = self.locales.iter().find(|l| l.id==locale_id) {
+        } else if let Some(value) = self.locales.iter().find(|l| l.id == locale_id) {
             Ok(value.clone())
         } else {
             Err(crate::manager::ManagerError::NotBound(locale_id))

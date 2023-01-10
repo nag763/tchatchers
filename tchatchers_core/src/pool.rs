@@ -10,9 +10,9 @@
 use std::str::FromStr;
 
 use log::LevelFilter;
-use sqlx::ConnectOptions;
 use sqlx::postgres::PgConnectOptions;
 use sqlx::postgres::PgPoolOptions;
+use sqlx::ConnectOptions;
 use sqlx::PgPool;
 
 /// Returns a postgres pool from the user env.
@@ -23,8 +23,10 @@ pub async fn get_pg_pool() -> PgPool {
         .username(&std::env::var("POSTGRES_USER").expect("No user defined in .env"))
         .password(&std::env::var("POSTGRES_PASSWORD").expect("No password defined in .env"));
     let connect_options = match std::env::var("SQLX_LOG").ok() {
-        Some(v) => connect_options.log_statements(LevelFilter::from_str(&v).unwrap_or_else(|_| LevelFilter::Error)).clone(),
-        None => connect_options.disable_statement_logging().clone()
+        Some(v) => connect_options
+            .log_statements(LevelFilter::from_str(&v).unwrap_or(LevelFilter::Error))
+            .clone(),
+        None => connect_options.disable_statement_logging().clone(),
     };
     PgPoolOptions::new()
         .max_connections(15)
