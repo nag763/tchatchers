@@ -28,4 +28,4 @@ RUN chmod 400 .env
 
 USER runner
 
-CMD tchatchers_back
+CMD RUST_LOG=tower_http=info tchatchers_back
