@@ -1,6 +1,7 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
+use tchatchers_core::translation::Translation;
 use tchatchers_core::ws_message::WsMessage;
 use tchatchers_core::{user::PartialUser, ws_message::WsMessageContent};
 use web_sys::HtmlInputElement;
@@ -15,6 +16,7 @@ pub struct Props {
     pub pass_message_to_ws: Callback<String>,
     pub room: String,
     pub user: PartialUser,
+    pub translation: Translation,
 }
 
 #[derive(Default)]
@@ -57,10 +59,9 @@ impl Component for TypeBar {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <>
-                <div />
                 <div class="col-span-6 mb-6">
                 <form onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
-                      <input class="shadow appearance-none border dark:border-zinc-800 rounded-xl px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-zinc-900 w-full h-10 invalid:border-red-500 disabled:bg-gray-100 dark:disabled:bg-zinc-700 focus:invalid:border-red-500 bg-gray-200 dark:bg-zinc-700 dark:text-gray-200" type="text" placeholder={"Type a message here"} minlength="2" maxlength="127" ref={self.input_ref.clone()} />
+                      <input class="shadow appearance-none border dark:border-zinc-800 rounded-xl px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-zinc-900 w-full h-10 invalid:border-red-500 disabled:bg-gray-100 dark:disabled:bg-zinc-700 focus:invalid:border-red-500 bg-gray-200 dark:bg-zinc-700 dark:text-gray-200" type="text" placeholder={ctx.props().translation.clone().get_or_default("type_msg_here", "Type a message here")} minlength="2" maxlength="127" ref={self.input_ref.clone()} />
                       <button type="submit" hidden=true></button>
                   </form>
                 </div>

@@ -1,7 +1,7 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use crate::components::prelude::*;
+use crate::components::{join_room::JoinRoomHOC, prelude::*};
 use yew::{html, Html};
 use yew_router::prelude::*;
 
@@ -36,7 +36,7 @@ pub enum Route {
 /// Function used to switch the main component's view.
 pub fn switch(route: Route) -> Html {
     match route {
-        Route::JoinRoom => html! { <JoinRoom /> },
+        Route::JoinRoom => html! { <JoinRoomHOC /> },
         Route::Room { room } => html! { <AuthGuard<FeedHOC> {room} /> },
         Route::SignIn => html! { <SignInHOC /> },
         Route::SignUp => html! { <SignUp /> },

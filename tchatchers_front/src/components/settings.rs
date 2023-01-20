@@ -137,6 +137,8 @@ impl Component for Settings {
                             req.is_json(true).body(Some(payload));
                             let link = ctx.link().clone();
                             self.wait_for_api = true;
+                            let translation =
+                                ctx.props().context.as_ref().unwrap().translation.clone();
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
                                 if resp.status().is_success() {
@@ -148,8 +150,10 @@ impl Component for Settings {
                                                 .unwrap();
                                         ToastBus::dispatcher().send(Alert {
                                             is_success: true,
-                                            content: "Your profile has been updated with success"
-                                                .into(),
+                                            content: translation.get_or_default(
+                                                "profile_updated",
+                                                "Your profile has been updated with success",
+                                            ),
                                         });
                                         link.send_message(Msg::ProfileUpdated(app_context));
                                     } else {
@@ -197,16 +201,27 @@ impl Component for Settings {
                 self.wait_for_api = false;
                 self.context = app_context.clone();
                 ctx.props().context.set(Some(app_context));
-                self.ok_msg = Some("Your profile has been updated with success.".into());
+                self.ok_msg = Some(
+                    ctx.props()
+                        .context
+                        .as_ref()
+                        .unwrap()
+                        .translation
+                        .clone()
+                        .get_or_default(
+                            "profile_updated",
+                            "Your profile has been updated with success",
+                        ),
+                );
 
                 true
             }
             Msg::ConfirmDeletion => {
                 let mc : ModalContent = ModalContent {
-                    title: "You are about to delete your account".into(),
-                    msg: "This action is not reversible, once your account is deleted, there is no way for you to get it back.".into(),
-                    decline_text: Some("I changed, my mind, don't delete my account".into()),
-                    accept_text: Some("Understood, farewell".into()),
+                    title: self.context.translation.clone().get_or_default("modal_delete_profile_title", "You are about to delete your account"),
+                    msg: self.context.translation.clone().get_or_default("modal_delete_profile_content", "This action is not reversible, once your account is deleted, there is no way for you to get it back."),
+                    decline_text: Some(self.context.translation.clone().get_or_default("modal_delete_profile_no", "I changed, my mind, don't delete my account")),
+                    accept_text: Some(self.context.translation.clone().get_or_default("modal_delete_profile_yes", "Understood, farewell")),
                 };
                 self.producer.send(ModalBusContent::PopModal(mc));
                 false
@@ -243,7 +258,9 @@ impl Component for Settings {
         let link = ctx.link().clone();
         let end_of_form = match self.wait_for_api {
             true => html! { <WaitingForResponse /> },
-            false => html! { <AppButton label="Update" /> },
+            false => {
+                html! { <AppButton label={self.context.translation.clone().get_or_default("update_profile", "Update profile")} /> }
+            }
         };
         let delete_profile = match self.wait_for_api {
             true => html! { <WaitingForResponse /> },
@@ -257,7 +274,9 @@ impl Component for Settings {
                 <div class="flex items-center justify-center h-full dark:bg-zinc-800">
                 <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);" >
 
-                <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold"><I18N label={"settings"} default={"Settings"} translation={self.context.translation.clone()}/></h2>
+                <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold">
+                    <I18N label={"settings"} default={"Settings"} translation={self.context.translation.clone()}/>
+                </h2>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">

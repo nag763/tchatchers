@@ -1,11 +1,13 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use crate::components::common::WaitingForResponse;
+use crate::components::common::{WaitingForResponse, I18N};
+use tchatchers_core::translation::Translation;
 use yew::{function_component, html, Callback, Component, Context, Html, Properties};
 
 #[derive(Properties, PartialEq)]
 pub struct TryReconnectProps {
     try_reconnect: Callback<()>,
+    translation: Translation,
 }
 
 #[function_component(TryReconnect)]
@@ -17,10 +19,10 @@ pub fn try_reconnect(props: &TryReconnectProps) -> Html {
     html! {
         <div class="flex items-center justify-center gap-2 lg:gap-12 dark:text-gray-200">
             <span>
-            {"You are currently disconnected"}
+            <I18N  label={"you_are_disconnected"} default={"You are disconnected"} translation={props.translation.clone()}/>
             </span>
             <button class="shadow bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded-md" onclick={onclick} >
-            {"Reconnect"}
+            <I18N  label={"try_reconnect"} default={"Reconnect"} translation={props.translation.clone()}/>
             </button>
         </div>
     }
@@ -30,6 +32,7 @@ pub fn try_reconnect(props: &TryReconnectProps) -> Html {
 pub struct Props {
     pub called_back: bool,
     pub try_reconnect: Callback<()>,
+    pub translation: Translation,
 }
 
 pub struct DisconnectedBar;
@@ -44,7 +47,9 @@ impl Component for DisconnectedBar {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let component = match ctx.props().called_back {
-            true => html! { <TryReconnect try_reconnect={ctx.props().try_reconnect.clone()} /> },
+            true => {
+                html! { <TryReconnect translation={ctx.props().translation.clone()} try_reconnect={ctx.props().try_reconnect.clone()} /> }
+            }
             false => html! { <WaitingForResponse /> },
         };
         html! {

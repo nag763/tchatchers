@@ -115,7 +115,7 @@ impl Component for Feed {
                                 {
                                     ToastBus::dispatcher().send(Alert {
                                         is_success: false,
-                                        content: "The room name you tried to join is not valid, please select one within this screen.".into(),
+                                        content: ctx.props().context.translation.clone().get_or_default("room_name_incorrect", "The room name you tried to join is not valid, please select one within this screen."),
                                     });
                                     ctx.link().navigator().unwrap().push(&Route::JoinRoom);
                                 } else {
@@ -234,14 +234,14 @@ impl Component for Feed {
                 let pass_message_to_ws = Callback::from(move |message: String| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar {pass_message_to_ws} user={ctx.props().context.user.clone()} room={ctx.props().room.clone()}/>}
+                html! {<TypeBar translation={ctx.props().context.translation.clone()} {pass_message_to_ws} user={ctx.props().context.user.clone()} room={ctx.props().room.clone()}/>}
             }
             false => {
                 let link = ctx.link().clone();
                 let try_reconnect = Callback::from(move |_: ()| {
                     link.send_message(Msg::TryReconnect);
                 });
-                html! {<DisconnectedBar called_back={self.called_back} {try_reconnect} />}
+                html! {<DisconnectedBar translation={ctx.props().context.translation.clone()} called_back={self.called_back} {try_reconnect} />}
             }
         };
         html! {

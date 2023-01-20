@@ -16,11 +16,16 @@ pub fn log_out_hoc() -> Html {
     let req = Request::get("/api/logout").send();
     wasm_bindgen_futures::spawn_local(async move {
         req.await.unwrap();
-        context.set(None);
         ToastBus::dispatcher().send(Alert {
             is_success: true,
-            content: "You logged out with success".into(),
+            content: context
+                .as_ref()
+                .unwrap()
+                .translation
+                .clone()
+                .get_or_default("logged_out", "You logged out with success, see you !"),
         });
+        context.set(None);
         navigator.replace(&Route::SignIn);
     });
     html! {

@@ -21,7 +21,7 @@ pub mod type_bar;
 pub mod prelude {
     pub use super::auth_guard::AuthGuard;
     pub use super::feed::FeedHOC;
-    pub use super::join_room::JoinRoom;
+    pub use super::join_room::JoinRoomHOC;
     pub use super::logout::LogOut;
     pub use super::modal::Modal;
     pub use super::navbar::NavbarHOC;
