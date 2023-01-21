@@ -84,7 +84,7 @@ pub async fn authenticate(
         jwt_cookie.set_path("/");
         jwt_cookie.make_permanent();
         jwt_cookie.set_secure(true);
-        jwt_cookie.set_http_only(false);
+        jwt_cookie.set_http_only(true);
         let cookie_jar = cookie_jar.add(jwt_cookie);
         Ok((StatusCode::OK, cookie_jar))
     } else {
@@ -147,7 +147,7 @@ pub async fn update_user(
         jwt_cookie.set_path("/");
         jwt_cookie.make_permanent();
         jwt_cookie.set_secure(true);
-        jwt_cookie.set_http_only(false);
+        jwt_cookie.set_http_only(true);
         let new_jar = cookie_jar.add(jwt_cookie);
         Ok((StatusCode::CREATED, new_jar, "User updated with success"))
     } else {
