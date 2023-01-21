@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-derive_more = "0.99.17"
 futures = "0.3.23"
 gloo-console = "0.2.3"
 gloo-net = "0.2.4"
@@ -18,9 +17,7 @@ yew = { version = "0.20.0", features = ["csr"] }
 yew-agent = "0.2.0"
 yew-router = "0.17.0"
 tchatchers_core = { path = "../tchatchers_core", features = ["front"] }
-linked_hash_set = "0.1.4"
 chrono = { version = "0.4.22", features = ["serde"] }
-base64 = "0.13.0"
 js-sys = "0.3.60"
 reqwest-wasm = "0.11.0"
 uuid = { version = "1.2.2", features = ["v4"] }
