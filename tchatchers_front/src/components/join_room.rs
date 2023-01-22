@@ -97,7 +97,7 @@ impl Component for JoinRoom {
                     <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.verification_error.is_none()}>
                         {self.verification_error.as_ref().unwrap_or(&AttrValue::default())}
                     </small>
-                  <FormButton label={ctx.props().context.translation.clone().get_or_default("join_room", "Join")} />
+                  <FormButton label={ctx.props().context.translation.as_ref().get_or_default("join_room", "Join")} />
                 </form>
                 </div>
             </>

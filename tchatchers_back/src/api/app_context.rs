@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{rc::Rc, sync::Arc};
 
 use axum::{
     extract::State,
@@ -32,7 +32,7 @@ pub async fn app_context(
     Ok(Json(AppContext {
         user: jwt.user,
         navlink,
-        translation,
+        translation: Rc::new(translation),
         available_locale,
     }))
 }

@@ -151,7 +151,7 @@ impl Component for Settings {
                                                 .unwrap();
                                         ToastBus::dispatcher().send(Alert {
                                             is_success: true,
-                                            content: translation.get_or_default(
+                                            content: translation.as_ref().get_or_default(
                                                 "profile_updated",
                                                 "Your profile has been updated with success",
                                             ),
@@ -219,11 +219,12 @@ impl Component for Settings {
                 true
             }
             Msg::ConfirmDeletion => {
+                let translation = self.context.translation.as_ref();
                 let mc : ModalContent = ModalContent {
-                    title: self.context.translation.clone().get_or_default("modal_delete_profile_title", "You are about to delete your account"),
-                    msg: self.context.translation.clone().get_or_default("modal_delete_profile_content", "This action is not reversible, once your account is deleted, there is no way for you to get it back."),
-                    decline_text: Some(self.context.translation.clone().get_or_default("modal_delete_profile_no", "I changed, my mind, don't delete my account")),
-                    accept_text: Some(self.context.translation.clone().get_or_default("modal_delete_profile_yes", "Understood, farewell")),
+                    title: translation.get_or_default("modal_delete_profile_title", "You are about to delete your account"),
+                    msg: translation.get_or_default("modal_delet", "This action is not reversible, once your account is deleted, there is no way for you to get it back."),
+                    decline_text: Some(translation.get_or_default("modal_delete_profile_no", "I changed, my mind, don't delete my account")),
+                    accept_text: Some(translation.get_or_default("modal_delete_profile_yes", "Understood, farewell")),
                 };
                 self.producer.send(ModalBusContent::PopModal(mc));
                 false
@@ -246,6 +247,7 @@ impl Component for Settings {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let translation = self.context.translation.as_ref();
         let pfp = match &self.context.user.pfp {
             None => match &self.pfp {
                 Some(_) => {
@@ -261,13 +263,13 @@ impl Component for Settings {
         let end_of_form = match self.wait_for_api {
             true => html! { <WaitingForResponse /> },
             false => {
-                html! { <AppButton label={self.context.translation.clone().get_or_default("update_profile", "Update profile")} /> }
+                html! { <AppButton label={translation.get_or_default("update_profile", "Update profile")} /> }
             }
         };
         let delete_profile = match self.wait_for_api {
             true => html! { <WaitingForResponse /> },
             false => {
-                html! { <AppButton label={self.context.translation.clone().get_or_default("delete_profile", "Delete profile")} is_modal_opener=true callback={Callback::from(move |_ :()| {link.send_message(Msg::ConfirmDeletion)})}/> }
+                html! { <AppButton label={translation.get_or_default("delete_profile", "Delete profile")} is_modal_opener=true callback={Callback::from(move |_ :()| {link.send_message(Msg::ConfirmDeletion)})}/> }
             }
         };
         let link = ctx.link().clone();

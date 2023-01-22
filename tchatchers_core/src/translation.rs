@@ -43,7 +43,7 @@ impl Translation {
     }
 
     #[cfg(feature = "front")]
-    pub fn get_or_default(self, label: &str, default: &str) -> String {
+    pub fn get_or_default(&self, label: &str, default: &str) -> String {
         match self.get(label) {
             Some(v) => v.to_string(),
             None => default.to_string(),

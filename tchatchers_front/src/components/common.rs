@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use js_sys::ArrayBuffer;
@@ -114,15 +116,14 @@ pub struct I18nProperties {
     pub default: AttrValue,
     pub label: AttrValue,
     #[prop_or_default]
-    pub translation: Option<Translation>,
+    pub translation: Rc<Translation>,
 }
 
 #[function_component(I18N)]
 pub fn i18n(props: &I18nProperties) -> Html {
-    if let Some(translation) = &props.translation {
-        if let Some(translated) = translation.get(props.label.as_str()) {
-            return html! {<>{translated}</>};
-        }
+    if let Some(translated) = props.translation.get(props.label.as_str()) {
+        html! {<>{translated}</>}
+    } else {
+        html! {<>{&props.default}</>}
     }
-    html! {<>{&props.default}</>}
 }
