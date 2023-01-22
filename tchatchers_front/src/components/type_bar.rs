@@ -5,7 +5,7 @@ use tchatchers_core::translation::Translation;
 use tchatchers_core::ws_message::WsMessage;
 use tchatchers_core::{user::PartialUser, ws_message::WsMessageContent};
 use web_sys::HtmlInputElement;
-use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
+use yew::{html, AttrValue, Callback, Component, Context, Html, NodeRef, Properties};
 
 pub enum Msg {
     SubmitForm,
@@ -14,7 +14,7 @@ pub enum Msg {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub pass_message_to_ws: Callback<String>,
-    pub room: String,
+    pub room: AttrValue,
     pub user: PartialUser,
     pub translation: Translation,
 }
@@ -40,7 +40,7 @@ impl Component for TypeBar {
                         return false;
                     }
                     let msg = WsMessageContent {
-                        room: ctx.props().room.clone(),
+                        room: ctx.props().room.to_string(),
                         author: ctx.props().user.clone(),
                         content: input.value(),
                         ..WsMessageContent::default()

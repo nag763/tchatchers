@@ -9,8 +9,8 @@ use tchatchers_core::app_context::AppContext;
 use tchatchers_core::user::AuthenticableUser;
 use web_sys::HtmlInputElement;
 use yew::{
-    function_component, html, use_context, Component, Context, Html, NodeRef, Properties,
-    UseStateHandle,
+    function_component, html, use_context, AttrValue, Component, Context, Html, NodeRef,
+    Properties, UseStateHandle,
 };
 use yew_agent::Dispatched;
 use yew_router::prelude::use_navigator;
@@ -38,7 +38,7 @@ pub fn sign_in_hoc() -> Html {
 pub enum Msg {
     SubmitForm,
     LoggedIn(AppContext),
-    ErrorFromServer(String),
+    ErrorFromServer(AttrValue),
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -50,7 +50,7 @@ pub struct Props {
 pub struct SignIn {
     login: NodeRef,
     password: NodeRef,
-    server_error: Option<String>,
+    server_error: Option<AttrValue>,
     wait_for_api: bool,
 }
 
@@ -91,11 +91,13 @@ impl Component for SignIn {
                                     link.send_message(Msg::LoggedIn(app_context));
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
-                                        resp.text().await.unwrap(),
+                                        resp.text().await.unwrap().into(),
                                     ));
                                 }
                             } else {
-                                link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
+                                link.send_message(Msg::ErrorFromServer(
+                                    resp.text().await.unwrap().into(),
+                                ));
                             }
                         });
                     }
@@ -154,7 +156,7 @@ impl Component for SignIn {
                     </div>
                   </div>
                   <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.server_error.is_none()}>
-                    {self.server_error.as_ref().unwrap_or(&String::new())}
+                    {self.server_error.as_ref().unwrap_or(&AttrValue::default())}
                   </small>
                     {end_of_form}
                 </form>

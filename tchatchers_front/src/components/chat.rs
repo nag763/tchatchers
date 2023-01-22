@@ -4,15 +4,15 @@ use chrono::{DateTime, Datelike, Duration, Timelike, Utc};
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessageContent, WsReceptionStatus};
 use uuid::Uuid;
-use yew::{function_component, html, use_state, Component, Context, Html, Properties};
+use yew::{function_component, html, use_state, AttrValue, Component, Context, Html, Properties};
 
 const DEFAULT_PFP: &str = "/assets/no_pfp.webp";
 
 #[derive(Properties, PartialEq)]
 struct ProfilePictureProperties {
     #[prop_or(DEFAULT_PFP.into())]
-    pub pfp: String,
-    pub author: String,
+    pub pfp: AttrValue,
+    pub author: AttrValue,
     #[prop_or(true)]
     pub display_pfp: bool,
 }
@@ -34,7 +34,7 @@ fn profile_picture(profile_picture_properties: &ProfilePictureProperties) -> Htm
 
 #[derive(Properties, PartialEq)]
 struct MessageProperties {
-    pub content: String,
+    pub content: AttrValue,
     pub timestamp: DateTime<Utc>,
     pub uuid: Uuid,
     #[prop_or_default]
@@ -45,14 +45,15 @@ struct MessageProperties {
 #[function_component(Message)]
 fn message(message_properties: &MessageProperties) -> Html {
     let timestamp = &message_properties.timestamp;
-    let title: String = format!(
+    let title: AttrValue = format!(
         "on {:02}/{:02}/{} at {}:{:02}",
         timestamp.day(),
         timestamp.month(),
         timestamp.year(),
         timestamp.hour(),
         timestamp.minute()
-    );
+    )
+    .into();
     let class: &str = match message_properties.is_user {
         true => {
             "relative bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg mb-2 text-sm break-when-needed max-w-xs"
@@ -95,14 +96,14 @@ fn message(message_properties: &MessageProperties) -> Html {
 
 #[derive(Properties, PartialEq)]
 struct UserChatProperties {
-    pub content: String,
+    pub content: AttrValue,
     pub uuid: Uuid,
     pub timestamp: DateTime<Utc>,
     #[prop_or_default]
     pub is_user: bool,
-    pub author: String,
+    pub author: AttrValue,
     #[prop_or("/assets/no_pfp.webp".into())]
-    pub pfp: String,
+    pub pfp: AttrValue,
     #[prop_or(true)]
     pub display_pfp: bool,
     pub reception_status: WsReceptionStatus,
@@ -128,7 +129,7 @@ fn user_chat(user_chat_properties: &UserChatProperties) -> Html {
 #[derive(Clone, Eq, PartialEq, Properties)]
 pub struct Props {
     pub messages: Vec<WsMessageContent>,
-    pub room: String,
+    pub room: AttrValue,
     pub user: PartialUser,
 }
 

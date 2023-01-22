@@ -11,7 +11,7 @@ use tchatchers_core::user::InsertableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
 use validator::Validate;
 use web_sys::HtmlInputElement;
-use yew::{html, Component, Context, Html, NodeRef, Properties};
+use yew::{html, AttrValue, Component, Context, Html, NodeRef, Properties};
 use yew_agent::Dispatched;
 use yew_router::scope_ext::RouterScopeExt;
 
@@ -20,7 +20,7 @@ const CHECK_LOGIN_AFTER: u32 = 250;
 pub enum Msg {
     SubmitForm,
     OnLoginChanged,
-    ErrorFromServer(String),
+    ErrorFromServer(AttrValue),
 }
 
 #[derive(Clone, PartialEq, Eq, Properties)]
@@ -35,7 +35,7 @@ pub struct SignUp {
     password_confirmation: NodeRef,
     check_login: Option<Timeout>,
     wait_for_api: bool,
-    server_error: Option<String>,
+    server_error: Option<AttrValue>,
 }
 
 impl Component for SignUp {
@@ -67,7 +67,7 @@ impl Component for SignUp {
                         };
                         if let Err(e) = payload.validate() {
                             let message: ValidationErrorMessage = e.into();
-                            link.send_message(Msg::ErrorFromServer(message.to_string()));
+                            link.send_message(Msg::ErrorFromServer(message.to_string().into()));
                         } else if !password.value().eq(&password_confirmation.value()) {
                             password.set_value("");
                             password_confirmation.set_value("");
@@ -87,7 +87,7 @@ impl Component for SignUp {
                                     link.navigator().unwrap().push(&Route::SignIn);
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
-                                        resp.text().await.unwrap(),
+                                        resp.text().await.unwrap().into(),
                                     ));
                                 }
                             });
@@ -183,7 +183,7 @@ impl Component for SignUp {
                     </div>
                   </div>
                   <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.server_error.is_none()}>
-                    {self.server_error.as_ref().unwrap_or(&String::new())}
+                    {self.server_error.as_ref().unwrap_or(&AttrValue::default())}
                   </small>
                   {end_of_form}
                 </form>

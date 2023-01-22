@@ -6,7 +6,7 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::{Event, EventTarget, FileReader, InputEvent};
 use web_sys::{HtmlInputElement, MouseEvent};
-use yew::{function_component, html, use_state, Callback, Html, Properties};
+use yew::{function_component, html, use_state, AttrValue, Callback, Html, Properties};
 
 use super::modal::MODAL_OPENER_CLASS;
 
@@ -24,7 +24,7 @@ pub fn waiting_for_response() -> Html {
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct FormButtonProperties {
-    pub label: String,
+    pub label: AttrValue,
     pub callback: Option<Callback<()>>,
     pub is_modal_opener: Option<bool>,
 }
@@ -68,7 +68,7 @@ pub fn app_button(props: &FormButtonProperties) -> Html {
 pub struct FileAttacherProps {
     pub on_file_attached: Callback<Option<ArrayBuffer>>,
     pub disabled: bool,
-    pub accept: Option<String>,
+    pub accept: Option<AttrValue>,
 }
 
 #[function_component(FileAttacher)]
@@ -111,8 +111,8 @@ pub fn file_attacher(props: &FileAttacherProps) -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct I18nProperties {
-    pub default: String,
-    pub label: String,
+    pub default: AttrValue,
+    pub label: AttrValue,
     #[prop_or_default]
     pub translation: Option<Translation>,
 }
@@ -120,7 +120,7 @@ pub struct I18nProperties {
 #[function_component(I18N)]
 pub fn i18n(props: &I18nProperties) -> Html {
     if let Some(translation) = &props.translation {
-        if let Some(translated) = translation.get(&props.label) {
+        if let Some(translated) = translation.get(props.label.as_str()) {
             return html! {<>{translated}</>};
         }
     }

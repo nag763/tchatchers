@@ -9,8 +9,8 @@ use tchatchers_core::{
 use validator::Validate;
 use web_sys::HtmlInputElement;
 use yew::{
-    function_component, html, use_context, Component, Context, Html, NodeRef, Properties,
-    UseStateHandle,
+    function_component, html, use_context, AttrValue, Component, Context, Html, NodeRef,
+    Properties, UseStateHandle,
 };
 use yew_router::scope_ext::RouterScopeExt;
 
@@ -38,7 +38,7 @@ pub enum Msg {
 #[derive(Default)]
 pub struct JoinRoom {
     room_name: NodeRef,
-    verification_error: Option<String>,
+    verification_error: Option<AttrValue>,
 }
 
 impl Component for JoinRoom {
@@ -69,7 +69,7 @@ impl Component for JoinRoom {
                 }
             }
             Msg::VerificationError(error) => {
-                self.verification_error = Some(error);
+                self.verification_error = Some(error.into());
             }
         }
         true
@@ -95,7 +95,7 @@ impl Component for JoinRoom {
                     </div>
                   </div>
                     <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.verification_error.is_none()}>
-                        {self.verification_error.as_ref().unwrap_or(&String::new())}
+                        {self.verification_error.as_ref().unwrap_or(&AttrValue::default())}
                     </small>
                   <FormButton label={ctx.props().context.translation.clone().get_or_default("join_room", "Join")} />
                 </form>

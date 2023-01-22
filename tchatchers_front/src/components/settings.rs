@@ -24,6 +24,7 @@ use validator::Validate;
 use web_sys::HtmlInputElement;
 use yew::function_component;
 use yew::use_context;
+use yew::AttrValue;
 use yew::UseStateHandle;
 use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
 use yew_agent::Bridge;
@@ -44,9 +45,9 @@ pub fn feed_hoc() -> Html {
 
 pub enum Msg {
     UploadNewPfp(Option<js_sys::ArrayBuffer>),
-    PfpUpdated(String),
+    PfpUpdated(AttrValue),
     SubmitForm,
-    ErrorFromServer(String),
+    ErrorFromServer(AttrValue),
     ProfileUpdated(AppContext),
     ConfirmDeletion,
     DeletionConfirmed,
@@ -63,8 +64,8 @@ pub struct Settings {
     timezone: NodeRef,
     pfp: Option<String>,
     wait_for_api: bool,
-    server_error: Option<String>,
-    ok_msg: Option<String>,
+    server_error: Option<AttrValue>,
+    ok_msg: Option<AttrValue>,
     producer: Box<dyn Bridge<ModalBus>>,
     context: AppContext,
 }
@@ -131,7 +132,7 @@ impl Component for Settings {
                         if let Err(e) = payload.validate() {
                             let message: ValidationErrorMessage = e.into();
                             ctx.link()
-                                .send_message(Msg::ErrorFromServer(message.to_string()));
+                                .send_message(Msg::ErrorFromServer(message.to_string().into()));
                         } else {
                             let mut req = Requester::<UpdatableUser>::put("/api/user");
                             req.is_json(true).body(Some(payload));
@@ -158,12 +159,12 @@ impl Component for Settings {
                                         link.send_message(Msg::ProfileUpdated(app_context));
                                     } else {
                                         link.send_message(Msg::ErrorFromServer(
-                                            resp.text().await.unwrap(),
+                                            resp.text().await.unwrap().into(),
                                         ));
                                     }
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
-                                        resp.text().await.unwrap(),
+                                        resp.text().await.unwrap().into(),
                                     ));
                                 }
                             });
@@ -179,9 +180,9 @@ impl Component for Settings {
                 wasm_bindgen_futures::spawn_local(async move {
                     let resp = req.await.unwrap();
                     if resp.ok() {
-                        link.send_message(Msg::PfpUpdated(resp.text().await.unwrap()));
+                        link.send_message(Msg::PfpUpdated(resp.text().await.unwrap().into()));
                     } else {
-                        link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
+                        link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap().into()));
                     }
                 });
                 true
@@ -194,7 +195,7 @@ impl Component for Settings {
             }
             Msg::PfpUpdated(pfp_path) => {
                 self.wait_for_api = false;
-                self.pfp = Some(pfp_path);
+                self.pfp = Some(pfp_path.to_string());
                 true
             }
             Msg::ProfileUpdated(app_context) => {
@@ -211,7 +212,8 @@ impl Component for Settings {
                         .get_or_default(
                             "profile_updated",
                             "Your profile has been updated with success",
-                        ),
+                        )
+                        .into(),
                 );
 
                 true
@@ -235,7 +237,7 @@ impl Component for Settings {
                     if resp.status().is_success() {
                         link.navigator().unwrap().push(&Route::LogOut);
                     } else {
-                        link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap()));
+                        link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap().into()));
                     }
                 });
                 true
@@ -334,16 +336,16 @@ impl Component for Settings {
                     </div>
                     <div class="md:w-2/3 flex justify-center items-center space-x-4 mt-2 dark:text-gray-200">
                     {pfp}
-                    <FileAttacher disabled=false accept={Some(String::from(".png,.webp,.jpg,.jpg"))} on_file_attached={Callback::from(move |file_path: Option<js_sys::ArrayBuffer>| {
+                    <FileAttacher disabled=false accept={Some(AttrValue::from(".png,.webp,.jpg,.jpg"))} on_file_attached={Callback::from(move |file_path: Option<js_sys::ArrayBuffer>| {
                         link.send_message(Msg::UploadNewPfp (file_path));
         })}/>
                     </div>
                   </div>
                   <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.server_error.is_none()}>
-                    {self.server_error.as_ref().unwrap_or(&String::new())}
+                    {self.server_error.as_ref().unwrap_or(&AttrValue::default())}
                   </small>
                   <small class="flex mt-4 mb-2 items-center text-green-500" hidden={self.ok_msg.is_none()}>
-                    {self.ok_msg.as_ref().unwrap_or(&String::new())}
+                    {self.ok_msg.as_ref().unwrap_or(&AttrValue::default())}
                   </small>
                   <div class="flex items-center">
                   <div class="w-1/3"></div>

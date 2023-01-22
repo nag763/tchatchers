@@ -18,8 +18,8 @@ use tchatchers_core::ws_message::{WsMessage, WsMessageContent, WsReceptionStatus
 use uuid::Uuid;
 use validator::Validate;
 use yew::{
-    function_component, html, use_context, Callback, Component, Context, Html, Properties,
-    UseStateHandle,
+    function_component, html, use_context, AttrValue, Callback, Component, Context, Html,
+    Properties, UseStateHandle,
 };
 use yew_agent::Dispatched;
 use yew_agent::{Bridge, Bridged};
@@ -27,7 +27,7 @@ use yew_router::scope_ext::RouterScopeExt;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct FeedHOCProps {
-    pub room: String,
+    pub room: AttrValue,
 }
 
 #[function_component(FeedHOC)]
@@ -49,7 +49,7 @@ pub enum Msg {
 
 #[derive(Clone, Eq, PartialEq, Properties)]
 pub struct Props {
-    pub room: String,
+    pub room: AttrValue,
     pub context: AppContext,
 }
 
@@ -111,7 +111,7 @@ impl Component for Feed {
                             });
                             if !self.room_name_checked {
                                 if let Err(_e) =
-                                    RoomNameValidator::from(ctx.props().room.clone()).validate()
+                                    RoomNameValidator::from(ctx.props().room.to_string()).validate()
                                 {
                                     ToastBus::dispatcher().send(Alert {
                                         is_success: false,
