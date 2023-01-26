@@ -1,4 +1,4 @@
-FROM rust:1.66 as builder
+FROM rust:1.67 as builder
 
 WORKDIR /home/usr/back/
 
@@ -8,7 +8,7 @@ COPY tchatchers_core/ ../tchatchers_core/
 
 RUN cargo install --path .
 
-FROM rust:1.66
+FROM rust:1.67
 
 WORKDIR /home/usr/back/
 
