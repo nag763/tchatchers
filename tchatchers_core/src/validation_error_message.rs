@@ -1,12 +1,18 @@
+//! Module used to store the common logic for the validation of the user's field
+//! and the subsequent error messages displayed.
+
 use std::fmt::Display;
 
 #[cfg(feature = "back")]
 use axum::{http::StatusCode, response::IntoResponse};
 use validator::ValidationErrors;
 
+/// The error message struct. 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValidationErrorMessage {
+    /// The concerned error field.
     field: String,
+    /// The code error on the field.
     code: String,
 }
 

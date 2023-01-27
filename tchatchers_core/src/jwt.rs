@@ -1,12 +1,12 @@
+// Copyright ⓒ 2022 LABEYE Loïc
+// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
+
 //! The JWT struct modelizes the data that is serialized and shared between
 //! the two apps.
 //!
 //! It is containing important data such as the user and its related
 //! informations while hiding the most private ones, that are stored server
 //! side.
-
-// Copyright ⓒ 2022 LABEYE Loïc
-// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use crate::user::{PartialUser, User};
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};

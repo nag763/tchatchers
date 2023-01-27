@@ -1,10 +1,10 @@
+// Copyright ⓒ 2022 LABEYE Loïc
+// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
+
 //! A user modelizes an authenticated client of the application.
 //!
 //! The user is declined under different structs so that only the revelant data
 //! is shared between processed and components.
-
-// Copyright ⓒ 2022 LABEYE Loïc
-// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use crate::common::RE_LIMITED_CHARS;
 use crate::jwt::Jwt;
@@ -51,8 +51,10 @@ pub struct User {
     pub pfp: Option<String>,
     /// The locale associated with the user.
     pub locale_id: i32,
+    /// The user's profile.
     #[cfg_attr(feature = "back", sqlx(rename = "profile_id"))]
     pub profile: Profile,
+    /// The user's timezone.
     #[cfg_attr(feature = "back", sqlx(flatten))]
     pub timezone: crate::timezone::Timezone,
 }
@@ -89,6 +91,15 @@ impl User {
         row.0
     }
 
+    /// Delete the user from the database.
+    ///
+    /// The check on whether the executer can delete the user has to be done server side.
+    /// This won't check the legitimity of the operation.
+    /// 
+    /// # Arguments
+    /// 
+    /// - id : the user to delete.
+    /// - pool : The PG connection pool.
     pub async fn delete_one(id: i32, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
         sqlx::query("DELETE FROM CHATTER WHERE id=$1")
             .bind(id)
@@ -130,6 +141,7 @@ pub struct PartialUser {
     // The profile of the user
     pub profile: Profile,
     #[cfg_attr(feature = "back", sqlx(rename = "profile_id"))]
+    /// The timezone associated to the user.
     #[cfg_attr(feature = "back", sqlx(flatten))]
     pub timezone: crate::timezone::Timezone,
 }

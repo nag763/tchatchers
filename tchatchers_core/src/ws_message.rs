@@ -33,10 +33,15 @@ pub enum WsMessage {
         messages: Vec<WsMessageContent>,
         session_id: Uuid,
     },
+    /// Indicates that the user has seeen the messages.
     MessagesSeen(Vec<Uuid>),
+    /// Responds to Ping !
     Pong,
+    /// Service !
     Ping,
+    /// Make aware that one of the party wants to close the connection.
     Close,
+    /// Keep alive to not close the connection.
     ClientKeepAlive,
     /// Action to inform the server that the client reconnected.
     #[cfg(feature = "front")]
@@ -44,10 +49,13 @@ pub enum WsMessage {
     #[cfg(feature = "front")]
     /// Action to inform the server that the client disconnected.
     ClientDisconnected,
+    /// Message to inform the connection will be closed by the client.
     #[cfg(feature = "front")]
     ConnectionClosed,
+    /// Inform that there is an error on the incoming message.
     #[cfg(feature = "front")]
     ErrorOnMessage(String),
+    /// Inform that one has seen the messages.
     Seen(Vec<Uuid>),
 }
 
@@ -96,11 +104,18 @@ pub struct WsMessageContent {
     pub timestamp: DateTime<Utc>,
     /// The room on which the message has been emitted.
     pub room: String,
+    /// Whether a message has been received or not.
     pub reception_status: WsReceptionStatus,
 }
 
 #[cfg(feature = "back")]
 impl WsMessageContent {
+    
+    /// Returns the first 100 messages for a given room name.
+    /// 
+    /// # Arguments
+    /// 
+    /// - room_name : The room the query is made for.
     pub async fn query_all_for_room(room_name: &str, pool: &sqlx::PgPool) -> Vec<Self> {
         sqlx::query_as("SELECT * FROM MESSAGE m INNER JOIN CHATTER c ON m.author = c.id WHERE room=$1 ORDER BY timestamp DESC LIMIT 100 ")
             .bind(room_name)
@@ -109,6 +124,11 @@ impl WsMessageContent {
             .unwrap()
     }
 
+    /// Insert the message in the database.
+    /// 
+    /// # Arguments
+    /// 
+    /// - pool : the connection pool.
     pub async fn persist(
         &self,
         pool: &sqlx::PgPool,
@@ -124,6 +144,12 @@ impl WsMessageContent {
             .await
     }
 
+    /// Mark a list of existing messages as seen?
+    /// 
+    /// # Arguments
+    /// 
+    /// - messages_uuid : the list of messages seen.
+    /// - pool : the connection pool.
     pub async fn mark_as_seen(
         messages_uuid: &Vec<Uuid>,
         pool: &sqlx::PgPool,
