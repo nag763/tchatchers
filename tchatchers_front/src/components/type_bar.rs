@@ -38,7 +38,7 @@ impl Component for TypeBar {
         match msg {
             Msg::SubmitForm => {
                 if let Some(input) = self.input_ref.cast::<HtmlInputElement>() {
-                    if !input.check_validity() {
+                    if !input.check_validity() || input.value().is_empty() {
                         return false;
                     }
                     let msg = WsMessageContent {
