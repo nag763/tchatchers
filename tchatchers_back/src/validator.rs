@@ -1,3 +1,10 @@
+// Copyright ⓒ 2022 LABEYE Loïc
+// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
+
+//! Extractor used mainly to verify that the incoming fields are valid before processing the requests.
+//! 
+//! So far, only the JSON inputs are implemented, but others wouldn't be much harder to implement.
+
 use std::sync::Arc;
 
 use axum::{

@@ -1,11 +1,11 @@
-//! Server of the application
-//!
-//! It is used to communicate directly with the front end and be a layer between
-//! the file systems (ie the profile pictures), the services (ie Postgres and
-//! Redis) and communicate then in a convenient way with the client application.
-
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
+
+//! Server of the application
+//!
+//! It is used to communicate diretchatchers_core/index.htmltly with the front end and be a layer between
+//! the file systems (ie the profile pictures), the services (ie Postgres and
+//! Redis) and communicate then in a convenient way with the client application.
 
 pub mod api;
 pub mod extractor;
@@ -61,8 +61,17 @@ pub struct AppState {
     txs: Mutex<WsRooms>,
     /// The Postgres pool.
     pg_pool: PgPool,
+    /// The translation manager.
+    /// 
+    /// Used to cache the translations from the database.
     translation_manager: Mutex<TranslationManager>,
+    /// The navlink manager.
+    /// 
+    /// Used to cache the navlinks from the database.
     navlink_manager: Mutex<NavlinkManager>,
+    /// The locale manager.
+    /// 
+    /// Used to cache the locales from the database.
     locale_manager: LocaleManager,
 }
 

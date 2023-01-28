@@ -1,6 +1,8 @@
-/// This gathers the list of API that can be used to upload pictures.
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
+
+//! This gathers the list of API that can be used to upload pictures.
+
 use crate::extractor::JwtUserExtractor;
 use axum::{body::Bytes, http::StatusCode, response::IntoResponse};
 use tokio::fs::File;

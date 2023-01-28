@@ -155,6 +155,9 @@ pub async fn update_user(
     }
 }
 
+/// Deletes a user from the database.
+/// 
+/// Only the user that requests this endpoint can delete himself. 
 pub async fn delete_user(
     JwtUserExtractor(jwt): JwtUserExtractor,
     State(state): State<Arc<AppState>>,

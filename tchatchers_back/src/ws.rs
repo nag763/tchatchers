@@ -1,9 +1,9 @@
+// Copyright ⓒ 2022 LABEYE Loïc
+// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
+
 //! The websocket is used to communicate between users within rooms.
 //!
 //! Websockets are isolated to each others, with one existing for each room.
-
-// Copyright ⓒ 2022 LABEYE Loïc
-// This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use std::{
     collections::HashMap,
