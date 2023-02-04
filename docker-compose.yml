@@ -33,6 +33,14 @@ services:
     ports:
       - "80:80"
       - "443:443"
+  cli :
+    links:
+      - postgres:pg.tchatche.rs
+    depends_on:
+      - postgres
+    build: 
+      context: ./ 
+      dockerfile: Dockerfile_tct
 volumes:
   db:
   static:

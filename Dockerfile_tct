@@ -1,0 +1,27 @@
+FROM rust:1.67 as builder
+
+WORKDIR /home/usr/tct/
+
+COPY tchatchers_cli_tools/ ./
+
+COPY tchatchers_core/ ../tchatchers_core/
+
+RUN cargo install --path .
+
+FROM rust:1.67
+
+WORKDIR /home/usr/tct/
+
+COPY --from=builder /usr/local/cargo/bin/tct /usr/local/cargo/bin/tct
+
+COPY .env ./
+
+RUN adduser runner && chown -R runner ./
+
+RUN chmod 111 /usr/local/cargo/bin/tct
+
+RUN chmod 600 .env
+
+USER runner
+
+ENTRYPOINT ["tail", "-f", "/dev/null"]

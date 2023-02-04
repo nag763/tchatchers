@@ -11,6 +11,14 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
+  cli :
+    links:
+      - postgres:pg.tchatche.rs
+    depends_on:
+      - postgres
+    build: 
+      context: ./ 
+      dockerfile: Dockerfile_tct
 volumes:
   db:
 

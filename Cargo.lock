@@ -2588,19 +2588,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tchatchers_cli_tools"
-version = "0.1.0"
-dependencies = [
- "clap",
- "derive_more",
- "dialoguer",
- "dotenv",
- "sqlx",
- "tchatchers_core",
- "tokio",
-]
-
-[[package]]
 name = "tchatchers_core"
 version = "0.1.0"
 dependencies = [
@@ -2643,6 +2630,19 @@ dependencies = [
  "yew",
  "yew-agent",
  "yew-router",
+]
+
+[[package]]
+name = "tct"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "derive_more",
+ "dialoguer",
+ "dotenv",
+ "sqlx",
+ "tchatchers_core",
+ "tokio",
 ]
 
 [[package]]
