@@ -1,0 +1,15 @@
+[package]
+name = "tchatchers_cli_tools"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tchatchers_core = { path = "../tchatchers_core", features = ["cli"] }
+clap = { version = "4.1.4", features = ["derive"] }
+dialoguer = "0.10.3"
+sqlx = { version = "0.6", features = ["postgres"]}
+derive_more = "0.99.17"
+tokio = { version = "1.25.0", features = ["macros", "rt", "rt-multi-thread"] }
+dotenv = "0.15.0"

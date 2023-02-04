@@ -2,15 +2,14 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 //! The locale is corresponds to a reference that can be used to translate some labels to the user.
-//! 
-//! The default locale is considered to be the english one, but since every user can use his language, 
+//!
+//! The default locale is considered to be the english one, but since every user can use his language,
 //! this entity provides the tools to translates the app while browsing.
 
 use serde::{Deserialize, Serialize};
 
-
 /// The locale is a reference to translate the application.
-/// 
+///
 /// A locale inherits usually from a language, and is more specific
 /// to match a subgroup of a language users (ie french speaking canadians).
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
@@ -29,7 +28,7 @@ pub struct Locale {
 #[cfg(feature = "back")]
 impl Locale {
     /// Returns all the locales stored in database.
-    /// 
+    ///
     /// # Arguments
     /// - pool : The postgres connection pool.
     pub(crate) async fn get_all(pool: &sqlx::PgPool) -> Vec<Locale> {
@@ -40,9 +39,9 @@ impl Locale {
     }
 
     /// Returns all the locales sorted alphabeticly by their name.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - pool : The postgres pool.
     pub(crate) async fn get_all_sorted_by_name(pool: &sqlx::PgPool) -> Vec<Locale> {
         sqlx::query_as("SELECT * FROM LOCALE ORDER BY long_name")
@@ -52,10 +51,10 @@ impl Locale {
     }
 }
 
-/// The locale manager is used to store in a reloadable cache 
+/// The locale manager is used to store in a reloadable cache
 /// the different locales.
-/// 
-/// This is mainly used for performance reasons (fetch once, reload when needed). 
+///
+/// This is mainly used for performance reasons (fetch once, reload when needed).
 #[cfg(feature = "back")]
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct LocaleManager {
@@ -67,9 +66,8 @@ pub struct LocaleManager {
 
 #[cfg(feature = "back")]
 impl LocaleManager {
-
     /// Initialise the locale manager
-    /// 
+    ///
     /// # Arguments
     /// - pg_pool : The pool used to fetch the locales.
     pub async fn init(pg_pool: &sqlx::PgPool) -> LocaleManager {
@@ -81,9 +79,9 @@ impl LocaleManager {
     }
 
     /// Returns a locale from its id from the cache.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - locale_id : The id to fetch
     pub fn get(&self, locale_id: i32) -> Result<Locale, crate::manager::ManagerError<i32>> {
         if !self.init {

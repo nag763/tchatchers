@@ -36,8 +36,8 @@ CREATE TABLE TRANSLATION (
         ON DELETE CASCADE
 );
 
-INSERT INTO LANGUAGE(id, name, short) VALUES (1, 'English', 'en'), (2, 'Français', 'fr');
-INSERT INTO LOCALE(language_id, short_name, long_name) VALUES (1, 'en_UK', 'English (UK)'), (2, 'fr_FR', 'Français (France)'), (1, 'en_US', 'English (US)');
+INSERT INTO LANGUAGE(id, name, short) VALUES (1, 'English', 'en'), (2, 'Français', 'fr') ON CONFLICT DO NOTHING;
+INSERT INTO LOCALE(language_id, short_name, long_name) VALUES (1, 'en_UK', 'English (UK)'), (2, 'fr_FR', 'Français (France)'), (1, 'en_US', 'English (US)') ON CONFLICT DO NOTHING; 
 
 ALTER TABLE CHATTER
 ADD COLUMN locale_id INTEGER NOT NULL DEFAULT 1,

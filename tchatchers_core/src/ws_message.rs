@@ -110,11 +110,10 @@ pub struct WsMessageContent {
 
 #[cfg(feature = "back")]
 impl WsMessageContent {
-    
     /// Returns the first 100 messages for a given room name.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - room_name : The room the query is made for.
     pub async fn query_all_for_room(room_name: &str, pool: &sqlx::PgPool) -> Vec<Self> {
         sqlx::query_as("SELECT * FROM MESSAGE m INNER JOIN CHATTER c ON m.author = c.id WHERE room=$1 ORDER BY timestamp DESC LIMIT 100 ")
@@ -125,9 +124,9 @@ impl WsMessageContent {
     }
 
     /// Insert the message in the database.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - pool : the connection pool.
     pub async fn persist(
         &self,
@@ -145,9 +144,9 @@ impl WsMessageContent {
     }
 
     /// Mark a list of existing messages as seen?
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - messages_uuid : the list of messages seen.
     /// - pool : the connection pool.
     pub async fn mark_as_seen(

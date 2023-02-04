@@ -14,11 +14,11 @@ use crate::timezone::Timezone;
 use rand::Rng;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "cli"))]
 use sqlx::postgres::PgQueryResult;
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "cli"))]
 use sqlx::FromRow;
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "cli"))]
 use sqlx::PgPool;
 use validator::Validate;
 use validator::ValidationError;
@@ -32,7 +32,7 @@ lazy_static! {
 /// The in base structure, which should never be shared between components and
 /// apps.
 #[derive(Serialize, Deserialize, Debug, Default)]
-#[cfg_attr(feature = "back", derive(FromRow))]
+#[cfg_attr(any(feature = "back", feature = "cli"), derive(FromRow))]
 #[serde(rename_all = "camelCase")]
 pub struct User {
     /// The in base id, unique.
@@ -52,14 +52,14 @@ pub struct User {
     /// The locale associated with the user.
     pub locale_id: i32,
     /// The user's profile.
-    #[cfg_attr(feature = "back", sqlx(rename = "profile_id"))]
+    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
     pub profile: Profile,
     /// The user's timezone.
-    #[cfg_attr(feature = "back", sqlx(flatten))]
+    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(flatten))]
     pub timezone: crate::timezone::Timezone,
 }
 
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "cli"))]
 impl User {
     /// Find a user by ID in the database.
     ///
@@ -95,14 +95,70 @@ impl User {
     ///
     /// The check on whether the executer can delete the user has to be done server side.
     /// This won't check the legitimity of the operation.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - id : the user to delete.
     /// - pool : The PG connection pool.
     pub async fn delete_one(id: i32, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
         sqlx::query("DELETE FROM CHATTER WHERE id=$1")
             .bind(id)
+            .execute(pool)
+            .await
+    }
+
+    /// Delete the user from the database.
+    ///
+    /// The check on whether the executer can delete the user has to be done server side.
+    /// This won't check the legitimity of the operation.
+    ///
+    /// # Arguments
+    ///
+    /// - id : the user to delete.
+    /// - pool : The PG connection pool.
+    pub async fn delete_login(login: &str, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query("DELETE FROM CHATTER WHERE login=$1")
+            .bind(login)
+            .execute(pool)
+            .await
+    }
+
+    /// Update the activation status of a user.
+    ///
+    /// This will mark a user as either authorized or unauthorized on the base.
+    ///
+    /// # Arguments
+    ///
+    /// - id : the user id.
+    /// - is_authorized : the new activation status.
+    pub async fn update_activation_status(
+        id: i32,
+        is_authorized: bool,
+        pool: &PgPool,
+    ) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query("UPDATE CHATTER SET is_authorized=$1 WHERE id=$2")
+            .bind(is_authorized)
+            .bind(id)
+            .execute(pool)
+            .await
+    }
+
+    /// Update the activation status of a user.
+    ///
+    /// This will mark a user as either authorized or unauthorized on the base.
+    ///
+    /// # Arguments
+    ///
+    /// - login : the user login.
+    /// - is_authorized : the new activation status.
+    pub async fn update_activation_status_from_login(
+        login: &str,
+        is_authorized: bool,
+        pool: &PgPool,
+    ) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query("UPDATE CHATTER SET is_authorized=$1 WHERE login=$2")
+            .bind(is_authorized)
+            .bind(login)
             .execute(pool)
             .await
     }

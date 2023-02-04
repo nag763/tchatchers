@@ -7,7 +7,7 @@ use std::fmt::Display;
 use axum::{http::StatusCode, response::IntoResponse};
 use validator::ValidationErrors;
 
-/// The error message struct. 
+/// The error message struct.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValidationErrorMessage {
     /// The concerned error field.
