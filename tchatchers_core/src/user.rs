@@ -10,6 +10,8 @@ use crate::common::RE_LIMITED_CHARS;
 use crate::jwt::Jwt;
 use crate::profile::Profile;
 use crate::timezone::Timezone;
+use chrono::DateTime;
+use chrono::Utc;
 #[cfg(feature = "back")]
 use rand::Rng;
 use regex::Regex;
@@ -31,9 +33,10 @@ lazy_static! {
 
 /// The in base structure, which should never be shared between components and
 /// apps.
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, derivative::Derivative)]
 #[cfg_attr(any(feature = "back", feature = "cli"), derive(FromRow))]
 #[serde(rename_all = "camelCase")]
+#[derivative(Default)]
 pub struct User {
     /// The in base id, unique.
     pub id: i32,
@@ -51,6 +54,12 @@ pub struct User {
     pub pfp: Option<String>,
     /// The locale associated with the user.
     pub locale_id: i32,
+    /// Timestamp when the user got created.
+    #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    pub created_at: DateTime<Utc>,
+    /// Timestamp on when the user got updated the last time.
+    #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    pub last_update: DateTime<Utc>,
     /// The user's profile.
     #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
     pub profile: Profile,
@@ -162,6 +171,7 @@ impl User {
             .execute(pool)
             .await
     }
+
 }
 
 impl From<Jwt> for User {
@@ -179,9 +189,10 @@ impl From<Jwt> for User {
 ///
 /// It is containing limited data, which is convenient and secure during
 /// exchanges. Thus, this is the struct used in JWT.
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Default, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "back", derive(sqlx::FromRow))]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash)]
+#[cfg_attr(any(feature = "back", feature = "cli"), derive(FromRow))]
 #[serde(rename_all = "camelCase")]
+#[derivative(Default)]
 pub struct PartialUser {
     /// In base id of the user.
     pub id: i32,
@@ -191,14 +202,22 @@ pub struct PartialUser {
     pub name: String,
     /// Profile picture of the user.
     pub pfp: Option<String>,
+    /// Whether the user is authorized or not.
+    pub is_authorized: bool,
+    // /// Timestamp when the user got created.
+    // #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    // pub created_at: DateTime<Utc>,
+    /// Timestamp on when the user got updated the last time.
+    #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    pub last_update: DateTime<Utc>,
     /// The locale associated with the user.
     pub locale_id: i32,
-    #[cfg_attr(feature = "back", sqlx(rename = "profile_id"))]
+    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
     // The profile of the user
     pub profile: Profile,
-    #[cfg_attr(feature = "back", sqlx(rename = "profile_id"))]
+    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
     /// The timezone associated to the user.
-    #[cfg_attr(feature = "back", sqlx(flatten))]
+    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(flatten))]
     pub timezone: crate::timezone::Timezone,
 }
 
@@ -212,8 +231,65 @@ impl From<User> for PartialUser {
             locale_id: user.locale_id,
             profile: user.profile,
             timezone: user.timezone,
+            is_authorized: user.is_authorized,
+            // created_at: user.created_at,
+            last_update: user.last_update
         }
     }
+}
+
+#[cfg(feature = "cli")]
+impl PartialUser {
+
+    /// Find a user by ID in the database.
+    ///
+    /// This shouldn't be used to identify users.
+    ///
+    /// # Arguments
+    ///
+    /// - id : The id of the user we are looking for.
+    /// - pool : The pool of connection.
+    pub async fn find_by_id(id: i32, pool: &PgPool) -> Result<Option<Self>, sqlx::Error>  {
+        sqlx::query_as("SELECT * FROM CHATTER WHERE id=$1")
+            .bind(id)
+            .fetch_optional(pool)
+            .await
+    }
+
+    /// Find a user from his login.
+    ///
+    /// This is an exact match look up.
+    /// 
+    /// # Arguments
+    ///
+    /// - login : the user login.
+    pub async fn find_by_login(
+        login: &str,
+        pool: &PgPool,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1")
+            .bind(login)
+            .fetch_optional(pool)
+            .await
+    }
+
+    /// Find a user from his name.
+    ///
+    /// This is an exact match look up.
+    /// 
+    /// # Arguments
+    ///
+    /// - name : the user name.
+    pub async fn find_by_name(
+        name: &str,
+        pool: &PgPool,
+    ) -> Result<Vec<Self>, sqlx::Error> {
+        sqlx::query_as("SELECT * FROM CHATTER WHERE name=$1")
+            .bind(name)
+            .fetch_all(pool)
+            .await
+    }
+
 }
 
 fn password_strengh(password: &str) -> Result<(), ValidationError> {

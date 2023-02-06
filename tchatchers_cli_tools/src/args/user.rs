@@ -1,4 +1,4 @@
-use crate::common::user::UserIdentifier;
+use crate::common::user::{UserIdentifier, UserSearch};
 
 #[derive(Debug, Clone, clap::Subcommand)]
 pub enum UserArgAction {
@@ -18,4 +18,8 @@ pub enum UserArgAction {
         #[command(subcommand)]
         user_identifier: UserIdentifier,
     },
+    Search {
+        #[command(subcommand)]
+        user_search: UserSearch,
+    }
 }
