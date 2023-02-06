@@ -48,6 +48,7 @@ async fn run_main() -> Result<(), CliError> {
         args::CliEntityArg::Message => todo!(),
         args::CliEntityArg::Env { action } => match action {
             args::env::EnvArgAction::Create => EnvAction::create().unwrap(),
+            args::env::EnvArgAction::Check => todo!(),
         },
     }
     Ok(())

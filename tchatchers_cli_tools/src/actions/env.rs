@@ -47,6 +47,7 @@ impl EnvAction {
             .create(true)
             .truncate(true)
             .open(FILE_NAME)?;
+        writeln!(env_file, "DATABASE_URL=postgres://{postgres_user_name}:{postgres_password}@pg.tchatche.rs/chatapp")?;
         writeln!(env_file, "POSTGRES_DB={postgres_db_name}")?;
         writeln!(env_file, "POSTGRES_USER={postgres_user_name}")?;
         writeln!(env_file, "POSTGRES_PASSWORD={postgres_password}")?;
