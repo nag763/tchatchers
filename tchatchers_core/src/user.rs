@@ -204,9 +204,9 @@ pub struct PartialUser {
     pub pfp: Option<String>,
     /// Whether the user is authorized or not.
     pub is_authorized: bool,
-    // /// Timestamp when the user got created.
-    // #[derivative(Default(value = "chrono::offset::Utc::now()"))]
-    // pub created_at: DateTime<Utc>,
+    /// Timestamp when the user got created.
+    #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    pub created_at: DateTime<Utc>,
     /// Timestamp on when the user got updated the last time.
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
     pub last_update: DateTime<Utc>,
@@ -232,7 +232,7 @@ impl From<User> for PartialUser {
             profile: user.profile,
             timezone: user.timezone,
             is_authorized: user.is_authorized,
-            // created_at: user.created_at,
+            created_at: user.created_at,
             last_update: user.last_update
         }
     }
