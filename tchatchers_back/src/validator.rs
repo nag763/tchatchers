@@ -21,8 +21,11 @@ use validator::{Validate, ValidationErrors};
 
 use crate::AppState;
 
+/// Errors returned on validation.
 pub enum JsonValidatorRejection {
+    /// Axum's own validation errors.
     JsonAxumRejection(JsonRejection),
+    /// The one returned from the validator.
     ValidationRejection(ValidationErrors),
 }
 
@@ -39,12 +42,15 @@ impl IntoResponse for JsonValidatorRejection {
     }
 }
 
-pub struct Json<T>(pub T)
+/// A validated JSON input.
+/// 
+/// Mainly used to validate the data before processing it server side.
+pub struct ValidJson<T>(pub T)
 where
     T: Validate;
 
 #[async_trait]
-impl<B, T> FromRequest<Arc<AppState>, B> for Json<T>
+impl<B, T> FromRequest<Arc<AppState>, B> for ValidJson<T>
 where
     B: 'static + Send + HttpBody,
     B::Data: Send,
@@ -59,7 +65,7 @@ where
                 if let Err(e) = json_value.validate() {
                     return Err(JsonValidatorRejection::ValidationRejection(e));
                 }
-                return Ok(Json(json_value.0));
+                return Ok(ValidJson(json_value.0));
             }
             Err(e) => return Err(JsonValidatorRejection::JsonAxumRejection(e)),
         };

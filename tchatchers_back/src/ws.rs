@@ -26,6 +26,7 @@ use tchatchers_core::{
 use tokio::sync::broadcast;
 use validator::Validate;
 
+/// Hashmap that contains the room name as key and the websocket data as value.
 #[derive(Default, Debug)]
 pub struct WsRooms(HashMap<String, broadcast::Sender<String>>);
 

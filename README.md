@@ -16,6 +16,7 @@
 * :rocket: Blazing fast, completely built on Rust.
 * :moon: Supports browser's dark mode.
 * :sparkles: Simple yet elegant UI.
+* :book: Translated in several languages.
 
 ## How to access the application
 
@@ -23,7 +24,11 @@ The application is deployed on https://tchatche.rs and should be compatible with
 
 ## About
 
-tchatche.rs is an application used to help clients to communicate between each others. It is built with yew.rs and axum servers in order to provide blazing fast responses and strong API. It is also using Postgres and Redis services in order to store the user data and retrieve the room messages.
+tchatche.rs is an application used to help clients to communicate between each others. It is built with yew.rs and axum server in order to provide blazing fast responses and strong API.
+
+The main application's usage is to create rooms to talk between people being connected to the application. You like football ? Try the football room. You like philosophy ? Try the philosophy one.
+
+ALl depends on you to chat how you want to .
 
 ## Project structure
 
@@ -55,11 +60,10 @@ front and backend
 |Rust                |Programming language        |1.64   |
 |Tailwind            |Stylesheets                 |3.X    |
 |yew.rs              |WASM Frontend framework     |0.20   |
-|axum                |rust server                 |0.6.1  |
+|axum                |Rust server                 |0.6.1  |
 |trunk-rs            |Rust development WASM server|0.16   |
 |nginx               |Reverse proxy server        |latest |
 |Postgres            |SQL engine                  |latest |
-|Redis               |Key value NoSQL engine      |latest |
 
 ## Production project architecture
 
@@ -68,8 +72,11 @@ front and backend
 The production architecture consists of several layers :
 * <u>The client</u>, who uses the application and interacts with the different ressources.
 * <u>The proxy layer</u>, that defines some security constraints such as BruteForce mitigation, the HTTPS connection, the read time out and HTTP headers. This layer is the sole entry point for the client to the application, as others aren't publicly reachable since they are on another network.
-* <u>The applicative layer :</u> One part being the frontend built in WASM, so static assets in production, another part being the backend, built in axum, so running as a task. It is important to note that in production, only the backend part exists, since the frontend and proxy are on the same image. Besides, only the backend can access to the data layer within the network.
-* <u>The data layer :</u> Mainly used for persistence. While Postgres will contain the data about the users, redis will store the messages that have been sent in the chatrooms. Postgres schema can be found right below, redis one is as simple as `ROOM_NAME[KEY]=MESSAGES[LIST]`.
+* <u>The applicative layer :</u> This contains two noticeable applicative layers :
+    - First, the front layer, a static WASM file being downloaded once by the client and then used to display the application's data to the client. Understand that there is no server side rendering.
+    - Secondly,the API layer, used to persist the application data, besides of permitting operations such as authentication and translation.
+* <u>The data layer :</u> Mainly used for persistence. The choice has been made to persist all the data onto a Postgres database, both the user's data and the chats. On network level, the data layer can only be accessed by the API layer, and is not exposed publicly.
+
 
 ## Postgres schema
 
