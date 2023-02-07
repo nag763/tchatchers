@@ -21,5 +21,5 @@ pub enum UserArgAction {
     Search {
         #[command(subcommand)]
         user_search: UserSearch,
-    }
+    },
 }

@@ -1,5 +1,8 @@
-use crate::{common::user::{UserIdentifier, UserSearch}, errors::CliError};
-use tchatchers_core::user::{User, PartialUser};
+use crate::{
+    common::user::{UserIdentifier, UserSearch},
+    errors::CliError,
+};
+use tchatchers_core::user::{PartialUser, User};
 
 pub struct UserAction;
 
@@ -42,8 +45,16 @@ impl UserAction {
     pub async fn search_user(user_search: UserSearch) -> Result<(), CliError> {
         let pool = tchatchers_core::pool::get_pg_pool().await;
         let result = match user_search {
-            UserSearch::Id { value } => PartialUser::find_by_id(value, &pool).await?.into_iter().filter_map(|v| Some(v)).collect::<Vec<PartialUser>>(),
-            UserSearch::Login { value } => PartialUser::find_by_login(&value, &pool).await?.into_iter().filter_map(|v| Some(v)).collect::<Vec<PartialUser>>(),
+            UserSearch::Id { value } => PartialUser::find_by_id(value, &pool)
+                .await?
+                .into_iter()
+                .filter_map(|v| Some(v))
+                .collect::<Vec<PartialUser>>(),
+            UserSearch::Login { value } => PartialUser::find_by_login(&value, &pool)
+                .await?
+                .into_iter()
+                .filter_map(|v| Some(v))
+                .collect::<Vec<PartialUser>>(),
             UserSearch::Name { value } => PartialUser::find_by_name(&value, &pool).await?,
         };
         if result.is_empty() {

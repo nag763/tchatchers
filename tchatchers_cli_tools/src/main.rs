@@ -42,13 +42,15 @@ async fn run_main() -> Result<(), CliError> {
             args::user::UserArgAction::Delete { user_identifier } => {
                 UserAction::delete_user(user_identifier).await?
             }
-            args::user::UserArgAction::Search { user_search } => UserAction::search_user(user_search).await?,
+            args::user::UserArgAction::Search { user_search } => {
+                UserAction::search_user(user_search).await?
+            }
         },
         args::CliEntityArg::Room => todo!(),
         args::CliEntityArg::Message => todo!(),
         args::CliEntityArg::Env { action } => match action {
-            args::env::EnvArgAction::Create => EnvAction::create().unwrap(),
-            args::env::EnvArgAction::Check => todo!(),
+            args::env::EnvArgAction::Create => EnvAction::create()?,
+            args::env::EnvArgAction::Check => EnvAction::check_setup().await?,
         },
     }
     Ok(())

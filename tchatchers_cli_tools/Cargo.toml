@@ -13,3 +13,4 @@ sqlx = { version = "0.6", features = ["postgres"]}
 derive_more = "0.99.17"
 tokio = { version = "1.25.0", features = ["macros", "rt", "rt-multi-thread"] }
 dotenv = "0.15.0"
+which = "4.4.0"
