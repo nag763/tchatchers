@@ -53,12 +53,12 @@ impl UserAction {
             UserSearch::Id { value } => PartialUser::find_by_id(value, &pool)
                 .await?
                 .into_iter()
-                .filter_map(|v| Some(v))
+                .filter_map(Some)
                 .collect::<Vec<PartialUser>>(),
             UserSearch::Login { value } => PartialUser::find_by_login(&value, &pool)
                 .await?
                 .into_iter()
-                .filter_map(|v| Some(v))
+                .filter_map(Some)
                 .collect::<Vec<PartialUser>>(),
             UserSearch::Name { value } => PartialUser::find_by_name(&value, &pool).await?,
         };
