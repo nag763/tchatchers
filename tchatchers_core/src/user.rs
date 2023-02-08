@@ -12,7 +12,7 @@ use crate::profile::Profile;
 use crate::timezone::Timezone;
 use chrono::DateTime;
 use chrono::Utc;
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "cli"))]
 use rand::Rng;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -330,13 +330,14 @@ pub struct InsertableUser {
     pub name: String,
 }
 
-#[cfg(feature = "back")]
 impl InsertableUser {
+
     /// Inserts the user in the database.
     ///
     /// # Arguments
     ///
     /// - pool : The connection pool.
+    #[cfg(feature = "back")]
     pub async fn insert(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
         let salt: [u8; 32] = rand::thread_rng().gen();
         let config = argon2::Config::default();
@@ -345,6 +346,26 @@ impl InsertableUser {
             .bind(&self.login)
             .bind(&hash)
             .bind(&self.name)
+            .execute(pool)
+            .await
+    }
+
+    /// Inserts the user in the database along his profile.
+    ///
+    /// # Arguments
+    ///
+    /// - profile : The user profile.
+    /// - pool : The connection pool.
+    #[cfg(feature = "cli")]
+    pub async fn insert_with_profile(&self, profile: Profile, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+        let salt: [u8; 32] = rand::thread_rng().gen();
+        let config = argon2::Config::default();
+        let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
+        sqlx::query("INSERT INTO CHATTER(login, password, name, profile_id) VALUES ($1,$2,$3,$4)")
+            .bind(&self.login)
+            .bind(&hash)
+            .bind(&self.name)
+            .bind(profile)
             .execute(pool)
             .await
     }

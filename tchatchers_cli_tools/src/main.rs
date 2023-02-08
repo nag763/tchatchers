@@ -31,7 +31,7 @@ async fn run_main() -> Result<(), CliError> {
     let args: CliArgs = CliArgs::parse();
     match args.entity {
         args::CliEntityArg::User { action } => match action {
-            args::user::UserArgAction::Create => todo!(),
+            args::user::UserArgAction::Create => UserAction::create_user().await?,
             args::user::UserArgAction::Update { id: _id } => todo!(),
             args::user::UserArgAction::Deactivate { user_identifier } => {
                 UserAction::update_activation_status(user_identifier, false).await?

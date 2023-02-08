@@ -14,3 +14,4 @@ derive_more = "0.99.17"
 tokio = { version = "1.25.0", features = ["macros", "rt", "rt-multi-thread"] }
 dotenv = "0.15.0"
 which = "4.4.0"
+validator = "0.16.0"

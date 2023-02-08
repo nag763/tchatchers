@@ -6,7 +6,7 @@ edition = "2021"
 [features]
 back = ["dep:sqlx", "dep:rust-argon2", "dep:axum"]
 front = []
-cli = ["dep:sqlx"]
+cli = ["dep:sqlx", "dep:rust-argon2"]
 
 
 [dependencies]

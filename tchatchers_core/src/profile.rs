@@ -24,6 +24,11 @@ pub enum Profile {
 impl Profile {
     /// Returns an iterator over all the variants of the Profile enum.
     pub fn iterator() -> impl Iterator<Item = Self> {
-        [Profile::User, Profile::Moderator, Profile::Admin].into_iter()
+        Self::options().into_iter()
+    }
+
+    /// Returns the profile options.
+    pub fn options() -> [Profile; 3] {
+        [Profile::User, Profile::Moderator, Profile::Admin]
     }
 }
