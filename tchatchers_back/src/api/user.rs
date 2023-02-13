@@ -4,7 +4,7 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use crate::extractor::JwtUserExtractor;
-use crate::validator::Json;
+use crate::validator::ValidJson;
 use crate::AppState;
 use crate::JWT_PATH;
 use axum::extract::State;
@@ -26,7 +26,7 @@ use tracing::log::error;
 /// - state : The data shared across thread.
 pub async fn create_user(
     State(state): State<Arc<AppState>>,
-    Json(new_user): Json<InsertableUser>,
+    ValidJson(new_user): ValidJson<InsertableUser>,
 ) -> impl IntoResponse {
     if User::login_exists(&new_user.login, &state.pg_pool).await {
         return Err((
@@ -71,7 +71,7 @@ pub async fn login_exists(
 pub async fn authenticate(
     cookie_jar: CookieJar,
     State(state): State<Arc<AppState>>,
-    Json(user): Json<AuthenticableUser>,
+    ValidJson(user): ValidJson<AuthenticableUser>,
 ) -> impl IntoResponse {
     let Some(user) = user.authenticate(&state.pg_pool).await else {
             sleep(Duration::from_secs(3)).await;
@@ -133,7 +133,7 @@ pub async fn update_user(
     JwtUserExtractor(jwt): JwtUserExtractor,
     State(state): State<Arc<AppState>>,
     cookie_jar: CookieJar,
-    Json(user): Json<UpdatableUser>,
+    ValidJson(user): ValidJson<UpdatableUser>,
 ) -> impl IntoResponse {
     if jwt.user.id == user.id {
         if let Err(err) = user.update(&state.pg_pool).await {
