@@ -1,6 +1,7 @@
-use self::{env::EnvArgAction, user::UserArgAction};
+use self::{env::EnvArgAction, room::RoomArgAction, user::UserArgAction};
 
 pub mod env;
+pub mod room;
 pub mod user;
 
 #[derive(clap::Parser, Debug)]
@@ -15,7 +16,10 @@ pub enum CliEntityArg {
         #[command(subcommand)]
         action: UserArgAction,
     },
-    Room,
+    Room {
+        #[command(subcommand)]
+        action: RoomArgAction,
+    },
     Message,
     Env {
         action: EnvArgAction,

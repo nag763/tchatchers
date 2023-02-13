@@ -171,7 +171,6 @@ impl User {
             .execute(pool)
             .await
     }
-
 }
 
 impl From<Jwt> for User {
@@ -189,7 +188,9 @@ impl From<Jwt> for User {
 ///
 /// It is containing limited data, which is convenient and secure during
 /// exchanges. Thus, this is the struct used in JWT.
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash)]
+#[derive(
+    Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash,
+)]
 #[cfg_attr(any(feature = "back", feature = "cli"), derive(FromRow))]
 #[serde(rename_all = "camelCase")]
 #[derivative(Default)]
@@ -233,14 +234,13 @@ impl From<User> for PartialUser {
             timezone: user.timezone,
             is_authorized: user.is_authorized,
             created_at: user.created_at,
-            last_update: user.last_update
+            last_update: user.last_update,
         }
     }
 }
 
 #[cfg(feature = "cli")]
 impl PartialUser {
-
     /// Find a user by ID in the database.
     ///
     /// This shouldn't be used to identify users.
@@ -249,7 +249,7 @@ impl PartialUser {
     ///
     /// - id : The id of the user we are looking for.
     /// - pool : The pool of connection.
-    pub async fn find_by_id(id: i32, pool: &PgPool) -> Result<Option<Self>, sqlx::Error>  {
+    pub async fn find_by_id(id: i32, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as("SELECT * FROM CHATTER WHERE id=$1")
             .bind(id)
             .fetch_optional(pool)
@@ -259,14 +259,11 @@ impl PartialUser {
     /// Find a user from his login.
     ///
     /// This is an exact match look up.
-    /// 
+    ///
     /// # Arguments
     ///
     /// - login : the user login.
-    pub async fn find_by_login(
-        login: &str,
-        pool: &PgPool,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    pub async fn find_by_login(login: &str, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1")
             .bind(login)
             .fetch_optional(pool)
@@ -276,20 +273,16 @@ impl PartialUser {
     /// Find a user from his name.
     ///
     /// This is an exact match look up.
-    /// 
+    ///
     /// # Arguments
     ///
     /// - name : the user name.
-    pub async fn find_by_name(
-        name: &str,
-        pool: &PgPool,
-    ) -> Result<Vec<Self>, sqlx::Error> {
+    pub async fn find_by_name(name: &str, pool: &PgPool) -> Result<Vec<Self>, sqlx::Error> {
         sqlx::query_as("SELECT * FROM CHATTER WHERE name=$1")
             .bind(name)
             .fetch_all(pool)
             .await
     }
-
 }
 
 fn password_strengh(password: &str) -> Result<(), ValidationError> {
@@ -331,7 +324,6 @@ pub struct InsertableUser {
 }
 
 impl InsertableUser {
-
     /// Inserts the user in the database.
     ///
     /// # Arguments
@@ -357,7 +349,11 @@ impl InsertableUser {
     /// - profile : The user profile.
     /// - pool : The connection pool.
     #[cfg(feature = "cli")]
-    pub async fn insert_with_profile(&self, profile: Profile, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+    pub async fn insert_with_profile(
+        &self,
+        profile: Profile,
+        pool: &PgPool,
+    ) -> Result<PgQueryResult, sqlx::Error> {
         let salt: [u8; 32] = rand::thread_rng().gen();
         let config = argon2::Config::default();
         let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
