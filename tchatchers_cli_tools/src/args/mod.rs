@@ -11,6 +11,8 @@ pub mod user;
 pub struct CliArgs {
     #[clap(subcommand)]
     pub entity: CliEntityArg,
+    #[clap(long, value_hint = clap::ValueHint::FilePath, required=false, global=true)]
+    pub env: Option<std::path::PathBuf>,
 }
 
 #[derive(clap::Subcommand, Debug, Clone)]

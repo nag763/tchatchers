@@ -27,8 +27,11 @@ async fn main() -> ExitCode {
 }
 
 async fn run_main() -> Result<(), CliError> {
-    dotenv::dotenv().ok();
     let args: CliArgs = CliArgs::parse();
+    match args.env {
+        None => dotenv::dotenv().ok(),
+        Some(v) => dotenv::from_filename(v).ok(),
+    };
     match args.entity {
         args::CliEntityArg::User { action } => match action {
             args::user::UserArgAction::Create => UserAction::create_user().await?,
