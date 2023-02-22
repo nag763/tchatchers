@@ -174,6 +174,16 @@ impl WsMessageContent {
             .execute(pool)
             .await
     }
+
+    pub async fn delete_messages(
+        messages_uuid: &Vec<Uuid>,
+        pool: &sqlx::PgPool
+    ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
+        sqlx::query("DELETE FROM MESSAGE WHERE uuid = ANY($1)")
+            .bind(messages_uuid)
+            .execute(pool)
+            .await
+    }
 }
 
 /// A struct used for the activity reports.

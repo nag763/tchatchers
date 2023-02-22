@@ -1,6 +1,9 @@
-use self::{env::EnvArgAction, room::RoomArgAction, user::UserArgAction};
+use self::{
+    env::EnvArgAction, message::MessageArgAction, room::RoomArgAction, user::UserArgAction,
+};
 
 pub mod env;
+pub mod message;
 pub mod room;
 pub mod user;
 
@@ -20,7 +23,10 @@ pub enum CliEntityArg {
         #[command(subcommand)]
         action: RoomArgAction,
     },
-    Message,
+    Message {
+        #[command(subcommand)]
+        action: MessageArgAction,
+    },
     Env {
         action: EnvArgAction,
     },

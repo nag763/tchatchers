@@ -5,8 +5,8 @@ mod errors;
 
 use std::process::{ExitCode, Termination};
 
-use actions::{env::EnvAction, room::RoomAction};
-use args::CliArgs;
+use actions::{env::EnvAction, message::MessageAction, room::RoomAction};
+use args::{message::MessageArgAction, CliArgs};
 use clap::Parser;
 use errors::CliError;
 
@@ -45,7 +45,11 @@ async fn run_main() -> Result<(), CliError> {
                 UserAction::search_user(user_search).await?
             }
         },
-        args::CliEntityArg::Message => todo!(),
+        args::CliEntityArg::Message { action } => match action {
+            MessageArgAction::Delete { messages_uuid } => {
+                MessageAction::delete_messages(messages_uuid).await?
+            }
+        },
         args::CliEntityArg::Env { action } => match action {
             args::env::EnvArgAction::Create => EnvAction::create()?,
             args::env::EnvArgAction::Check => EnvAction::check_setup().await?,
