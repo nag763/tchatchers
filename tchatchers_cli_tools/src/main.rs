@@ -1,6 +1,15 @@
+//! This crate's purpose is to have a usable and functional CLI to perform simple operations or setup the tchatchers app.
+//!
+//! It can be handful since the implementations on the front might take sometime, besides of helping the person trying
+//! to install this application to have it running easily.
+
+/// The actions that will be ran from this CLI usage.
 mod actions;
+/// The arguments of the CLI.
 mod args;
+/// The shared struct between the action and arg modules.
 mod common;
+/// The errors thrown during the runtime.
 mod errors;
 
 use std::process::{ExitCode, Termination};
@@ -26,6 +35,7 @@ async fn main() -> ExitCode {
     }
 }
 
+/// Run the main logic and returns an exit code accordingly.
 async fn run_main() -> Result<(), CliError> {
     let args: CliArgs = CliArgs::parse();
     match args.env {

@@ -3,9 +3,14 @@ use std::{
     process::{ExitCode, Termination},
 };
 
+/// Common errors returned during the runtime.
+///
+/// These errors are wrapped and then returned as a positive integer error.
 #[derive(Debug, Clone, PartialEq, Eq, From, Constructor, Error)]
 pub struct CliError {
+    /// The error message printed to the user.
     message: String,
+    /// The error kind.
     kind: ErrorKind,
 }
 
@@ -15,10 +20,16 @@ impl Display for CliError {
     }
 }
 
+/// The different types of errors handled by the runtime.
 #[derive(Debug, Clone, PartialEq, Eq, From, Display, Copy)]
 #[repr(u8)]
 pub enum ErrorKind {
+    /// An error linked with a DB statement execution.
+    ///
+    /// It can indicate a bad .env not leading to a proper connection to the remote host (client error),
+    /// or a statement execution error such as a badly written request.
     StatementExecution = 1,
+    /// An error linked to the writing within a file, or access to a particular file.
     IoError,
 }
 

@@ -440,6 +440,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "clap-cargo"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eca953650a7350560b61db95a0ab1d9c6f7b74d146a9e08fb258b834f3cf7e2c"
+dependencies = [
+ "clap",
+ "doc-comment",
+]
+
+[[package]]
 name = "clap_derive"
 version = "4.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -715,6 +725,12 @@ dependencies = [
  "redox_users",
  "winapi",
 ]
+
+[[package]]
+name = "doc-comment"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fea41bba32d969b513997752735605054bc0dfa92b4c56bf1189f2e174be7a10"
 
 [[package]]
 name = "dotenv"
@@ -2637,6 +2653,7 @@ name = "tct"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "clap-cargo",
  "derive_more",
  "dialoguer",
  "dotenv",
