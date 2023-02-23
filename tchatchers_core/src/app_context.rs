@@ -16,15 +16,15 @@ pub struct AppContext {
     /// The user currently being logged in.
     pub user: PartialUser,
     /// The translations associated to the user's locale.
-    /// 
+    ///
     /// Mainly used for internationalization.
     pub translation: Rc<Translation>,
     /// The list of navigation links he can access to.
-    /// 
+    ///
     /// This depends on the user's profile.
     pub navlink: Vec<Navlink>,
     /// The locales available.
-    /// 
+    ///
     /// Mainly used to not request them from the server if the user wants to change his language.
     pub available_locale: Vec<Locale>,
 }

@@ -1,7 +1,6 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-
 //! Defines the extractors used by the different webservices.
 
 use crate::{AppState, JWT_PATH};
@@ -43,7 +42,7 @@ impl FromRequestParts<Arc<AppState>> for JwtUserExtractor {
 }
 
 /// Extractor used to check that :
-/// 
+///
 /// 1. The user is authenticated.
 /// 2. The user has at least moderator roles in database.
 pub struct ModeratorExtractor(pub PartialUser);
@@ -73,7 +72,7 @@ impl FromRequestParts<Arc<AppState>> for ModeratorExtractor {
 }
 
 /// Extractor used to check that :
-/// 
+///
 /// 1. The user is authenticated.
 /// 2. The user has at least admin roles in database.
 pub struct AdminExtractor(pub PartialUser);

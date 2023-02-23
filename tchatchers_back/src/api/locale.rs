@@ -24,9 +24,9 @@ pub async fn get_locales(
 }
 
 /// Returns the locale given as id in the path, returns 404 if not found.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// - locale_id : The inbase id of the locale in the database.
 pub async fn get_locale_id(
     Path(locale_id): Path<i32>,

@@ -2,7 +2,7 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 //! This module contains the route allowing the user to access the application context.
-//! 
+//!
 //! The context is useful since it permits the front end to have an understandable and parametized view
 //! given the user that uses the application.
 
@@ -17,10 +17,9 @@ use tchatchers_core::{app_context::AppContext, navlink::Navlink, translation::Tr
 
 use crate::{extractor::JwtUserExtractor, AppState};
 
-
 /// Route to get the application context.
-/// 
-/// This requires the user to be authenticated. Once the user is authenticated, 
+///
+/// This requires the user to be authenticated. Once the user is authenticated,
 /// will be returned a lot of data useful when browsing the application, allowing
 /// an asynchronous browsing.
 pub async fn app_context(

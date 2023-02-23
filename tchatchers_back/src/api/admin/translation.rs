@@ -2,7 +2,7 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 //! Administrative translations tools.
-//! 
+//!
 //! This module contains the routes allowing to perform administrative actions on the translations stored in database, and help
 //! the users facing issues to find what is happening.
 
@@ -18,9 +18,8 @@ use tchatchers_core::{manager::ManagerError, translation::TranslationManager};
 
 use crate::{extractor::AdminExtractor, AppState};
 
-
 /// Reload the translations from the database.
-/// 
+///
 /// This allows a refresh of the cache manager, useful when a translation has been inserted in database
 /// and we want it to be displayed on the next connections.
 pub async fn reload_translations(
@@ -32,11 +31,10 @@ pub async fn reload_translations(
     (StatusCode::OK, "Translations reloaded")
 }
 
-
 /// Returns all the translations available in the cache manager.
-/// 
+///
 /// The translations will be returned a JSON map with the keys being the locale id and the values being
-/// the translations. 
+/// the translations.
 pub async fn get_all_translations(
     AdminExtractor(_): AdminExtractor,
     State(state): State<Arc<AppState>>,
@@ -47,9 +45,9 @@ pub async fn get_all_translations(
 }
 
 /// Returns all the translations for a given locale.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// - locale_id : The locale the translations need to be fetched from.
 pub async fn get_translations_for_locale(
     Path(locale_id): Path<i32>,

@@ -62,15 +62,15 @@ pub struct AppState {
     /// The Postgres pool.
     pg_pool: PgPool,
     /// The translation manager.
-    /// 
+    ///
     /// Used to cache the translations from the database.
     translation_manager: Mutex<TranslationManager>,
     /// The navlink manager.
-    /// 
+    ///
     /// Used to cache the navlinks from the database.
     navlink_manager: Mutex<NavlinkManager>,
     /// The locale manager.
-    /// 
+    ///
     /// Used to cache the locales from the database.
     locale_manager: LocaleManager,
 }
