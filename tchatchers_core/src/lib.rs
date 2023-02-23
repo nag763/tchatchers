@@ -8,7 +8,7 @@ pub mod locale;
 #[cfg(feature = "back")]
 pub mod manager;
 pub mod navlink;
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "cli"))]
 pub mod pool;
 pub mod profile;
 pub mod room;

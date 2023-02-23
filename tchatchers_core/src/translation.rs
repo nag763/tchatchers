@@ -2,8 +2,8 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 //! The translation module is mainly used to translate the app's text content given a user's locale.
-//! 
-//! This helps for the internationalization of the application. 
+//!
+//! This helps for the internationalization of the application.
 
 #[cfg(feature = "back")]
 use crate::manager::ManagerError;
@@ -14,11 +14,11 @@ use std::{
 };
 
 /// A translation is a set of label (key) for which correspond a translation (value).
-/// 
+///
 /// A translation is built from a locale, if the locale doesn't have a translation for a given label,
 /// then the default translation of the label will be used (in english).
-/// 
-/// ie (settings_menu_title) => "Settings" 
+///
+/// ie (settings_menu_title) => "Settings"
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "back", derive(sqlx::FromRow))]
 pub struct Translation(HashMap<String, String>);
@@ -38,13 +38,12 @@ impl DerefMut for Translation {
 }
 
 impl Translation {
-    
     /// Returns the translations for a given locale.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - locale_id : The id of the locale.
-    /// - pool : The Postgres pool. 
+    /// - pool : The Postgres pool.
     #[cfg(feature = "back")]
     async fn get_translations_for_locale(locale_id: i32, pool: &sqlx::PgPool) -> Self {
         let hashmap = sqlx::query_as("
@@ -63,9 +62,9 @@ impl Translation {
     }
 
     /// Returns the translation or the default argument if not found.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - label : The label to translation
     /// - default : The default translation if the label isn't translatable.
     #[cfg(feature = "front")]
@@ -78,7 +77,7 @@ impl Translation {
 }
 
 /// Server Side cached translations.
-/// 
+///
 /// This stores the locale id as key, and the corresponding translations as value.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg(feature = "back")]
@@ -91,11 +90,10 @@ pub struct TranslationManager {
 
 #[cfg(feature = "back")]
 impl TranslationManager {
-    
     /// Initializes the manager.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - pool : The postgres pool.
     pub async fn init(pool: &sqlx::PgPool) -> TranslationManager {
         use crate::locale::Locale;
@@ -118,8 +116,8 @@ impl TranslationManager {
     /// Returns the translations for the given locale.
     ///
     /// # Argument
-    /// 
-    /// - locale_id: The locale for which we want the translations. 
+    ///
+    /// - locale_id: The locale for which we want the translations.
     pub fn get_translations_for_locale(
         &self,
         locale_id: i32,

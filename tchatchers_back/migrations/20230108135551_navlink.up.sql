@@ -41,11 +41,13 @@ VALUES
 ON CONFLICT DO NOTHING; 
 
 INSERT INTO NAVLINK(href, label_id) VALUES 
-('/logout', (SELECT id FROM LABEL WHERE name='logout_menu'));
+('/logout', (SELECT id FROM LABEL WHERE name='logout_menu'))
+ON CONFLICT DO NOTHING;
 
 
 INSERT INTO NAVLINK(href, label_id, before) VALUES 
-('/settings', (SELECT id FROM LABEL WHERE name='settings_menu'), (SELECT id FROM NAVLINK WHERE href='/logout'));
+('/settings', (SELECT id FROM LABEL WHERE name='settings_menu'), (SELECT id FROM NAVLINK WHERE href='/logout'))
+ON CONFLICT DO NOTHING; 
 
 INSERT INTO NAVLINK_PROFILE VALUES 
 (1, (SELECT id FROM NAVLINK WHERE href='/logout')),
@@ -53,4 +55,5 @@ INSERT INTO NAVLINK_PROFILE VALUES
 (2, (SELECT id FROM NAVLINK WHERE href='/logout')),
 (2, (SELECT id FROM NAVLINK WHERE href='/settings')),
 (3, (SELECT id FROM NAVLINK WHERE href='/logout')),
-(3, (SELECT id FROM NAVLINK WHERE href='/settings'));
+(3, (SELECT id FROM NAVLINK WHERE href='/settings'))
+ON CONFLICT DO NOTHING;

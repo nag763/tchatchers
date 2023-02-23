@@ -10,15 +10,17 @@ use crate::common::RE_LIMITED_CHARS;
 use crate::jwt::Jwt;
 use crate::profile::Profile;
 use crate::timezone::Timezone;
-#[cfg(feature = "back")]
+use chrono::DateTime;
+use chrono::Utc;
+#[cfg(any(feature = "back", feature = "cli"))]
 use rand::Rng;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "cli"))]
 use sqlx::postgres::PgQueryResult;
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "cli"))]
 use sqlx::FromRow;
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "cli"))]
 use sqlx::PgPool;
 use validator::Validate;
 use validator::ValidationError;
@@ -31,9 +33,10 @@ lazy_static! {
 
 /// The in base structure, which should never be shared between components and
 /// apps.
-#[derive(Serialize, Deserialize, Debug, Default)]
-#[cfg_attr(feature = "back", derive(FromRow))]
+#[derive(Serialize, Deserialize, Debug, derivative::Derivative)]
+#[cfg_attr(any(feature = "back", feature = "cli"), derive(FromRow))]
 #[serde(rename_all = "camelCase")]
+#[derivative(Default)]
 pub struct User {
     /// The in base id, unique.
     pub id: i32,
@@ -51,15 +54,21 @@ pub struct User {
     pub pfp: Option<String>,
     /// The locale associated with the user.
     pub locale_id: i32,
+    /// Timestamp when the user got created.
+    #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    pub created_at: DateTime<Utc>,
+    /// Timestamp on when the user got updated the last time.
+    #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    pub last_update: DateTime<Utc>,
     /// The user's profile.
-    #[cfg_attr(feature = "back", sqlx(rename = "profile_id"))]
+    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
     pub profile: Profile,
     /// The user's timezone.
-    #[cfg_attr(feature = "back", sqlx(flatten))]
+    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(flatten))]
     pub timezone: crate::timezone::Timezone,
 }
 
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "cli"))]
 impl User {
     /// Find a user by ID in the database.
     ///
@@ -95,14 +104,70 @@ impl User {
     ///
     /// The check on whether the executer can delete the user has to be done server side.
     /// This won't check the legitimity of the operation.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - id : the user to delete.
     /// - pool : The PG connection pool.
     pub async fn delete_one(id: i32, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
         sqlx::query("DELETE FROM CHATTER WHERE id=$1")
             .bind(id)
+            .execute(pool)
+            .await
+    }
+
+    /// Delete the user from the database.
+    ///
+    /// The check on whether the executer can delete the user has to be done server side.
+    /// This won't check the legitimity of the operation.
+    ///
+    /// # Arguments
+    ///
+    /// - id : the user to delete.
+    /// - pool : The PG connection pool.
+    pub async fn delete_login(login: &str, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query("DELETE FROM CHATTER WHERE login=$1")
+            .bind(login)
+            .execute(pool)
+            .await
+    }
+
+    /// Update the activation status of a user.
+    ///
+    /// This will mark a user as either authorized or unauthorized on the base.
+    ///
+    /// # Arguments
+    ///
+    /// - id : the user id.
+    /// - is_authorized : the new activation status.
+    pub async fn update_activation_status(
+        id: i32,
+        is_authorized: bool,
+        pool: &PgPool,
+    ) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query("UPDATE CHATTER SET is_authorized=$1 WHERE id=$2")
+            .bind(is_authorized)
+            .bind(id)
+            .execute(pool)
+            .await
+    }
+
+    /// Update the activation status of a user.
+    ///
+    /// This will mark a user as either authorized or unauthorized on the base.
+    ///
+    /// # Arguments
+    ///
+    /// - login : the user login.
+    /// - is_authorized : the new activation status.
+    pub async fn update_activation_status_from_login(
+        login: &str,
+        is_authorized: bool,
+        pool: &PgPool,
+    ) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query("UPDATE CHATTER SET is_authorized=$1 WHERE login=$2")
+            .bind(is_authorized)
+            .bind(login)
             .execute(pool)
             .await
     }
@@ -123,9 +188,12 @@ impl From<Jwt> for User {
 ///
 /// It is containing limited data, which is convenient and secure during
 /// exchanges. Thus, this is the struct used in JWT.
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Default, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "back", derive(sqlx::FromRow))]
+#[derive(
+    Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash,
+)]
+#[cfg_attr(any(feature = "back", feature = "cli"), derive(FromRow))]
 #[serde(rename_all = "camelCase")]
+#[derivative(Default)]
 pub struct PartialUser {
     /// In base id of the user.
     pub id: i32,
@@ -135,14 +203,22 @@ pub struct PartialUser {
     pub name: String,
     /// Profile picture of the user.
     pub pfp: Option<String>,
+    /// Whether the user is authorized or not.
+    pub is_authorized: bool,
+    /// Timestamp when the user got created.
+    #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    pub created_at: DateTime<Utc>,
+    /// Timestamp on when the user got updated the last time.
+    #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    pub last_update: DateTime<Utc>,
     /// The locale associated with the user.
     pub locale_id: i32,
-    #[cfg_attr(feature = "back", sqlx(rename = "profile_id"))]
+    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
     // The profile of the user
     pub profile: Profile,
-    #[cfg_attr(feature = "back", sqlx(rename = "profile_id"))]
+    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
     /// The timezone associated to the user.
-    #[cfg_attr(feature = "back", sqlx(flatten))]
+    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(flatten))]
     pub timezone: crate::timezone::Timezone,
 }
 
@@ -156,7 +232,56 @@ impl From<User> for PartialUser {
             locale_id: user.locale_id,
             profile: user.profile,
             timezone: user.timezone,
+            is_authorized: user.is_authorized,
+            created_at: user.created_at,
+            last_update: user.last_update,
         }
+    }
+}
+
+#[cfg(feature = "cli")]
+impl PartialUser {
+    /// Find a user by ID in the database.
+    ///
+    /// This shouldn't be used to identify users.
+    ///
+    /// # Arguments
+    ///
+    /// - id : The id of the user we are looking for.
+    /// - pool : The pool of connection.
+    pub async fn find_by_id(id: i32, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
+        sqlx::query_as("SELECT * FROM CHATTER WHERE id=$1")
+            .bind(id)
+            .fetch_optional(pool)
+            .await
+    }
+
+    /// Find a user from his login.
+    ///
+    /// This is an exact match look up.
+    ///
+    /// # Arguments
+    ///
+    /// - login : the user login.
+    pub async fn find_by_login(login: &str, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
+        sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1")
+            .bind(login)
+            .fetch_optional(pool)
+            .await
+    }
+
+    /// Find a user from his name.
+    ///
+    /// This is an exact match look up.
+    ///
+    /// # Arguments
+    ///
+    /// - name : the user name.
+    pub async fn find_by_name(name: &str, pool: &PgPool) -> Result<Vec<Self>, sqlx::Error> {
+        sqlx::query_as("SELECT * FROM CHATTER WHERE name=$1")
+            .bind(name)
+            .fetch_all(pool)
+            .await
     }
 }
 
@@ -198,13 +323,13 @@ pub struct InsertableUser {
     pub name: String,
 }
 
-#[cfg(feature = "back")]
 impl InsertableUser {
     /// Inserts the user in the database.
     ///
     /// # Arguments
     ///
     /// - pool : The connection pool.
+    #[cfg(feature = "back")]
     pub async fn insert(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
         let salt: [u8; 32] = rand::thread_rng().gen();
         let config = argon2::Config::default();
@@ -213,6 +338,30 @@ impl InsertableUser {
             .bind(&self.login)
             .bind(&hash)
             .bind(&self.name)
+            .execute(pool)
+            .await
+    }
+
+    /// Inserts the user in the database along his profile.
+    ///
+    /// # Arguments
+    ///
+    /// - profile : The user profile.
+    /// - pool : The connection pool.
+    #[cfg(feature = "cli")]
+    pub async fn insert_with_profile(
+        &self,
+        profile: Profile,
+        pool: &PgPool,
+    ) -> Result<PgQueryResult, sqlx::Error> {
+        let salt: [u8; 32] = rand::thread_rng().gen();
+        let config = argon2::Config::default();
+        let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
+        sqlx::query("INSERT INTO CHATTER(login, password, name, profile_id) VALUES ($1,$2,$3,$4)")
+            .bind(&self.login)
+            .bind(&hash)
+            .bind(&self.name)
+            .bind(profile)
             .execute(pool)
             .await
     }

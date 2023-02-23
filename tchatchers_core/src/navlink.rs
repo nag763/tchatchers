@@ -2,11 +2,11 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 //! A navlink is a reference to a front end page that is stored in the database.
-//! 
+//!
 //! This module is mainly used to differentiate the privilegied accesses that can be existing between the different user types.
-//! 
+//!
 //! For instance, an admin usually do not have access to the same screens as a simple user.
-//! 
+//!
 //! This difference is stored in the database, and then returned to the client once he logs in.
 
 #[cfg(feature = "back")]
@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "back")]
 use std::collections::HashMap;
 
-/// A navlink is a reference to a front-end page. 
+/// A navlink is a reference to a front-end page.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "back", derive(sqlx::FromRow))]
 pub struct Navlink {
@@ -33,11 +33,10 @@ pub struct Navlink {
 
 #[cfg(feature = "back")]
 impl Navlink {
-    
     /// Returns the navlinks for the profile.
-    /// 
-    /// # Arguments 
-    /// 
+    ///
+    /// # Arguments
+    ///
     /// - profile : the user's associated profile.
     /// - pg_pool : the connection pool.
     async fn get_for_profile(profile: Profile, pg_pool: &sqlx::PgPool) -> Vec<Navlink> {
@@ -57,9 +56,9 @@ impl Navlink {
     }
 
     /// Returns the navlinks ordered for a given profile.
-    /// 
-    /// # Arguments 
-    /// 
+    ///
+    /// # Arguments
+    ///
     /// - profile : the user's associated profile.
     /// - pg_pool : the connection pool.
     async fn get_for_profile_sorted(profile: Profile, pg_pool: &sqlx::PgPool) -> Vec<Navlink> {
@@ -81,11 +80,10 @@ pub struct NavlinkManager {
 
 #[cfg(feature = "back")]
 impl NavlinkManager {
-
     /// Initialize the manager
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - pg_pool : The pool to cache the manager.
     pub async fn init(pg_pool: &sqlx::PgPool) -> NavlinkManager {
         let profiles = Profile::iterator();
@@ -103,10 +101,10 @@ impl NavlinkManager {
     }
 
     /// Returns an ordered navlink list for the given profile.
-    /// 
+    ///
     /// # Arguments
-    /// 
-    /// - profile : The profile to get the navlinks from. 
+    ///
+    /// - profile : The profile to get the navlinks from.
     pub fn get_navlink_for_profile(
         &self,
         profile: Profile,

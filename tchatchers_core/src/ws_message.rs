@@ -71,7 +71,7 @@ pub enum WsMessage {
     Default,
     Copy,
 )]
-#[cfg_attr(feature = "back", derive(sqlx::Type))]
+#[cfg_attr(any(feature = "back", feature = "cli"), derive(sqlx::Type))]
 #[repr(i32)]
 pub enum WsReceptionStatus {
     #[default]
@@ -86,7 +86,7 @@ pub enum WsReceptionStatus {
     Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash,
 )]
 #[derivative(Default)]
-#[cfg_attr(feature = "back", derive(sqlx::FromRow))]
+#[cfg_attr(any(feature = "back", feature = "cli"), derive(sqlx::FromRow))]
 #[serde(rename_all = "camelCase")]
 pub struct WsMessageContent {
     /// The message identifier, must be unique.
@@ -97,7 +97,7 @@ pub struct WsMessageContent {
     /// The author of the message.
     ///
     /// Is empty when the message is emitted by the server.
-    #[cfg_attr(feature = "back", sqlx(flatten))]
+    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(flatten))]
     pub author: PartialUser,
     /// When the message has been emitted.
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
@@ -108,13 +108,12 @@ pub struct WsMessageContent {
     pub reception_status: WsReceptionStatus,
 }
 
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "cli"))]
 impl WsMessageContent {
-    
     /// Returns the first 100 messages for a given room name.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - room_name : The room the query is made for.
     pub async fn query_all_for_room(room_name: &str, pool: &sqlx::PgPool) -> Vec<Self> {
         sqlx::query_as("SELECT * FROM MESSAGE m INNER JOIN CHATTER c ON m.author = c.id WHERE room=$1 ORDER BY timestamp DESC LIMIT 100 ")
@@ -125,9 +124,9 @@ impl WsMessageContent {
     }
 
     /// Insert the message in the database.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - pool : the connection pool.
     pub async fn persist(
         &self,
@@ -145,9 +144,9 @@ impl WsMessageContent {
     }
 
     /// Mark a list of existing messages as seen?
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// - messages_uuid : the list of messages seen.
     /// - pool : the connection pool.
     pub async fn mark_as_seen(
@@ -159,5 +158,55 @@ impl WsMessageContent {
             .bind(messages_uuid)
             .execute(pool)
             .await
+    }
+
+    /// Deletes the message present in a room.
+    ///
+    /// # Arguments
+    /// - room_name : The room where the messages needs to be deleted.
+    /// - pool : The connection pool.
+    pub async fn delete_message_in_room(
+        room_name: &str,
+        pool: &sqlx::PgPool,
+    ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
+        sqlx::query("DELETE FROM MESSAGE WHERE room = $1")
+            .bind(room_name)
+            .execute(pool)
+            .await
+    }
+
+    pub async fn delete_messages(
+        messages_uuid: &Vec<Uuid>,
+        pool: &sqlx::PgPool,
+    ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
+        sqlx::query("DELETE FROM MESSAGE WHERE uuid = ANY($1)")
+            .bind(messages_uuid)
+            .execute(pool)
+            .await
+    }
+}
+
+/// A struct used for the activity reports.
+#[derive(Debug)]
+#[cfg_attr(any(feature = "back", feature = "cli"), derive(sqlx::FromRow))]
+pub struct WsMessageStats {
+    /// The number of messages in the room.
+    pub number_of_messages: i64,
+    /// The room name.
+    pub room: String,
+}
+
+#[cfg(feature = "cli")]
+impl WsMessageStats {
+    /// Returns the activity from the database.
+    ///
+    /// # Arguments
+    ///
+    /// - pool : The connection pool.
+    pub async fn get_activity(pool: &sqlx::PgPool) -> Vec<Self> {
+        sqlx::query_as("SELECT COUNT(*) as number_of_messages, room FROM MESSAGE GROUP BY room ORDER BY number_of_messages DESC")
+            .fetch_all(pool)
+            .await
+            .unwrap()
     }
 }

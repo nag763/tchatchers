@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(
     Debug, Default, Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Hash, derive_more::Display,
 )]
-#[cfg_attr(feature = "back", derive(sqlx::Type))]
+#[cfg_attr(any(feature = "back", feature = "cli"), derive(sqlx::Type))]
 #[repr(i32)]
 pub enum Profile {
     /// Simple user, with little rights.
@@ -22,9 +22,13 @@ pub enum Profile {
 }
 
 impl Profile {
-
     /// Returns an iterator over all the variants of the Profile enum.
     pub fn iterator() -> impl Iterator<Item = Self> {
-        [Profile::User, Profile::Moderator, Profile::Admin].into_iter()
+        Self::options().into_iter()
+    }
+
+    /// Returns the profile options.
+    pub fn options() -> [Profile; 3] {
+        [Profile::User, Profile::Moderator, Profile::Admin]
     }
 }
