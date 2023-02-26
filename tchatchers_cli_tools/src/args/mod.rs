@@ -2,9 +2,34 @@ use self::{
     env::EnvArgAction, message::MessageArgAction, room::RoomArgAction, user::UserArgAction,
 };
 
+/// Provides functionality to manage the application's environment.
+///
+/// This module contains subcommands to manage the current environment, as well as commands to create and
+/// populate a new environment file. An environment file is a `.env` file that contains environment
+/// variables used by the application. These variables typically include database connection settings,
+/// security-related secrets, and other configuration values that are sensitive or subject to change.
 pub mod env;
+/// Provides functionality to manage the messages stored in the application's database.
+///
+/// This module contains subcommands to perform CRUD (Create, Read, Update, Delete) operations on the
+/// messages stored in the application's database. Messages are the main data entity of the application
+/// and contain information about the content of messages, the users who sent them, and the rooms where
+/// they were sent. The commands in this module allow users to create new messages, retrieve messages
+/// from the database, update existing messages, and delete messages from the database.
 pub mod message;
+/// Provides functionality to manage the rooms in the application.
+///
+/// This module contains subcommands to perform operations on the rooms in the application. Rooms are
+/// entities that store messages sent by users. The commands in this module allow users to retrieve
+/// messages from a room, delete all messages from a room, and view the global activity of all rooms
 pub mod room;
+/// Provides functionality to manage the users of the application.
+///
+/// This module contains subcommands to perform CRUD (Create, Read, Update, Delete) operations on the
+/// users of the application. Users are entities that represent individual users of the application,
+/// and contain information such as usernames, passwords, and email addresses. The commands in this
+/// module allow users to create new users, retrieve information about existing users, update user
+/// information, and delete users from the application.
 pub mod user;
 
 /// The CLI arguments that will be parsed from the user input.

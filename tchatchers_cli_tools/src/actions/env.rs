@@ -10,6 +10,7 @@ use which::which;
 
 use crate::errors::CliError;
 
+/// This struct provides functionality to interact with environment variables.
 pub struct EnvAction;
 
 const FILE_NAME: &str = ".env";
@@ -18,6 +19,7 @@ const CHECKMARK_EMOJI: &str = "\u{2714}";
 const ERROR_EMOJI: &str = "\u{0058}";
 const WARNING_EMOJI: &str = "\u{26A0}";
 
+/// A constant array of tuples representing the environment variables that should be checked, along with their error types.
 const ENV_VARS_TO_CHECK: [(&str, EnvironmentCheckErrorTypes); 7] = [
     ("DATABASE_URL", EnvironmentCheckErrorTypes::Warning),
     ("POSTGRES_DB", EnvironmentCheckErrorTypes::Error),
@@ -28,6 +30,7 @@ const ENV_VARS_TO_CHECK: [(&str, EnvironmentCheckErrorTypes); 7] = [
     ("GID", EnvironmentCheckErrorTypes::Warning),
 ];
 
+/// A constant array of program names to check if they exist in the PATH.
 const PATH_PGM_TO_CHECK: [&str; 6] = [
     "docker",
     "cargo",
@@ -37,8 +40,10 @@ const PATH_PGM_TO_CHECK: [&str; 6] = [
     "rustup",
 ];
 
+/// A constant array of targets to check if they are installed for cargo.
 const TARGETS_TO_CHECK: [&str; 1] = ["wasm32-unknown-unknown"];
 
+/// An enum representing the types of errors for environment variable checks.
 #[derive(Debug, PartialEq, Eq)]
 enum EnvironmentCheckErrorTypes {
     Error,
@@ -46,6 +51,8 @@ enum EnvironmentCheckErrorTypes {
 }
 
 impl EnvAction {
+    /// Create a new `.env` file and populate it with database-related environment variables.
+
     pub fn create() -> Result<(), CliError> {
         if fs::read(FILE_NAME).is_ok() {
             let confirm_override = Confirm::new()
@@ -95,6 +102,7 @@ impl EnvAction {
         Ok(())
     }
 
+    /// Check the current .env file.
     pub async fn check_setup() -> Result<(), CliError> {
         let mut errors: Vec<EnvironmentCheckErrorTypes> = Vec::new();
 

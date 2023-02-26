@@ -1,7 +1,7 @@
 /// The user identifier is a struct used to query and return a single result from the user DB.
 ///
 /// It can only be used to get a single result from the database.
-#[derive(clap::Subcommand, Debug, Clone)]
+#[derive(clap::Subcommand, Debug, Clone, Display)]
 pub enum UserIdentifier {
     /// Performing a search on the ID.
     #[command(about = "Unique identifier of the user")]
@@ -12,7 +12,7 @@ pub enum UserIdentifier {
 }
 
 /// The user search struct is a struct used to return possibly several results from the user DB.
-#[derive(clap::Subcommand, Debug, Clone)]
+#[derive(clap::Subcommand, Debug, Clone, Display)]
 pub enum UserSearch {
     /// Performing a search on the ID.
     #[command(about = "Unique identifier of the user")]
