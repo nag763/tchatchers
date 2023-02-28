@@ -4,7 +4,7 @@ This folder contains the documentation that and scripts that can be helpful if y
 
 ## Foreword
 
-It is to be noted that the setting up has only been made available for apt, rpm and pacman based distros. If you want your distro to be supported, I recommand to check the objectives and install the application on your end with your knowledge and then update the setup script.
+It is to be noted that the setting up has only been made available for apt, rpm and pacman based distros. If you want your distro to be supported, I recommend to check the objectives and install the application on your end with your knowledge and then update the setup script.
 
 ## Objectives
 
@@ -13,8 +13,9 @@ It is to be noted that the setting up has only been made available for apt, rpm 
 - Install `trunk` and (recommended) `cargo-watch` from cargo
 - Setting up the environment file
 - Starting the database
+- Running the application in developper mode
 
-## 0. Prequesites
+## 0. Prerequisites
 
 - Git is needed, if you didn't clone yet this repo, use `git clone https://github.com/nag763/tchatchers`, and then position yourself at the root of the project.
 - Make sure your distro and its packages are up to date
@@ -22,7 +23,7 @@ It is to be noted that the setting up has only been made available for apt, rpm 
 - Install `docker` (guide [here](https://docs.docker.com/engine/install/)) and care about having rights with your user on dockerd if you are on linux (guide [here](https://docs.docker.com/engine/install/linux-postinstall/)).
 
 Then you can either setup your environment by :
-- Running the following command : `curl -ssl https://github.com/nag763/tchatchers/setup.sh | sh`
+- Running the following command : `curl -ssl https://raw.githubusercontent.com/nag763/tchatchers/main/setup.sh | sh`
 - Or using `cargo-make`
     1. Install cargo-make : `cargo install cargo-make`
     2. Run the following : `cargo-make make install-native-pkgs`
