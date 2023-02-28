@@ -72,6 +72,10 @@ impl EnvAction {
             .with_prompt("Database host")
             .default("localhost".into())
             .interact_text()?;
+        let postgres_port: i32 = Input::new()
+            .with_prompt("Database port")
+            .default(5432)
+            .interact_text()?;
         let postgres_db_name: String = Input::new()
             .with_prompt("Enter the database name")
             .default("chatapp".into())
@@ -92,8 +96,9 @@ impl EnvAction {
             .create(true)
             .truncate(true)
             .open(FILE_NAME)?;
-        writeln!(env_file, "DATABASE_URL=postgres://{postgres_user_name}:{postgres_password}@{postgres_host}/chatapp")?;
+        writeln!(env_file, "DATABASE_URL=postgres://{postgres_user_name}:{postgres_password}@{postgres_host}:{postgres_port}/chatapp")?;
         writeln!(env_file, "POSTGRES_HOST={postgres_host}")?;
+        writeln!(env_file, "POSTGRES_PORT={postgres_port}")?;
         writeln!(env_file, "POSTGRES_DB={postgres_db_name}")?;
         writeln!(env_file, "POSTGRES_USER={postgres_user_name}")?;
         writeln!(env_file, "POSTGRES_PASSWORD={postgres_password}")?;

@@ -42,29 +42,7 @@ If you want to set up a new environment, it is recommanded to first run the foll
 cargo-make make clear-symlink
 ```
 
-## 2. Starting the database
-
-Now you need to start the database, to do that :
-
-```bash
-cargo-make make run-db-background
-```
-
-Understand the database will run as a dockerized background process.
-
-To stop it :
-
-```bash
-cargo-make make stop-db
-```
-
-And to dump it (meaning cleaning its data) :
-
-```bash
-cargo-make make dump-db
-```
-
-## 3. Starting the back and front as observable processes (dev mode)
+## 2. Starting the db, back and front as observable processes (dev mode)
 
 So now, you most likely want to start the application as an observable process, meaning that both the front and the back will be running, and they will recompile everytime a change is performed.
 
@@ -75,6 +53,8 @@ cargo-make start-dev
 ```
 
 And you should be all good to start the application locally. :happy:
+
+If you access http://localhost:3000/ , you should see the login screen of the app.
 
 ## Recommandation
 

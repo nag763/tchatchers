@@ -39,8 +39,8 @@ echo "Env links deleted"
 '''
 workspace=false
 
-[tasks.run-db-background]
-args = ["-f", "docker-compose_dev.yml", "up", "-d", "postgres"]
+[tasks.start-db]
+args = ["-f", "docker-compose_dev.yml", "up",  "-d", "postgres"]
 command = "docker-compose"
 workspace = false
 
@@ -58,10 +58,11 @@ workspace = false
 args = ["-x", "r --bin tchatchers_back", "--watch", "tchatchers_back/src/"]
 command = "cargo-watch"
 workspace = false
+dependencies = ["start-db"]
 
 [tasks.start-dev-front]
 cwd = "./tchatchers_front"
-args = ["serve"]
+args = ["serve", "--port", "3000"]
 command = "trunk"
 workspace = false
 

@@ -19,6 +19,7 @@ use sqlx::PgPool;
 pub async fn get_pg_pool() -> PgPool {
     let mut connect_options = PgConnectOptions::new()
         .host(&std::env::var("POSTGRES_HOST").expect("No host defined in .env"))
+        .port(std::env::var("POSTGRES_PORT").expect("No port defined in .env").parse::<u16>().expect("The port defined in the .env is not valid"))
         .database(&std::env::var("POSTGRES_DB").expect("No schema defined in .env"))
         .username(&std::env::var("POSTGRES_USER").expect("No user defined in .env"))
         .password(&std::env::var("POSTGRES_PASSWORD").expect("No password defined in .env"));
