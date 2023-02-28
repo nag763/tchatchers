@@ -1,0 +1,76 @@
+[tasks.install-native-pkgs.linux]
+script = { file = "setup.sh" }
+workspace = false
+
+[tasks.create-env]
+args = ["r", "--bin", "tct", "env", "create"]
+command = "cargo"
+workspace = false
+
+[tasks.symlink-env]
+script_runner = "@shell"
+script = '''
+if ! ls tchatchers_back/.env &>/dev/null ; then  
+    ln .env tchatchers_back/
+else
+    echo "The symlink for the back project already exists, run 'cargo-make make clear-symlink' if you want to delete them"
+fi
+if ! ls .env tchatchers_cli_tools/.env &>/dev/null ; then
+    ln .env tchatchers_cli_tools/
+else
+    echo "The symlink for the cli project already exists, run 'cargo-make make clear-symlink' if you want to delete them"
+fi
+'''
+workspace = false
+
+[tasks.setup-env]
+dependencies = [
+	"create-env",
+	"symlink-env"
+]
+workspace = false
+
+[tasks.clear-symlink]
+script_runner="@shell"
+script = '''
+rm tchatchers_back/.env
+rm tchatchers_cli_tools/.env
+echo "Env links deleted"
+'''
+workspace=false
+
+[tasks.run-db-background]
+args = ["-f", "docker-compose_dev.yml", "up", "-d", "postgres"]
+command = "docker-compose"
+workspace = false
+
+[tasks.stop-db]
+args = ["-f", "docker-compose_dev.yml", "down"]
+command = "docker-compose"
+workspace = false
+
+[tasks.dump-db]
+args = ["-f", "docker-compose_dev.yml", "down", "-v"]
+command = "docker-compose"
+workspace = false
+
+[tasks.start-dev-back]
+args = ["-x", "r --bin tchatchers_back", "--watch", "tchatchers_back/src/"]
+command = "cargo-watch"
+workspace = false
+
+[tasks.start-dev-front]
+cwd = "./tchatchers_front"
+args = ["serve"]
+command = "trunk"
+workspace = false
+
+[tasks.start-dev-style]
+cwd = "./tchatchers_front"
+args = ["tailwindcss", "-i", "main.css", "-o", "assets/tailwind.css", "-c", "tailwind.config.js", "--minify", "--watch", "src/"]
+command = "npx"
+workspace = false
+
+[tasks.start-dev]
+run_task = { name = ["start-dev-back", "start-dev-front", "start-dev-style"], fork = true, parallel = true }
+workspace = false

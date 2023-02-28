@@ -28,7 +28,11 @@ tchatche.rs is an application used to help clients to communicate between each o
 
 The main application's usage is to create rooms to talk between people being connected to the application. You like football ? Try the football room. You like philosophy ? Try the philosophy one.
 
-ALl depends on you to chat how you want to .
+All depends on you to chat how you want to .
+
+## :new: Installing the application locally and starting developping
+
+Follow [this guide](./SETUP.md). 
 
 ## Project structure
 
