@@ -86,6 +86,10 @@ async fn run_main() -> Result<(), CliError> {
                 info!("Checking environment variables...");
                 EnvAction::check_setup().await?
             }
+            args::env::EnvArgAction::BuildNginxConf { output_file } => {
+                info!("Building the nginx config file...");
+                EnvAction::build_nginx_conf(&output_file)?
+            }
         },
         args::CliEntityArg::Room { action } => match action {
             args::room::RoomArgAction::Clean { room_name } => {

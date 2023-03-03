@@ -1,14 +1,25 @@
 use std::{
     env::var,
+    ffi::OsString,
     fs::{self, OpenOptions},
     io::Write,
     process::{Command, Output},
 };
 
+use askama::Template;
 use dialoguer::{Confirm, Input, Password};
 use which::which;
 
 use crate::errors::CliError;
+
+#[derive(Template, Debug, Default)]
+#[template(path = "nginx.conf", ext = "txt", escape = "none")]
+struct NginxConfigTemplate {
+    http_only: bool,
+    disable_security: bool,
+    version: String,
+    server_name: String,
+}
 
 /// This struct provides functionality to interact with environment variables.
 pub struct EnvAction;
@@ -196,6 +207,47 @@ impl EnvAction {
             println!("{} Warnings detected", errors_count - fatal_errors);
         }
 
+        Ok(())
+    }
+
+    /// Build a Nginx config file for production usage.
+    ///
+    /// This can be helpful when you want to for instance change the domain name or disable HTTPS only mode.
+    pub(crate) fn build_nginx_conf(output_file: &OsString) -> Result<(), CliError> {
+        if fs::read(output_file).is_ok() && Input::new().with_prompt(format!("Be careful, the output file located at {output_file:?} is non empty, please confirm you want to override the configuration.")).default(false).interact_text()? {
+            return Ok(());
+        }
+
+        let http_only: bool = Input::new()
+            .with_prompt("Disable https ?\nThis can for instance be helpful if you want to run the project only in DEV mode.")
+            .default(false)
+            .interact_text()?;
+        let disable_security: bool = Input::new()
+            .with_prompt("Disable security options ?")
+            .default(false)
+            .interact_text()?;
+        let version: String = Input::new()
+            .with_prompt("What is the version of the tool?")
+            .interact_text()?;
+        let server_name: String = Input::new()
+            .with_prompt("What is the server name ?")
+            .default("www.tchatche.rs".into())
+            .interact_text()?;
+
+        let mut nginx_config_output = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(output_file)?;
+
+        let output: String = NginxConfigTemplate {
+            http_only,
+            disable_security,
+            version,
+            server_name,
+        }
+        .render()?;
+        nginx_config_output.write_all(output.as_bytes())?;
         Ok(())
     }
 }

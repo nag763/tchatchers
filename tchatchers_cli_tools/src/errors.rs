@@ -31,6 +31,8 @@ pub enum ErrorKind {
     StatementExecution = 1,
     /// An error linked to the writing within a file, or access to a particular file.
     IoError,
+    /// Error linked with template generation.
+    TemplateError,
 }
 
 impl From<sqlx::Error> for CliError {
@@ -42,6 +44,12 @@ impl From<sqlx::Error> for CliError {
 impl From<std::io::Error> for CliError {
     fn from(value: std::io::Error) -> Self {
         Self::new(value.to_string(), ErrorKind::IoError)
+    }
+}
+
+impl From<askama::Error> for CliError {
+    fn from(value: askama::Error) -> Self {
+        Self::new(value.to_string(), ErrorKind::TemplateError)
     }
 }
 

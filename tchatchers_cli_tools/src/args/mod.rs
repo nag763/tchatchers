@@ -65,5 +65,8 @@ pub enum CliEntityArg {
         action: MessageArgAction,
     },
     #[command(about = "Helper to either set up a new environment or check the current one")]
-    Env { action: EnvArgAction },
+    Env {
+        #[command(subcommand)]
+        action: EnvArgAction,
+    },
 }
