@@ -33,7 +33,7 @@ services:
       - ${SSL_CERTIFICATE_PATH}:/usr/nginx/home/certs/cert.crt:ro
       - ${SSL_CERTIFICATE_KEY}:/usr/nginx/home/certs/key.pem:ro
       - ${SSL_DHPARAM_PATH}:/usr/nginx/home/certs/ssl-dhparams.pem
-      - ./nginx.conf:/etc/nginx/templates
+      - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - back
     links:
