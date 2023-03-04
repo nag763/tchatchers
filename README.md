@@ -57,6 +57,15 @@ front and backend
 └── tchatchers_front => the frontend project
 ```
 
+## Rustdoc
+
+The rustdoc can be found for each subproject at :
+
+- tchatchers_core : [here](https://tchatche.rs/doc/tchatchers_core/) 
+- tchatchers_back : [here](https://tchatche.rs/doc/tchatchers_back/)
+- tchatchers_front : [here](https://tchatche.rs/doc/tchatchers_front/)
+- tct (tchatchers_cli_tool): [here](https://tchatche.rs/doc/tct/)
+
 ## Technologies used
 
 |Technology/Framework|Utility                     |Version|
