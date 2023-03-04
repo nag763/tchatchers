@@ -45,7 +45,7 @@ const ERROR_EMOJI: &str = "\u{0058}";
 const WARNING_EMOJI: &str = "\u{26A0}";
 
 /// A constant array of tuples representing the environment variables that should be checked, along with their error types.
-const ENV_VARS_TO_CHECK: [(&str, EnvironmentCheckErrorTypes); 7] = [
+const ENV_VARS_TO_CHECK: [(&str, EnvironmentCheckErrorTypes); 10] = [
     ("DATABASE_URL", EnvironmentCheckErrorTypes::Warning),
     ("POSTGRES_DB", EnvironmentCheckErrorTypes::Error),
     ("POSTGRES_USER", EnvironmentCheckErrorTypes::Error),
@@ -53,6 +53,9 @@ const ENV_VARS_TO_CHECK: [(&str, EnvironmentCheckErrorTypes); 7] = [
     ("JWT_SECRET", EnvironmentCheckErrorTypes::Error),
     ("UID", EnvironmentCheckErrorTypes::Warning),
     ("GID", EnvironmentCheckErrorTypes::Warning),
+    ("SSL_CERTIFICATE_PATH", EnvironmentCheckErrorTypes::Warning),
+    ("SSL_CERTIFICATE_KEY", EnvironmentCheckErrorTypes::Warning),
+    ("SSL_DHPARAM_PATH", EnvironmentCheckErrorTypes::Warning)
 ];
 
 /// A constant array of program names to check if they exist in the PATH.
