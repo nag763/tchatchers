@@ -5,3 +5,6 @@ tchatchers_back/static/*
 !tchatchers_back/static/.index
 .env
 nginx.conf
+my_cert.crt
+my_dhparam.pem
+my_key.key
