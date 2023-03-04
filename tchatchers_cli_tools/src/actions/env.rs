@@ -214,7 +214,7 @@ impl EnvAction {
     ///
     /// This can be helpful when you want to for instance change the domain name or disable HTTPS only mode.
     pub(crate) fn build_nginx_conf(output_file: &OsString) -> Result<(), CliError> {
-        if fs::read(output_file).is_ok() && Input::new().with_prompt(format!("Be careful, the output file located at {output_file:?} is non empty, please confirm you want to override the configuration.")).default(false).interact_text()? {
+        if fs::read(output_file).is_ok() && !Input::new().with_prompt(format!("Be careful, the output file located at {output_file:?} is non empty, please confirm you want to override the configuration.")).default(false).interact_text()? {
             return Ok(());
         }
 
