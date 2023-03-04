@@ -6,6 +6,8 @@ COPY ./ .
 
 RUN cargo doc --no-deps --all-features --target-dir doc
 
+RUN git rev-parse HEAD > .rev
+
 FROM node as asset_builder
 
 WORKDIR /home/usr/front
@@ -44,10 +46,15 @@ RUN cargo install trunk
 
 RUN trunk build --release
 
-FROM nginx
+FROM nginx:alpine
 
 COPY --from=src_builder /usr/tchatchers/front/dist /usr/share/nginx/html
 
 COPY --from=doc_builder /home/usr/doc/doc/doc/ /usr/share/nginx/html/doc
+
+COPY --from=doc_builder /home/usr/doc/.rev /usr/share/nginx/html/.rev
+
+RUN date > /usr/share/nginx/html/.up-since
+
 
 EXPOSE 80

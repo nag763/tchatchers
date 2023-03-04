@@ -1,7 +1,6 @@
 **/target/*
 target/
 **/dist/*
-.git
 README.md
 LICENSE.MD
 CODE_OF_CONDUCT.md
