@@ -2,13 +2,13 @@
 
 if command -v apt-get &> /dev/null; then
     echo "Package manager: apt"
-    sudo apt-get install gcc npm docker docker-compose libssl-dev
+    sudo apt-get install build-essential npm docker docker-compose
 elif command -v dnf &> /dev/null; then
     echo "Package manager: dnf"
-    sudo dnf install gcc openssl-devel npm docker docker-compose
+    sudo dnf install openssl-devel npm docker docker-compose gcc
 elif command -v pacman &> /dev/null; then
     echo "Package manager: pacman"
-    sudo pacman -S gcc npm docker docker-compose base-devel
+    sudo pacman -S npm docker docker-compose base-devel
 else
     echo "Your package manager has either not been found or isn't supported, please report this issue on github"
     exit
