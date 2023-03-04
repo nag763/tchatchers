@@ -1,0 +1,7 @@
+DATABASE_URL=postgres://{{postgres_user_name}}:{{postgres_password}}@{{postgres_host}}:{{postgres_port}}/chatapp
+POSTGRES_HOST={{postgres_host}}
+POSTGRES_PORT={{postgres_port}}
+POSTGRES_DB={{postgres_db_name}}
+POSTGRES_USER={{postgres_user_name}}
+POSTGRES_PASSWORD={{postgres_password}}
+JWT_SECRET={{jwt_secret}}

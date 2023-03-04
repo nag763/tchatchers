@@ -21,6 +21,18 @@ struct NginxConfigTemplate {
     server_name: String,
 }
 
+#[derive(Template, Debug, Default)]
+#[template(path = "env", ext = "txt", escape = "none")]
+struct EnvTemplate {
+    postgres_host: String,
+    postgres_port: u32,
+    postgres_db_name: String,
+    postgres_user_name: String,
+    postgres_password: String,
+    jwt_secret: String
+}
+
+
 /// This struct provides functionality to interact with environment variables.
 pub struct EnvAction;
 
@@ -83,7 +95,7 @@ impl EnvAction {
             .with_prompt("Database host")
             .default("localhost".into())
             .interact_text()?;
-        let postgres_port: i32 = Input::new()
+        let postgres_port: u32 = Input::new()
             .with_prompt("Database port")
             .default(5432)
             .interact_text()?;
@@ -107,13 +119,8 @@ impl EnvAction {
             .create(true)
             .truncate(true)
             .open(FILE_NAME)?;
-        writeln!(env_file, "DATABASE_URL=postgres://{postgres_user_name}:{postgres_password}@{postgres_host}:{postgres_port}/chatapp")?;
-        writeln!(env_file, "POSTGRES_HOST={postgres_host}")?;
-        writeln!(env_file, "POSTGRES_PORT={postgres_port}")?;
-        writeln!(env_file, "POSTGRES_DB={postgres_db_name}")?;
-        writeln!(env_file, "POSTGRES_USER={postgres_user_name}")?;
-        writeln!(env_file, "POSTGRES_PASSWORD={postgres_password}")?;
-        writeln!(env_file, "JWT_SECRET={jwt_secret}")?;
+
+        env_file.write_all(EnvTemplate{ postgres_host, postgres_port, postgres_db_name, postgres_user_name, postgres_password, jwt_secret }.render()?.as_bytes())?;
 
         Ok(())
     }
