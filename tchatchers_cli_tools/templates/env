@@ -5,3 +5,8 @@ POSTGRES_DB={{postgres_db_name}}
 POSTGRES_USER={{postgres_user_name}}
 POSTGRES_PASSWORD={{postgres_password}}
 JWT_SECRET={{jwt_secret}}
+{% if let (Some(ssl_certificate_path_v), Some(ssl_certificate_key_v), Some(ssl_dhparam_path_v)) = (ssl_certificate_path.as_ref(), ssl_certificate_key.as_ref(), ssl_dhparam_path.as_ref()) %}
+SSL_CERTIFICATE_PATH={{ssl_certificate_path_v}}
+SSL_CERTIFICATE_KEY={{ssl_certificate_key_v}}
+SSL_DHPARAM_PATH={{ssl_dhparam_path_v}}
+{% endif %}

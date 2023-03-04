@@ -30,6 +30,16 @@ dependencies = [
 ]
 workspace = false
 
+[tasks.generate-self-signed-certificate]
+script_runner="@shell"
+script='''
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./my_key.key -out ./my_cert.crt
+openssl dhparam -out ./my_dhparam.pem 2048
+echo "The following files have been generated"
+ls -ltr my_cert.crt my_key.key my_dhparam.pem 
+'''
+workspace=false
+
 [tasks.clear-symlink]
 script_runner="@shell"
 script = '''

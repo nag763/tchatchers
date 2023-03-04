@@ -4,3 +4,4 @@
 tchatchers_back/static/*
 !tchatchers_back/static/.index
 .env
+nginx.conf

@@ -29,9 +29,11 @@ struct EnvTemplate {
     postgres_db_name: String,
     postgres_user_name: String,
     postgres_password: String,
-    jwt_secret: String
+    jwt_secret: String,
+    ssl_certificate_key: Option<String>,
+    ssl_certificate_path: Option<String>,
+    ssl_dhparam_path: Option<String>,
 }
-
 
 /// This struct provides functionality to interact with environment variables.
 pub struct EnvAction;
@@ -75,44 +77,95 @@ enum EnvironmentCheckErrorTypes {
 
 impl EnvAction {
     /// Create a new `.env` file and populate it with database-related environment variables.
-
     pub fn create() -> Result<(), CliError> {
         if fs::read(FILE_NAME).is_ok() {
             let confirm_override = Confirm::new()
-                .with_prompt("The .env file already exists, confirm that you want to override it.")
+                .with_prompt("The .env file already exists, if you confirm the following dialog, any modification to the default values of the dialoguer will change the current environment file.")
                 .default(false)
                 .interact()?;
             if !confirm_override {
                 return Ok(());
             } else {
-                println!("Completing this process will override the existing file ...");
+                println!("The showed default values will be purposed from the existing .env file, skip changing them by pressing enter (default value).");
             }
         } else {
             println!("Setting up a new .env file");
         }
 
         let postgres_host: String = Input::new()
-            .with_prompt("Database host")
-            .default("localhost".into())
+            .with_prompt("* Database host\nBe cautious, if you plan to deploy this in production, do not pick default localhost.")
+            .default(std::env::var("POSTGRES_HOST").unwrap_or("localhost".into()))
             .interact_text()?;
         let postgres_port: u32 = Input::new()
-            .with_prompt("Database port")
-            .default(5432)
+            .with_prompt("* Database port")
+            .default(std::env::var("POSTGRES_HOST").unwrap_or("5432".into()).parse::<u32>().unwrap_or(5432))
             .interact_text()?;
         let postgres_db_name: String = Input::new()
-            .with_prompt("Enter the database name")
-            .default("chatapp".into())
+            .with_prompt("* Enter the database name")
+            .default(std::env::var("POSTGRES_DB").unwrap_or("chatapp".into()))
             .interact_text()?;
         let postgres_user_name: String = Input::new()
-            .with_prompt("Enter the database user name")
-            .default("chatter".into())
+            .with_prompt("* Enter the database user name")
+            .default(std::env::var("POSTGRES_USER").unwrap_or("chatter".into()))
             .interact_text()?;
-        let postgres_password: String = Password::new()
-            .with_prompt("Enter the DB password")
-            .interact()?;
-        let jwt_secret: String = Password::new()
-            .with_prompt("Enter the JWT password")
-            .interact()?;
+
+        let (postgres_password, jwt_secret): (String, String) = match (
+            std::env::var("POSTGRES_PASSWORD"),
+            std::env::var("JWT_SECRET"),
+        ) {
+            (Ok(postgres_password), Ok(jwt_secret))
+                if Input::new()
+                    .with_prompt("Values were found for secrets, do you want to keep them ?")
+                    .default(true)
+                    .interact()? =>
+            {
+                (postgres_password, jwt_secret)
+            }
+            _ => (
+                Password::new()
+                    .with_prompt("* Enter the DB password")
+                    .interact()?,
+                Password::new()
+                    .with_prompt("* Enter the JWT password")
+                    .interact()?,
+            ),
+        };
+
+        let (ssl_certificate_path, ssl_certificate_key, ssl_dhparam_path): (
+            Option<String>,
+            Option<String>,
+            Option<String>,
+        ) = match (
+            std::env::var("SSL_CERTIFICATE_PATH"),
+            std::env::var("SSL_CERTIFICATE_KEY"),
+            std::env::var("SSL_DHPARAM_PATH"),
+        ) {
+            (Ok(ssl_certificate_path), Ok(ssl_certificate_key), Ok(ssl_dhparam_path)) if Input::new().with_prompt(format!("The HTTPs config is the following one so far :\nSSL cert. path : {ssl_certificate_path}\nSSL cert. key : {ssl_certificate_key}\nSSL DH param path : {ssl_dhparam_path}\nDo you want to keep these values ?")).default(true).interact()? =>  (Some(ssl_certificate_path), Some(ssl_certificate_key), Some(ssl_dhparam_path)),
+            _ if !Input::new()
+            .with_prompt("* Do you want to configure SSL for nginx ?")
+                 .default(false)
+                 .interact()? => (None, None, None),
+            _ =>         
+            {
+                println!("Be careful, the values you will type next have to be either relative or absolute path, otherwise the config won't be understood.\nFor instance, if one of the files is located in this folder, write './myfile' rather than 'myfile'.\n");
+                (
+                Some(
+                    Input::new()
+                        .with_prompt("* Indicate the SSL certificate path")
+                        .interact()?,
+                ),
+                Some(
+                    Input::new()
+                        .with_prompt("* Indicate the SSL key path")
+                        .interact()?,
+                ),
+                Some(
+                    Input::new()
+                        .with_prompt("* Indicate the SSL dh param file path")
+                        .interact()?,
+                ),
+            )}
+        };
 
         let mut env_file = OpenOptions::new()
             .write(true)
@@ -120,7 +173,21 @@ impl EnvAction {
             .truncate(true)
             .open(FILE_NAME)?;
 
-        env_file.write_all(EnvTemplate{ postgres_host, postgres_port, postgres_db_name, postgres_user_name, postgres_password, jwt_secret }.render()?.as_bytes())?;
+        env_file.write_all(
+            EnvTemplate {
+                postgres_host,
+                postgres_port,
+                postgres_db_name,
+                postgres_user_name,
+                postgres_password,
+                jwt_secret,
+                ssl_certificate_key,
+                ssl_certificate_path,
+                ssl_dhparam_path,
+            }
+            .render()?
+            .as_bytes(),
+        )?;
 
         Ok(())
     }
@@ -225,19 +292,33 @@ impl EnvAction {
             return Ok(());
         }
 
-        let http_only: bool = Input::new()
-            .with_prompt("Disable https ?\nThis can for instance be helpful if you want to run the project only in DEV mode.")
-            .default(false)
-            .interact_text()?;
+        let ssl_certificate = std::env::var("SSL_CERTIFICATE_PATH").ok();
+        let ssl_certificate_key: Option<String> = std::env::var("SSL_CERTIFICATE_KEY").ok();
+        let ssl_dhparam_path: Option<String> = std::env::var("SSL_DHPARAM_PATH").ok();
+
+        let http_only: bool = if let (
+            Some(ssl_certificate),
+            Some(ssl_certificate_key),
+            Some(ssl_dhparam_path),
+        ) = (ssl_certificate, ssl_certificate_key, ssl_dhparam_path)
+        {
+            Input::new()
+                .with_prompt(format!("* Disable https ?\nThis can for instance be helpful if you want to run the project only in DEV mode.\nThe HTTPs config is the following one so far :\nSSL cert. path : {ssl_certificate}\nSSL cert. key : {ssl_certificate_key}\nSSL DH param path : {ssl_dhparam_path}\nDo you want to switch in HTTP only mode ?"))
+                .default(false)
+                .interact_text()?
+        } else {
+            println!("* HTTPs mode is not available since .env doesn't contain neither SSL_CERTIFICATE_PATH nor SSL_CERTIFICATE_KEY values.");
+            true
+        };
         let disable_security: bool = Input::new()
-            .with_prompt("Disable security options ?")
+            .with_prompt("* Disable security options ?")
             .default(false)
             .interact_text()?;
         let version: String = Input::new()
-            .with_prompt("What is the version of the tool?")
+            .with_prompt("* What is the version of the tool?")
             .interact_text()?;
         let server_name: String = Input::new()
-            .with_prompt("What is the server name ?")
+            .with_prompt("* What is the server name ?")
             .default("www.tchatche.rs".into())
             .interact_text()?;
 

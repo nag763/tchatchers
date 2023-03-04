@@ -14,8 +14,6 @@ WORKDIR /home/usr/back/
 
 COPY --from=builder /usr/local/cargo/bin/tchatchers_back /usr/local/cargo/bin/tchatchers_back
 
-COPY .env ./
-
 RUN adduser runner && chown -R runner ./
 
 RUN mkdir static
@@ -23,8 +21,6 @@ RUN mkdir static
 RUN chown -R runner static
 
 RUN chmod 111 /usr/local/cargo/bin/tchatchers_back
-
-RUN chmod 400 .env
 
 USER runner
 
