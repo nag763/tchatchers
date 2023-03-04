@@ -5,6 +5,8 @@ README.md
 LICENSE.MD
 CODE_OF_CONDUCT.md
 Dockerfile_*
+.git
+!.git/refs/heads/main
 docker*
 **/*.crt
 **/*.pem
