@@ -5,3 +5,8 @@ target/
 README.md
 LICENSE.MD
 CODE_OF_CONDUCT.md
+Dockerfile_*
+docker*
+**/*.crt
+**/*.pem
+**/*.key
