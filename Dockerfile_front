@@ -1,4 +1,4 @@
-FROM rust:1.67.1 as doc_builder
+FROM rust:1.68 as doc_builder
 
 WORKDIR /home/usr/doc
 
@@ -26,7 +26,7 @@ RUN mkdir assets
 
 RUN bash install_assets.sh
 
-FROM rust:1.67.1 as src_builder
+FROM rust:1.68 as src_builder
 
 WORKDIR /usr/tchatchers/front
 
