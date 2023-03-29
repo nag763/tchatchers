@@ -1,4 +1,4 @@
-FROM rust:1.68-alpine as builder
+FROM rust:1.68.2-alpine as builder
 
 WORKDIR /home/usr/back/
 
