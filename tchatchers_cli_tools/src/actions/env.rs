@@ -29,7 +29,10 @@ struct EnvTemplate {
     postgres_db_name: String,
     postgres_user_name: String,
     postgres_password: String,
+    redis_host: String,
+    redis_port: String,
     jwt_secret: String,
+    refresh_token_secret: String,
     ssl_certificate_key: Option<String>,
     ssl_certificate_path: Option<String>,
     ssl_dhparam_path: Option<String>,
@@ -45,17 +48,20 @@ const ERROR_EMOJI: &str = "\u{0058}";
 const WARNING_EMOJI: &str = "\u{26A0}";
 
 /// A constant array of tuples representing the environment variables that should be checked, along with their error types.
-const ENV_VARS_TO_CHECK: [(&str, EnvironmentCheckErrorTypes); 10] = [
+const ENV_VARS_TO_CHECK: [(&str, EnvironmentCheckErrorTypes); 13] = [
     ("DATABASE_URL", EnvironmentCheckErrorTypes::Warning),
     ("POSTGRES_DB", EnvironmentCheckErrorTypes::Error),
     ("POSTGRES_USER", EnvironmentCheckErrorTypes::Error),
     ("POSTGRES_PASSWORD", EnvironmentCheckErrorTypes::Error),
+    ("REDIS_HOST", EnvironmentCheckErrorTypes::Error),
+    ("POSTGRES_PORT", EnvironmentCheckErrorTypes::Warning),
     ("JWT_SECRET", EnvironmentCheckErrorTypes::Error),
+    ("REFRESH_TOKEN_SECRET", EnvironmentCheckErrorTypes::Error),
     ("UID", EnvironmentCheckErrorTypes::Warning),
     ("GID", EnvironmentCheckErrorTypes::Warning),
     ("SSL_CERTIFICATE_PATH", EnvironmentCheckErrorTypes::Warning),
     ("SSL_CERTIFICATE_KEY", EnvironmentCheckErrorTypes::Warning),
-    ("SSL_DHPARAM_PATH", EnvironmentCheckErrorTypes::Warning)
+    ("SSL_DHPARAM_PATH", EnvironmentCheckErrorTypes::Warning),
 ];
 
 /// A constant array of program names to check if they exist in the PATH.
@@ -101,7 +107,12 @@ impl EnvAction {
             .interact_text()?;
         let postgres_port: u32 = Input::new()
             .with_prompt("* Database port")
-            .default(std::env::var("POSTGRES_HOST").unwrap_or("5432".into()).parse::<u32>().unwrap_or(5432))
+            .default(
+                std::env::var("POSTGRES_HOST")
+                    .unwrap_or("5432".into())
+                    .parse::<u32>()
+                    .unwrap_or(5432),
+            )
             .interact_text()?;
         let postgres_db_name: String = Input::new()
             .with_prompt("* Enter the database name")
@@ -112,17 +123,18 @@ impl EnvAction {
             .default(std::env::var("POSTGRES_USER").unwrap_or("chatter".into()))
             .interact_text()?;
 
-        let (postgres_password, jwt_secret): (String, String) = match (
+        let (postgres_password, jwt_secret, refresh_secret): (String, String, String) = match (
             std::env::var("POSTGRES_PASSWORD"),
             std::env::var("JWT_SECRET"),
+            std::env::var("REFRESH_SECRET"),
         ) {
-            (Ok(postgres_password), Ok(jwt_secret))
+            (Ok(postgres_password), Ok(jwt_secret), Ok(refresh_secret))
                 if Input::new()
                     .with_prompt("Values were found for secrets, do you want to keep them ?")
                     .default(true)
                     .interact()? =>
             {
-                (postgres_password, jwt_secret)
+                (postgres_password, jwt_secret, refresh_secret)
             }
             _ => (
                 Password::new()
@@ -131,8 +143,21 @@ impl EnvAction {
                 Password::new()
                     .with_prompt("* Enter the JWT password")
                     .interact()?,
+                Password::new()
+                    .with_prompt("* Enter the refresh token password")
+                    .interact()?,
             ),
         };
+
+        let redis_host: String = Input::new()
+            .with_prompt("* Enter the redis host")
+            .default(std::env::var("REDIS_HOST").unwrap_or("localhost".into()))
+            .interact_text()?;
+
+        let redis_port: String = Input::new()
+            .with_prompt("* Enter the redis port")
+            .default(std::env::var("REDIS_PORT").unwrap_or("6379".into()))
+            .interact_text()?;
 
         let (ssl_certificate_path, ssl_certificate_key, ssl_dhparam_path): (
             Option<String>,
@@ -148,7 +173,7 @@ impl EnvAction {
             .with_prompt("* Do you want to configure SSL for nginx ?")
                  .default(false)
                  .interact()? => (None, None, None),
-            _ =>         
+            _ =>
             {
                 println!("Be careful, the values you will type next have to be either relative or absolute path, otherwise the config won't be understood.\nFor instance, if one of the files is located in this folder, write './myfile' rather than 'myfile'.\n");
                 (
@@ -184,9 +209,12 @@ impl EnvAction {
                 postgres_user_name,
                 postgres_password,
                 jwt_secret,
+                refresh_token_secret: refresh_secret,
                 ssl_certificate_key,
                 ssl_certificate_path,
                 ssl_dhparam_path,
+                redis_host,
+                redis_port,
             }
             .render()?
             .as_bytes(),

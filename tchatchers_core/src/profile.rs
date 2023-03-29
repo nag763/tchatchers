@@ -7,7 +7,17 @@ use serde::{Deserialize, Serialize};
 
 /// The profile linked with a user.
 #[derive(
-    Debug, Default, Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Hash, derive_more::Display,
+    Debug,
+    Default,
+    Clone,
+    Copy,
+    Eq,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    Hash,
+    derive_more::Display,
+    PartialOrd,
 )]
 #[cfg_attr(any(feature = "back", feature = "cli"), derive(sqlx::Type))]
 #[repr(i32)]

@@ -11,6 +11,13 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-chatapp}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
+  redis:
+    image: redis:6.2.11-alpine
+    restart: always
+    volumes:
+      - redis:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
   cli :
     links:
       - postgres:${POSTGRES_HOST:-pg.tchatche.rs}
@@ -21,4 +28,4 @@ services:
       dockerfile: Dockerfile_tct
 volumes:
   db:
-
+  redis:

@@ -4,7 +4,7 @@
 //! Defines the set of API entrypoints that can be called on client side.
 
 pub(crate) mod admin;
-pub(crate) mod app_context;
 pub(crate) mod locale;
 pub(crate) mod pfp;
 pub(crate) mod user;
+pub(crate) mod user_context;

@@ -2,8 +2,8 @@
 //! the client and the server applications.
 
 pub mod app_context;
+pub mod authorization_token;
 pub(crate) mod common;
-pub mod jwt;
 pub mod locale;
 #[cfg(feature = "back")]
 pub mod manager;
@@ -11,7 +11,9 @@ pub mod navlink;
 #[cfg(any(feature = "back", feature = "cli"))]
 pub mod pool;
 pub mod profile;
+pub mod refresh_token;
 pub mod room;
+pub mod serializable_token;
 pub mod timezone;
 pub mod translation;
 pub mod user;

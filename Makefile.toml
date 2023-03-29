@@ -50,7 +50,7 @@ echo "Env links deleted"
 workspace=false
 
 [tasks.start-db]
-args = ["-f", "docker-compose_dev.yml", "up",  "-d", "postgres"]
+args = ["-f", "docker-compose_dev.yml", "up",  "-d", "postgres", "redis"]
 command = "docker-compose"
 workspace = false
 

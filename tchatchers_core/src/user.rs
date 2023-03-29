@@ -7,7 +7,6 @@
 //! is shared between processed and components.
 
 use crate::common::RE_LIMITED_CHARS;
-use crate::jwt::Jwt;
 use crate::profile::Profile;
 use crate::timezone::Timezone;
 use chrono::DateTime;
@@ -170,17 +169,6 @@ impl User {
             .bind(login)
             .execute(pool)
             .await
-    }
-}
-
-impl From<Jwt> for User {
-    fn from(jwt: Jwt) -> User {
-        User {
-            id: jwt.user.id,
-            login: jwt.user.login,
-            name: jwt.user.name,
-            ..User::default()
-        }
     }
 }
 
@@ -409,6 +397,8 @@ pub struct AuthenticableUser {
     pub login: String,
     /// The password of the user, has to be encrypted.
     pub password: String,
+    /// If the session of the user has to be persisted.
+    pub session_only: bool,
 }
 
 #[cfg(feature = "back")]

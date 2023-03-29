@@ -8,18 +8,19 @@
 use std::{
     collections::HashMap,
     ops::{Deref, DerefMut},
-    sync::Arc,
 };
 
-use crate::extractor::JwtUserExtractor;
 use crate::AppState;
 use axum::{
     extract::{ws::Message, ws::WebSocket, Path, State, WebSocketUpgrade},
+    http::{HeaderMap, StatusCode},
     response::IntoResponse,
 };
 use futures_util::{SinkExt, StreamExt};
 use tchatchers_core::{
+    authorization_token::AuthorizationToken,
     room::RoomNameValidator,
+    serializable_token::SerializableToken,
     validation_error_message::ValidationErrorMessage,
     ws_message::{WsMessage, WsMessageContent, WsReceptionStatus},
 };
@@ -54,10 +55,20 @@ impl DerefMut for WsRooms {
 /// - jwt : The authenticated user infos.
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
     Path(room): Path<String>,
-    JwtUserExtractor(_jwt): JwtUserExtractor,
+    headers: HeaderMap,
 ) -> impl IntoResponse {
+    let Some(auth_header) = headers.get("Sec-WebSocket-Protocol") else {
+        return Err((StatusCode::BAD_REQUEST, "Authentication header is required in order to access this service").into_response());
+    };
+    if let Err(_e) = AuthorizationToken::decode(auth_header.to_str().unwrap(), &state.jwt_secret) {
+        return Err((
+            StatusCode::UNAUTHORIZED,
+            "This route is protected, please authenticate prior accessing this.",
+        )
+            .into_response());
+    };
     let room_name_validator: RoomNameValidator = RoomNameValidator::from(room.clone());
     if let Err(e) = room_name_validator.validate() {
         return Err(ValidationErrorMessage::from(e).into_response());
@@ -73,7 +84,7 @@ pub async fn ws_handler(
 /// - state : The data shared across threads.
 /// - room : The room name.
 /// - user : The connected user's infos.
-async fn handle_socket(socket: WebSocket, state: Arc<AppState>, room: String) {
+async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
     let (mut sender, mut receiver) = socket.split();
     let tx = {
         let mut rooms = state.txs.lock().await;

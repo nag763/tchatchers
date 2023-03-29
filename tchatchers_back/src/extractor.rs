@@ -3,40 +3,44 @@
 
 //! Defines the extractors used by the different webservices.
 
-use crate::{AppState, JWT_PATH};
+use crate::AppState;
 use axum::{
     async_trait,
     extract::FromRequestParts,
+    headers::{authorization::Bearer, Authorization},
     http::{request::Parts, StatusCode},
+    TypedHeader,
 };
-use axum_extra::extract::CookieJar;
-use std::sync::Arc;
-use tchatchers_core::{jwt::Jwt, profile::Profile, user::PartialUser};
+use tchatchers_core::{
+    authorization_token::AuthorizationToken, profile::Profile,
+    serializable_token::SerializableToken,
+};
 
 /// Extracts the JWT from the request.
 ///
 /// The JWT should be sent as a cookie to the server.
-pub struct JwtUserExtractor(pub Jwt);
+pub struct JwtUserExtractor(pub AuthorizationToken);
 
 #[async_trait]
-impl FromRequestParts<Arc<AppState>> for JwtUserExtractor {
+impl FromRequestParts<AppState> for JwtUserExtractor {
     type Rejection = (StatusCode, &'static str);
 
     async fn from_request_parts(
         parts: &mut Parts,
-        state: &Arc<AppState>,
+        state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        let headers = &parts.headers;
-        let cookie_jar: CookieJar = CookieJar::from_headers(headers);
-        let Some(cookie) = cookie_jar.get(JWT_PATH)  else {
+        let Ok(TypedHeader(Authorization(jwt))) =  TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, state).await else {
             return Err((
                 StatusCode::UNAUTHORIZED,
                 "This route requires authentication",
             ));
         };
-        match Jwt::deserialize(cookie.value(), &state.jwt_secret) {
+        match AuthorizationToken::decode(jwt.token(), &state.jwt_secret) {
             Ok(v) => Ok(JwtUserExtractor(v)),
-            Err(_) => Err((StatusCode::UNAUTHORIZED, "JWT invalid")),
+            Err(_) => Err((
+                StatusCode::UNAUTHORIZED,
+                "Authentication is not valid, please log in again.",
+            )),
         }
     }
 }
@@ -45,28 +49,24 @@ impl FromRequestParts<Arc<AppState>> for JwtUserExtractor {
 ///
 /// 1. The user is authenticated.
 /// 2. The user has at least moderator roles in database.
-pub struct ModeratorExtractor(pub PartialUser);
+pub struct ModeratorExtractor(pub AuthorizationToken);
 
 #[async_trait]
-impl FromRequestParts<Arc<AppState>> for ModeratorExtractor {
+impl FromRequestParts<AppState> for ModeratorExtractor {
     type Rejection = (StatusCode, &'static str);
 
     async fn from_request_parts(
         parts: &mut Parts,
-        state: &Arc<AppState>,
+        state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        let user = JwtUserExtractor::from_request_parts(parts, state)
-            .await?
-            .0
-            .user;
-        let user_profile: i32 = user.profile as i32;
-        if user_profile < (Profile::Moderator as i32) {
+        let jwt = JwtUserExtractor::from_request_parts(parts, state).await?.0;
+        if jwt.user_profile < Profile::Moderator {
             Err((
                 StatusCode::UNAUTHORIZED,
                 "You don't have sufficient privileges",
             ))
         } else {
-            Ok(ModeratorExtractor(user))
+            Ok(ModeratorExtractor(jwt))
         }
     }
 }
@@ -75,28 +75,24 @@ impl FromRequestParts<Arc<AppState>> for ModeratorExtractor {
 ///
 /// 1. The user is authenticated.
 /// 2. The user has at least admin roles in database.
-pub struct AdminExtractor(pub PartialUser);
+pub struct AdminExtractor(pub AuthorizationToken);
 
 #[async_trait]
-impl FromRequestParts<Arc<AppState>> for AdminExtractor {
+impl FromRequestParts<AppState> for AdminExtractor {
     type Rejection = (StatusCode, &'static str);
 
     async fn from_request_parts(
         parts: &mut Parts,
-        state: &Arc<AppState>,
+        state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        let user = JwtUserExtractor::from_request_parts(parts, state)
-            .await?
-            .0
-            .user;
-        let user_profile: i32 = user.profile as i32;
-        if user_profile < (Profile::Admin as i32) {
+        let jwt = JwtUserExtractor::from_request_parts(parts, state).await?.0;
+        if jwt.user_profile < Profile::Admin {
             Err((
                 StatusCode::UNAUTHORIZED,
                 "You don't have sufficient privileges",
             ))
         } else {
-            Ok(AdminExtractor(user))
+            Ok(AdminExtractor(jwt))
         }
     }
 }

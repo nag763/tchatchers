@@ -10,6 +10,8 @@
 use std::str::FromStr;
 
 use log::LevelFilter;
+use r2d2::Pool;
+use redis::Client;
 use sqlx::postgres::PgConnectOptions;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::ConnectOptions;
@@ -39,4 +41,11 @@ pub async fn get_pg_pool() -> PgPool {
         .connect_with(connect_options)
         .await
         .unwrap()
+}
+
+pub fn get_redis_pool() -> Pool<Client> {
+    let redis_host = std::env::var("REDIS_HOST").expect("No redis host defined in .env");
+    let redis_port = std::env::var("REDIS_PORT").expect("No redis port defined in .env");
+    let client = redis::Client::open(format!("redis://{redis_host}:{redis_port}")).unwrap();
+    r2d2::Pool::builder().max_size(15).build(client).unwrap()
 }

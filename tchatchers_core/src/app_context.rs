@@ -12,7 +12,7 @@ use crate::{locale::Locale, navlink::Navlink, translation::Translation, user::Pa
 ///
 /// Contains several important data that the user needs in order to browse the application.
 #[derive(Debug, PartialEq, Eq, Clone, Default, serde::Serialize, serde::Deserialize)]
-pub struct AppContext {
+pub struct UserContext {
     /// The user currently being logged in.
     pub user: PartialUser,
     /// The translations associated to the user's locale.

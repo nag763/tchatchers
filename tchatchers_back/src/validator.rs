@@ -5,8 +5,6 @@
 //!
 //! So far, only the JSON inputs are implemented, but others wouldn't be much harder to implement.
 
-use std::sync::Arc;
-
 use axum::{
     async_trait,
     body::HttpBody,
@@ -50,7 +48,7 @@ where
     T: Validate;
 
 #[async_trait]
-impl<B, T> FromRequest<Arc<AppState>, B> for ValidJson<T>
+impl<B, T> FromRequest<AppState, B> for ValidJson<T>
 where
     B: 'static + Send + HttpBody,
     B::Data: Send,
@@ -59,7 +57,7 @@ where
 {
     type Rejection = JsonValidatorRejection;
 
-    async fn from_request(req: Request<B>, state: &Arc<AppState>) -> Result<Self, Self::Rejection> {
+    async fn from_request(req: Request<B>, state: &AppState) -> Result<Self, Self::Rejection> {
         match JsonAxum::<T>::from_request(req, state).await {
             Ok(json_value) => {
                 if let Err(e) = json_value.validate() {

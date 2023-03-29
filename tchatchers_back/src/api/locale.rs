@@ -3,8 +3,6 @@
 
 //! This crate contains some useful tools to get the locales stored in database.
 
-use std::sync::Arc;
-
 use axum::{
     extract::{Path, State},
     response::IntoResponse,
@@ -17,7 +15,7 @@ use crate::{extractor::JwtUserExtractor, AppState};
 /// Returns the list of locales stored in the database.
 pub async fn get_locales(
     JwtUserExtractor(_): JwtUserExtractor,
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
 ) -> Result<impl IntoResponse, ManagerError<i32>> {
     let locales = state.locale_manager.get_all()?;
     Ok(Json(locales))
@@ -31,7 +29,7 @@ pub async fn get_locales(
 pub async fn get_locale_id(
     Path(locale_id): Path<i32>,
     JwtUserExtractor(_): JwtUserExtractor,
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
 ) -> Result<Json<Locale>, ManagerError<i32>> {
     let locales = state.locale_manager.get(locale_id)?;
     Ok(Json(locales))

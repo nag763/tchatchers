@@ -10,9 +10,10 @@ use crate::router::Route;
 use crate::services::chat_bus::ChatBus;
 use crate::services::chat_service::WebsocketService;
 use crate::services::toast_bus::ToastBus;
-use gloo_net::http::Request;
+use crate::utils::client_context::ClientContext;
+use crate::utils::requester::Requester;
 use gloo_timers::callback::{Interval, Timeout};
-use tchatchers_core::app_context::AppContext;
+use tchatchers_core::app_context::UserContext;
 use tchatchers_core::room::RoomNameValidator;
 use tchatchers_core::ws_message::{WsMessage, WsMessageContent, WsReceptionStatus};
 use uuid::Uuid;
@@ -32,11 +33,9 @@ pub struct FeedHOCProps {
 
 #[function_component(FeedHOC)]
 pub fn feed_hoc(props: &FeedHOCProps) -> Html {
-    let app_context = use_context::<UseStateHandle<Option<AppContext>>>();
-    let unwrapped_context = app_context.unwrap();
-    let context = unwrapped_context.as_ref().unwrap();
+    let client_context = use_context::<Rc<ClientContext>>().unwrap();
 
-    html! { <Feed room={props.room.clone()} context={context.clone()} /> }
+    html! { <Feed room={props.room.clone()} client_context={client_context} /> }
 }
 
 #[derive(Clone)]
@@ -47,10 +46,10 @@ pub enum Msg {
     CutWs,
 }
 
-#[derive(Clone, Eq, PartialEq, Properties)]
+#[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub room: AttrValue,
-    pub context: AppContext,
+    pub client_context: Rc<ClientContext>,
 }
 
 pub struct Feed {
@@ -64,6 +63,8 @@ pub struct Feed {
     is_closed: bool,
     session_id: Uuid,
     room_name_checked: bool,
+    user_context: UserContext,
+    bearer: UseStateHandle<Option<String>>,
 }
 
 impl Component for Feed {
@@ -71,7 +72,14 @@ impl Component for Feed {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
+        let ws: WebsocketService = WebsocketService::new(
+            &ctx.props().room,
+            ctx.props()
+                .client_context
+                .bearer
+                .as_ref()
+                .expect("Bearer must be defined since AuthGuarded"),
+        );
         let cb = {
             let link = ctx.link().clone();
             move |msg| link.send_message(Msg::HandleWsInteraction(Box::new(msg)))
@@ -90,6 +98,14 @@ impl Component for Feed {
             },
             session_id: Uuid::new_v4(),
             room_name_checked: false,
+            user_context: ctx
+                .props()
+                .client_context
+                .user_context
+                .as_ref()
+                .cloned()
+                .expect("Context is defined since AuthGuarded"),
+            bearer: ctx.props().client_context.bearer.clone(),
         }
     }
 
@@ -101,10 +117,11 @@ impl Component for Feed {
                     WsMessage::ClientDisconnected | WsMessage::ConnectionClosed => {
                         if !self.is_closed {
                             gloo_console::error!("Not connected");
-                            let req = Request::get("/api/validate").send();
+                            let mut req = Requester::<()>::get("/api/validate");
+                            req.bearer(self.bearer.clone());
                             let link = ctx.link().clone();
                             wasm_bindgen_futures::spawn_local(async move {
-                                let resp = req.await.unwrap();
+                                let resp = req.send().await;
                                 if resp.status() == 401 {
                                     link.navigator().unwrap().push(&Route::SignIn);
                                 }
@@ -115,7 +132,7 @@ impl Component for Feed {
                                 {
                                     ToastBus::dispatcher().send(Alert {
                                         is_success: false,
-                                        content: ctx.props().context.translation.clone().get_or_default("room_name_incorrect", "The room name you tried to join is not valid, please select one within this screen."),
+                                        content: self.user_context.translation.clone().get_or_default("room_name_incorrect", "The room name you tried to join is not valid, please select one within this screen."),
                                     });
                                     ctx.link().navigator().unwrap().push(&Route::JoinRoom);
                                 } else {
@@ -129,7 +146,7 @@ impl Component for Feed {
                     WsMessage::Receive(msg_content) => {
                         self.received_messages.insert(0, msg_content.clone());
                         if msg_content.reception_status == WsReceptionStatus::Sent
-                            && msg_content.author.id != ctx.props().context.user.id
+                            && msg_content.author.id != self.user_context.user.id
                         {
                             self.ws
                                 .tx
@@ -150,7 +167,7 @@ impl Component for Feed {
                             .into_iter()
                             .filter(|message| {
                                 message.reception_status == WsReceptionStatus::Sent
-                                    && message.author.id != ctx.props().context.user.id
+                                    && message.author.id != self.user_context.user.id
                             })
                             .map(|m| m.uuid)
                             .collect();
@@ -206,7 +223,11 @@ impl Component for Feed {
                 false
             }
             Msg::TryReconnect => {
-                let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
+                gloo_console::log!("Try reconnect...");
+                let ws: WebsocketService = WebsocketService::new(
+                    &ctx.props().room,
+                    ctx.props().client_context.bearer.as_ref().unwrap(),
+                );
                 self.ws = ws;
                 self.ws
                     .tx
@@ -234,20 +255,20 @@ impl Component for Feed {
                 let pass_message_to_ws = Callback::from(move |message: String| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar translation={ctx.props().context.translation.clone()} {pass_message_to_ws} user={ctx.props().context.user.clone()} room={ctx.props().room.clone()}/>}
+                html! {<TypeBar translation={self.user_context.translation.clone()} {pass_message_to_ws} user={self.user_context.user.clone()} room={ctx.props().room.clone()}/>}
             }
             false => {
                 let link = ctx.link().clone();
                 let try_reconnect = Callback::from(move |_: ()| {
                     link.send_message(Msg::TryReconnect);
                 });
-                html! {<DisconnectedBar translation={ctx.props().context.translation.clone()} called_back={self.called_back} {try_reconnect} />}
+                html! {<DisconnectedBar translation={self.user_context.translation.clone()} called_back={self.called_back} {try_reconnect} />}
             }
         };
         html! {
             <div class="grid grid-rows-11 h-full dark:bg-zinc-800">
                 <div class="row-span-10 overflow-auto flex flex-col-reverse" >
-                    <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={ctx.props().context.user.clone()} />
+                    <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={self.user_context.user.clone()} />
                 </div>
                 <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center block">
                     {component}

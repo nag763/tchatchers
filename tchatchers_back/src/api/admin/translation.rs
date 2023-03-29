@@ -6,7 +6,7 @@
 //! This module contains the routes allowing to perform administrative actions on the translations stored in database, and help
 //! the users facing issues to find what is happening.
 
-use std::{fmt::Display, sync::Arc};
+use std::fmt::Display;
 
 use axum::{
     extract::{Path, State},
@@ -24,7 +24,7 @@ use crate::{extractor::AdminExtractor, AppState};
 /// and we want it to be displayed on the next connections.
 pub async fn reload_translations(
     AdminExtractor(_): AdminExtractor,
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
 ) -> impl IntoResponse {
     let mut translation_manager = state.translation_manager.lock().await;
     *translation_manager = TranslationManager::init(&state.pg_pool).await;
@@ -37,7 +37,7 @@ pub async fn reload_translations(
 /// the translations.
 pub async fn get_all_translations(
     AdminExtractor(_): AdminExtractor,
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
 ) -> Result<impl IntoResponse, ManagerError<impl Display>> {
     let translation_manager = state.translation_manager.lock().await;
     let translations = translation_manager.get_all_translations()?;
@@ -52,7 +52,7 @@ pub async fn get_all_translations(
 pub async fn get_translations_for_locale(
     Path(locale_id): Path<i32>,
     AdminExtractor(_): AdminExtractor,
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
 ) -> Result<impl IntoResponse, ManagerError<impl Display>> {
     let translation_manager = state.translation_manager.lock().await;
     let translation = translation_manager.get_translations_for_locale(locale_id)?;

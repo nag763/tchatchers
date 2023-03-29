@@ -1,24 +1,23 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use super::{common::I18N, navlink::Navlink};
-use crate::router::Route;
-use tchatchers_core::app_context::AppContext;
-use yew::{
-    function_component, html, use_context, Component, Context, Html, Properties, UseStateHandle,
-};
+use crate::{router::Route, utils::client_context::ClientContext};
+use tchatchers_core::app_context::UserContext;
+use yew::{function_component, html, use_context, Component, Context, Html, Properties};
 use yew_router::{prelude::Link, Routable};
 
 #[function_component]
 pub fn NavbarHOC() -> Html {
-    let app_context = use_context::<UseStateHandle<Option<AppContext>>>().expect("No app context");
-    html! { <Navbar app_context={(*app_context).clone()}/> }
+    let client_context =
+        use_context::<Rc<ClientContext>>().expect("Client context defined at startup.");
+    html! { <Navbar app_context={(*client_context.user_context).clone()}/> }
 }
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    app_context: Option<AppContext>,
+    app_context: Option<UserContext>,
 }
 
 #[derive(Default, Debug, PartialEq)]

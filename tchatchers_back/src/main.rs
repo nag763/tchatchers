@@ -15,11 +15,12 @@ pub mod ws;
 use api::admin::translation::get_all_translations;
 use api::admin::translation::get_translations_for_locale;
 use api::admin::translation::reload_translations;
-use api::app_context::app_context;
 use api::locale::get_locale_id;
 use api::locale::get_locales;
 use api::pfp::*;
 use api::user::*;
+use api::user_context::user_context;
+use axum::http::header::AUTHORIZATION;
 use axum::http::header::COOKIE;
 use axum::routing::get_service;
 use axum::routing::put;
@@ -28,6 +29,8 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use r2d2::Pool;
+use redis::Client;
 use sqlx_core::postgres::PgPool;
 use std::iter::once;
 use std::net::SocketAddr;
@@ -51,28 +54,33 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use ws::ws_handler;
 use ws::WsRooms;
 
-const JWT_PATH: &str = "jwt";
+const REFRESH_TOKEN_PATH: &str = "refresh_token";
 
+#[derive(Clone)]
 /// The data that is shared across the processes.
 pub struct AppState {
     /// The secret to encrypt the JWT.
     jwt_secret: String,
+    /// Refresh token secret.
+    refresh_token_secret: String,
     /// The WS rooms, with the key being the room name.
-    txs: Mutex<WsRooms>,
+    txs: Arc<Mutex<WsRooms>>,
     /// The Postgres pool.
     pg_pool: PgPool,
     /// The translation manager.
     ///
     /// Used to cache the translations from the database.
-    translation_manager: Mutex<TranslationManager>,
+    translation_manager: Arc<Mutex<TranslationManager>>,
     /// The navlink manager.
     ///
     /// Used to cache the navlinks from the database.
-    navlink_manager: Mutex<NavlinkManager>,
+    navlink_manager: Arc<Mutex<NavlinkManager>>,
     /// The locale manager.
     ///
     /// Used to cache the locales from the database.
     locale_manager: LocaleManager,
+    /// Redis connection pool
+    redis_pool: Pool<Client>,
 }
 
 #[tokio::main]
@@ -86,19 +94,24 @@ async fn main() {
         .init();
 
     let jwt_secret = std::env::var("JWT_SECRET").expect("No jwt secret has been defined");
+    let refresh_token_secret = std::env::var("REFRESH_TOKEN_SECRET")
+        .expect("No refresh token signature key has been defined");
     let pg_pool = tchatchers_core::pool::get_pg_pool().await;
+    let redis_pool = tchatchers_core::pool::get_redis_pool();
     sqlx::migrate!()
         .run(&pg_pool)
         .await
         .expect("Could not apply migrations on the database");
-    let shared_state = Arc::new(AppState {
+    let shared_state = AppState {
+        refresh_token_secret,
         locale_manager: LocaleManager::init(&pg_pool).await,
-        navlink_manager: Mutex::new(NavlinkManager::init(&pg_pool).await),
-        translation_manager: Mutex::new(TranslationManager::init(&pg_pool).await),
+        navlink_manager: Arc::new(Mutex::new(NavlinkManager::init(&pg_pool).await)),
+        translation_manager: Arc::new(Mutex::new(TranslationManager::init(&pg_pool).await)),
         jwt_secret,
-        txs: Mutex::new(WsRooms::default()),
+        txs: Arc::new(Mutex::new(WsRooms::default())),
         pg_pool,
-    });
+        redis_pool,
+    };
 
     let app = Router::new()
         .route(
@@ -106,11 +119,14 @@ async fn main() {
             post(create_user).put(update_user).delete(delete_user),
         )
         .route("/api/login_exists/:login", get(login_exists))
-        .route("/api/authenticate", post(authenticate))
+        .route(
+            "/api/authenticate",
+            post(authenticate).patch(reauthenticate),
+        )
         .route("/api/logout", get(logout))
         .route("/api/validate", get(validate))
         .route("/api/pfp", post(upload_pfp))
-        .route("/api/app_context", get(app_context))
+        .route("/api/app_context", get(user_context))
         .route("/api/locale/", get(get_locales))
         .route("/api/locale/:locale_id", get(get_locale_id))
         .route(
@@ -140,6 +156,7 @@ async fn main() {
                 .on_failure(DefaultOnFailure::new().level(Level::ERROR)),
         )
         .layer(SetSensitiveRequestHeadersLayer::new(once(COOKIE)))
+        .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
         .layer(
             ServiceBuilder::new()
                 .set_x_request_id(MakeRequestUuid)
