@@ -6,8 +6,7 @@ use reqwest_wasm::{Client, Method, Response, StatusCode};
 use yew::{UseStateHandle, UseStateSetter};
 
 #[derive(Default, Debug, Clone)]
-pub struct Requester
-{
+pub struct Requester {
     endpoint: Option<String>,
     method: Option<Method>,
     payload: Option<String>,
@@ -16,8 +15,7 @@ pub struct Requester
     bearer_setter: Option<UseStateSetter<Option<String>>>,
 }
 
-impl Requester
-{
+impl Requester {
     pub fn get(endpoint: &str) -> Self {
         Self {
             method: Some(Method::GET),
@@ -99,11 +97,9 @@ impl Requester
             let uri = format!("{}{}{}", protocol, host, endpoint);
             let builder = client.request(method.clone(), &uri);
             let builder = match (self.payload.clone(), self.is_json) {
-                (Some(payload), true) => {
-                    builder
-                        .body(payload)
-                        .header("content-type", "application/json")
-                }
+                (Some(payload), true) => builder
+                    .body(payload)
+                    .header("content-type", "application/json"),
                 (None, true) => builder.header("content-type", "application/json"),
                 _ => builder,
             };

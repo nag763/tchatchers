@@ -158,7 +158,9 @@ async fn main() {
         )
         .layer(SetSensitiveRequestHeadersLayer::new(once(COOKIE)))
         .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
-        .layer(SetSensitiveRequestHeadersLayer::new(once(SEC_WEBSOCKET_PROTOCOL)))
+        .layer(SetSensitiveRequestHeadersLayer::new(once(
+            SEC_WEBSOCKET_PROTOCOL,
+        )))
         .layer(
             ServiceBuilder::new()
                 .set_x_request_id(MakeRequestUuid)
