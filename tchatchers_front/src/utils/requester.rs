@@ -101,7 +101,7 @@ impl Requester
             let builder = match (self.payload.clone(), self.is_json) {
                 (Some(payload), true) => {
                     builder
-                        .body(payload.to_string())
+                        .body(payload)
                         .header("content-type", "application/json")
                 }
                 (None, true) => builder.header("content-type", "application/json"),
