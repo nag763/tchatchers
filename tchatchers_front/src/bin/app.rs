@@ -46,7 +46,7 @@ fn contextual_app() -> HtmlResult {
                     <NavbarHOC/>
                     <Toast />
                         <Modal />
-                    <div class="row-span-11">
+                    <div class="row-span-11 overflow-y-auto">
                         <Switch<Route> render={switch} />
                     </div>
                 </div>

@@ -55,7 +55,7 @@ impl Component for Navbar {
         html! {
             <nav class="flex items-center justify-between flex-wrap bg-zinc-800 px-6 row-span-1">
                 <Link<Route> to={logo_route} classes="flex items-center flex-shrink-0 text-white mr-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600 hover:animate-pulse">
-                    <img src="/favicon.ico" class="h-16 w-16"/>
+                    <img src="/favicon.ico" class="h-8 w-8 sm:h-12 sm:w-12 md:h-16 md:w-16"/>
                 </Link<Route>>
                 <div>
                     {links}
