@@ -1,0 +1,1 @@
+cargo-make make verify-before-commit

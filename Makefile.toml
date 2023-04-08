@@ -85,3 +85,17 @@ workspace = false
 [tasks.start-dev]
 run_task = { name = ["start-dev-back", "start-dev-front", "start-dev-style"], fork = true, parallel = true }
 workspace = false
+
+[tasks.verify-fmt]
+args = ["fmt", "--check"]
+command = "cargo"
+workspace = false
+
+[tasks.verify-clippy]
+args = ["clippy", "--all-features"]
+command = "cargo"
+workspace = false
+
+[tasks.verify-before-commit]
+run_task = { name = [ "verify-fmt", "verify-clippy"], parallel = true }
+workspace = false
