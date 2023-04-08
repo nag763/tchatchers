@@ -37,6 +37,10 @@ services:
     volumes:
       - static:/home/usr/back/static
       - ./env:/home/usr/back/.env:ro
+  doc:
+    build: 
+      context: ./ 
+      dockerfile: Dockerfile_doc
   front :
     volumes:
       - ${SSL_CERTIFICATE_PATH:-/dev/null}:/usr/nginx/home/certs/cert.crt:ro
@@ -45,8 +49,10 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - back
+      - doc
     links:
       - back:back.tchatche.rs
+      - doc:doc.tchatche.rs
     build: 
       context: ./ 
       dockerfile: Dockerfile_front

@@ -1,0 +1,13 @@
+FROM rust:1.68.2 as doc_builder
+
+WORKDIR /home/usr/doc
+
+COPY ./ .
+
+RUN cargo doc --no-deps --all-features --target-dir doc
+
+FROM nginx:alpine
+
+COPY --from=doc_builder /home/usr/doc/doc/doc/ /usr/share/nginx/html/doc
+
+EXPOSE 80
