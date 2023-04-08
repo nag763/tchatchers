@@ -22,6 +22,7 @@ use api::user::*;
 use api::user_context::user_context;
 use axum::http::header::AUTHORIZATION;
 use axum::http::header::COOKIE;
+use axum::http::header::SEC_WEBSOCKET_PROTOCOL;
 use axum::routing::get_service;
 use axum::routing::put;
 use axum::{
@@ -157,6 +158,7 @@ async fn main() {
         )
         .layer(SetSensitiveRequestHeadersLayer::new(once(COOKIE)))
         .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
+        .layer(SetSensitiveRequestHeadersLayer::new(once(SEC_WEBSOCKET_PROTOCOL)))
         .layer(
             ServiceBuilder::new()
                 .set_x_request_id(MakeRequestUuid)
