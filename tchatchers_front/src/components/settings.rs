@@ -140,10 +140,10 @@ impl Component for Settings {
                             let translation = self.user_context.translation.clone();
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
-                                if resp.status().is_success() {
+                                if resp.ok() {
                                     let mut req = Requester::get("/api/app_context");
                                     let resp = req.bearer(bearer).send().await;
-                                    if resp.status().is_success() {
+                                    if resp.ok() {
                                         let app_context: UserContext =
                                             serde_json::from_str(&resp.text().await.unwrap())
                                                 .unwrap();
@@ -174,11 +174,11 @@ impl Component for Settings {
             Msg::UploadNewPfp(pfp) => {
                 self.wait_for_api = true;
                 let mut req = Requester::post("/api/pfp");
-                req.body(pfp.unwrap().as_string());
+                req.body(pfp);
                 let link = ctx.link().clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     let resp = req.send().await;
-                    if resp.status().is_success() {
+                    if resp.ok() {
                         link.send_message(Msg::PfpUpdated(resp.text().await.unwrap().into()));
                     } else {
                         link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap().into()));
@@ -232,7 +232,7 @@ impl Component for Settings {
                 self.wait_for_api = true;
                 wasm_bindgen_futures::spawn_local(async move {
                     let resp = req.send().await;
-                    if resp.status().is_success() {
+                    if resp.ok() {
                         link.navigator().unwrap().push(&Route::LogOut);
                     } else {
                         link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap().into()));

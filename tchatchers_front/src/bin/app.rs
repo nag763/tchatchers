@@ -22,7 +22,7 @@ fn contextual_app() -> HtmlResult {
         use_future(|| async {
             let mut req = Requester::get("/api/app_context");
             let resp = req.bearer_setter(bearer_setter).send().await;
-            if resp.status().is_success() {
+            if resp.ok() {
                 let app_context: UserContext =
                     serde_json::from_str(&resp.text().await.unwrap()).unwrap();
                 Some(app_context)

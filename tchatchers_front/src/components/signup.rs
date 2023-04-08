@@ -79,7 +79,7 @@ impl Component for SignUp {
                             req.is_json(true).json_body(payload);
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
-                                if resp.status().is_success() {
+                                if resp.ok() {
                                     ToastBus::dispatcher().send(Alert {
                                         is_success: true,
                                         content: "User created with success".into(),

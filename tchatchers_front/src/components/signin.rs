@@ -87,12 +87,12 @@ impl Component for SignIn {
                         let bearer = ctx.props().client_context.bearer.clone();
                         wasm_bindgen_futures::spawn_local(async move {
                             let resp = req.send().await;
-                            if resp.status().is_success() {
+                            if resp.ok() {
                                 let token = resp.text().await.unwrap();
                                 bearer.set(Some(token));
                                 let mut req = Requester::get("/api/app_context");
                                 let resp = req.bearer(bearer).send().await;
-                                if resp.status().is_success() {
+                                if resp.ok() {
                                     let app_context: UserContext =
                                         serde_json::from_str(&resp.text().await.unwrap()).unwrap();
                                     link.send_message(Msg::LoggedIn(app_context));

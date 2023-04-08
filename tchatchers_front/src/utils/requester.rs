@@ -2,14 +2,17 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use async_recursion::async_recursion;
-use reqwest_wasm::{Client, Method, Response, StatusCode};
+use gloo_net::http::{Method, Request, Response};
+use wasm_bindgen::JsValue;
 use yew::{UseStateHandle, UseStateSetter};
+
+const UNAUTHORIZED: u16 = 401u16;
 
 #[derive(Default, Debug, Clone)]
 pub struct Requester {
     endpoint: Option<String>,
     method: Option<Method>,
-    payload: Option<String>,
+    payload: Option<JsValue>,
     is_json: bool,
     bearer_value: Option<String>,
     bearer_setter: Option<UseStateSetter<Option<String>>>,
@@ -56,13 +59,15 @@ impl Requester {
         }
     }
 
-    pub fn body(&mut self, body: Option<String>) -> &mut Self {
-        self.payload = body;
+    pub fn body(&mut self, body: Option<impl Into<JsValue>>) -> &mut Self {
+        if let Some(val) = body {
+            self.payload = Some(val.into());
+        }
         self
     }
 
     pub fn json_body<U: serde::Serialize>(&mut self, body: U) -> &mut Self {
-        self.payload = Some(serde_json::to_string(&body).unwrap());
+        self.payload = Some(serde_json::to_string(&body).unwrap().into());
         self
     }
 
@@ -90,25 +95,19 @@ impl Requester {
     #[async_recursion(?Send)]
     pub async fn send(&mut self) -> Response {
         if let (Some(method), Some(endpoint)) = (&self.method, &self.endpoint) {
-            let client = Client::new();
-            let location = web_sys::window().unwrap().location();
-            let protocol = location.protocol().unwrap();
-            let host = location.host().unwrap();
-            let uri = format!("{}{}{}", protocol, host, endpoint);
-            let builder = client.request(method.clone(), &uri);
-            let builder = match (self.payload.clone(), self.is_json) {
-                (Some(payload), true) => builder
-                    .body(payload)
-                    .header("content-type", "application/json"),
-                (None, true) => builder.header("content-type", "application/json"),
-                _ => builder,
-            };
-
-            let resp = match &self.bearer_value {
-                Some(bearer) => builder.bearer_auth(bearer).send().await.unwrap(),
-                _ => builder.send().await.unwrap(),
-            };
-            if resp.status() == StatusCode::UNAUTHORIZED && endpoint != "/api/authenticate" {
+            let mut builder = Request::new(endpoint);
+            builder = builder.method(*method);
+            if let Some(payload) = &self.payload {
+                builder = builder.body(payload);
+            }
+            if let Some(bearer) = &self.bearer_value {
+                builder = builder.header("Authorization", &format!("Bearer {bearer}"));
+            }
+            if self.is_json {
+                builder = builder.header("Content-Type", "application/json");
+            }
+            let resp = builder.send().await.unwrap();
+            if resp.status() == UNAUTHORIZED && endpoint != "/api/authenticate" {
                 let reauth = Self {
                     endpoint: Some("/api/authenticate".into()),
                     method: Some(Method::PATCH),
@@ -116,7 +115,7 @@ impl Requester {
                 }
                 .send()
                 .await;
-                if reauth.status().is_success() {
+                if reauth.ok() {
                     let new_token = reauth.text().await.unwrap();
                     if let Some(bearer_setter) = &self.bearer_setter {
                         bearer_setter.set(Some(new_token.clone()));
