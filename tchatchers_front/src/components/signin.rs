@@ -81,8 +81,8 @@ impl Component for SignIn {
                             password: password.value(),
                             session_only: !remember_me.checked(),
                         };
-                        let mut req = Requester::<AuthenticableUser>::post("/api/authenticate");
-                        req.is_json(true).body(Some(payload));
+                        let mut req = Requester::post("/api/authenticate");
+                        req.is_json(true).json_body(payload);
                         let link = ctx.link().clone();
                         let bearer = ctx.props().client_context.bearer.clone();
                         wasm_bindgen_futures::spawn_local(async move {
@@ -90,7 +90,7 @@ impl Component for SignIn {
                             if resp.status().is_success() {
                                 let token = resp.text().await.unwrap();
                                 bearer.set(Some(token));
-                                let mut req = Requester::<()>::get("/api/app_context");
+                                let mut req = Requester::get("/api/app_context");
                                 let resp = req.bearer(bearer).send().await;
                                 if resp.status().is_success() {
                                     let app_context: UserContext =

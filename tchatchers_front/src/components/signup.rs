@@ -75,8 +75,8 @@ impl Component for SignUp {
                                 "The passwords do not match, please try again.".into(),
                             ));
                         } else {
-                            let mut req = Requester::<InsertableUser>::post("/api/user");
-                            req.is_json(true).body(Some(payload));
+                            let mut req = Requester::post("/api/user");
+                            req.is_json(true).json_body(payload);
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
                                 if resp.status().is_success() {

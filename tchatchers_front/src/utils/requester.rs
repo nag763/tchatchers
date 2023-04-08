@@ -6,21 +6,17 @@ use reqwest_wasm::{Client, Method, Response, StatusCode};
 use yew::{UseStateHandle, UseStateSetter};
 
 #[derive(Default, Debug, Clone)]
-pub struct Requester<T>
-where
-    T: serde::Serialize,
+pub struct Requester
 {
     endpoint: Option<String>,
     method: Option<Method>,
-    payload: Option<T>,
+    payload: Option<String>,
     is_json: bool,
     bearer_value: Option<String>,
     bearer_setter: Option<UseStateSetter<Option<String>>>,
 }
 
-impl<T> Requester<T>
-where
-    T: serde::Serialize + std::default::Default + Clone,
+impl Requester
 {
     pub fn get(endpoint: &str) -> Self {
         Self {
@@ -62,8 +58,13 @@ where
         }
     }
 
-    pub fn body(&mut self, body: Option<T>) -> &mut Self {
+    pub fn body(&mut self, body: Option<String>) -> &mut Self {
         self.payload = body;
+        self
+    }
+
+    pub fn json_body<U: serde::Serialize>(&mut self, body: U) -> &mut Self {
+        self.payload = Some(serde_json::to_string(&body).unwrap());
         self
     }
 
@@ -99,9 +100,8 @@ where
             let builder = client.request(method.clone(), &uri);
             let builder = match (self.payload.clone(), self.is_json) {
                 (Some(payload), true) => {
-                    let serde_struct: String = serde_json::to_string(&payload).unwrap();
                     builder
-                        .body(serde_struct)
+                        .body(payload.to_string())
                         .header("content-type", "application/json")
                 }
                 (None, true) => builder.header("content-type", "application/json"),

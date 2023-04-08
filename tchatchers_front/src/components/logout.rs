@@ -4,8 +4,8 @@ use std::rc::Rc;
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
+use crate::utils::requester::Requester;
 use crate::{components::toast::Alert, utils::client_context::ClientContext};
-use gloo_net::http::Request;
 use yew::{function_component, html, use_context, Html};
 use yew_agent::Dispatched;
 use yew_router::prelude::use_navigator;
@@ -14,7 +14,7 @@ use yew_router::prelude::use_navigator;
 pub fn log_out_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().unwrap();
     let navigator = use_navigator().unwrap();
-    let req = Request::get("/api/logout").send();
+    let mut req = Requester::get("/api/logout");
     let translations = client_context
         .user_context
         .as_ref()
@@ -22,7 +22,7 @@ pub fn log_out_hoc() -> Html {
         .translation
         .clone();
     wasm_bindgen_futures::spawn_local(async move {
-        req.await.unwrap();
+        req.send().await;
         ToastBus::dispatcher().send(Alert {
             is_success: true,
             content: translations

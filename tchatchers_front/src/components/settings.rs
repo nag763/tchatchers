@@ -16,7 +16,6 @@ use crate::utils::requester::Requester;
 use chrono::TimeZone;
 use chrono_tz::OffsetComponents;
 use chrono_tz::Tz;
-use gloo_net::http::Request;
 use tchatchers_core::app_context::UserContext;
 use tchatchers_core::timezone::Timezone;
 use tchatchers_core::user::UpdatableUser;
@@ -134,15 +133,15 @@ impl Component for Settings {
                                 .send_message(Msg::ErrorFromServer(message.to_string().into()));
                         } else {
                             let bearer = ctx.props().context.bearer.clone();
-                            let mut req = Requester::<UpdatableUser>::put("/api/user");
-                            req.is_json(true).bearer(bearer.clone()).body(Some(payload));
+                            let mut req = Requester::put("/api/user");
+                            req.is_json(true).bearer(bearer.clone()).json_body(payload);
                             let link = ctx.link().clone();
                             self.wait_for_api = true;
                             let translation = self.user_context.translation.clone();
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
                                 if resp.status().is_success() {
-                                    let mut req = Requester::<()>::get("/api/app_context");
+                                    let mut req = Requester::get("/api/app_context");
                                     let resp = req.bearer(bearer).send().await;
                                     if resp.status().is_success() {
                                         let app_context: UserContext =
@@ -174,11 +173,12 @@ impl Component for Settings {
             }
             Msg::UploadNewPfp(pfp) => {
                 self.wait_for_api = true;
-                let req = Request::post("/api/pfp").body(pfp.unwrap()).send();
+                let mut req = Requester::post("/api/pfp");
+                req.body(pfp.unwrap().as_string());
                 let link = ctx.link().clone();
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = req.await.unwrap();
-                    if resp.ok() {
+                    let resp = req.send().await;
+                    if resp.status().is_success() {
                         link.send_message(Msg::PfpUpdated(resp.text().await.unwrap().into()));
                     } else {
                         link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap().into()));
@@ -227,7 +227,7 @@ impl Component for Settings {
                 false
             }
             Msg::DeletionConfirmed => {
-                let mut req = Requester::<()>::delete("/api/user");
+                let mut req = Requester::delete("/api/user");
                 let link = ctx.link().clone();
                 self.wait_for_api = true;
                 wasm_bindgen_futures::spawn_local(async move {

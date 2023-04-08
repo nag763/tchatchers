@@ -117,7 +117,7 @@ impl Component for Feed {
                     WsMessage::ClientDisconnected | WsMessage::ConnectionClosed => {
                         if !self.is_closed {
                             gloo_console::error!("Not connected");
-                            let mut req = Requester::<()>::get("/api/validate");
+                            let mut req = Requester::get("/api/validate");
                             req.bearer(self.bearer.clone());
                             let link = ctx.link().clone();
                             wasm_bindgen_futures::spawn_local(async move {

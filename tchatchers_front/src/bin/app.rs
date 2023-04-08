@@ -20,7 +20,7 @@ fn contextual_app() -> HtmlResult {
     let app_context = {
         let bearer_setter = bearer.setter();
         use_future(|| async {
-            let mut req = Requester::<()>::get("/api/app_context");
+            let mut req = Requester::get("/api/app_context");
             let resp = req.bearer_setter(bearer_setter).send().await;
             if resp.status().is_success() {
                 let app_context: UserContext =
