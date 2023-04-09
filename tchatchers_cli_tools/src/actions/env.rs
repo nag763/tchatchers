@@ -17,6 +17,7 @@ use crate::errors::CliError;
 struct NginxConfigTemplate {
     http_only: bool,
     disable_security: bool,
+    disable_http2: bool,
     version: String,
     server_name: String,
 }
@@ -345,9 +346,16 @@ impl EnvAction {
             .with_prompt("* Disable security options ?")
             .default(false)
             .interact_text()?;
+
+        let disable_http2: bool = Input::new()
+            .with_prompt("* Disable http2 ?")
+            .default(false)
+            .interact_text()?;
+
         let version: String = Input::new()
             .with_prompt("* What is the version of the tool?")
             .interact_text()?;
+
         let server_name: String = Input::new()
             .with_prompt("* What is the server name ?")
             .default("www.tchatche.rs".into())
@@ -362,6 +370,7 @@ impl EnvAction {
         let output: String = NginxConfigTemplate {
             http_only,
             disable_security,
+            disable_http2,
             version,
             server_name,
         }
