@@ -75,11 +75,14 @@ impl Component for Settings {
                 }
             }
         };
+
+        let context_ref = ctx.props().context.user_context.as_ref().unwrap();
+
         Self {
             name: NodeRef::default(),
             locale_id: NodeRef::default(),
-            pfp: None,
-            user_context: ctx.props().context.user_context.as_ref().unwrap().clone(),
+            pfp: context_ref.user.pfp.clone(),
+            user_context: context_ref.clone(),
             wait_for_api: false,
             server_error: None,
             ok_msg: None,
