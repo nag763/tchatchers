@@ -14,7 +14,6 @@ pub mod profile;
 pub mod refresh_token;
 pub mod room;
 pub mod serializable_token;
-pub mod timezone;
 pub mod translation;
 pub mod user;
 pub mod validation_error_message;

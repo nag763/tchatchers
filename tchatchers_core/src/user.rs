@@ -8,7 +8,6 @@
 
 use crate::common::RE_LIMITED_CHARS;
 use crate::profile::Profile;
-use crate::timezone::Timezone;
 use chrono::DateTime;
 use chrono::Utc;
 #[cfg(any(feature = "back", feature = "cli"))]
@@ -62,9 +61,6 @@ pub struct User {
     /// The user's profile.
     #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
     pub profile: Profile,
-    /// The user's timezone.
-    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(flatten))]
-    pub timezone: crate::timezone::Timezone,
 }
 
 #[cfg(any(feature = "back", feature = "cli"))]
@@ -204,10 +200,6 @@ pub struct PartialUser {
     #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
     // The profile of the user
     pub profile: Profile,
-    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
-    /// The timezone associated to the user.
-    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(flatten))]
-    pub timezone: crate::timezone::Timezone,
 }
 
 impl From<User> for PartialUser {
@@ -219,7 +211,6 @@ impl From<User> for PartialUser {
             pfp: user.pfp,
             locale_id: user.locale_id,
             profile: user.profile,
-            timezone: user.timezone,
             is_authorized: user.is_authorized,
             created_at: user.created_at,
             last_update: user.last_update,
@@ -367,7 +358,6 @@ pub struct UpdatableUser {
     pub name: String,
     pub pfp: Option<String>,
     pub locale_id: i32,
-    pub timezone: Timezone,
 }
 
 #[cfg(feature = "back")]
@@ -378,12 +368,10 @@ impl UpdatableUser {
     ///
     /// - pool : The connection pool.
     pub async fn update(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
-        sqlx::query("UPDATE CHATTER SET name=$1, pfp=$2, locale_id=$3, tz_name=$4, tz_offset=$5 WHERE id=$6")
+        sqlx::query("UPDATE CHATTER SET name=$1, pfp=$2, locale_id=$3 WHERE id=$4")
             .bind(&self.name)
             .bind(&self.pfp)
             .bind(self.locale_id)
-            .bind(&self.timezone.tz_name)
-            .bind(self.timezone.tz_offset)
             .bind(self.id)
             .execute(pool)
             .await
