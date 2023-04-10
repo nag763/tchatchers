@@ -6,7 +6,7 @@ COPY ./ .
 
 RUN cargo doc --no-deps --all-features --target-dir doc
 
-FROM nginx:alpine
+FROM nginx:alpine-slim
 
 COPY --from=doc_builder /home/usr/doc/doc/doc/ /usr/share/nginx/html/doc
 
