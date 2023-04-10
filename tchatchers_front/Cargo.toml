@@ -19,6 +19,6 @@ yew-router = "0.17.0"
 tchatchers_core = { path = "../tchatchers_core", features = ["front"] }
 chrono = { version = "0.4.24", features = ["serde"] }
 js-sys = "0.3.61"
-uuid = { version = "1.3.0", features = ["v4"] }
+uuid = { version = "1.3.1", features = ["v4"] }
 validator = "0.16.0"
 async-recursion = "1.0.4"
