@@ -14,10 +14,10 @@ impl Component for NotFound {
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
-            <div class="flex items-center justify-center h-full text-8xl text-center text-slate-600 dark:text-gray-200 dark:bg-zinc-800">
+            <div class="flex items-center justify-center h-full text-2xl sm:text-8xl text-center text-slate-600 dark:text-gray-200 dark:bg-zinc-800">
             {"404 ( ˘︹˘ )"}
                 <br/>
-            {"This route doesn't exist"}
+            {"This page doesn't exist"}
             </div>
         }
     }
