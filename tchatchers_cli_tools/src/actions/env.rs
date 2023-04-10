@@ -1,8 +1,5 @@
 use std::{
     env::var,
-    ffi::OsString,
-    fs::{self, OpenOptions},
-    io::Write,
     process::{Command, Output},
 };
 
@@ -10,7 +7,7 @@ use askama::Template;
 use dialoguer::{Confirm, Input, Password};
 use which::which;
 
-use crate::errors::CliError;
+use crate::{common::output::OutputStream, errors::CliError};
 
 #[derive(Template, Debug, Default)]
 #[template(path = "nginx.conf", ext = "txt", escape = "none")]
@@ -41,8 +38,6 @@ struct EnvTemplate {
 
 /// This struct provides functionality to interact with environment variables.
 pub struct EnvAction;
-
-const FILE_NAME: &str = ".env";
 
 const CHECKMARK_EMOJI: &str = "\u{2714}";
 const ERROR_EMOJI: &str = "\u{0058}";
@@ -87,17 +82,12 @@ enum EnvironmentCheckErrorTypes {
 
 impl EnvAction {
     /// Create a new `.env` file and populate it with database-related environment variables.
-    pub fn create() -> Result<(), CliError> {
-        if fs::read(FILE_NAME).is_ok() {
-            let confirm_override = Confirm::new()
+    pub fn create(output_stream: OutputStream) -> Result<(), CliError> {
+        if output_stream.stream_already_filled() && !Confirm::new()
                 .with_prompt("The .env file already exists, if you confirm the following dialog, any modification to the default values of the dialoguer will change the current environment file.")
                 .default(false)
-                .interact()?;
-            if !confirm_override {
-                return Ok(());
-            } else {
-                println!("The showed default values will be purposed from the existing .env file, skip changing them by pressing enter (default value).");
-            }
+                .interact()? {
+                    return Ok(());
         } else {
             println!("Setting up a new .env file");
         }
@@ -196,13 +186,7 @@ impl EnvAction {
             )}
         };
 
-        let mut env_file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(FILE_NAME)?;
-
-        env_file.write_all(
+        output_stream.write_all(
             EnvTemplate {
                 postgres_host,
                 postgres_port,
@@ -319,8 +303,8 @@ impl EnvAction {
     /// Build a Nginx config file for production usage.
     ///
     /// This can be helpful when you want to for instance change the domain name or disable HTTPS only mode.
-    pub(crate) fn build_nginx_conf(output_file: &OsString) -> Result<(), CliError> {
-        if fs::read(output_file).is_ok() && !Input::new().with_prompt(format!("Be careful, the output file located at {output_file:?} is non empty, please confirm you want to override the configuration.")).default(false).interact_text()? {
+    pub(crate) fn build_nginx_conf(output_stream: &OutputStream) -> Result<(), CliError> {
+        if output_stream.stream_already_filled() && !Input::new().with_prompt("Be careful, the output file is non empty, please confirm you want to override the configuration.").default(false).interact_text()? {
             return Ok(());
         }
 
@@ -361,12 +345,6 @@ impl EnvAction {
             .default("www.tchatche.rs".into())
             .interact_text()?;
 
-        let mut nginx_config_output = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(output_file)?;
-
         let output: String = NginxConfigTemplate {
             http_only,
             disable_security,
@@ -375,7 +353,7 @@ impl EnvAction {
             server_name,
         }
         .render()?;
-        nginx_config_output.write_all(output.as_bytes())?;
+        output_stream.write_all(output.as_bytes())?;
         Ok(())
     }
 }

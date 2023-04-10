@@ -78,17 +78,19 @@ async fn run_main() -> Result<(), CliError> {
             }
         },
         args::CliEntityArg::Env { action } => match action {
-            args::env::EnvArgAction::Create => {
+            args::env::EnvArgAction::Create(output_stream) => {
                 info!("Creating environment variables...");
-                EnvAction::create()?
+                debug!("Output stream {:#?}", output_stream);
+                EnvAction::create(output_stream)?
             }
             args::env::EnvArgAction::Check => {
                 info!("Checking environment variables...");
                 EnvAction::check_setup().await?
             }
-            args::env::EnvArgAction::BuildNginxConf { output_file } => {
+            args::env::EnvArgAction::BuildNginxConf(output_stream) => {
                 info!("Building the nginx config file...");
-                EnvAction::build_nginx_conf(&output_file)?
+                debug!("Output stream {:#?}", output_stream);
+                EnvAction::build_nginx_conf(&output_stream)?
             }
         },
         args::CliEntityArg::Room { action } => match action {

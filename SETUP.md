@@ -103,7 +103,7 @@ Be aware that self signed certificates might not be suitable for public producti
 Run the following for that, and follow the dialogs.
 
 ```
-cargo r --bin tct env create
+cargo r --bin tct env create -o .env
 ```
 
 Be aware that for the HTTPs config, you need to precise all paths as relative './myfile' or absolute '/path/to/myfile/'.
@@ -113,7 +113,7 @@ Be aware that for the HTTPs config, you need to precise all paths as relative '.
 Run the following command, and follow again the dialogs.
 
 ```
-cargo r --bin tct env build-nginx-conf
+cargo r --bin tct env build-nginx-conf -o nginx.conf
 ```
 
 ### 3. Start the server

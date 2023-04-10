@@ -33,6 +33,8 @@ pub enum ErrorKind {
     IoError,
     /// Error linked with template generation.
     TemplateError,
+    /// Error with inconsistent args received.
+    UnreachableError,
 }
 
 impl From<sqlx::Error> for CliError {
