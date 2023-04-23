@@ -3,7 +3,6 @@
 [![tchatchers-license](https://img.shields.io/github/license/nag763/tchatchers)](https://raw.githubusercontent.com/nag763/tchatchers/main/LICENSE.MD)
 [![github-issues](https://img.shields.io/github/issues/nag763/tchatchers)](https://github.com/nag763/tchatchers/issues)
 [![instance-health](https://img.shields.io/website?down_color=red&down_message=down&label=public%20instance&up_color=green&up_message=up&url=https%3A%2F%2Ftchatche.rs)](https://tchatche.rs)
-[![security-headers](https://img.shields.io/security-headers?url=https%3A%2F%2Ftchatche.rs)](https://securityheaders.com/?q=tchatche.rs&followRedirects=on)
 
 <p align="center"><img height="300" src="https://raw.githubusercontent.com/nag763/tchatchers/main/.github/gh_logo.png"></img></p>
 
