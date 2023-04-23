@@ -36,7 +36,13 @@ RUN cargo install trunk
 
 RUN trunk build --release
 
+WORKDIR /usr/tchatchers/front/dist
+
+RUN gzip -r ./*
+
 FROM nginx:alpine
+
+WORKDIR /usr/share/nginx/html
 
 COPY --from=src_builder /usr/tchatchers/front/dist /usr/share/nginx/html
 
