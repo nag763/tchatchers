@@ -35,6 +35,7 @@ fn contextual_app() -> HtmlResult {
                     <div class="row-span-11">
                         <Switch<Route> render={switch} />
                     </div>
+                    <RMenu/>
                 </div>
             </ContextProvider<UseStateHandle<Option<AppContext>>>>
         </BrowserRouter>

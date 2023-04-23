@@ -4,7 +4,14 @@ use chrono::{DateTime, Datelike, Duration, Timelike, Utc};
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessageContent, WsReceptionStatus};
 use uuid::Uuid;
+use web_sys::MouseEvent;
 use yew::{function_component, html, use_state, AttrValue, Component, Context, Html, Properties};
+use yew_agent::Dispatched;
+
+use crate::components::right_menu::message_rmenu::MessageRMenuProps;
+use crate::components::right_menu::profile_rmenu::ProfileRMenuProps;
+use crate::components::right_menu::RMenuKind;
+use crate::services::rmenu_bus::{RMenuBus, RMenusBusEvents};
 
 const DEFAULT_PFP: &str = "/assets/no_pfp.webp";
 
@@ -15,6 +22,8 @@ struct ProfilePictureProperties {
     pub author: AttrValue,
     #[prop_or(true)]
     pub display_pfp: bool,
+    pub author_id: i32,
+    pub is_self: bool,
 }
 
 #[function_component(ProfilePicture)]
@@ -23,9 +32,19 @@ fn profile_picture(profile_picture_properties: &ProfilePictureProperties) -> Htm
         true => "flex-shrink-0 h-10 w-10 rounded-full bg-gray-300",
         false => "flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 invisible",
     };
+
+    let user_id = profile_picture_properties.author_id;
+    let is_self = profile_picture_properties.is_self;
+
     html! {
         <div>
-            <div {class} title={profile_picture_properties.author.clone()}>
+            <div {class} title={profile_picture_properties.author.clone()} oncontextmenu={move |me: MouseEvent|
+                {
+                    if !is_self {
+                        me.prevent_default();
+                        RMenuBus::dispatcher().send(RMenusBusEvents::OpenRMenu(me.client_x(), me.client_y(), RMenuKind::ProfileRMenu(ProfileRMenuProps{ user_id })));
+                    }
+                }}>
                 <img class="h-10 w-10 rounded-full" src={profile_picture_properties.pfp.clone()} alt="No img"/>
             </div>
         </div>
@@ -80,11 +99,19 @@ fn message(message_properties: &MessageProperties) -> Html {
         false => "flex flex-row-reverse",
     };
 
+    let message_id = message_properties.uuid;
+    let is_self = message_properties.is_user;
+
     let hide_timestamp = use_state(|| true);
     html! {
-        <div id={message_properties.uuid.to_string()} class={div_class}>
+        <div id={message_id.to_string()} class={div_class}>
             <small hidden={*hide_timestamp} class="dark:text-white mx-2">{&title}</small>
-            <p {title} class={class} onclick={move |_me| hide_timestamp.set(!*hide_timestamp)} >
+            <p {title} class={class} onclick={move |_me| hide_timestamp.set(!*hide_timestamp)} oncontextmenu={move |me: MouseEvent|
+                {
+                    me.prevent_default();
+                    RMenuBus::dispatcher().send(RMenusBusEvents::OpenRMenu(me.client_x(), me.client_y(), RMenuKind::MessageRMenu(MessageRMenuProps{ message_id, is_self })));
+                }}
+            >
                 {message_properties.content.as_str()}
                     <span class="absolute right-0 bottom-0 pb-1 pr-1">
                     {reception_checkmark}
@@ -107,6 +134,7 @@ struct UserChatProperties {
     #[prop_or(true)]
     pub display_pfp: bool,
     pub reception_status: WsReceptionStatus,
+    pub author_id: i32,
 }
 
 #[function_component(UserChat)]
@@ -120,7 +148,7 @@ fn user_chat(user_chat_properties: &UserChatProperties) -> Html {
     }
     html! {
         <div {class}>
-            <ProfilePicture pfp={user_chat_properties.pfp.clone()} author={user_chat_properties.author.clone()} display_pfp={user_chat_properties.display_pfp} />
+            <ProfilePicture pfp={user_chat_properties.pfp.clone()} author={user_chat_properties.author.clone()} display_pfp={user_chat_properties.display_pfp} author_id={user_chat_properties.author_id} is_self={user_chat_properties.is_user}/>
             <Message uuid={user_chat_properties.uuid} reception_status={user_chat_properties.reception_status} content={user_chat_properties.content.clone()} is_user={user_chat_properties.is_user} timestamp={user_chat_properties.timestamp} />
         </div>
     }
@@ -158,7 +186,7 @@ impl Component for Chat {
                 // so we display the pfp for the first message
                 _ => true,
             };
-            html_content.push(html! { <UserChat uuid={current_element.uuid} pfp={current_element.author.pfp.clone().unwrap_or_else(|| DEFAULT_PFP.into())} reception_status={current_element.reception_status} content={current_element.content.clone()} author={current_element.author.name.clone()} is_user={current_element.author.id == current_user_id} timestamp={current_element.timestamp + user_offset} {display_pfp}/> });
+            html_content.push(html! { <UserChat uuid={current_element.uuid} pfp={current_element.author.pfp.clone().unwrap_or_else(|| DEFAULT_PFP.into())} reception_status={current_element.reception_status} content={current_element.content.clone()} author_id={current_element.author.id} author={current_element.author.name.clone()} is_user={current_element.author.id == current_user_id} timestamp={current_element.timestamp + user_offset} {display_pfp}/> });
         }
         html_content.into_iter().collect::<Html>()
     }

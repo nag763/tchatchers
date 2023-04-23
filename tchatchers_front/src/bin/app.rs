@@ -50,6 +50,7 @@ fn contextual_app() -> HtmlResult {
                         <Switch<Route> render={switch} />
                     </div>
                 </div>
+                <RightMenu />
             </ContextProvider<Rc<ClientContext>>>
         </BrowserRouter>
     })

@@ -4,6 +4,7 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use crate::extractor::JwtUserExtractor;
+use crate::extractor::ModeratorExtractor;
 use crate::validator::ValidJson;
 use crate::AppState;
 use crate::REFRESH_TOKEN_PATH;
@@ -255,6 +256,20 @@ pub async fn delete_user(
 ) -> impl IntoResponse {
     match User::delete_one(jwt.user_id, &state.pg_pool).await {
         Ok(_) => Ok((StatusCode::OK, "User updated with success")),
+        Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened")),
+    }
+}
+
+/// Revokes a user's access.
+///
+/// Only the user that requests this endpoint can delete himself.
+pub async fn revoke_user(
+    Path(user_id): Path<i32>,
+    ModeratorExtractor(_): ModeratorExtractor,
+    State(state): State<AppState>,
+) -> impl IntoResponse {
+    match User::update_activation_status(user_id, false, &state.pg_pool).await {
+        Ok(_) => Ok((StatusCode::OK, "User revoked")),
         Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened")),
     }
 }

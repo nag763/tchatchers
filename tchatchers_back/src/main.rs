@@ -17,12 +17,14 @@ use api::admin::translation::get_translations_for_locale;
 use api::admin::translation::reload_translations;
 use api::locale::get_locale_id;
 use api::locale::get_locales;
+use api::message::delete_message;
 use api::pfp::*;
 use api::user::*;
 use api::user_context::user_context;
 use axum::http::header::AUTHORIZATION;
 use axum::http::header::COOKIE;
 use axum::http::header::SEC_WEBSOCKET_PROTOCOL;
+use axum::routing::delete;
 use axum::routing::get_service;
 use axum::routing::put;
 use axum::{
@@ -120,6 +122,7 @@ async fn main() {
             post(create_user).put(update_user).delete(delete_user),
         )
         .route("/api/login_exists/:login", get(login_exists))
+        .route("/api/user/revoke/:user_id", post(revoke_user))
         .route(
             "/api/authenticate",
             post(authenticate).patch(reauthenticate),
@@ -130,6 +133,7 @@ async fn main() {
         .route("/api/app_context", get(user_context))
         .route("/api/locale/", get(get_locales))
         .route("/api/locale/:locale_id", get(get_locale_id))
+        .route("/api/message/:message_id", delete(delete_message))
         .route(
             "/api/admin/translation",
             put(reload_translations).get(get_all_translations),
