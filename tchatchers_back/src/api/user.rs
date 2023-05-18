@@ -14,6 +14,7 @@ use axum_extra::extract::cookie::Cookie;
 use axum_extra::extract::CookieJar;
 use tchatchers_core::authorization_token::AuthorizationToken;
 use tchatchers_core::refresh_token::RefreshToken;
+use tchatchers_core::reported_user::ReportedUser;
 use tchatchers_core::serializable_token::SerializableToken;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, UpdatableUser, User};
 use tokio::time::{sleep, Duration};
@@ -271,5 +272,39 @@ pub async fn revoke_user(
     match User::update_activation_status(user_id, false, &state.pg_pool).await {
         Ok(_) => Ok((StatusCode::OK, "User revoked")),
         Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened")),
+    }
+}
+
+/// Report a user.
+///
+/// # Arguments
+///
+/// - `reported_user`: The ID of the user to report.
+///
+/// This function reports a user by inserting a new entry in the `REPORTED_USER` table of the database. The reported user is associated with the user who made the request, as identified by the JWT token extracted from the request.
+///
+/// If the insertion is successful, the function returns a tuple containing the status code `StatusCode::OK` and a string indicating that the user has been reported.
+///
+/// If an error occurs during the insertion, the function checks if the error is a database error. If the error code is `23505`, it means that the user has already been reported, and the function returns a tuple with the status code `StatusCode::BAD_REQUEST` and a corresponding error message. Otherwise, it returns a tuple with the status code `StatusCode::INTERNAL_SERVER_ERROR` and a generic error message indicating that an error occurred while reporting the user.
+pub async fn report_user(
+    JwtUserExtractor(user): JwtUserExtractor,
+    Path(reported_user): Path<i32>,
+    state: State<AppState>,
+) -> impl IntoResponse {
+    match ReportedUser::insert(user.user_id, reported_user, &state.pg_pool).await {
+        Ok(_) => (StatusCode::OK, "User reported"),
+        Err(e) => {
+            if let Some(database_err) = e.as_database_error() {
+                if let Some(code) = database_err.code() {
+                    if code == "23505" {
+                        return (StatusCode::BAD_REQUEST, "You already reported this user");
+                    }
+                }
+            }
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "An error happened while reporting this message",
+            )
+        }
     }
 }
