@@ -45,6 +45,7 @@ pub struct Props {}
 
 pub enum Msg {
     HandleBusMessage(RMenusBusEvents),
+    RepositionMenu,
 }
 
 pub struct RightMenu {
@@ -55,6 +56,7 @@ pub struct RightMenu {
     close_events: Vec<Function>,
     _location_handle: LocationHandle,
     content: Html,
+    menu_repositionned: bool,
 }
 
 impl Component for RightMenu {
@@ -83,6 +85,7 @@ impl Component for RightMenu {
             close_events: Vec::new(),
             _location_handle: listener,
             content: Html::default(),
+            menu_repositionned: false,
         }
     }
 
@@ -105,7 +108,6 @@ impl Component for RightMenu {
             Msg::HandleBusMessage(m) => match m {
                 RMenusBusEvents::OpenRMenu(x, y, kind) => {
                     clear_events();
-                    self.visible = true;
                     self.pos_x = x;
                     self.pos_y = y;
 
@@ -125,22 +127,52 @@ impl Component for RightMenu {
                         RMenuKind::ProfileRMenu(props) => html! { <ProfileRMenu ..props /> },
                     };
 
+                    self.visible = true;
                     self.close_events.push(close_event);
                 }
                 RMenusBusEvents::CloseRMenu => {
                     clear_events();
                     self.content = Html::default();
                     self.visible = false;
+                    self.menu_repositionned = false;
                 }
             },
+            Msg::RepositionMenu => {
+                let window = web_sys::window().unwrap();
+                let document = window.document().unwrap();
+                let rmenu = document
+                    .get_element_by_id("rmenu")
+                    .unwrap()
+                    .dyn_into::<web_sys::HtmlElement>()
+                    .unwrap();
+
+                let (rmenu_width, rmenu_height) = (rmenu.offset_width(), rmenu.offset_height());
+                let (window_width, window_height) = (
+                    window.inner_width().unwrap().as_f64().unwrap().round() as i32,
+                    window.inner_height().unwrap().as_f64().unwrap().round() as i32,
+                );
+
+                if window_width < self.pos_x + rmenu_width {
+                    self.pos_x = window_width - rmenu_width;
+                }
+
+                if window_height < self.pos_y + rmenu_height {
+                    self.pos_y = window_height - rmenu_height;
+                }
+
+                self.menu_repositionned = true;
+            }
         }
         true
     }
 
-    fn view(&self, _ctx: &Context<Self>) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         let style = format!("left: {}px; top : {}px;", self.pos_x, self.pos_y);
+        if self.visible && !self.menu_repositionned {
+            ctx.link().send_message(Msg::RepositionMenu);
+        }
         html! {
-            <div id="rmenu" hidden={!self.visible} {style} class={"z-1000 absolute dark:bg-zinc-600 dark:text-white border-10 p-2 rounded-md border-zinc-500 whitespace-nowrap"}>
+            <div id="rmenu" hidden={!self.visible} {style} dir={"ltr"} class={"flex-row-reverse z-1000 absolute dark:bg-zinc-600 dark:text-white border-10 p-2 rounded-md border-zinc-500 whitespace-nowrap"}>
                 {self.content.clone()}
             </div>
         }
