@@ -7,11 +7,11 @@ edition = "2021"
 
 [dependencies]
 tchatchers_core = { path = "../tchatchers_core", features = ["cli"] }
-clap = { version = "4.2.4", features = ["derive"] }
+clap = { version = "4.2.7", features = ["derive"] }
 dialoguer = "0.10.4"
 sqlx = { version = "0.6", features = ["postgres"]}
 derive_more = "0.99.17"
-tokio = { version = "1.27.0", features = ["macros", "rt", "rt-multi-thread"] }
+tokio = { version = "1.28.1", features = ["macros", "rt", "rt-multi-thread"] }
 dotenv = "0.15.0"
 which = "4.4.0"
 validator = "0.16.0"
