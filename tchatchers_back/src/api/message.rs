@@ -4,7 +4,7 @@ use axum::{
     response::IntoResponse,
 };
 use tchatchers_core::{
-    profile::Profile, reported_message::ReportedMessage, ws_message::WsMessageContent,
+    profile::Profile,  ws_message::WsMessageContent, report::Report,
 };
 use uuid::Uuid;
 
@@ -56,7 +56,7 @@ pub async fn report_message(
     Path(message_id): Path<Uuid>,
     state: State<AppState>,
 ) -> impl IntoResponse {
-    match ReportedMessage::insert(user.user_id, message_id, &state.pg_pool).await {
+    match Report::message(user.user_id, &message_id, &state.pg_pool).await {
         Ok(_) => (StatusCode::OK, "Message reported"),
         Err(e) => {
             if let Some(database_err) = e.as_database_error() {

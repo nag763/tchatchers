@@ -14,7 +14,7 @@ use axum_extra::extract::cookie::Cookie;
 use axum_extra::extract::CookieJar;
 use tchatchers_core::authorization_token::AuthorizationToken;
 use tchatchers_core::refresh_token::RefreshToken;
-use tchatchers_core::reported_user::ReportedUser;
+use tchatchers_core::report::Report;
 use tchatchers_core::serializable_token::SerializableToken;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, UpdatableUser, User};
 use tokio::time::{sleep, Duration};
@@ -291,7 +291,7 @@ pub async fn report_user(
     Path(reported_user): Path<i32>,
     state: State<AppState>,
 ) -> impl IntoResponse {
-    match ReportedUser::insert(user.user_id, reported_user, &state.pg_pool).await {
+    match Report::user(user.user_id, reported_user, &state.pg_pool).await {
         Ok(_) => (StatusCode::OK, "User reported"),
         Err(e) => {
             if let Some(database_err) = e.as_database_error() {

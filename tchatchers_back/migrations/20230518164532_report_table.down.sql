@@ -1,3 +1,0 @@
--- Add down migration script here
-DROP TABLE REPORTED_MESSAGE;
-DROP TABLE REPORTED_USER;
