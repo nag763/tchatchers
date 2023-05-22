@@ -3,9 +3,7 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-use tchatchers_core::{
-    profile::Profile,  ws_message::WsMessageContent, report::Report,
-};
+use tchatchers_core::{profile::Profile, report::Report, ws_message::WsMessageContent};
 use uuid::Uuid;
 
 use crate::{extractor::JwtUserExtractor, AppState};
