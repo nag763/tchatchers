@@ -12,6 +12,7 @@ pub mod navlink;
 pub mod pool;
 pub mod profile;
 pub mod refresh_token;
+pub mod report;
 pub mod room;
 pub mod serializable_token;
 pub mod translation;

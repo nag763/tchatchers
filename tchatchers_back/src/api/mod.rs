@@ -5,6 +5,7 @@
 
 pub(crate) mod admin;
 pub(crate) mod locale;
+pub(crate) mod message;
 pub(crate) mod pfp;
 pub(crate) mod user;
 pub(crate) mod user_context;

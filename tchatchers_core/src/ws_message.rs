@@ -57,6 +57,8 @@ pub enum WsMessage {
     ErrorOnMessage(String),
     /// Inform that one has seen the messages.
     Seen(Vec<Uuid>),
+    /// Deletes a message
+    Delete(Uuid),
 }
 
 #[derive(
@@ -110,6 +112,21 @@ pub struct WsMessageContent {
 
 #[cfg(any(feature = "back", feature = "cli"))]
 impl WsMessageContent {
+    /// Get one message from the database.
+    ///
+    /// # Arguments
+    ///
+    /// - uuid: message id.
+    pub async fn get_one(uuid: &Uuid, pool: &sqlx::PgPool) -> Option<Self> {
+        sqlx::query_as(
+            "SELECT * FROM MESSAGE m INNER JOIN CHATTER c ON m.author = c.id WHERE uuid=$1 LIMIT 1",
+        )
+        .bind(uuid)
+        .fetch_optional(pool)
+        .await
+        .unwrap()
+    }
+
     /// Returns the first 100 messages for a given room name.
     ///
     /// # Arguments

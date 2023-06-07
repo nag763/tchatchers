@@ -11,3 +11,5 @@ pub mod chat_service;
 pub mod toast_bus;
 
 pub mod modal_bus;
+
+pub mod rmenu_bus;

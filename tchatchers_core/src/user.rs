@@ -197,8 +197,8 @@ pub struct PartialUser {
     pub last_update: DateTime<Utc>,
     /// The locale associated with the user.
     pub locale_id: i32,
+    // The profile of the user.
     #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
-    // The profile of the user
     pub profile: Profile,
 }
 

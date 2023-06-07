@@ -12,6 +12,7 @@ pub mod modal;
 pub mod navbar;
 pub mod navlink;
 pub mod not_found;
+pub mod right_menu;
 pub mod settings;
 pub mod signin;
 pub mod signup;
@@ -26,6 +27,7 @@ pub mod prelude {
     pub use super::modal::Modal;
     pub use super::navbar::NavbarHOC;
     pub use super::not_found::NotFound;
+    pub use super::right_menu::RightMenu;
     pub use super::settings::SettingsHOC;
     pub use super::signin::SignInHOC;
     pub use super::signup::SignUp;

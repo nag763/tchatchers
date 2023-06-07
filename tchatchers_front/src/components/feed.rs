@@ -208,6 +208,14 @@ impl Component for Feed {
                             }
                         }
                     }
+                    WsMessage::Delete(msg_uuid) => {
+                        self.ws
+                            .tx
+                            .clone()
+                            .try_send(serde_json::to_string(&message).unwrap())
+                            .unwrap();
+                        self.received_messages.retain(|msg| msg_uuid != msg.uuid);
+                    }
                     _ => {
                         self.is_connected = true;
                     }

@@ -19,7 +19,7 @@ use args::{message::MessageArgAction, CliArgs};
 use clap::Parser;
 use errors::CliError;
 
-use crate::actions::user::UserAction;
+use crate::actions::{report::ReportAction, user::UserAction};
 
 #[macro_use]
 extern crate derive_more;
@@ -105,6 +105,12 @@ async fn run_main() -> Result<(), CliError> {
             args::room::RoomArgAction::Activity => {
                 info!("Getting the activity...");
                 RoomAction::get_activity().await?
+            }
+        },
+        args::CliEntityArg::Report { action } => match action {
+            args::report::ReportArgs::Check => {
+                info!("Checking the latest reports...");
+                ReportAction::check_latest_reports().await?;
             }
         },
     }
