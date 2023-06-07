@@ -1,5 +1,6 @@
 use self::{
-    env::EnvArgAction, message::MessageArgAction, room::RoomArgAction, user::UserArgAction,
+    env::EnvArgAction, message::MessageArgAction, report::ReportArgs, room::RoomArgAction,
+    user::UserArgAction,
 };
 
 /// Provides functionality to manage the application's environment.
@@ -31,6 +32,8 @@ pub mod room;
 /// module allow users to create new users, retrieve information about existing users, update user
 /// information, and delete users from the application.
 pub mod user;
+
+pub mod report;
 
 /// The CLI arguments that will be parsed from the user input.
 #[derive(clap::Parser, Debug)]
@@ -68,5 +71,10 @@ pub enum CliEntityArg {
     Env {
         #[command(subcommand)]
         action: EnvArgAction,
+    },
+    #[command(about = "Menu to check the reports made by the users")]
+    Report {
+        #[command(subcommand)]
+        action: ReportArgs,
     },
 }

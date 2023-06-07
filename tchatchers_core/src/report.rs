@@ -13,7 +13,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 #[cfg(any(feature = "back", feature = "cli"))]
-use sqlx::{postgres::PgQueryResult, PgPool};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 /// Represents the kind of report that can be made.
@@ -32,7 +32,7 @@ pub enum ReportKind {
 
 /// Represents a report.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[cfg_attr(feature = "back", derive(sqlx::FromRow))]
+#[cfg_attr(any(feature = "back", feature = "cli"), derive(sqlx::FromRow))]
 pub struct Report {
     /// The ID of the report.
     pub id: i32,
@@ -40,8 +40,14 @@ pub struct Report {
     pub reporter_id: i32,
     /// The ID of the reported user.
     pub reported_id: Option<i32>,
+    /// The name of the reported.
+    pub reported_name: Option<String>,
+    /// The pfp of the reported.
+    pub reported_pfp: Option<String>,
     /// The UUID of the reported message.
     pub message_uuid: Option<Uuid>,
+    /// The message content.
+    pub message_content: Option<String>,
     /// The kind of report.
     #[cfg_attr(
         any(feature = "back", feature = "cli"),
@@ -52,8 +58,27 @@ pub struct Report {
     pub created_at: DateTime<Utc>,
 }
 
-#[cfg(feature = "back")]
 impl Report {
+    /// Retrieves all reports from the database.
+    ///
+    /// This function queries the database to fetch all reports, ordered by their creation timestamp
+    /// in descending order.
+    ///
+    /// # Arguments
+    ///
+    /// * `pool` - The PostgreSQL connection pool.
+    ///
+    /// # Returns
+    ///
+    /// Returns a `Result` containing a vector of `Report` instances if the operation was successful,
+    /// or an `sqlx::Error` if an error occurred during the database query.
+    #[cfg(feature = "cli")]
+    pub async fn get_all(pool: &PgPool) -> Result<Vec<Self>, sqlx::Error> {
+        sqlx::query_as("SELECT * FROM REPORT ORDER BY CREATED_AT DESC")
+            .fetch_all(pool)
+            .await
+    }
+
     /// Report a user.
     ///
     /// # Arguments
@@ -63,14 +88,16 @@ impl Report {
     /// - `pool`: The database connection pool.
     ///
     /// This function inserts a new entry in the `REPORT` table of the database to report a user. It takes the ID of the reporter and the ID of the reported user as arguments. The `report_kind_id` field is set to `ReportKind::Profile`.
-    ///
+    #[cfg(feature = "back")]
     pub async fn user(
         reporter_id: i32,
         reported_id: i32,
         pool: &PgPool,
-    ) -> Result<PgQueryResult, sqlx::Error> {
+    ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
         sqlx::query(
-            "INSERT INTO REPORT(reporter_id, reported_id, report_kind_id) VALUES ($1, $2, $3)",
+            "INSERT INTO REPORT(reporter_id, reported_id, reported_name, reported_pfp, report_kind_id) 
+            SELECT $1, id, name, pfp, $3 FROM CHATTER WHERE id = $2 
+            LIMIT 1",
         )
         .bind(reporter_id)
         .bind(reported_id)
@@ -88,13 +115,17 @@ impl Report {
     /// - `pool`: The database connection pool.
     ///
     /// This function inserts a new entry in the `REPORT` table of the database to report a message. It takes the ID of the reporter and the UUID of the reported message as arguments. The `report_kind_id` field is set to `ReportKind::Message`.
+    #[cfg(feature = "back")]
     pub async fn message(
         reporter_id: i32,
         message_uuid: &Uuid,
         pool: &PgPool,
-    ) -> Result<PgQueryResult, sqlx::Error> {
+    ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
         sqlx::query(
-            "INSERT INTO REPORT(reporter_id, message_uuid, report_kind_id) VALUES ($1, $2, $3)",
+            "
+            INSERT INTO REPORT(reporter_id, message_uuid, message_content, report_kind_id) 
+            SELECT $1, $2, content, $3 FROM MESSAGE WHERE UUID=$2 
+            LIMIT 1",
         )
         .bind(reporter_id)
         .bind(message_uuid)

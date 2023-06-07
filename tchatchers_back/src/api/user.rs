@@ -301,6 +301,7 @@ pub async fn report_user(
                     }
                 }
             }
+            eprintln!("{}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "An error happened while reporting this message",
