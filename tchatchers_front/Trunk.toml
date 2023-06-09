@@ -18,6 +18,3 @@ backend = "http://localhost:8080/api"
 [[proxy]]
 rewrite = "/static/"
 backend = "http://localhost:8080/static"
-
-[tools]
-wasm_bindgen = "0.2.84"
