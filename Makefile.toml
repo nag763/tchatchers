@@ -78,7 +78,7 @@ workspace = false
 
 [tasks.start-dev-style]
 cwd = "./tchatchers_front"
-args = ["tailwindcss", "-i", "main.css", "-o", "assets/tailwind.css", "-c", "tailwind.config.js", "--minify", "--watch", "src/"]
+args = ["tailwindcss@3.3.0", "-i", "main.css", "-o", "assets/tailwind.css", "-c", "tailwind.config.js", "--minify", "--watch", "src/"]
 command = "npx"
 workspace = false
 

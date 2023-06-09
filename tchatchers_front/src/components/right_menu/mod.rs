@@ -172,7 +172,7 @@ impl Component for RightMenu {
             ctx.link().send_message(Msg::RepositionMenu);
         }
         html! {
-            <div id="rmenu" hidden={!self.visible} {style} dir={"ltr"} class={"flex-row-reverse z-1000 absolute dark:bg-zinc-600 dark:text-white border-10 p-2 rounded-md border-zinc-500 whitespace-nowrap"}>
+            <div id="rmenu" hidden={!self.visible} {style} dir={"ltr"} class={"text-sm rounded flex-row-reverse z-1000 absolute bg-zinc-900 text-white drop-shadow-md p-2 dark:border-zinc-300 whitespace-nowrap"}>
                 {self.content.clone()}
             </div>
         }
