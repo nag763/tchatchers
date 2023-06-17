@@ -63,6 +63,7 @@ services:
       - "80:80"
       - "443:443"
   cli :
+    image: nag763/tchatchers_tct:latest
     volumes:
       - .env:/home/usr/tct/.env
     links:

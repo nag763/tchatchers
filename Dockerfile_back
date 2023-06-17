@@ -10,11 +10,11 @@ RUN apk add libressl-dev musl-dev
 
 RUN cargo install --path .
 
-FROM rust:1.70-alpine
+FROM alpine:latest
 
 WORKDIR /home/usr/back/
 
-COPY --from=builder /usr/local/cargo/bin/tchatchers_back /usr/local/cargo/bin/tchatchers_back
+COPY --from=builder /usr/local/cargo/bin/tchatchers_back /home/usr/back/tchatchers_back
 
 RUN adduser -D runner && chown -R runner ./
 
@@ -22,8 +22,8 @@ RUN mkdir static
 
 RUN chown -R runner static
 
-RUN chmod 111 /usr/local/cargo/bin/tchatchers_back
+RUN chmod 111 /home/usr/back/tchatchers_back
 
 USER runner
 
-CMD RUST_LOG=tower_http=info tchatchers_back
+CMD RUST_LOG=tower_http=info ./tchatchers_back
