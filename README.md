@@ -20,6 +20,7 @@
 * :sparkles: Simple yet elegant UI.
 * :book: Translated in several languages.
 * :lock: With little data collected and robust security, this app is completly secured.
+* :ship: This application is fully optimized to be as small as possible for production environments.
 
 ## How to access the application
 
