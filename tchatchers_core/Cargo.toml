@@ -5,27 +5,27 @@ edition = "2021"
 
 [features]
 back = ["dep:sqlx", "dep:rust-argon2", "dep:axum", "dep:axum-extra", "dep:cookie", "dep:redis", "dep:r2d2"]
-front = []
+front = ["uuid/js"]
 cli = ["dep:sqlx", "dep:rust-argon2"]
 
 
 [dependencies]
-chrono = { version = "0.4.26", features = ["serde"] }
+chrono = { version = "0.4.26", features = ["clock", "serde"], default-features = false }
 derivative = "2.2.0"
-jsonwebtoken = "8.3.0"
-rand = "0.8.5"
-rust-argon2 = { version = "1.0.0", optional = true}
-serde = { version = "1.0.163", features = ["derive", "rc"] }
-sqlx = { version = "0.6", features = ["runtime-async-std-native-tls", "postgres", "uuid", "chrono"], optional = true }
-uuid = { version = "1.3.3", features = ["v4", "serde", "js"] }
-validator = { version = "0.16.0", features = ["derive"] }
-axum = { version = "0.6.18", optional = true }
-regex = "1.8.4"
+jsonwebtoken = { default-features = false, version = "8.3.0" }
+rand = { default-features = false, version = "0.8.5" }
+rust-argon2 = { version = "1.0.0", optional = true, default-features = false }
+serde = { version = "1.0.163", features = ["rc"], default-features = false }
+sqlx = { version = "0.6", optional = true ,  features = ["runtime-async-std-native-tls", "postgres", "chrono", "uuid"], default-features = false }
+uuid = { version = "1.3.3", features = ["v4", "serde"], default-features = false }
+validator = { version = "0.16.0", features = ["derive"], default-features = false }
+axum = { version = "0.6.18", optional = true , default-features = false }
+regex = { default-features = false, version = "1.8.4" }
 lazy_static = "1.4.0"
-derive_more = "0.99.17"
+derive_more = { features = ["display"], default-features = false, version = "0.99.17" }
 log = "0.4.18"
 axum-extra = { version = "0.7.4", optional = true }
-time = "0.3.22"
+time = { default-features = false, version = "0.3.22" }
 cookie = { version = "0.17.0", optional = true }
-redis = { version = "0.23.0", optional = true, features = ["r2d2"] }
+redis = { version = "0.23.0", optional = true,  features = ["r2d2"], default-features = false }
 r2d2 = { version = "0.8.10", optional = true }

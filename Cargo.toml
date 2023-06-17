@@ -1,3 +1,13 @@
+[profile.release]
+lto = true
+codegen-units = 1
+
+[profile.release.package.tchatchers_back]
+strip = true
+
+[profile.release.package.tchatchers_front]
+opt-level = 'z'
+
 [workspace]
 
 members = [
@@ -6,3 +16,4 @@ members = [
     "tchatchers_front",
     "tchatchers_cli_tools"
 ]
+
