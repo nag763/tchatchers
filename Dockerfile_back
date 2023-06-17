@@ -10,7 +10,7 @@ RUN apk add libressl-dev musl-dev
 
 RUN cargo install --path .
 
-FROM rust:1.68-alpine
+FROM rust:1.70-alpine
 
 WORKDIR /home/usr/back/
 
