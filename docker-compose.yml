@@ -15,6 +15,7 @@ services:
     volumes:
       - redis:/data
   back :
+    image: nag763/tchatchers_back:latest
     user: "${UID:-1000}:${GID:-1000}"
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST:-pg.tchatche.rs}
@@ -38,10 +39,12 @@ services:
       - static:/home/usr/back/static
       - ./env:/home/usr/back/.env:ro
   doc:
+    image: nag763/tchatchers_doc:latest
     build: 
       context: ./ 
       dockerfile: Dockerfile_doc
   front :
+    image: nag763/tchatchers_front:latest
     volumes:
       - ${SSL_CERTIFICATE_PATH:-/dev/null}:/usr/nginx/home/certs/cert.crt:ro
       - ${SSL_CERTIFICATE_KEY:-/dev/null}:/usr/nginx/home/certs/key.pem:ro
