@@ -88,6 +88,12 @@ Most of the ways to install dependencies or packages won't be rexplained here si
 - Being able to run the tct crate of this project, this should print the help : `cargo r --bin tct`.
 - Docker and Docker Compose being installed on the station.
 
+### Recommended : Keep it simple
+
+You only need the docker-compose.yml file to start your production server as well as the `.env` and `nginx.conf`.
+
+It is recommended to only transfer the docker-compose.yml file to the target server and then generate the `.env` and `nginx.conf` ones without transferring the source code.
+
 ### Optional : Generate a self signed certificate
 
 You might want to generate a self signed certificate for HTTPs config, to do that, run the following with cargo-make :
