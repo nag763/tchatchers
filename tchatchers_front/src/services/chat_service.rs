@@ -17,7 +17,7 @@ pub struct WebsocketService {
 impl WebsocketService {
     pub fn new(room: &str, bearer: &str) -> Self {
         let location = web_sys::window().unwrap().location();
-        let host = "localhost:8080";
+        let host = location.host().unwrap();
         let protocol = location.protocol().unwrap();
         let ws_protocol = match protocol.as_str() {
             "https:" => "wss:",
