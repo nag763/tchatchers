@@ -60,7 +60,7 @@ pub fn app_button(props: &FormButtonProperties) -> Html {
         _ => "",
     };
     html! {
-        <button class={format!("shadow bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded {}", additionnal_class)} type={button_type} {onclick}>
+        <button class={format!("shadow bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded md:whitespace-nowrap {}", additionnal_class)} type={button_type} {onclick}>
             {&props.label}
         </button>
     }
