@@ -533,6 +533,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "clap-verbosity-flag"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1eef05769009513df2eb1c3b4613e7fad873a14c600ff025b08f250f59fee7de"
+dependencies = [
+ "clap",
+ "log",
+]
+
+[[package]]
 name = "clap_builder"
 version = "4.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2511,6 +2521,7 @@ version = "0.1.0"
 dependencies = [
  "askama",
  "clap",
+ "clap-verbosity-flag",
  "derive_more",
  "dialoguer",
  "dotenv",

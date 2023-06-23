@@ -27,8 +27,6 @@ use log::{debug, info};
 
 #[tokio::main]
 async fn main() -> ExitCode {
-    env_logger::init();
-
     match run_main().await {
         Ok(()) => {
             println!("The process ended with success.");
@@ -41,6 +39,9 @@ async fn main() -> ExitCode {
 /// Run the main logic and returns an exit code accordingly.
 async fn run_main() -> Result<(), CliError> {
     let args: CliArgs = CliArgs::parse();
+    env_logger::Builder::new()
+        .filter_level(args.verbose.log_level_filter())
+        .init();
     debug!("Parsed CLI args: {:?}", args);
 
     match args.env {

@@ -46,6 +46,8 @@ pub mod report;
 pub struct CliArgs {
     #[clap(subcommand)]
     pub entity: CliEntityArg,
+    #[command(flatten)]
+    pub verbose: clap_verbosity_flag::Verbosity,
     #[clap(long, short, value_hint = clap::ValueHint::FilePath, required=false, global=true, help="Precise a .env file.")]
     pub env: Option<std::path::PathBuf>,
 }
