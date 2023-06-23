@@ -72,9 +72,7 @@ impl Component for Feed {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let ws: WebsocketService = WebsocketService::new(
-            &ctx.props().room,
-        );
+        let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
         let cb = {
             let link = ctx.link().clone();
             move |msg| link.send_message(Msg::HandleWsInteraction(Box::new(msg)))
@@ -227,9 +225,7 @@ impl Component for Feed {
             }
             Msg::TryReconnect => {
                 gloo_console::log!("Try reconnect...");
-                let ws: WebsocketService = WebsocketService::new(
-                    &ctx.props().room,
-                );
+                let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
                 self.ws = ws;
                 self.ws
                     .tx
