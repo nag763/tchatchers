@@ -99,7 +99,7 @@ pub async fn authenticate(
             jwt.encode(&state.jwt_secret).unwrap(),
         ))
     } else {
-        Err((StatusCode::UNAUTHORIZED, "This user's access has been revoked, contact an admin if you believe you should access this service"))
+        Err((StatusCode::FORBIDDEN, "This user's access has been revoked, contact an admin if you believe you should access this service"))
     }
 }
 

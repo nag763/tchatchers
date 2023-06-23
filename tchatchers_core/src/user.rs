@@ -400,7 +400,7 @@ impl AuthenticableUser {
     /// - pool : The connection pool.
     pub async fn authenticate(&self, pool: &PgPool) -> Option<User> {
         let user: User =
-            sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1 AND is_authorized=true")
+            sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1")
                 .bind(&self.login)
                 .fetch_optional(pool)
                 .await
