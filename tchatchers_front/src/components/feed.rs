@@ -74,11 +74,6 @@ impl Component for Feed {
     fn create(ctx: &Context<Self>) -> Self {
         let ws: WebsocketService = WebsocketService::new(
             &ctx.props().room,
-            ctx.props()
-                .client_context
-                .bearer
-                .as_ref()
-                .expect("Bearer must be defined since AuthGuarded"),
         );
         let cb = {
             let link = ctx.link().clone();
@@ -234,7 +229,6 @@ impl Component for Feed {
                 gloo_console::log!("Try reconnect...");
                 let ws: WebsocketService = WebsocketService::new(
                     &ctx.props().room,
-                    ctx.props().client_context.bearer.as_ref().unwrap(),
                 );
                 self.ws = ws;
                 self.ws

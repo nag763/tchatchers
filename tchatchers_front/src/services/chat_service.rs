@@ -15,9 +15,9 @@ pub struct WebsocketService {
 }
 
 impl WebsocketService {
-    pub fn new(room: &str, bearer: &str) -> Self {
+    pub fn new(room: &str) -> Self {
         let location = web_sys::window().unwrap().location();
-        let host = location.host().unwrap();
+        let host = "localhost:8080";
         let protocol = location.protocol().unwrap();
         let ws_protocol = match protocol.as_str() {
             "https:" => "wss:",
@@ -30,7 +30,7 @@ impl WebsocketService {
             room,
             js_sys::Date::new_0().get_time()
         );
-        let ws = WebSocket::open_with_protocol(&ws_addr, bearer).unwrap();
+        let ws = WebSocket::open(&ws_addr).unwrap();
 
         let (mut write, mut read) = ws.split();
 
