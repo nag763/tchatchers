@@ -7,14 +7,14 @@ edition = "2021"
 
 [dependencies]
 tchatchers_core = { path = "../tchatchers_core", features = ["cli"] }
-clap = { version = "4.3.2", features = ["derive", "std"]}
+clap = { version = "4.3.6", features = ["derive", "std"]}
 dialoguer = { features = ["password"], default-features = false, version = "0.10.4" }
 sqlx = { version = "0.6", features = ["macros"], default-features = false }
 derive_more = { features = ["from", "constructor", "error"], default-features = false, version = "0.99.17" }
 tokio = { version = "1.28.2", features = ["macros", "rt-multi-thread"], default-features = false }
 dotenv = "0.15.0"
 which = "4.4.0"
-validator = "0.16.0"
-log = "0.4.18"
+validator = "0.16.1"
+log = "0.4.19"
 env_logger = { default-features = false, version = "0.10.0" }
 askama = { default-features = false, version = "0.12.0" }

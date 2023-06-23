@@ -19,5 +19,3 @@ backend = "http://localhost:8080/api"
 rewrite = "/static/"
 backend = "http://localhost:8080/static"
 
-[tools]
-wasm_bindgen = "0.2.86"
