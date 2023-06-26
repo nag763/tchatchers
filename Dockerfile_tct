@@ -10,16 +10,16 @@ RUN apk add libressl-dev musl-dev
 
 RUN cargo install --path .
 
-FROM rust:1.70-alpine
+FROM alpine:latest
 
 WORKDIR /home/usr/tct/
 
-COPY --from=builder /usr/local/cargo/bin/tct /usr/local/cargo/bin/tct
+COPY --from=builder /usr/local/cargo/bin/tct /home/usr/tct/tct
 
 RUN adduser -D runner && chown -R runner ./
 
-RUN chmod 111 /usr/local/cargo/bin/tct
+RUN chmod 111 /home/usr/tct/tct
 
 USER runner
 
-ENTRYPOINT ["tct"]
+ENTRYPOINT ["./tct"]
