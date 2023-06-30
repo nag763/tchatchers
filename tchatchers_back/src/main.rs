@@ -83,8 +83,10 @@ pub struct AppState {
     ///
     /// Used to cache the locales from the database.
     locale_manager: LocaleManager,
-    /// Redis connection pool
-    redis_pool: Pool<Client>,
+    /// Redis session pool.
+    session_pool: Pool<Client>,
+    /// Redis async pool.
+    async_pool: Pool<Client>,
 }
 
 #[tokio::main]
@@ -101,7 +103,8 @@ async fn main() {
     let refresh_token_secret = std::env::var("REFRESH_TOKEN_SECRET")
         .expect("No refresh token signature key has been defined");
     let pg_pool = tchatchers_core::pool::get_pg_pool().await;
-    let redis_pool = tchatchers_core::pool::get_redis_pool();
+    let session_pool = tchatchers_core::pool::get_session_pool();
+    let async_pool = tchatchers_core::pool::get_async_pool();
     sqlx::migrate!()
         .run(&pg_pool)
         .await
@@ -114,7 +117,8 @@ async fn main() {
         jwt_secret,
         txs: Arc::new(Mutex::new(WsRooms::default())),
         pg_pool,
-        redis_pool,
+        session_pool,
+        async_pool,
     };
 
     let app = Router::new()

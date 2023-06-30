@@ -10,9 +10,9 @@
 use std::str::FromStr;
 
 use log::LevelFilter;
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "async"))]
 use r2d2::Pool;
-#[cfg(feature = "back")]
+#[cfg(any(feature = "back", feature = "async"))]
 use redis::Client;
 use sqlx::postgres::PgConnectOptions;
 use sqlx::postgres::PgPoolOptions;
@@ -46,9 +46,17 @@ pub async fn get_pg_pool() -> PgPool {
 }
 
 #[cfg(feature = "back")]
-pub fn get_redis_pool() -> Pool<Client> {
+pub fn get_session_pool() -> Pool<Client> {
     let redis_host = std::env::var("REDIS_HOST").expect("No redis host defined in .env");
     let redis_port = std::env::var("REDIS_PORT").expect("No redis port defined in .env");
-    let client = redis::Client::open(format!("redis://{redis_host}:{redis_port}")).unwrap();
+    let client = redis::Client::open(format!("redis://{redis_host}:{redis_port}/1")).unwrap();
+    r2d2::Pool::builder().max_size(15).build(client).unwrap()
+}
+
+#[cfg(any(feature = "back", feature = "async"))]
+pub fn get_async_pool() -> Pool<Client> {
+    let redis_host = std::env::var("REDIS_HOST").expect("No redis host defined in .env");
+    let redis_port = std::env::var("REDIS_PORT").expect("No redis port defined in .env");
+    let client = redis::Client::open(format!("redis://{redis_host}:{redis_port}/2")).unwrap();
     r2d2::Pool::builder().max_size(15).build(client).unwrap()
 }

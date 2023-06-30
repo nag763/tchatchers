@@ -5,5 +5,7 @@ edition = "2021"
 
 [dependencies]
 dotenv = { version = "0.15.0", default-features = false }
+env_logger = "0.10.0"
+log = "0.4.19"
 tchatchers_core = { path = "../tchatchers_core" , features = ["async"] }
-tokio = { version = "1.28.2", default-features = false, features = ["rt", "macros", "rt-multi-thread"] }
+tokio = { version = "1.28.2", default-features = false, features = ["rt", "macros", "rt-multi-thread", "time"] }

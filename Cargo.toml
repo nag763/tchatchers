@@ -14,6 +14,7 @@ members = [
     "tchatchers_core",
     "tchatchers_back",
     "tchatchers_front",
-    "tchatchers_cli_tools"
+    "tchatchers_cli_tools",
+    "tchatchers_async"
 ]
 
