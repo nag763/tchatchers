@@ -6,19 +6,21 @@
 //! The user is declined under different structs so that only the revelant data
 //! is shared between processed and components.
 
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
+use crate::async_message::AsyncOperationPGType;
 use crate::common::RE_LIMITED_CHARS;
 use crate::profile::Profile;
 use chrono::DateTime;
 use chrono::Utc;
-#[cfg(any(feature = "back", feature = "cli"))]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use rand::Rng;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-#[cfg(any(feature = "back", feature = "cli"))]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use sqlx::postgres::PgQueryResult;
-#[cfg(any(feature = "back", feature = "cli"))]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use sqlx::FromRow;
-#[cfg(any(feature = "back", feature = "cli"))]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use sqlx::PgPool;
 use validator::Validate;
 use validator::ValidationError;
@@ -32,7 +34,10 @@ lazy_static! {
 /// The in base structure, which should never be shared between components and
 /// apps.
 #[derive(Serialize, Deserialize, Debug, derivative::Derivative)]
-#[cfg_attr(any(feature = "back", feature = "cli"), derive(FromRow))]
+#[cfg_attr(
+    any(feature = "back", feature = "cli", feature = "async"),
+    derive(FromRow)
+)]
 #[serde(rename_all = "camelCase")]
 #[derivative(Default)]
 pub struct User {
@@ -59,11 +64,14 @@ pub struct User {
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
     pub last_update: DateTime<Utc>,
     /// The user's profile.
-    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
+    #[cfg_attr(
+        any(feature = "back", feature = "cli", feature = "async"),
+        sqlx(rename = "profile_id")
+    )]
     pub profile: Profile,
 }
 
-#[cfg(any(feature = "back", feature = "cli"))]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 impl User {
     /// Find a user by ID in the database.
     ///
@@ -164,6 +172,16 @@ impl User {
             .bind(is_authorized)
             .bind(login)
             .execute(pool)
+            .await
+    }
+
+    pub async fn mark_users_as_logged(
+        userid_identifier: Vec<AsyncOperationPGType>,
+        pool: &PgPool,
+    ) -> Result<Vec<AsyncOperationPGType>, sqlx::Error> {
+        sqlx::query_as("SELECT queue_id FROM update_last_log_on($1)")
+            .bind(&userid_identifier)
+            .fetch_all(pool)
             .await
     }
 }

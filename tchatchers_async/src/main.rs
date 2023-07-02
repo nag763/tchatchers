@@ -1,6 +1,6 @@
 use tchatchers_core::{
-    async_message::{AsyncMessage, AsyncQueue, processor::process},
-    pool::{get_async_pool, self, get_pg_pool},
+    async_message::{processor::process, AsyncMessage, AsyncQueue},
+    pool::{self, get_async_pool, get_pg_pool},
 };
 use tokio::{task, time};
 

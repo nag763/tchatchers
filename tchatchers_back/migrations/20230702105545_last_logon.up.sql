@@ -1,0 +1,3 @@
+-- Add up migration script here
+ALTER TABLE CHATTER
+ADD COLUMN LAST_LOGON TIMESTAMPTZ;
