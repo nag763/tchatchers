@@ -1,6 +1,6 @@
 use tchatchers_core::{
-    async_message::{AsyncMessage, AsyncQueue},
-    pool::get_async_pool,
+    async_message::{AsyncMessage, AsyncQueue, processor::process},
+    pool::{get_async_pool, self, get_pg_pool},
 };
 use tokio::{task, time};
 
@@ -15,6 +15,7 @@ async fn main() {
     debug!("Env inited");
 
     let redis_conn = get_async_pool();
+    let pg_pool = get_pg_pool().await;
     debug!("Redis pool acquired with success");
     let logg_async = task::spawn(async move {
         debug!("Building log in pool.");
@@ -26,7 +27,7 @@ async fn main() {
             debug!("Waiting for next");
             info!("Waiting to process events");
             if let Some(events) = AsyncMessage::read_events(AsyncQueue::LoggedUsers, &mut conn) {
-                trace!("{events:?}");
+                process(AsyncQueue::LoggedUsers, events, pg_pool.clone());
             }
             info!("Done");
         }
