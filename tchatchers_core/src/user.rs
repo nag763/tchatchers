@@ -184,7 +184,7 @@ impl User {
         sqlx::query(
             "
             CREATE TEMPORARY TABLE tmp_user_update(
-                entity_id integer NOT NULL,
+                entity_id integer NOT NULL UNIQUE,
                 queue_id text NOT NULL,
                 timestamp TIMESTAMPTZ NOT NULL,
                 is_updated boolean default false
@@ -196,7 +196,11 @@ impl User {
 
         for operation in userid_identifier {
             sqlx::query(
-                "INSERT INTO tmp_user_update(entity_id, queue_id, timestamp) VALUES ($1, $2, $3)",
+                "
+                INSERT INTO tmp_user_update(entity_id, queue_id, timestamp) 
+                VALUES ($1, $2, $3)
+                ON CONFLICT ON CONSTRAINT tmp_user_update_entity_id_key
+                DO NOTHING",
             )
             .bind(operation.entity_id)
             .bind(operation.queue_id)
