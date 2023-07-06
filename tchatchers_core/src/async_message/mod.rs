@@ -1,9 +1,10 @@
 pub mod async_payload;
 pub mod processor;
 
+use chrono::Utc;
 use derive_more::Display;
+use redis::Commands;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgHasArrayType;
 
 use self::async_payload::AsyncPayload;
 
@@ -17,16 +18,19 @@ pub enum AsyncQueue {
     LoggedUsers,
 }
 
-#[derive(sqlx::Type, sqlx::FromRow, Clone, Debug)]
-pub struct AsyncOperationPGType {
-    entity_id: i32,
-    queue_id: String,
+impl AsyncQueue {
+    pub(crate) fn delete(&self, list: Vec<AsyncPayload>, conn: &mut redis::Connection) -> usize {
+        let id_list: Vec<String> = list.into_iter().filter_map(|li| li.id).collect();
+        debug!("[{self}] IDs to delete : {id_list:#?}");
+        conn.xdel(self.to_string(), &id_list).unwrap()
+    }
 }
 
-impl PgHasArrayType for AsyncOperationPGType {
-    fn array_type_info() -> sqlx::postgres::PgTypeInfo {
-        sqlx::postgres::PgTypeInfo::with_name("chatter_logged_on")
-    }
+#[derive(sqlx::FromRow, Clone, Debug)]
+pub struct AsyncOperationPGType {
+    pub entity_id: i32,
+    pub queue_id: String,
+    pub timestamp: chrono::DateTime<Utc>,
 }
 
 impl AsyncMessage {
@@ -38,7 +42,7 @@ impl AsyncMessage {
 
     pub fn spawn(self, conn: &mut redis::Connection) {
         let queue_name = self.get_queue().to_string();
-        AsyncPayload::new(&queue_name, self).spawn(&queue_name.as_str(), conn);
+        AsyncPayload::new(&queue_name, self).spawn(queue_name.as_str(), conn);
     }
 
     pub fn read_events(

@@ -178,11 +178,49 @@ impl User {
     pub async fn mark_users_as_logged(
         userid_identifier: Vec<AsyncOperationPGType>,
         pool: &PgPool,
-    ) -> Result<Vec<AsyncOperationPGType>, sqlx::Error> {
-        sqlx::query_as("SELECT queue_id FROM update_last_log_on($1)")
-            .bind(&userid_identifier)
-            .fetch_all(pool)
+    ) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
+
+        sqlx::query(
+            "
+            CREATE TEMPORARY TABLE tmp_user_update(
+                entity_id integer NOT NULL,
+                queue_id text NOT NULL,
+                timestamp TIMESTAMPTZ NOT NULL,
+                is_updated boolean default false
+            ) ON COMMIT DROP;
+        ",
+        )
+        .execute(&mut tx)
+        .await?;
+
+        for operation in userid_identifier {
+            sqlx::query(
+                "INSERT INTO tmp_user_update(entity_id, queue_id, timestamp) VALUES ($1, $2, $3)",
+            )
+            .bind(operation.entity_id)
+            .bind(operation.queue_id)
+            .bind(operation.timestamp)
+            .execute(&mut tx)
+            .await?;
+        }
+
+        sqlx::query("UPDATE CHATTER c SET LAST_LOGON = tr.timestamp FROM tmp_user_update tr WHERE tr.entity_id = c.id").execute(&mut tx).await?;
+        sqlx::query("UPDATE tmp_user_update tr SET is_updated=true FROM CHATTER c WHERE c.id = tr.entity_id").execute(&mut tx).await?;
+        sqlx::query("UPDATE tmp_user_update tr SET is_updated=true FROM DELETED_RECORD dr WHERE tr.entity_id = dr.RECORD_ID AND dr.ORIGIN = 'CHATTER' AND tr.is_updated=false").execute(&mut tx).await?;
+
+        sqlx::query("
+        INSERT INTO PROCESS_REPORT(process_kind, successfull_records, failed_records) 
+        SELECT 'USER_LOGON', sum(case when is_updated then 1 else 0 end), sum(case when is_updated then 0 else 1 end) 
+        FROM tmp_user_update
+        ")
+            .execute(&mut tx)
             .await
+            .unwrap();
+
+        tx.commit().await.unwrap();
+
+        Ok(())
     }
 }
 
