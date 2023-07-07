@@ -210,8 +210,6 @@ impl User {
         }
 
         sqlx::query("UPDATE CHATTER c SET LAST_LOGON = tr.timestamp FROM tmp_user_update tr WHERE tr.entity_id = c.id").execute(&mut tx).await?;
-        sqlx::query("UPDATE tmp_user_update tr SET is_updated=true FROM CHATTER c WHERE c.id = tr.entity_id").execute(&mut tx).await?;
-        sqlx::query("UPDATE tmp_user_update tr SET is_updated=true FROM DELETED_RECORD dr WHERE tr.entity_id = dr.RECORD_ID AND dr.ORIGIN = 'CHATTER' AND tr.is_updated=false").execute(&mut tx).await?;
 
         sqlx::query("
         INSERT INTO PROCESS_REPORT(process_kind, successfull_records, failed_records) 

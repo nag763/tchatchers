@@ -1,4 +1,4 @@
-use std::{future::Future, pin::Pin, collections::HashMap};
+use std::{collections::HashMap, future::Future, pin::Pin};
 
 use sqlx::PgPool;
 
@@ -7,16 +7,20 @@ use crate::user::User;
 use super::{async_payload::AsyncPayload, AsyncMessage, AsyncOperationPGType, AsyncQueue};
 
 async fn process_logged_users(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
-    let mut entities_to_update: HashMap<i32, AsyncOperationPGType> = HashMap::with_capacity(payloads.capacity());
+    let mut entities_to_update: HashMap<i32, AsyncOperationPGType> =
+        HashMap::with_capacity(payloads.capacity());
     for payload in payloads {
         let AsyncMessage::LoggedUsers(id) = payload.entity;
 
         if let Some(payload_id) = &payload.id {
-            entities_to_update.insert(id, AsyncOperationPGType {
-                entity_id: id,
-                queue_id: payload_id.clone(),
-                timestamp: payload.timestamp,
-            });
+            entities_to_update.insert(
+                id,
+                AsyncOperationPGType {
+                    entity_id: id,
+                    queue_id: payload_id.clone(),
+                    timestamp: payload.timestamp,
+                },
+            );
         }
     }
 
