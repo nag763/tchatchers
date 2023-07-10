@@ -14,20 +14,30 @@ async fn main() {
     dotenv::dotenv().ok();
     debug!("Env inited");
 
-    let redis_conn = get_async_pool();
+    let redis_conn = get_async_pool().await;
     debug!("Redis pool acquired with success");
     let pg_pool = get_pg_pool().await;
     debug!("PG pool acquired with success");
     let logg_async = task::spawn(async move {
         debug!("Building log in pool.");
-        let mut conn = redis_conn.get().unwrap();
         let mut interval = time::interval(time::Duration::from_secs(60));
         loop {
             trace!("Ticking clock");
             interval.tick().await;
             info!("Waiting to process events");
-            if let Some(events) = AsyncMessage::read_events(AsyncQueue::LoggedUsers, &mut conn) {
-                let _ = process(AsyncQueue::LoggedUsers, events, &pg_pool, &mut conn).await;
+            if let Some(events) = AsyncMessage::read_events(
+                AsyncQueue::LoggedUsers,
+                &mut redis_conn.get().await.unwrap(),
+            )
+            .await
+            {
+                let _ = process(
+                    AsyncQueue::LoggedUsers,
+                    events,
+                    &pg_pool,
+                    &mut redis_conn.get().await.unwrap(),
+                )
+                .await;
             }
             info!("Done");
         }

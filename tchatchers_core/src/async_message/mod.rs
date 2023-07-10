@@ -3,7 +3,7 @@ pub mod processor;
 
 use chrono::Utc;
 use derive_more::Display;
-use redis::Commands;
+use redis::AsyncCommands;
 use serde::{Deserialize, Serialize};
 
 use self::async_payload::AsyncPayload;
@@ -19,10 +19,14 @@ pub enum AsyncQueue {
 }
 
 impl AsyncQueue {
-    pub(crate) fn delete(&self, list: Vec<AsyncPayload>, conn: &mut redis::Connection) -> usize {
+    pub(crate) async fn delete(
+        &self,
+        list: Vec<AsyncPayload>,
+        conn: &mut redis::aio::Connection,
+    ) -> usize {
         let id_list: Vec<String> = list.into_iter().filter_map(|li| li.id).collect();
         debug!("[{self}] IDs to delete : {id_list:#?}");
-        conn.xdel(self.to_string(), &id_list).unwrap()
+        conn.xdel(self.to_string(), &id_list).await.unwrap()
     }
 }
 
@@ -40,15 +44,18 @@ impl AsyncMessage {
         }
     }
 
-    pub fn spawn(self, conn: &mut redis::Connection) {
+    pub async fn spawn(self, conn: &mut redis::aio::Connection) {
         let queue_name = self.get_queue().to_string();
-        AsyncPayload::new(&queue_name, self).spawn(queue_name.as_str(), conn);
+        let _id = AsyncPayload::new(&queue_name, self)
+            .spawn(queue_name.as_str(), conn)
+            .await
+            .unwrap();
     }
 
-    pub fn read_events(
+    pub async fn read_events(
         queue: AsyncQueue,
-        conn: &mut redis::Connection,
+        conn: &mut redis::aio::Connection,
     ) -> Option<Vec<AsyncPayload>> {
-        AsyncPayload::read_events(&queue.to_string(), conn)
+        AsyncPayload::read_events(&queue.to_string(), conn).await
     }
 }

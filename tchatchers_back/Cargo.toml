@@ -23,3 +23,4 @@ sqlx = {features = ["uuid"], version = "0.6.3" }
 tower = { default-features = false, version = "0.4.13" }
 r2d2 = "0.8.10"
 redis = { default-features = false, version = "0.23.0" }
+bb8-redis = "0.13.1"

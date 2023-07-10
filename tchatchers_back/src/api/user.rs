@@ -92,9 +92,10 @@ pub async fn authenticate(
             token
         };
         {
-            let mut redis_conn = state.async_pool.get();
-            let redis_conn_unwrapped = redis_conn.as_deref_mut().unwrap();
-            AsyncMessage::LoggedUsers(user.id).spawn(redis_conn_unwrapped);
+            let mut redis_conn = state.async_pool.get().await.unwrap();
+            AsyncMessage::LoggedUsers(user.id)
+                .spawn(&mut redis_conn)
+                .await;
         }
         let jwt: AuthorizationToken = AuthorizationToken::from(user);
         Ok((
@@ -178,9 +179,10 @@ pub async fn reauthenticate(
 
     // Queue the information that user reauthenticated.
     {
-        let mut redis_conn = state.async_pool.get();
-        let redis_conn_unwrapped = redis_conn.as_deref_mut().unwrap();
-        AsyncMessage::LoggedUsers(user.id).spawn(redis_conn_unwrapped);
+        let mut redis_conn = state.async_pool.get().await.unwrap();
+        AsyncMessage::LoggedUsers(user.id)
+            .spawn(&mut redis_conn)
+            .await;
     }
 
     let encoded_jwt: String = AuthorizationToken::from(user)

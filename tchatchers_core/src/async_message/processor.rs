@@ -43,13 +43,13 @@ pub async fn process(
     queue: AsyncQueue,
     messages: Vec<AsyncPayload>,
     pg_pool: &PgPool,
-    redis_conn: &mut redis::Connection,
+    redis_conn: &mut redis::aio::Connection,
 ) {
     let number_of_messages = messages.len();
     let processor = get_processor(queue, &messages, pg_pool);
     processor.await;
     info!("[{queue}] {number_of_messages} Messages passed");
-    let number_of_id_deleted = queue.delete(messages, redis_conn);
+    let number_of_id_deleted = queue.delete(messages, redis_conn).await;
     if number_of_id_deleted != number_of_messages {
         warn!("[{queue}] The number of ID deleted from the queue doesn't match the number of initial elements : Messages ({number_of_messages}) ; Deleted ({number_of_id_deleted})")
     } else {

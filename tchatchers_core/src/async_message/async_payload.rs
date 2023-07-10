@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use redis::{
     streams::{StreamReadOptions, StreamReadReply},
-    Commands,
+    AsyncCommands, RedisError,
 };
 use serde::{Deserialize, Serialize};
 
@@ -98,15 +98,24 @@ impl AsyncPayload {
         }
     }
 
-    pub(crate) fn spawn(self, queue_name: &str, conn: &mut redis::Connection) {
+    pub(crate) async fn spawn(
+        self,
+        queue_name: &str,
+        conn: &mut redis::aio::Connection,
+    ) -> Result<String, RedisError> {
         let redis_payload: [(String, String); 2] = self.into();
-        redis::Cmd::xadd(queue_name, "*", &redis_payload).execute(conn);
-        debug!("[{queue_name}] Event registered");
+        let event_id: String = conn.xadd(queue_name, "*", &redis_payload).await?;
+        debug!("[{queue_name}] Event #{event_id} registered");
+        Ok(event_id)
     }
 
-    pub(crate) fn read_events(queue_name: &str, conn: &mut redis::Connection) -> Option<Vec<Self>> {
+    pub(crate) async fn read_events(
+        queue_name: &str,
+        conn: &mut redis::aio::Connection,
+    ) -> Option<Vec<Self>> {
         let stream_events: Option<StreamReadReply> = conn
             .xread_options(&[queue_name], &["0"], &DEFAULT_EVENT_OPTIONS)
+            .await
             .unwrap();
         if let Some(stream_events) = stream_events {
             let mut events: Vec<Self> = Vec::new();
@@ -132,7 +141,7 @@ impl AsyncPayload {
             trace!("[{queue_name}] Events : \n{:#?}", events);
             if !rejects.is_empty() {
                 warn!("[{queue_name}] Reject list isn't empty, rejects will be deleted.");
-                let events: i32 = conn.xdel(&[queue_name], &rejects).unwrap();
+                let events: i32 = conn.xdel(&[queue_name], &rejects).await.unwrap();
                 info!("[{queue_name}] {events} rejects deleted.");
             }
             Some(events)

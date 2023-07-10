@@ -12,7 +12,7 @@ use crate::common::RE_LIMITED_CHARS;
 use crate::profile::Profile;
 use chrono::DateTime;
 use chrono::Utc;
-#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
+#[cfg(any(feature = "back", feature = "cli"))]
 use rand::Rng;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -210,6 +210,8 @@ impl User {
         }
 
         sqlx::query("UPDATE CHATTER c SET LAST_LOGON = tr.timestamp FROM tmp_user_update tr WHERE tr.entity_id = c.id").execute(&mut tx).await?;
+        sqlx::query("UPDATE tmp_user_update tr SET is_updated=true FROM CHATTER c WHERE tr.entity_id = c.id").execute(&mut tx).await?;
+
 
         sqlx::query("
         INSERT INTO PROCESS_REPORT(process_kind, successfull_records, failed_records) 
