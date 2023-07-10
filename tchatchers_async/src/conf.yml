@@ -1,0 +1,4 @@
+- logged_users:
+  queue: LoggedUsers
+  interval: 60
+  description: "Asynchronous queue to mark users as logged in"

@@ -13,7 +13,7 @@ pub enum AsyncMessage {
     LoggedUsers(i32),
 }
 
-#[derive(Debug, Clone, Copy, Display)]
+#[derive(Debug, Clone, Copy, Display, Serialize, Deserialize)]
 pub enum AsyncQueue {
     LoggedUsers,
 }
