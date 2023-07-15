@@ -1,16 +1,20 @@
 use std::{collections::HashMap, future::Future, pin::Pin};
 
 use sqlx::PgPool;
+use uuid::Uuid;
 
-use crate::user::User;
+use crate::{user::User, ws_message::WsMessageContent};
 
 use super::{async_payload::AsyncPayload, AsyncMessage, AsyncOperationPGType, AsyncQueue};
 
 async fn process_logged_users(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
-    let mut entities_to_update: HashMap<i32, AsyncOperationPGType> =
+    let mut entities_to_update: HashMap<i32, AsyncOperationPGType<i32>> =
         HashMap::with_capacity(payloads.capacity());
     for payload in payloads {
-        let AsyncMessage::LoggedUsers(id) = payload.entity;
+        let AsyncMessage::LoggedUser(id) = payload.entity else {
+            warn!("Entity {:?} isn't matching the expected format", payload.id);
+            continue;
+        };
 
         if let Some(payload_id) = &payload.id {
             entities_to_update.insert(
@@ -29,6 +33,33 @@ async fn process_logged_users(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
         .unwrap();
 }
 
+async fn messages_seen(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
+    let mut entities_to_update: HashMap<Uuid, AsyncOperationPGType<Uuid>> =
+        HashMap::with_capacity(payloads.capacity());
+
+    for payload in payloads {
+        let AsyncMessage::MessageSeen(id) = payload.entity else {
+            warn!("Entity {:?} isn't matching the expected format", payload.id);
+            continue;
+        };
+
+        if let Some(payload_id) = &payload.id {
+            entities_to_update.insert(
+                id,
+                AsyncOperationPGType {
+                    entity_id: id,
+                    queue_id: payload_id.clone(),
+                    timestamp: payload.timestamp,
+                },
+            );
+        }
+    }
+
+    WsMessageContent::mark_as_seen_async(entities_to_update.into_values().collect(), pool)
+        .await
+        .unwrap();
+}
+
 fn get_processor<'a>(
     queue: AsyncQueue,
     payloads: &'a Vec<AsyncPayload>,
@@ -36,6 +67,7 @@ fn get_processor<'a>(
 ) -> Pin<Box<dyn Future<Output = ()> + Send + 'a>> {
     match queue {
         AsyncQueue::LoggedUsers => return Box::pin(process_logged_users(payloads, pool)),
+        AsyncQueue::MessagesSeen => return Box::pin(messages_seen(payloads, pool)),
     }
 }
 

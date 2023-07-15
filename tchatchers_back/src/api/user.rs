@@ -93,7 +93,7 @@ pub async fn authenticate(
         };
         {
             let mut redis_conn = state.async_pool.get().await.unwrap();
-            AsyncMessage::LoggedUsers(user.id)
+            AsyncMessage::LoggedUser(user.id)
                 .spawn(&mut redis_conn)
                 .await;
         }
@@ -180,7 +180,7 @@ pub async fn reauthenticate(
     // Queue the information that user reauthenticated.
     {
         let mut redis_conn = state.async_pool.get().await.unwrap();
-        AsyncMessage::LoggedUsers(user.id)
+        AsyncMessage::LoggedUser(user.id)
             .spawn(&mut redis_conn)
             .await;
     }

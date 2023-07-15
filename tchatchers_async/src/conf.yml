@@ -2,3 +2,7 @@
   queue: LoggedUsers
   interval: 60
   description: "Asynchronous queue to mark users as logged in"
+- read_messages:
+  queue: MessagesSeen
+  interval: 15
+  description: "Mark messages as read"

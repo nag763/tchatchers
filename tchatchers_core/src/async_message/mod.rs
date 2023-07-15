@@ -10,12 +10,14 @@ use self::async_payload::AsyncPayload;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Display)]
 pub enum AsyncMessage {
-    LoggedUsers(i32),
+    LoggedUser(i32),
+    MessageSeen(uuid::Uuid),
 }
 
 #[derive(Debug, Clone, Copy, Display, Serialize, Deserialize)]
 pub enum AsyncQueue {
     LoggedUsers,
+    MessagesSeen,
 }
 
 impl AsyncQueue {
@@ -31,8 +33,8 @@ impl AsyncQueue {
 }
 
 #[derive(sqlx::FromRow, Clone, Debug)]
-pub struct AsyncOperationPGType {
-    pub entity_id: i32,
+pub struct AsyncOperationPGType<T> {
+    pub entity_id: T,
     pub queue_id: String,
     pub timestamp: chrono::DateTime<Utc>,
 }
@@ -40,7 +42,8 @@ pub struct AsyncOperationPGType {
 impl AsyncMessage {
     fn get_queue(&self) -> AsyncQueue {
         match self {
-            AsyncMessage::LoggedUsers(_) => AsyncQueue::LoggedUsers,
+            AsyncMessage::LoggedUser(_) => AsyncQueue::LoggedUsers,
+            AsyncMessage::MessageSeen(_) => AsyncQueue::MessagesSeen,
         }
     }
 

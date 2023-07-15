@@ -7,7 +7,7 @@
 //! is shared between processed and components.
 
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
-use crate::async_message::AsyncOperationPGType;
+use crate::async_message::{AsyncOperationPGType, AsyncQueue};
 use crate::common::RE_LIMITED_CHARS;
 use crate::profile::Profile;
 use chrono::DateTime;
@@ -176,7 +176,7 @@ impl User {
     }
 
     pub async fn mark_users_as_logged(
-        userid_identifier: Vec<AsyncOperationPGType>,
+        userid_identifier: Vec<AsyncOperationPGType<i32>>,
         pool: &PgPool,
     ) -> Result<(), sqlx::Error> {
         let mut tx = pool.begin().await?;
@@ -214,9 +214,10 @@ impl User {
 
         sqlx::query("
         INSERT INTO PROCESS_REPORT(process_kind, successfull_records, failed_records) 
-        SELECT 'USER_LOGON', sum(case when is_updated then 1 else 0 end), sum(case when is_updated then 0 else 1 end) 
+        SELECT $1, sum(case when is_updated then 1 else 0 end), sum(case when is_updated then 0 else 1 end) 
         FROM tmp_user_update
         ")
+            .bind(AsyncQueue::LoggedUsers.to_string())
             .execute(&mut tx)
             .await
             .unwrap();
@@ -234,7 +235,10 @@ impl User {
 #[derive(
     Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash,
 )]
-#[cfg_attr(any(feature = "back", feature = "cli"), derive(FromRow))]
+#[cfg_attr(
+    any(feature = "back", feature = "cli", feature = "async"),
+    derive(FromRow)
+)]
 #[serde(rename_all = "camelCase")]
 #[derivative(Default)]
 pub struct PartialUser {
