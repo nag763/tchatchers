@@ -11,14 +11,14 @@ tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 sqlx-core = { version = "0.6.3", default-features = false }
 dotenv = "0.15.0"
 futures-util = { default-features = false, version = "0.3.28" }
-serde_json = { default-features = false, version = "1.0.100" }
+serde_json = { default-features = false, version = "1.0.102" }
 uuid = { version = "1.4.0", default-features = false }
 tower-http = { version = "0.4.1", features = ["fs", "trace", "util", "request-id", "sensitive-headers"], default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"], default-features = false }
 axum-extra = { version = "0.7.4", features = ["cookie"] }
 tracing = { default-features = false, version = "0.1.37" }
 validator = { version = "0.16.1"}
-serde = { default-features = false, version = "1.0.166" }
+serde = { default-features = false, version = "1.0.171" }
 sqlx = {features = ["uuid"], version = "0.6.3" }
 tower = { default-features = false, version = "0.4.13" }
 bb8-redis = "0.13.1"

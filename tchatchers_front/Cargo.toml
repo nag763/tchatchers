@@ -8,8 +8,8 @@ futures = "0.3.28"
 gloo-console = "0.2.3"
 gloo-net = "0.2.6"
 gloo-timers = "0.2.6"
-serde = { version = "1.0.166", features = ["derive"] }
-serde_json = "1.0.100"
+serde = { version = "1.0.171", features = ["derive"] }
+serde_json = "1.0.102"
 wasm-bindgen = "0.2.87"
 wasm-bindgen-futures = "0.4.37"
 web-sys = { version = "0.3.64", features = ["HtmlDocument", "FileReader", "Event"] }
