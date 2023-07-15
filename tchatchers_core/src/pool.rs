@@ -9,7 +9,7 @@
 
 use std::str::FromStr;
 
-#[cfg(any(feature = "back", feature = "async"))]
+#[cfg(any(feature = "back", feature = "async", feature = "cli"))]
 use bb8_redis::bb8;
 use log::LevelFilter;
 #[cfg(any(feature = "back"))]
@@ -55,7 +55,7 @@ pub fn get_session_pool() -> Pool<Client> {
     r2d2::Pool::builder().max_size(15).build(client).unwrap()
 }
 
-#[cfg(any(feature = "back", feature = "async"))]
+#[cfg(any(feature = "back", feature = "async", feature = "cli"))]
 pub async fn get_async_pool() -> bb8::Pool<bb8_redis::RedisConnectionManager> {
     let redis_host = std::env::var("REDIS_HOST").expect("No redis host defined in .env");
     let redis_port = std::env::var("REDIS_PORT").expect("No redis port defined in .env");

@@ -19,7 +19,7 @@ use args::{message::MessageArgAction, CliArgs};
 use clap::Parser;
 use errors::CliError;
 
-use crate::actions::{report::ReportAction, user::UserAction};
+use crate::actions::{queue::QueueArgAction, report::ReportAction, user::UserAction};
 
 #[macro_use]
 extern crate derive_more;
@@ -112,6 +112,14 @@ async fn run_main() -> Result<(), CliError> {
             args::report::ReportArgs::Check => {
                 info!("Checking the latest reports...");
                 ReportAction::check_latest_reports().await?;
+            }
+        },
+        args::CliEntityArg::Queue { action } => match action {
+            args::queue::QueueArg::Clear { queue } => QueueArgAction::clear(queue).await,
+            args::queue::QueueArg::Process { queue } => QueueArgAction::process(queue).await,
+            args::queue::QueueArg::ReadEvents { queue } => QueueArgAction::read_events(queue).await,
+            args::queue::QueueArg::DeleteEvents { queue, events } => {
+                QueueArgAction::delete_events(queue, events).await
             }
         },
     }

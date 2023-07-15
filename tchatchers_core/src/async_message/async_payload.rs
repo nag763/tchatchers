@@ -8,10 +8,6 @@ use serde::{Deserialize, Serialize};
 
 use super::AsyncMessage;
 
-lazy_static! {
-    static ref DEFAULT_EVENT_OPTIONS: StreamReadOptions = StreamReadOptions::default().block(0);
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AsyncPayload {
     pub id: Option<String>,
@@ -111,10 +107,11 @@ impl AsyncPayload {
 
     pub(crate) async fn read_events(
         queue_name: &str,
+        options: &StreamReadOptions,
         conn: &mut redis::aio::Connection,
     ) -> Option<Vec<Self>> {
         let stream_events: Option<StreamReadReply> = conn
-            .xread_options(&[queue_name], &["0"], &DEFAULT_EVENT_OPTIONS)
+            .xread_options(&[queue_name], &["0"], options)
             .await
             .unwrap();
         if let Some(stream_events) = stream_events {

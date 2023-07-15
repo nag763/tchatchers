@@ -3,10 +3,15 @@ pub mod processor;
 
 use chrono::Utc;
 use derive_more::Display;
-use redis::AsyncCommands;
+use redis::{streams::StreamReadOptions, AsyncCommands};
 use serde::{Deserialize, Serialize};
 
 use self::async_payload::AsyncPayload;
+
+lazy_static! {
+    static ref DEFAULT_EVENT_OPTIONS: StreamReadOptions = StreamReadOptions::default().block(0);
+    static ref NOT_BLOCKING_OPTIONS: StreamReadOptions = StreamReadOptions::default().block(1);
+}
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Display)]
 pub enum AsyncMessage {
@@ -15,20 +20,45 @@ pub enum AsyncMessage {
 }
 
 #[derive(Debug, Clone, Copy, Display, Serialize, Deserialize)]
+#[cfg_attr(feature = "cli", derive(clap::ValueEnum))]
 pub enum AsyncQueue {
     LoggedUsers,
     MessagesSeen,
 }
 
 impl AsyncQueue {
-    pub(crate) async fn delete(
+    pub async fn delete(&self, list: Vec<String>, conn: &mut redis::aio::Connection) -> usize {
+        debug!("[{self}] IDs to delete : {list:#?}");
+        conn.xdel(self.to_string(), &list).await.unwrap()
+    }
+
+    pub async fn clear_with_timeout(&self, conn: &mut redis::aio::Connection) -> usize {
+        let events = Self::read_events_with_timeout(self, conn).await;
+        if let Some(events) = events {
+            let id_list: Vec<String> = events.into_iter().filter_map(|li| li.id).collect();
+            self.delete(id_list, conn).await
+        } else {
+            warn!("[{self}] No events found while attempting to clear the queue");
+            0
+        }
+    }
+
+    pub async fn read_events_with_timeout(
         &self,
-        list: Vec<AsyncPayload>,
         conn: &mut redis::aio::Connection,
-    ) -> usize {
-        let id_list: Vec<String> = list.into_iter().filter_map(|li| li.id).collect();
-        debug!("[{self}] IDs to delete : {id_list:#?}");
-        conn.xdel(self.to_string(), &id_list).await.unwrap()
+    ) -> Option<Vec<AsyncPayload>> {
+        AsyncPayload::read_events(&self.to_string(), &NOT_BLOCKING_OPTIONS, conn).await
+    }
+
+    pub async fn read_events(
+        &self,
+        conn: &mut redis::aio::Connection,
+    ) -> Option<Vec<AsyncPayload>> {
+        AsyncPayload::read_events(&self.to_string(), &DEFAULT_EVENT_OPTIONS, conn).await
+    }
+
+    pub fn iter() -> impl Iterator<Item = Self> {
+        [Self::LoggedUsers, Self::MessagesSeen].into_iter()
     }
 }
 
@@ -53,12 +83,5 @@ impl AsyncMessage {
             .spawn(queue_name.as_str(), conn)
             .await
             .unwrap();
-    }
-
-    pub async fn read_events(
-        queue: AsyncQueue,
-        conn: &mut redis::aio::Connection,
-    ) -> Option<Vec<AsyncPayload>> {
-        AsyncPayload::read_events(&queue.to_string(), conn).await
     }
 }

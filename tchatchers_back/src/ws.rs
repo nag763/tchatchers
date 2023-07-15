@@ -129,11 +129,8 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                     WsMessage::Seen(messages) => {
                         let redis_conn = &mut state.async_pool.get().await.unwrap();
                         for message in messages.iter() {
-                            AsyncMessage::spawn(
-                                AsyncMessage::MessageSeen(*message),
-                                redis_conn,
-                            )
-                            .await;
+                            AsyncMessage::spawn(AsyncMessage::MessageSeen(*message), redis_conn)
+                                .await;
                         }
                         let _ = tx.send(
                             serde_json::to_string(&WsMessage::MessagesSeen(messages)).unwrap(),

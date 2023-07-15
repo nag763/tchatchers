@@ -2,7 +2,7 @@
 //! the client and the server applications.
 
 pub mod app_context;
-#[cfg(any(feature = "back", feature = "async"))]
+#[cfg(any(feature = "back", feature = "async", feature = "cli"))]
 pub mod async_message;
 pub mod authorization_token;
 pub(crate) mod common;

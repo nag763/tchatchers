@@ -14,3 +14,5 @@ pub mod user;
 
 /// This module contains functions and structs for reporting.
 pub mod report;
+
+pub mod queue;

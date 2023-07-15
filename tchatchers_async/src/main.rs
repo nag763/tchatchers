@@ -1,7 +1,7 @@
 pub mod config;
 
 use tchatchers_core::{
-    async_message::{processor::process, AsyncMessage, AsyncQueue},
+    async_message::{processor::process, AsyncQueue},
     pool::{get_async_pool, get_pg_pool},
 };
 use tokio::{
@@ -45,9 +45,9 @@ async fn main() {
                 trace!("[{queue_name}] Ticking clock");
                 interval.tick().await;
                 debug!("[{queue_name}] Waiting to process events");
-                if let Some(events) =
-                    AsyncMessage::read_events(queue_name, &mut redis_conn.get().await.unwrap())
-                        .await
+                if let Some(events) = queue_name
+                    .read_events(&mut redis_conn.get().await.unwrap())
+                    .await
                 {
                     let events_number = events.len();
                     debug!(

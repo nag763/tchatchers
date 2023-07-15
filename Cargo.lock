@@ -2642,6 +2642,7 @@ dependencies = [
  "axum-extra",
  "bb8-redis",
  "chrono",
+ "clap",
  "cookie",
  "derivative",
  "derive_more",
