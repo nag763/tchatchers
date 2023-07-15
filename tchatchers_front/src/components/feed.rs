@@ -195,7 +195,7 @@ impl Component for Feed {
                         }
                     }
                     WsMessage::MessagesSeen(msgs_uuid) => {
-                        for mut msg in self.received_messages.iter_mut() {
+                        for msg in self.received_messages.iter_mut() {
                             if msgs_uuid.contains(&msg.uuid) {
                                 msg.reception_status = WsReceptionStatus::Seen;
                             }

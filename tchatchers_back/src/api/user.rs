@@ -84,11 +84,10 @@ pub async fn authenticate(
     };
     if user.is_authorized {
         let refresh_token = {
-            let mut redis_conn = state.session_pool.get();
-            let redis_conn_unwrapped = redis_conn.as_deref_mut().unwrap();
+            let mut redis_conn = state.session_pool.get().await.unwrap();
 
             let token = RefreshToken::new(user.id, authenticable_user.session_only);
-            token.set_as_head_token(redis_conn_unwrapped);
+            token.set_as_head_token(&mut redis_conn).await;
             token
         };
         tokio::spawn(async move {
@@ -148,18 +147,17 @@ pub async fn reauthenticate(
     // Refresh the token.
     let refreshed_token = {
         // Get a Redis connection from the Redis connection pool.
-        let mut redis_conn = state.session_pool.get();
-        let redis_conn_unwrapped = redis_conn.as_deref_mut().unwrap();
+        let mut redis_conn = state.session_pool.get().await.unwrap();
 
-        if !refresh_token.is_head_token(redis_conn_unwrapped) {
-            refresh_token.revoke_family(redis_conn_unwrapped);
+        if !refresh_token.is_head_token(&mut redis_conn).await {
+            refresh_token.revoke_family(&mut redis_conn).await;
             return Err((
                 StatusCode::UNAUTHORIZED,
                 "There was an issue while refreshing your session. Please log in again.",
             ));
         } else {
             let refreshed_token = refresh_token.renew();
-            refreshed_token.set_as_head_token(redis_conn_unwrapped);
+            refreshed_token.set_as_head_token(&mut redis_conn).await;
             refreshed_token
         }
     };
@@ -213,10 +211,9 @@ pub async fn logout(State(state): State<AppState>, cookie_jar: CookieJar) -> imp
         {
             {
                 // Get a Redis connection from the Redis connection pool.
-                let mut redis_conn = state.session_pool.get();
-                let redis_conn_unwrapped = redis_conn.as_deref_mut().unwrap();
+                let mut redis_conn = state.session_pool.get().await.unwrap();
 
-                refresh_token.revoke_family(redis_conn_unwrapped);
+                refresh_token.revoke_family(&mut redis_conn).await;
             }
         }
     }

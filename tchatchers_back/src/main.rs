@@ -35,7 +35,6 @@ use axum::{
 };
 use bb8_redis::bb8;
 use bb8_redis::RedisConnectionManager;
-use redis::Client;
 use sqlx_core::postgres::PgPool;
 use std::iter::once;
 use std::net::SocketAddr;
@@ -85,7 +84,7 @@ pub struct AppState {
     /// Used to cache the locales from the database.
     locale_manager: LocaleManager,
     /// Redis session pool.
-    session_pool: r2d2::Pool<Client>,
+    session_pool: bb8::Pool<RedisConnectionManager>,
     /// Redis async pool.
     async_pool: bb8::Pool<RedisConnectionManager>,
 }
@@ -104,7 +103,7 @@ async fn main() {
     let refresh_token_secret = std::env::var("REFRESH_TOKEN_SECRET")
         .expect("No refresh token signature key has been defined");
     let pg_pool = tchatchers_core::pool::get_pg_pool().await;
-    let session_pool = tchatchers_core::pool::get_session_pool();
+    let session_pool = tchatchers_core::pool::get_session_pool().await;
     let async_pool = tchatchers_core::pool::get_async_pool().await;
     sqlx::migrate!()
         .run(&pg_pool)

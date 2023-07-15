@@ -10,12 +10,9 @@
 use std::str::FromStr;
 
 #[cfg(any(feature = "back", feature = "async", feature = "cli"))]
-use bb8_redis::bb8;
+use bb8_redis::{bb8::{self, Pool}, RedisConnectionManager};
 use log::LevelFilter;
 #[cfg(any(feature = "back"))]
-use r2d2::Pool;
-#[cfg(any(feature = "back"))]
-use redis::Client;
 use sqlx::postgres::PgConnectOptions;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::ConnectOptions;
@@ -48,15 +45,15 @@ pub async fn get_pg_pool() -> PgPool {
 }
 
 #[cfg(feature = "back")]
-pub fn get_session_pool() -> Pool<Client> {
+pub async fn get_session_pool() -> Pool<RedisConnectionManager> {
     let redis_host = std::env::var("REDIS_HOST").expect("No redis host defined in .env");
     let redis_port = std::env::var("REDIS_PORT").expect("No redis port defined in .env");
-    let client = redis::Client::open(format!("redis://{redis_host}:{redis_port}/1")).unwrap();
-    r2d2::Pool::builder().max_size(15).build(client).unwrap()
+    let client = bb8_redis::RedisConnectionManager::new(format!("redis://{redis_host}:{redis_port}/1")).unwrap();
+    bb8::Pool::builder().max_size(15).build(client).await.unwrap()
 }
 
 #[cfg(any(feature = "back", feature = "async", feature = "cli"))]
-pub async fn get_async_pool() -> bb8::Pool<bb8_redis::RedisConnectionManager> {
+pub async fn get_async_pool() -> Pool<RedisConnectionManager> {
     let redis_host = std::env::var("REDIS_HOST").expect("No redis host defined in .env");
     let redis_port = std::env::var("REDIS_PORT").expect("No redis port defined in .env");
     let client =

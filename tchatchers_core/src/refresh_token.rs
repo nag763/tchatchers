@@ -37,6 +37,8 @@ use crate::{common::REFRESH_TOKEN_EXPIRACY_TIME, serializable_token::Serializabl
 #[cfg(feature = "back")]
 use axum_extra::extract::cookie::{Cookie, CookieJar};
 #[cfg(feature = "back")]
+use redis::AsyncCommands;
+#[cfg(feature = "back")]
 const REFRESH_TOKEN_PATH: &str = "refresh_token";
 #[cfg(feature = "back")]
 use std::{
@@ -127,11 +129,11 @@ impl RefreshToken {
     /// # Returns
     ///
     /// Returns a boolean indicating whether the Redis command executed successfully.
-    pub fn set_as_head_token(&self, con: &mut redis::Connection) -> bool {
+    pub async fn set_as_head_token(&self, con: &mut redis::aio::Connection) -> bool {
         let mut default_hasher = DefaultHasher::default();
 
         self.hash(&mut default_hasher);
-        redis::Cmd::set_ex(
+        con.set_ex(
             self.token_family.to_string(),
             default_hasher.finish(),
             REFRESH_TOKEN_EXPIRACY_TIME
@@ -139,7 +141,7 @@ impl RefreshToken {
                 .try_into()
                 .unwrap(),
         )
-        .query(con)
+        .await
         .unwrap()
     }
 
@@ -152,12 +154,12 @@ impl RefreshToken {
     /// # Returns
     ///
     /// Returns a boolean indicating whether this token is the head token for its family in Redis.
-    pub fn is_head_token(&self, con: &mut redis::Connection) -> bool {
+    pub async fn is_head_token(&self, con: &mut redis::aio::Connection) -> bool {
         let mut default_hasher = DefaultHasher::default();
         self.hash(&mut default_hasher);
 
-        let head_token: Option<u64> = redis::Cmd::get(self.token_family.to_string())
-            .query(con)
+        let head_token: Option<u64> = con.get(self.token_family.to_string())
+            .await
             .unwrap();
         matches!(head_token, Some(v) if v == default_hasher.finish())
     }
@@ -171,11 +173,11 @@ impl RefreshToken {
     /// # Returns
     ///
     /// Returns a boolean indicating whether the Redis command executed successfully.
-    pub fn revoke_family(&self, con: &mut redis::Connection) -> bool {
+    pub async fn revoke_family(&self, con: &mut redis::aio::Connection) -> bool {
         // Execute a Redis `DEL` command to delete this token family.
         // Returns a boolean indicating whether the Redis command executed successfully.
-        redis::Cmd::del(self.token_family.to_string())
-            .query(con)
+        con.del(self.token_family.to_string())
+            .await
             .unwrap()
     }
 }
