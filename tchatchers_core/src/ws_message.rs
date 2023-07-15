@@ -6,6 +6,8 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
+use crate::async_message::{AsyncOperationPGType, AsyncQueue};
 use crate::user::PartialUser;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
@@ -73,7 +75,10 @@ pub enum WsMessage {
     Default,
     Copy,
 )]
-#[cfg_attr(any(feature = "back", feature = "cli"), derive(sqlx::Type))]
+#[cfg_attr(
+    any(feature = "back", feature = "cli", feature = "async"),
+    derive(sqlx::Type)
+)]
 #[repr(i32)]
 pub enum WsReceptionStatus {
     #[default]
@@ -88,7 +93,10 @@ pub enum WsReceptionStatus {
     Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash,
 )]
 #[derivative(Default)]
-#[cfg_attr(any(feature = "back", feature = "cli"), derive(sqlx::FromRow))]
+#[cfg_attr(
+    any(feature = "back", feature = "cli", feature = "async"),
+    derive(sqlx::FromRow)
+)]
 #[serde(rename_all = "camelCase")]
 pub struct WsMessageContent {
     /// The message identifier, must be unique.
@@ -99,7 +107,10 @@ pub struct WsMessageContent {
     /// The author of the message.
     ///
     /// Is empty when the message is emitted by the server.
-    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(flatten))]
+    #[cfg_attr(
+        any(feature = "back", feature = "cli", feature = "async"),
+        sqlx(flatten)
+    )]
     pub author: PartialUser,
     /// When the message has been emitted.
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
@@ -110,7 +121,7 @@ pub struct WsMessageContent {
     pub reception_status: WsReceptionStatus,
 }
 
-#[cfg(any(feature = "back", feature = "cli"))]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 impl WsMessageContent {
     /// Get one message from the database.
     ///
@@ -159,22 +170,44 @@ impl WsMessageContent {
             .execute(pool)
             .await
     }
-
-    /// Mark a list of existing messages as seen?
+    /// Mark a list of existing messages as seen.
     ///
     /// # Arguments
     ///
     /// - messages_uuid : the list of messages seen.
     /// - pool : the connection pool.
-    pub async fn mark_as_seen(
-        messages_uuid: &Vec<Uuid>,
+    pub async fn mark_as_seen_async(
+        messages: Vec<AsyncOperationPGType<Uuid>>,
         pool: &sqlx::PgPool,
-    ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
-        sqlx::query("UPDATE MESSAGE SET reception_status=$1 WHERE uuid = ANY($2)")
-            .bind(WsReceptionStatus::Seen)
-            .bind(messages_uuid)
-            .execute(pool)
-            .await
+    ) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
+
+        let updated_records: u64 =
+            sqlx::query("UPDATE MESSAGE m SET RECEPTION_STATUS = $1 WHERE uuid = ANY($2)")
+                .bind(WsReceptionStatus::Seen)
+                .bind(messages.iter().map(|m| m.entity_id).collect::<Vec<Uuid>>())
+                .execute(&mut tx)
+                .await?
+                .rows_affected();
+
+        let failed_records = messages.len() - updated_records as usize;
+
+        sqlx::query(
+            "
+        INSERT INTO PROCESS_REPORT(process_id, successfull_records, failed_records) 
+        VALUES($1, $2, $3)
+        ",
+        )
+        .bind(AsyncQueue::MessagesSeen)
+        .bind(updated_records as i64)
+        .bind(failed_records as i64)
+        .execute(&mut tx)
+        .await
+        .unwrap();
+
+        tx.commit().await.unwrap();
+
+        Ok(())
     }
 
     /// Deletes the message present in a room.

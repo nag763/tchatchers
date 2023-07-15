@@ -1,6 +1,6 @@
 use self::{
-    env::EnvArgAction, message::MessageArgAction, report::ReportArgs, room::RoomArgAction,
-    user::UserArgAction,
+    env::EnvArgAction, message::MessageArgAction, queue::QueueArg, report::ReportArgs,
+    room::RoomArgAction, user::UserArgAction,
 };
 
 /// Provides functionality to manage the application's environment.
@@ -34,6 +34,8 @@ pub mod room;
 pub mod user;
 
 pub mod report;
+
+pub mod queue;
 
 /// The CLI arguments that will be parsed from the user input.
 #[derive(clap::Parser, Debug)]
@@ -78,5 +80,10 @@ pub enum CliEntityArg {
     Report {
         #[command(subcommand)]
         action: ReportArgs,
+    },
+    #[command(about = "Command to check or perform async processes")]
+    Queue {
+        #[command(subcommand)]
+        action: QueueArg,
     },
 }

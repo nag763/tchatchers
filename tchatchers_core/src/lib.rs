@@ -2,13 +2,15 @@
 //! the client and the server applications.
 
 pub mod app_context;
+#[cfg(any(feature = "back", feature = "async", feature = "cli"))]
+pub mod async_message;
 pub mod authorization_token;
 pub(crate) mod common;
 pub mod locale;
 #[cfg(feature = "back")]
 pub mod manager;
 pub mod navlink;
-#[cfg(any(feature = "back", feature = "cli"))]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 pub mod pool;
 pub mod profile;
 pub mod refresh_token;
@@ -22,3 +24,6 @@ pub mod ws_message;
 
 #[macro_use]
 extern crate lazy_static;
+
+#[macro_use]
+extern crate log;

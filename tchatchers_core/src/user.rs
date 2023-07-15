@@ -6,6 +6,8 @@
 //! The user is declined under different structs so that only the revelant data
 //! is shared between processed and components.
 
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
+use crate::async_message::{AsyncOperationPGType, AsyncQueue};
 use crate::common::RE_LIMITED_CHARS;
 use crate::profile::Profile;
 use chrono::DateTime;
@@ -14,11 +16,11 @@ use chrono::Utc;
 use rand::Rng;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-#[cfg(any(feature = "back", feature = "cli"))]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use sqlx::postgres::PgQueryResult;
-#[cfg(any(feature = "back", feature = "cli"))]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use sqlx::FromRow;
-#[cfg(any(feature = "back", feature = "cli"))]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use sqlx::PgPool;
 use validator::Validate;
 use validator::ValidationError;
@@ -32,7 +34,10 @@ lazy_static! {
 /// The in base structure, which should never be shared between components and
 /// apps.
 #[derive(Serialize, Deserialize, Debug, derivative::Derivative)]
-#[cfg_attr(any(feature = "back", feature = "cli"), derive(FromRow))]
+#[cfg_attr(
+    any(feature = "back", feature = "cli", feature = "async"),
+    derive(FromRow)
+)]
 #[serde(rename_all = "camelCase")]
 #[derivative(Default)]
 pub struct User {
@@ -59,11 +64,14 @@ pub struct User {
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
     pub last_update: DateTime<Utc>,
     /// The user's profile.
-    #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
+    #[cfg_attr(
+        any(feature = "back", feature = "cli", feature = "async"),
+        sqlx(rename = "profile_id")
+    )]
     pub profile: Profile,
 }
 
-#[cfg(any(feature = "back", feature = "cli"))]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 impl User {
     /// Find a user by ID in the database.
     ///
@@ -166,6 +174,71 @@ impl User {
             .execute(pool)
             .await
     }
+
+    /// Marks users as logged based on the provided user identifier and updates the `LAST_LOGON` field in the database.
+    ///
+    /// This function creates a temporary table to store the user updates and performs the necessary SQL operations to mark users as logged.
+    ///
+    /// # Arguments
+    ///
+    /// * `userid_identifier` - A vector of `AsyncOperationPGType<i32>` representing the user IDs and associated queue IDs and timestamps.
+    /// * `pool` - A reference to the PostgreSQL pool for database operations.
+    ///
+    /// # Returns
+    ///
+    /// An empty result indicating success, or an `sqlx::Error` if an error occurs during database operations.
+    ///
+    pub async fn mark_users_as_logged(
+        userid_identifier: Vec<AsyncOperationPGType<i32>>,
+        pool: &PgPool,
+    ) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
+
+        sqlx::query(
+            "
+            CREATE TEMPORARY TABLE tmp_user_update(
+                entity_id integer NOT NULL UNIQUE,
+                queue_id text NOT NULL,
+                timestamp TIMESTAMPTZ NOT NULL,
+                is_updated boolean default false
+            ) ON COMMIT DROP;
+        ",
+        )
+        .execute(&mut tx)
+        .await?;
+
+        for operation in userid_identifier {
+            sqlx::query(
+                "
+                INSERT INTO tmp_user_update(entity_id, queue_id, timestamp) 
+                VALUES ($1, $2, $3)
+                ON CONFLICT ON CONSTRAINT tmp_user_update_entity_id_key
+                DO NOTHING",
+            )
+            .bind(operation.entity_id)
+            .bind(operation.queue_id)
+            .bind(operation.timestamp)
+            .execute(&mut tx)
+            .await?;
+        }
+
+        sqlx::query("UPDATE CHATTER c SET LAST_LOGON = tr.timestamp FROM tmp_user_update tr WHERE tr.entity_id = c.id").execute(&mut tx).await?;
+        sqlx::query("UPDATE tmp_user_update tr SET is_updated=true FROM CHATTER c WHERE tr.entity_id = c.id").execute(&mut tx).await?;
+
+        sqlx::query("
+        INSERT INTO PROCESS_REPORT(process_id, successfull_records, failed_records) 
+        SELECT $1, sum(case when is_updated then 1 else 0 end), sum(case when is_updated then 0 else 1 end) 
+        FROM tmp_user_update
+        ")
+            .bind(AsyncQueue::LoggedUsers as i32)
+            .execute(&mut tx)
+            .await
+            .unwrap();
+
+        tx.commit().await.unwrap();
+
+        Ok(())
+    }
 }
 
 /// Structure mostly used to share the data between the applications.
@@ -175,7 +248,10 @@ impl User {
 #[derive(
     Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash,
 )]
-#[cfg_attr(any(feature = "back", feature = "cli"), derive(FromRow))]
+#[cfg_attr(
+    any(feature = "back", feature = "cli", feature = "async"),
+    derive(FromRow)
+)]
 #[serde(rename_all = "camelCase")]
 #[derivative(Default)]
 pub struct PartialUser {

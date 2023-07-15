@@ -17,6 +17,7 @@ use axum::{
 };
 use futures_util::{SinkExt, StreamExt};
 use tchatchers_core::{
+    async_message::AsyncMessage,
     room::RoomNameValidator,
     validation_error_message::ValidationErrorMessage,
     ws_message::{WsMessage, WsMessageContent, WsReceptionStatus},
@@ -126,18 +127,14 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                         );
                     }
                     WsMessage::Seen(messages) => {
-                        if let Err(e) =
-                            WsMessageContent::mark_as_seen(&messages, &state.pg_pool).await
-                        {
-                            tracing::error!(
-                                "An error happened while updating the messsages : {:?}.",
-                                e
-                            );
-                        } else {
-                            let _ = tx.send(
-                                serde_json::to_string(&WsMessage::MessagesSeen(messages)).unwrap(),
-                            );
+                        let redis_conn = &mut state.async_pool.get().await.unwrap();
+                        for message in messages.iter() {
+                            AsyncMessage::spawn(AsyncMessage::MessageSeen(*message), redis_conn)
+                                .await;
                         }
+                        let _ = tx.send(
+                            serde_json::to_string(&WsMessage::MessagesSeen(messages)).unwrap(),
+                        );
                     }
                     _ => {}
                 }

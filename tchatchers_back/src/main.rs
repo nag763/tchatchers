@@ -33,7 +33,8 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use r2d2::Pool;
+use bb8_redis::bb8;
+use bb8_redis::RedisConnectionManager;
 use redis::Client;
 use sqlx_core::postgres::PgPool;
 use std::iter::once;
@@ -83,8 +84,10 @@ pub struct AppState {
     ///
     /// Used to cache the locales from the database.
     locale_manager: LocaleManager,
-    /// Redis connection pool
-    redis_pool: Pool<Client>,
+    /// Redis session pool.
+    session_pool: r2d2::Pool<Client>,
+    /// Redis async pool.
+    async_pool: bb8::Pool<RedisConnectionManager>,
 }
 
 #[tokio::main]
@@ -101,7 +104,8 @@ async fn main() {
     let refresh_token_secret = std::env::var("REFRESH_TOKEN_SECRET")
         .expect("No refresh token signature key has been defined");
     let pg_pool = tchatchers_core::pool::get_pg_pool().await;
-    let redis_pool = tchatchers_core::pool::get_redis_pool();
+    let session_pool = tchatchers_core::pool::get_session_pool();
+    let async_pool = tchatchers_core::pool::get_async_pool().await;
     sqlx::migrate!()
         .run(&pg_pool)
         .await
@@ -114,7 +118,8 @@ async fn main() {
         jwt_secret,
         txs: Arc::new(Mutex::new(WsRooms::default())),
         pg_pool,
-        redis_pool,
+        session_pool,
+        async_pool,
     };
 
     let app = Router::new()

@@ -59,6 +59,7 @@ Follow [this guide](./SETUP.md).
 ├── tchatchers_cli_tools => Rust crate for command-line tools
 ├── tchatchers_core => Rust crate for shared core functionality
 └── tchatchers_front => Rust crate for the frontend service
+└── tchatchers_async => Rust crate for the asynchronous service
 ```
 
 ## Rustdoc
@@ -68,6 +69,7 @@ The rustdoc can be found for each subproject at :
 - tchatchers_core : [here](https://tchatche.rs/doc/tchatchers_core/) 
 - tchatchers_back : [here](https://tchatche.rs/doc/tchatchers_back/)
 - tchatchers_front : [here](https://tchatche.rs/doc/tchatchers_front/)
+- tchatchers_async : [here](https://tchatche.rs/doc/tchatchers_async/)
 - tct (tchatchers_cli_tool): [here](https://tchatche.rs/doc/tct/)
 
 ## Technologies used
@@ -81,6 +83,7 @@ The rustdoc can be found for each subproject at :
 |trunk-rs            |Rust development WASM server|0.16   |
 |nginx               |Reverse proxy server        |latest |
 |Postgres            |SQL engine                  |latest |
+|Redis               |Messaging and cache         |latest |
 
 ## Production project architecture
 
@@ -91,6 +94,8 @@ The production architecture consists of several layers :
 * <u>The proxy layer</u>, that defines some security constraints such as BruteForce mitigation, the HTTPS connection, the read time out and HTTP headers. This layer is the sole entry point for the client to the application, as others aren't publicly reachable since they are on another network.
 * <u>The applicative layer :</u> This contains two noticeable applicative layers :
     - First, the front layer, a static WASM file being downloaded once by the client and then used to display the application's data to the client. Understand that there is no server side rendering.
+
+- <u>The Asynchronous Layer</u>: This layer, introduced in the updated architecture, is responsible for processing queued messages stored in Redis. It includes components such as the asynchronous payload, processor, and queue modules. These modules facilitate the retrieval, processing, and deletion of messages from the Redis queue.
     - Secondly,the API layer, used to persist the application data, besides of permitting operations such as authentication and translation.
 * <u>The data layer :</u> Mainly used for persistence. The choice has been made to persist all the data onto a Postgres database, both the user's data and the chats. On network level, the data layer can only be accessed by the API layer, and is not exposed publicly. Redis on its side mainly stores the authorization and refresh tokens.
 

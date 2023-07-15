@@ -19,7 +19,10 @@ use serde::{Deserialize, Serialize};
     derive_more::Display,
     PartialOrd,
 )]
-#[cfg_attr(any(feature = "back", feature = "cli"), derive(sqlx::Type))]
+#[cfg_attr(
+    any(feature = "back", feature = "cli", feature = "async"),
+    derive(sqlx::Type)
+)]
 #[repr(i32)]
 pub enum Profile {
     /// Simple user, with little rights.
