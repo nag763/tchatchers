@@ -15,4 +15,5 @@ pub mod user;
 /// This module contains functions and structs for reporting.
 pub mod report;
 
+/// This module contains functions and structs for managing async queues.
 pub mod queue;

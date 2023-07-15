@@ -175,6 +175,19 @@ impl User {
             .await
     }
 
+    /// Marks users as logged based on the provided user identifier and updates the `LAST_LOGON` field in the database.
+    ///
+    /// This function creates a temporary table to store the user updates and performs the necessary SQL operations to mark users as logged.
+    ///
+    /// # Arguments
+    ///
+    /// * `userid_identifier` - A vector of `AsyncOperationPGType<i32>` representing the user IDs and associated queue IDs and timestamps.
+    /// * `pool` - A reference to the PostgreSQL pool for database operations.
+    ///
+    /// # Returns
+    ///
+    /// An empty result indicating success, or an `sqlx::Error` if an error occurs during database operations.
+    ///
     pub async fn mark_users_as_logged(
         userid_identifier: Vec<AsyncOperationPGType<i32>>,
         pool: &PgPool,

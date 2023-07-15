@@ -1,3 +1,10 @@
+//! This module provides functionality for processing asynchronous messages in different queues.
+//!
+//! It includes functions for processing specific types of messages, such as logged users and seen messages.
+//! The `process` function is the main entry point, which takes a queue, a list of messages, a PostgreSQL pool,
+//! and a Redis connection. It delegates the processing to the appropriate function based on the queue type,
+//! updates the corresponding entities in the database, and clears the processed messages from the queue.
+
 use std::{collections::HashMap, future::Future, pin::Pin};
 
 use sqlx::PgPool;
@@ -7,6 +14,16 @@ use crate::{user::User, ws_message::WsMessageContent};
 
 use super::{async_payload::AsyncPayload, AsyncMessage, AsyncOperationPGType, AsyncQueue};
 
+/// Processes messages related to logged users.
+///
+/// This function takes a vector of `AsyncPayload` messages and a PostgreSQL pool.
+/// It extracts the logged user IDs from the messages and updates the corresponding entities
+/// in the database as "logged". Any messages that don't match the expected format are skipped.
+///
+/// # Arguments
+///
+/// * `payloads` - A vector of `AsyncPayload` messages to process.
+/// * `pool` - A reference to the PostgreSQL pool for database operations.
 async fn process_logged_users(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
     let mut entities_to_update: HashMap<i32, AsyncOperationPGType<i32>> =
         HashMap::with_capacity(payloads.capacity());
@@ -33,6 +50,16 @@ async fn process_logged_users(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
         .unwrap();
 }
 
+/// Processes messages related to seen messages.
+///
+/// This function takes a vector of `AsyncPayload` messages and a PostgreSQL pool.
+/// It extracts the seen message UUIDs from the messages and updates the corresponding entities
+/// in the database as "seen". Any messages that don't match the expected format are skipped.
+///
+/// # Arguments
+///
+/// * `payloads` - A vector of `AsyncPayload` messages to process.
+/// * `pool` - A reference to the PostgreSQL pool for database operations.
 async fn messages_seen(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
     let mut entities_to_update: HashMap<Uuid, AsyncOperationPGType<Uuid>> =
         HashMap::with_capacity(payloads.capacity());
@@ -60,6 +87,17 @@ async fn messages_seen(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
         .unwrap();
 }
 
+/// Returns the appropriate processor for the given queue.
+///
+/// This function takes a queue, a vector of `AsyncPayload` messages, and a PostgreSQL pool,
+/// and returns a boxed future representing the appropriate processing function for the given queue.
+/// The processing function will be executed asynchronously.
+///
+/// # Arguments
+///
+/// * `queue` - The queue type indicating the type of messages to process.
+/// * `payloads` - A reference to the vector of `AsyncPayload` messages to process.
+/// * `pool` - A reference to the PostgreSQL pool for database operations.
 fn get_processor<'a>(
     queue: AsyncQueue,
     payloads: &'a Vec<AsyncPayload>,
@@ -71,6 +109,18 @@ fn get_processor<'a>(
     }
 }
 
+/// Processes messages in the specified queue.
+///
+/// This function takes a queue, a list of messages, a PostgreSQL pool, and a Redis connection.
+/// It delegates the processing to the appropriate function based on the queue type, updates
+/// the corresponding entities in the database, and clears the processed messages from the queue.
+///
+/// # Arguments
+///
+/// * `queue` - The queue type indicating the type of messages to process.
+/// * `messages` - A vector of `AsyncPayload` messages to process.
+/// * `pg_pool` - A reference to the PostgreSQL pool for database operations.
+/// * `redis_conn` - A mutable reference to the Redis connection for queue operations.
 pub async fn process(
     queue: AsyncQueue,
     messages: Vec<AsyncPayload>,

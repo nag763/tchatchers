@@ -170,25 +170,7 @@ impl WsMessageContent {
             .execute(pool)
             .await
     }
-
-    /// Mark a list of existing messages as seen?
-    ///
-    /// # Arguments
-    ///
-    /// - messages_uuid : the list of messages seen.
-    /// - pool : the connection pool.
-    pub async fn mark_as_seen(
-        messages_uuid: &Vec<Uuid>,
-        pool: &sqlx::PgPool,
-    ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
-        sqlx::query("UPDATE MESSAGE SET reception_status=$1 WHERE uuid = ANY($2)")
-            .bind(WsReceptionStatus::Seen)
-            .bind(messages_uuid)
-            .execute(pool)
-            .await
-    }
-
-    /// Mark a list of existing messages as seen?
+    /// Mark a list of existing messages as seen.
     ///
     /// # Arguments
     ///

@@ -3,22 +3,45 @@ use tchatchers_core::async_message::AsyncQueue;
 /// The actions that can be run on the messages stored in the database.
 #[derive(Debug, Clone, clap::Subcommand)]
 pub enum QueueArg {
-    #[command(about = "Clear the events of a queue")]
-    Clear { queue: AsyncQueue },
-    #[command(about = "Process directly all the events of a queue")]
-    Process { queue: AsyncQueue },
-    #[command(about = "Read all the events of a queue")]
-    ReadEvents { queue: AsyncQueue },
-    #[command(about = "Delete directly some events")]
-    DeleteEvents {
+    /// Clear the events of a queue.
+    #[clap(about = "Clear the events of a queue")]
+    Clear {
+        /// The queue to clear.
+        #[clap(name = "queue")]
         queue: AsyncQueue,
-        #[arg(required = true)]
+    },
+    /// Process directly all the events of a queue.
+    #[clap(about = "Process directly all the events of a queue")]
+    Process {
+        /// The queue to process.
+        #[clap(name = "queue")]
+        queue: AsyncQueue,
+    },
+    /// Read all the events of a queue.
+    #[clap(about = "Read all the events of a queue")]
+    ReadEvents {
+        /// The queue to read events from.
+        #[clap(name = "queue")]
+        queue: AsyncQueue,
+    },
+    /// Delete directly some events.
+    #[clap(about = "Delete directly some events")]
+    DeleteEvents {
+        /// The queue to delete events from.
+        #[clap(name = "queue")]
+        queue: AsyncQueue,
+        /// The events to delete.
+        #[clap(name = "events", required = true)]
         events: Vec<String>,
     },
-    #[command(about = "Get report of latest executed processes for a queue")]
+    /// Get report of latest executed processes for a queue.
+    #[clap(about = "Get report of latest executed processes for a queue")]
     Report {
+        /// An optional queue to retrieve the report for. If not specified, reports for all queues will be retrieved.
+        #[clap(name = "queue")]
         queue: Option<AsyncQueue>,
-        #[arg(help = "Number of elements to display", short = 'l', long = "limit")]
+        /// The maximum number of elements to display in the report.
+        #[clap(name = "limit", short = 'l', long = "limit")]
         limit: Option<i64>,
     },
 }

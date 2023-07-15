@@ -1,3 +1,9 @@
+//! This module provides functionalities for handling asynchronous payloads used in the core crate.
+//!
+//! It includes a struct for representing an asynchronous payload (`AsyncPayload`) and related error types.
+//! The `AsyncPayload` struct contains information about the payload, such as the ID, queue name, entity data,
+//! and timestamp. It also provides methods for creating, spawning, and reading events from Redis streams.
+
 use std::collections::HashMap;
 
 use redis::{
@@ -8,25 +14,37 @@ use serde::{Deserialize, Serialize};
 
 use super::AsyncMessage;
 
+/// Represents an asynchronous payload that is stored in Redis.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AsyncPayload {
+    /// The ID of the payload.
     pub id: Option<String>,
+    /// The name of the queue the payload belongs to.
     pub queue: String,
+    /// The entity data of the payload.
     pub entity: AsyncMessage,
+    /// The timestamp of when the payload was created.
     pub timestamp: chrono::DateTime<chrono::Utc>,
 }
 
+/// Represents an error that occurs during the parsing of an `AsyncPayload`.
 #[derive(Clone, derive_more::Display, Debug)]
 #[display(fmt = "[{kind}] {reason}")]
 pub struct AsyncPayloadParseError {
+    /// The kind of parse error.
     kind: AsyncPayloadParseErrorKind,
+    /// The reason for the parse error.
     reason: String,
 }
 
+/// Represents the different kinds of errors that can occur during parsing of an `AsyncPayload`.
 #[derive(Clone, Copy, derive_more::Display, Debug)]
 pub enum AsyncPayloadParseErrorKind {
+    /// The Redis value could not be parsed.
     UnparseableRedisValue,
+    /// The value could not be deserialized.
     UndeserializableValue,
+    /// The timestamp format is not correct.
     TimestampNotCorrect,
 }
 
@@ -85,6 +103,7 @@ impl From<AsyncPayload> for [(String, String); 2] {
 }
 
 impl AsyncPayload {
+    /// Creates a new `AsyncPayload` with the given queue name and entity data.
     pub(crate) fn new(queue_name: &str, entity: AsyncMessage) -> Self {
         Self {
             id: None,
@@ -94,6 +113,16 @@ impl AsyncPayload {
         }
     }
 
+    /// Spawns the `AsyncPayload` to the specified queue and returns the event ID.
+    ///
+    /// # Arguments
+    ///
+    /// * `queue_name` - The name of the queue to spawn the payload into.
+    /// * `conn` - A mutable reference to the Redis connection.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the event ID if successful, or a `RedisError` if an error occurs.
     pub(crate) async fn spawn(
         self,
         queue_name: &str,
@@ -105,6 +134,17 @@ impl AsyncPayload {
         Ok(event_id)
     }
 
+    /// Reads events from the specified queue with the given options.
+    ///
+    /// # Arguments
+    ///
+    /// * `queue_name` - The name of the queue to read events from.
+    /// * `options` - The options to customize the event reading behavior.
+    /// * `conn` - A mutable reference to the Redis connection.
+    ///
+    /// # Returns
+    ///
+    /// An `Option` containing a `Vec` of `AsyncPayload` if events are found, or `None` if no events are found.
     pub(crate) async fn read_events(
         queue_name: &str,
         options: &StreamReadOptions,
@@ -124,18 +164,15 @@ impl AsyncPayload {
                     match Self::try_from((queue_name, event_id.as_str(), map)) {
                         Ok(event) => events.push(event),
                         Err(e) => {
-                            error!("[{queue_name}] An error happened while parsing the value of the event #{event_id} : {e}");
+                            error!("[{queue_name}] An error happened while parsing the value of the event #{event_id}: {e}");
                             warn!("[{queue_name}] Element #{event_id} will be rejected");
                             rejects.push(event_id);
                         }
                     }
                 }
             }
-            debug!(
-                "[{queue_name}] Events fetched from queue : {}",
-                events.len()
-            );
-            trace!("[{queue_name}] Events : \n{:#?}", events);
+            debug!("[{queue_name}] Events fetched from queue: {}", events.len());
+            trace!("[{queue_name}] Events:\n{:#?}", events);
             if !rejects.is_empty() {
                 warn!("[{queue_name}] Reject list isn't empty, rejects will be deleted.");
                 let events: i32 = conn.xdel(&[queue_name], &rejects).await.unwrap();

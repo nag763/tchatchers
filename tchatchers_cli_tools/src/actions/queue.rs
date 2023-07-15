@@ -6,13 +6,33 @@ use tokio::task::JoinSet;
 
 use crate::errors::CliError;
 
+/// A struct representing actions related to queue management.
 pub struct QueueArgAction;
 
 impl QueueArgAction {
+    /// Retrieves the queue report for the specified queue.
+    ///
+    /// Retrieves the latest queue report for the given queue from the database
+    /// and prints the report to the console. The `limit` parameter can be used
+    /// to limit the number of reports returned.
+    ///
+    /// # Arguments
+    ///
+    /// - `queue`: An optional `AsyncQueue` representing the queue to retrieve the report for.
+    ///   If `None`, the report for all queues will be retrieved.
+    /// - `limit`: An optional `i64` representing the maximum number of reports to return.
+    ///
+    /// Returns an `Ok` result if the operation succeeds, or a `CliError` if an error occurs.
     pub async fn get_queue_report(
         queue: Option<AsyncQueue>,
         limit: Option<i64>,
     ) -> Result<(), CliError> {
+        if let Some(limit) = limit {
+            if limit < 1 {
+                println!("Please provide a positive limit");
+                return Ok(());
+            }
+        }
         let pg_pool = pool::get_pg_pool().await;
 
         let reports = match queue {
@@ -44,6 +64,15 @@ impl QueueArgAction {
         Ok(())
     }
 
+    /// Deletes events from the specified queue.
+    ///
+    /// Deletes the specified events from the given queue in Redis. The number of elements
+    /// deleted is printed to the console.
+    ///
+    /// # Arguments
+    ///
+    /// - `queue`: An `AsyncQueue` representing the queue to delete events from.
+    /// - `list`: A vector of strings representing the events to delete.
     pub async fn delete_events(queue: AsyncQueue, list: Vec<String>) {
         let number_of_elements_to_delete = list.len();
         let redis_pool = pool::get_async_pool().await;
@@ -56,6 +85,13 @@ impl QueueArgAction {
         };
     }
 
+    /// Reads events from the specified queue.
+    ///
+    /// Reads events from the given queue in Redis and prints them to the console.
+    ///
+    /// # Arguments
+    ///
+    /// - `queue`: An `AsyncQueue` representing the queue to read events from.
     pub async fn read_events(queue: AsyncQueue) {
         let redis_pool = pool::get_async_pool().await;
         let mut redis_conn = redis_pool.get().await.unwrap();
@@ -66,6 +102,14 @@ impl QueueArgAction {
         }
     }
 
+    /// Clears events from the specified queue.
+    ///
+    /// Clears all events from the given queue in Redis. The number of events cleared is
+    /// printed to the console.
+    ///
+    /// # Arguments
+    ///
+    /// - `queue`: An `AsyncQueue` representing the queue to clear.
     pub async fn clear(queue: AsyncQueue) {
         let redis_pool = pool::get_async_pool().await;
         let mut redis_conn = redis_pool.get().await.unwrap();
@@ -73,6 +117,15 @@ impl QueueArgAction {
         println!("[{queue}] {number_of_events_cleared} events cleared");
     }
 
+    /// Processes events from the specified queue.
+    ///
+    /// Reads events from the given queue in Redis, processes them, and prints the result
+    /// to the console. The events are processed by running the `process` function from
+    /// the `async_message` module.
+    ///
+    /// # Arguments
+    ///
+    /// - `queue`: An `AsyncQueue` representing the queue to process events from.
     pub async fn process(queue: AsyncQueue) {
         let (redis_pool, pg_pool) = (pool::get_async_pool().await, pool::get_pg_pool().await);
         let mut redis_conn = redis_pool.get().await.unwrap();
