@@ -213,11 +213,11 @@ impl User {
         sqlx::query("UPDATE tmp_user_update tr SET is_updated=true FROM CHATTER c WHERE tr.entity_id = c.id").execute(&mut tx).await?;
 
         sqlx::query("
-        INSERT INTO PROCESS_REPORT(process_kind, successfull_records, failed_records) 
+        INSERT INTO PROCESS_REPORT(process_id, successfull_records, failed_records) 
         SELECT $1, sum(case when is_updated then 1 else 0 end), sum(case when is_updated then 0 else 1 end) 
         FROM tmp_user_update
         ")
-            .bind(AsyncQueue::LoggedUsers.to_string())
+            .bind(AsyncQueue::LoggedUsers as i32)
             .execute(&mut tx)
             .await
             .unwrap();

@@ -15,4 +15,10 @@ pub enum QueueArg {
         #[arg(required = true)]
         events: Vec<String>,
     },
+    #[command(about = "Get report of latest executed processes for a queue")]
+    Report {
+        queue: Option<AsyncQueue>,
+        #[arg(help = "Number of elements to display", short = 'l', long = "limit")]
+        limit: Option<i64>,
+    },
 }

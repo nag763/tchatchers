@@ -5,6 +5,7 @@ use chrono::Utc;
 use derive_more::Display;
 use redis::{streams::StreamReadOptions, AsyncCommands};
 use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
 
 use self::async_payload::AsyncPayload;
 
@@ -19,11 +20,39 @@ pub enum AsyncMessage {
     MessageSeen(uuid::Uuid),
 }
 
-#[derive(Debug, Clone, Copy, Display, Serialize, Deserialize)]
+#[derive(Debug, Clone, sqlx::FromRow, Display)]
+#[display(fmt = "[{process_id}#{id}] ({successfull_records}/{records_processed}) on {passed_at}")]
+pub struct QueueReport {
+    pub id: i32,
+    pub process_id: AsyncQueue,
+    pub failed_records: i32,
+    pub successfull_records: i32,
+    pub records_processed: i32,
+    pub passed_at: chrono::DateTime<Utc>,
+}
+
+impl QueueReport {
+    pub async fn latest_for_queue(
+        queue: AsyncQueue,
+        limit: Option<i64>,
+        pool: &PgPool,
+    ) -> Result<Vec<Self>, sqlx::Error> {
+        sqlx::query_as(
+            "SELECT * FROM PROCESS_REPORT WHERE process_id = $1 ORDER BY ID DESC LIMIT $2",
+        )
+        .bind(queue as i32)
+        .bind(limit.unwrap_or(1))
+        .fetch_all(pool)
+        .await
+    }
+}
+
+#[derive(Debug, Clone, Copy, Display, Serialize, Deserialize, sqlx::Type, PartialEq, Eq)]
 #[cfg_attr(feature = "cli", derive(clap::ValueEnum))]
+#[repr(i32)]
 pub enum AsyncQueue {
-    LoggedUsers,
-    MessagesSeen,
+    LoggedUsers = 1,
+    MessagesSeen = 2,
 }
 
 impl AsyncQueue {

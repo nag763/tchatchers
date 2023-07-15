@@ -212,11 +212,11 @@ impl WsMessageContent {
 
         sqlx::query(
             "
-        INSERT INTO PROCESS_REPORT(process_kind, successfull_records, failed_records) 
-        VALUES ($1, $2, $3)
+        INSERT INTO PROCESS_REPORT(process_id, successfull_records, failed_records) 
+        VALUES($1, $2, $3)
         ",
         )
-        .bind(AsyncQueue::MessagesSeen.to_string())
+        .bind(AsyncQueue::MessagesSeen)
         .bind(updated_records as i64)
         .bind(failed_records as i64)
         .execute(&mut tx)
