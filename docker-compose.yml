@@ -32,12 +32,32 @@ services:
       - redis:${REDIS_HOST:-redis.tchatche.rs}
     depends_on:
       - postgres
+      - redis
     build: 
       context: ./ 
       dockerfile: Dockerfile_back
     volumes:
       - static:/home/usr/back/static
       - ./env:/home/usr/back/.env:ro
+  async :
+    image: nag763/tchatchers_async:latest
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST:-pg.tchatche.rs}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-chatapp}
+      POSTGRES_USER: ${POSTGRES_USER:-chatter}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST:-redis.tchatche.rs}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+    links:
+      - postgres:${POSTGRES_HOST:-pg.tchatche.rs}
+      - redis:${REDIS_HOST:-redis.tchatche.rs}
+    depends_on:
+      - postgres
+      - redis
+    build: 
+      context: ./ 
+      dockerfile: Dockerfile_async
   doc:
     image: nag763/tchatchers_doc:latest
     build: 

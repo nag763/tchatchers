@@ -1,0 +1,25 @@
+FROM rust:1.70-alpine as builder
+
+WORKDIR /home/usr/async/
+
+COPY tchatchers_async/ ./
+
+COPY tchatchers_core/ ../tchatchers_core/
+
+RUN apk add libressl-dev musl-dev
+
+RUN cargo install --path .
+
+FROM alpine:latest
+
+WORKDIR /home/usr/async/
+
+COPY --from=builder /usr/local/cargo/bin/tchatchers_async /home/usr/async/tchatchers_async
+
+RUN adduser -D runner && chown -R runner ./
+
+RUN chmod 111 /home/usr/async/tchatchers_async
+
+USER runner
+
+CMD RUST_LOG=INFO ./tchatchers_async
