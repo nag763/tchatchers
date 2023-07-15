@@ -11,3 +11,5 @@ docker*
 **/*.crt
 **/*.pem
 **/*.key
+.env
+**/*.env

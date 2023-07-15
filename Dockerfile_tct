@@ -2,13 +2,11 @@ FROM rust:1.71-alpine as builder
 
 WORKDIR /home/usr/tct/
 
-COPY tchatchers_cli_tools/ ./
-
-COPY tchatchers_core/ ../tchatchers_core/
+COPY ./  ./
 
 RUN apk add libressl-dev musl-dev
 
-RUN cargo install --path .
+RUN cargo install --path ./tchatchers_cli_tools/
 
 FROM alpine:latest
 

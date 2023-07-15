@@ -12,15 +12,13 @@ use std::str::FromStr;
 #[cfg(any(feature = "back", feature = "async", feature = "cli"))]
 use bb8_redis::{bb8::{self, Pool}, RedisConnectionManager};
 use log::LevelFilter;
-#[cfg(any(feature = "back"))]
-use sqlx::postgres::PgConnectOptions;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::ConnectOptions;
 use sqlx::PgPool;
 
 /// Returns a postgres pool from the user env.
 pub async fn get_pg_pool() -> PgPool {
-    let mut connect_options = PgConnectOptions::new()
+    let mut connect_options = sqlx::postgres::PgConnectOptions::new()
         .host(&std::env::var("POSTGRES_HOST").expect("No host defined in .env"))
         .port(
             std::env::var("POSTGRES_PORT")
