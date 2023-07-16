@@ -36,6 +36,8 @@ use axum::{
 use bb8_redis::bb8;
 use bb8_redis::RedisConnectionManager;
 use sqlx_core::postgres::PgPool;
+use tokio::join;
+use tokio::signal::unix::SignalKind;
 use std::iter::once;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -102,18 +104,18 @@ async fn main() {
     let jwt_secret = std::env::var("JWT_SECRET").expect("No jwt secret has been defined");
     let refresh_token_secret = std::env::var("REFRESH_TOKEN_SECRET")
         .expect("No refresh token signature key has been defined");
-    let pg_pool = tchatchers_core::pool::get_pg_pool().await;
-    let session_pool = tchatchers_core::pool::get_session_pool().await;
-    let async_pool = tchatchers_core::pool::get_async_pool().await;
+    let (pg_pool, session_pool, async_pool) = join!(tchatchers_core::pool::get_pg_pool(), tchatchers_core::pool::get_session_pool(), tchatchers_core::pool::get_async_pool());
+    let (locale_manager, navlink_manager, translation_manager) = join!(LocaleManager::init(&pg_pool), NavlinkManager::init(&pg_pool), TranslationManager::init(&pg_pool));
+    
     sqlx::migrate!()
         .run(&pg_pool)
         .await
         .expect("Could not apply migrations on the database");
     let shared_state = AppState {
         refresh_token_secret,
-        locale_manager: LocaleManager::init(&pg_pool).await,
-        navlink_manager: Arc::new(Mutex::new(NavlinkManager::init(&pg_pool).await)),
-        translation_manager: Arc::new(Mutex::new(TranslationManager::init(&pg_pool).await)),
+        locale_manager,
+        navlink_manager: Arc::new(Mutex::new(navlink_manager)),
+        translation_manager: Arc::new(Mutex::new(translation_manager)),
         jwt_secret,
         txs: Arc::new(Mutex::new(WsRooms::default())),
         pg_pool,
@@ -178,10 +180,22 @@ async fn main() {
                 .propagate_x_request_id(),
         );
 
+    
+
     // run it with hyper
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
+        .with_graceful_shutdown(async {
+            let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate()).unwrap();
+            let mut sigkill = tokio::signal::unix::signal(SignalKind::interrupt()).unwrap();
+            tokio::select! {
+                _ = tokio::signal::ctrl_c() => {},
+                _ = sigterm.recv() => {},
+                _ = sigkill.recv() => {},
+            }
+            println!("Shutting down...");
+        })
         .await
         .unwrap();
 }

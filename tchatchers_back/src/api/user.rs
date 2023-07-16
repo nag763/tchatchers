@@ -90,12 +90,12 @@ pub async fn authenticate(
             token.set_as_head_token(&mut redis_conn).await;
             token
         };
-        tokio::spawn(async move {
+        std::mem::drop(tokio::spawn(async move {
             let mut redis_conn = state.async_pool.get().await.unwrap();
             AsyncMessage::LoggedUser(user.id)
                 .spawn(&mut redis_conn)
                 .await;
-        });
+        }));
         let jwt: AuthorizationToken = AuthorizationToken::from(user);
         Ok((
             StatusCode::OK,

@@ -14,7 +14,7 @@ use tchatchers_core::{
 };
 use tokio::{
     task::{JoinHandle, JoinSet},
-    time,
+    time, signal::unix::SignalKind,
 };
 
 use crate::config::Config;
@@ -32,13 +32,9 @@ async fn main() {
     dotenv::dotenv().ok();
     debug!("Env initialized");
 
-    // Acquire the Redis connection pool
-    let redis_conn = get_async_pool().await;
-    debug!("Redis pool acquired with success");
-
-    // Acquire the PostgreSQL connection pool
-    let pg_pool = get_pg_pool().await;
-    debug!("PG pool acquired with success");
+    // Acquire the connection pools
+    let (pg_pool, redis_conn) = tokio::join!(get_pg_pool(), get_async_pool());
+    debug!("Pools acquired with success");
 
     // Read the configuration file
     let config_file = include_str!("conf.yml");
@@ -101,10 +97,27 @@ async fn main() {
         info!("[{}] The queue has been built with success.", queue_name);
     }
 
-    // Wait for all tasks to complete
-    while let Some(handle) = events.join_next().await {
-        let _ = handle;
+    let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate()).unwrap();
+    let mut sigkill = tokio::signal::unix::signal(SignalKind::interrupt()).unwrap();
+    
+    tokio::select! {
+        _ = async {
+            // Wait for all tasks to complete
+            while let Some(handle) = events.join_next().await {
+                let _ = handle;
+            }
+        } => {},
+        _ = tokio::signal::ctrl_c() => {},
+        _ = sigterm.recv() => {},
+        _ = sigkill.recv() => {},
+
     }
 
-    println!("Done");
+
+    println!("Shutting down...");
+
+    events.abort_all();
+
+    println!("All event shut down");
+
 }
