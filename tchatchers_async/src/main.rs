@@ -13,8 +13,9 @@ use tchatchers_core::{
     pool::{get_async_pool, get_pg_pool},
 };
 use tokio::{
+    signal::unix::SignalKind,
     task::{JoinHandle, JoinSet},
-    time, signal::unix::SignalKind,
+    time,
 };
 
 use crate::config::Config;
@@ -99,7 +100,7 @@ async fn main() {
 
     let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate()).unwrap();
     let mut sigkill = tokio::signal::unix::signal(SignalKind::interrupt()).unwrap();
-    
+
     tokio::select! {
         _ = async {
             // Wait for all tasks to complete
@@ -113,7 +114,6 @@ async fn main() {
 
     }
 
-
     println!("Shutting down...");
 
     events.abort_all();
@@ -122,5 +122,4 @@ async fn main() {
     std::mem::drop(pg_pool);
 
     println!("All event shut down");
-
 }

@@ -158,9 +158,7 @@ impl RefreshToken {
         let mut default_hasher = DefaultHasher::default();
         self.hash(&mut default_hasher);
 
-        let head_token: Option<u64> = con.get(self.token_family.to_string())
-            .await
-            .unwrap();
+        let head_token: Option<u64> = con.get(self.token_family.to_string()).await.unwrap();
         matches!(head_token, Some(v) if v == default_hasher.finish())
     }
 
@@ -176,9 +174,7 @@ impl RefreshToken {
     pub async fn revoke_family(&self, con: &mut redis::aio::Connection) -> bool {
         // Execute a Redis `DEL` command to delete this token family.
         // Returns a boolean indicating whether the Redis command executed successfully.
-        con.del(self.token_family.to_string())
-            .await
-            .unwrap()
+        con.del(self.token_family.to_string()).await.unwrap()
     }
 }
 

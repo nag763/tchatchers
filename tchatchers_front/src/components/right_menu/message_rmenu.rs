@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use serde::{Deserialize, Serialize};
-use tchatchers_core::{profile::Profile, locale::Translation, ws_message::WsMessage};
+use tchatchers_core::{locale::Translation, profile::Profile, ws_message::WsMessage};
 use uuid::Uuid;
 use yew::{function_component, html, use_context, Html, Properties};
 use yew_agent::Dispatched;

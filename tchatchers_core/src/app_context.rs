@@ -6,7 +6,11 @@
 
 use std::rc::Rc;
 
-use crate::{locale::{Locale, Translation}, navlink::Navlink, user::PartialUser};
+use crate::{
+    locale::{Locale, Translation},
+    navlink::Navlink,
+    user::PartialUser,
+};
 
 /// The application context.
 ///

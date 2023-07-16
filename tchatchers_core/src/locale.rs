@@ -6,11 +6,11 @@
 //! The default locale is considered to be the english one, but since every user can use his language,
 //! this entity provides the tools to translates the app while browsing.
 
-use std::{collections::{HashMap}, sync::OnceLock};
+use std::{collections::HashMap, sync::OnceLock};
 
 use serde::{Deserialize, Serialize};
 
-static LOCALES : OnceLock<HashMap<i32, Locale>> = OnceLock::new();
+static LOCALES: OnceLock<HashMap<i32, Locale>> = OnceLock::new();
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "back", derive(sqlx::FromRow))]
@@ -52,11 +52,10 @@ pub struct Locale {
     /// The locale's longname.
     pub long_name: String,
     /// Translations associated to the locale.
-    pub translations: Translation
+    pub translations: Translation,
 }
 
 impl Locale {
-
     fn init_cell() -> HashMap<i32, Locale> {
         serde_yaml::from_str(include_str!("config/translations.yml")).unwrap()
     }
@@ -68,7 +67,10 @@ impl Locale {
     }
 
     pub fn get_available_locales() -> Vec<Locale> {
-        LOCALES.get_or_init(Self::init_cell).values().cloned().collect()
+        LOCALES
+            .get_or_init(Self::init_cell)
+            .values()
+            .cloned()
+            .collect()
     }
-
 }

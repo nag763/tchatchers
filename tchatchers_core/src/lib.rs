@@ -7,8 +7,6 @@ pub mod async_message;
 pub mod authorization_token;
 pub(crate) mod common;
 pub mod locale;
-#[cfg(feature = "back")]
-pub mod manager;
 pub mod navlink;
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 pub mod pool;

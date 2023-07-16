@@ -1,0 +1,12 @@
+- &settings:
+  id: 2
+  href: /settings
+  label: settings_menu
+  default_translation: Settings
+  visibility: [User, Admin, Moderator]  
+- &logout:
+  id: 1
+  href: /logout
+  label: logout_menu
+  default_translation: Log out
+  visibility: [User, Admin, Moderator]
