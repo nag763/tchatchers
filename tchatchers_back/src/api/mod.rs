@@ -3,8 +3,6 @@
 
 //! Defines the set of API entrypoints that can be called on client side.
 
-pub(crate) mod admin;
-pub(crate) mod locale;
 pub(crate) mod message;
 pub(crate) mod pfp;
 pub(crate) mod user;

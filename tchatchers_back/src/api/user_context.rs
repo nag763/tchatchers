@@ -15,7 +15,7 @@ use axum::{
     Json,
 };
 use tchatchers_core::{
-    app_context::UserContext, navlink::Navlink, translation::Translation, user::User,
+    app_context::UserContext, navlink::Navlink, user::User, locale::Locale,
 };
 
 use crate::{extractor::JwtUserExtractor, AppState};
@@ -39,26 +39,20 @@ pub async fn user_context(
         )
             .into_response());
     }
-    let translation: Translation = state
-        .translation_manager
-        .lock()
-        .await
-        .get_translations_for_locale(user.locale_id)
-        .map_err(|e| e.into_response())?;
+    let Some(locale) = Locale::find_by_id(user.locale_id) else {
+        return Err((StatusCode::BAD_REQUEST, "").into_response());
+    };
+    let available_locale = Locale::get_available_locales();
     let navlink: Vec<Navlink> = state
         .navlink_manager
         .lock()
         .await
         .get_navlink_for_profile(user.profile)
         .map_err(|e| e.into_response())?;
-    let available_locale = state
-        .locale_manager
-        .get_all()
-        .map_err(|e| e.into_response())?;
     Ok(Json(UserContext {
         user: user.into(),
         navlink,
-        translation: Rc::new(translation),
+        translation: Rc::new(locale.translations),
         available_locale,
     }))
 }

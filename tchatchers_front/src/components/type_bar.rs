@@ -3,7 +3,7 @@
 
 use std::rc::Rc;
 
-use tchatchers_core::translation::Translation;
+use tchatchers_core::locale::Translation;
 use tchatchers_core::ws_message::WsMessage;
 use tchatchers_core::{user::PartialUser, ws_message::WsMessageContent};
 use web_sys::HtmlInputElement;

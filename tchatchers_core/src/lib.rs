@@ -17,7 +17,6 @@ pub mod refresh_token;
 pub mod report;
 pub mod room;
 pub mod serializable_token;
-pub mod translation;
 pub mod user;
 pub mod validation_error_message;
 pub mod ws_message;

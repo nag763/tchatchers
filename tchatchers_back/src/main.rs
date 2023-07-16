@@ -12,11 +12,6 @@ pub mod extractor;
 pub mod validator;
 pub mod ws;
 
-use api::admin::translation::get_all_translations;
-use api::admin::translation::get_translations_for_locale;
-use api::admin::translation::reload_translations;
-use api::locale::get_locale_id;
-use api::locale::get_locales;
 use api::message::delete_message;
 use api::message::report_message;
 use api::pfp::*;
@@ -27,7 +22,6 @@ use axum::http::header::COOKIE;
 use axum::http::header::SEC_WEBSOCKET_PROTOCOL;
 use axum::routing::delete;
 use axum::routing::get_service;
-use axum::routing::put;
 use axum::{
     http::StatusCode,
     routing::{get, post},
@@ -41,9 +35,7 @@ use tokio::signal::unix::SignalKind;
 use std::iter::once;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tchatchers_core::locale::LocaleManager;
 use tchatchers_core::navlink::NavlinkManager;
-use tchatchers_core::translation::TranslationManager;
 use tokio::sync::Mutex;
 use tower::ServiceBuilder;
 use tower_http::request_id::MakeRequestUuid;
@@ -73,18 +65,10 @@ pub struct AppState {
     txs: Arc<Mutex<WsRooms>>,
     /// The Postgres pool.
     pg_pool: PgPool,
-    /// The translation manager.
-    ///
-    /// Used to cache the translations from the database.
-    translation_manager: Arc<Mutex<TranslationManager>>,
     /// The navlink manager.
     ///
     /// Used to cache the navlinks from the database.
     navlink_manager: Arc<Mutex<NavlinkManager>>,
-    /// The locale manager.
-    ///
-    /// Used to cache the locales from the database.
-    locale_manager: LocaleManager,
     /// Redis session pool.
     session_pool: bb8::Pool<RedisConnectionManager>,
     /// Redis async pool.
@@ -105,7 +89,7 @@ async fn main() {
     let refresh_token_secret = std::env::var("REFRESH_TOKEN_SECRET")
         .expect("No refresh token signature key has been defined");
     let (pg_pool, session_pool, async_pool) = join!(tchatchers_core::pool::get_pg_pool(), tchatchers_core::pool::get_session_pool(), tchatchers_core::pool::get_async_pool());
-    let (locale_manager, navlink_manager, translation_manager) = join!(LocaleManager::init(&pg_pool), NavlinkManager::init(&pg_pool), TranslationManager::init(&pg_pool));
+    let navlink_manager = NavlinkManager::init(&pg_pool).await;
     
     sqlx::migrate!()
         .run(&pg_pool)
@@ -113,9 +97,7 @@ async fn main() {
         .expect("Could not apply migrations on the database");
     let shared_state = AppState {
         refresh_token_secret,
-        locale_manager,
         navlink_manager: Arc::new(Mutex::new(navlink_manager)),
-        translation_manager: Arc::new(Mutex::new(translation_manager)),
         jwt_secret,
         txs: Arc::new(Mutex::new(WsRooms::default())),
         pg_pool,
@@ -139,18 +121,8 @@ async fn main() {
         .route("/api/validate", get(validate))
         .route("/api/pfp", post(upload_pfp))
         .route("/api/app_context", get(user_context))
-        .route("/api/locale/", get(get_locales))
-        .route("/api/locale/:locale_id", get(get_locale_id))
         .route("/api/message/:message_id", delete(delete_message))
         .route("/api/message/:message_id/report", post(report_message))
-        .route(
-            "/api/admin/translation",
-            put(reload_translations).get(get_all_translations),
-        )
-        .route(
-            "/api/admin/translation/:locale_id",
-            get(get_translations_for_locale),
-        )
         .route("/ws/:room", get(ws_handler))
         .nest_service(
             "/static",

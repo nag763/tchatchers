@@ -3,7 +3,7 @@ use std::rc::Rc;
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use js_sys::ArrayBuffer;
-use tchatchers_core::translation::Translation;
+use tchatchers_core::locale::Translation;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::{Event, EventTarget, FileReader, InputEvent};

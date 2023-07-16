@@ -3,7 +3,7 @@ use std::rc::Rc;
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::common::{WaitingForResponse, I18N};
-use tchatchers_core::translation::Translation;
+use tchatchers_core::locale::Translation;
 use yew::{function_component, html, Callback, Component, Context, Html, Properties};
 
 #[derive(Properties, PartialEq)]

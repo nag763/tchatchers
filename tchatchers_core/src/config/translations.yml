@@ -1,0 +1,93 @@
+1:
+  id: 1
+  long_name: English (US)
+  short_name: en-us
+  translations:
+    try_reconnect: Reconnect
+    report_user: Report user
+    your_pfp_field: Your pfp
+    revoke_user: Revoke user
+    join_a_room_title: Join a room
+    room_name_incorrect: The room name you tried to join is not valid, please select one within this screen.
+    join_room: Join
+    modal_delete_profile_no: I changed, my mind, don't delete my account
+    your_name_field: Your name
+    your_locale_field: Your locale
+    delete_profile: Delete
+    modal_delete_profile_yes: Understood, farewell
+    logout_menu: Log out
+    your_login_field: Your login
+    modal_delete_profile_content: This action is not reversible, once your account is deleted, there is no way for you to get it back.
+    logged_out: You logged out with success, see you !
+    settings: Settings
+    you_are_disconnected: You are disconnected
+    modal_delete_profile_title: You are about to delete your account
+    type_msg_here: Type a message here
+    report_message: Report message
+    settings_menu: Settings
+    delete_message: Delete message
+    update_profile: Update
+    room_name: Room name
+    profile_updated: Your profile has been updated with success
+2:
+  id: 2
+  long_name: Français (FR)
+  short_name: fr-FR
+  translations:
+    you_are_disconnected: Vous êtes déconnecté
+    profile_updated: Votre profil a été mis à jour avec succès
+    revoke_user: Désactiver l'utilisateur
+    join_room: Rejoindre
+    logout_menu: Se déconnecter
+    your_name_field: Votre nom
+    room_name: Nom du salon
+    your_login_field: Votre identifiant
+    report_user: Signaler l'utilisateur
+    delete_message: Supprimer le message
+    settings: Paramètres
+    your_locale_field: Votre locale
+    modal_delete_profile_yes: Je souhaite supprimer mon compte
+    logged_out: Vous êtes déconnecté, au revoir !
+    modal_delete_profile_content: Cette action n’est pas réversible, une fois que votre compte est supprimé, il n’y aura pas de possibilité de récuperer votre compte.
+    delete_profile: Supprimer
+    your_pfp_field: Votre photo de profil
+    settings_menu: Paramètres
+    join_a_room_title: Rejoindre un salon
+    update_profile: Mettre à jour
+    report_message: Signaler le message
+    modal_delete_profile_no: J’ai changé d’avis, ne supprimez pas mon compte
+    room_name_incorrect: Le nom de salon que vous avez entré n’est pas correct, essayez de le taper de nouveau via cet écran
+    try_reconnect: Se reconnecter
+    modal_delete_profile_title: Vous êtes sur le point de supprimer votre compte
+    type_msg_here: Commencez à écrire ici
+3:
+  id: 3
+  long_name: English (UK)
+  short_name: en-uk
+  translations:
+    try_reconnect: Reconnect
+    your_name_field: Your name
+    delete_profile: Delete
+    modal_delete_profile_no: I changed, my mind, don't delete my account
+    modal_delete_profile_yes: Understood, farewell
+    your_locale_field: Your locale
+    your_pfp_field: Your pfp
+    settings_menu: Settings
+    logged_out: You logged out with success, see you !
+    profile_updated: Your profile has been updated with success
+    room_name_incorrect: The room name you tried to join is not valid, please select one within this screen.
+    you_are_disconnected: You are disconnected
+    settings: Settings
+    modal_delete_profile_title: You are about to delete your account
+    join_a_room_title: Join a room
+    revoke_user: Revoke user
+    your_login_field: Your login
+    type_msg_here: Type a message here
+    room_name: Room name
+    report_message: Report message
+    logout_menu: Log out
+    modal_delete_profile_content: This action is not reversible, once your account is deleted, there is no way for you to get it back.
+    update_profile: Update
+    delete_message: Delete message
+    join_room: Join
+    report_user: Report user
