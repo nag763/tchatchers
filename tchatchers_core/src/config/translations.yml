@@ -91,3 +91,189 @@
     delete_message: Delete message
     join_room: Join
     report_user: Report user
+4:
+  id: 4
+  long_name: Deutsch (DE)
+  short_name: de-DE
+  translations:
+    try_reconnect: Verbinden
+    report_user: Benutzer melden
+    your_pfp_field: Dein Profilbild
+    revoke_user: Benutzer widerrufen
+    join_a_room_title: Raum beitreten
+    room_name_incorrect: Der von dir versuchte Raumname ist ungültig. Bitte wähle einen innerhalb dieses Bildschirms aus.
+    join_room: Beitritt
+    modal_delete_profile_no: Ich habe es mir anders überlegt, lösche meinen Account nicht
+    your_name_field: Dein Name
+    your_locale_field: Deine Spracheinstellung
+    delete_profile: Löschen
+    modal_delete_profile_yes: Verstanden, auf Wiedersehen
+    logout_menu: Ausloggen
+    your_login_field: Dein Benutzername
+    modal_delete_profile_content: Diese Aktion kann nicht rückgängig gemacht werden. Sobald dein Account gelöscht ist, gibt es keine Möglichkeit, ihn wiederherzustellen.
+    logged_out: Du hast dich erfolgreich ausgeloggt. Auf Wiedersehen!
+    settings: Einstellungen
+    you_are_disconnected: Du bist offline
+    modal_delete_profile_title: Du bist dabei, deinen Account zu löschen
+    type_msg_here: Hier eine Nachricht eingeben
+    report_message: Nachricht melden
+    settings_menu: Einstellungen
+    delete_message: Nachricht löschen
+    update_profile: Aktualisieren
+    room_name: Raumname
+    profile_updated: Dein Profil wurde erfolgreich aktualisiert
+5:
+  id: 5
+  long_name: Español (ES)
+  short_name: es-ES
+  translations:
+    try_reconnect: Reconectar
+    report_user: Reportar usuario
+    your_pfp_field: Tu foto de perfil
+    revoke_user: Revocar usuario
+    join_a_room_title: Unirse a una sala
+    room_name_incorrect: El nombre de sala que intentaste unir no es válido. Por favor, selecciona uno dentro de esta pantalla.
+    join_room: Unirse
+    modal_delete_profile_no: Cambié de opinión, no elimines mi cuenta
+    your_name_field: Tu nombre
+    your_locale_field: Tu idioma
+    delete_profile: Eliminar
+    modal_delete_profile_yes: Entendido, adiós
+    logout_menu: Cerrar sesión
+    your_login_field: Tu inicio de sesión
+    modal_delete_profile_content: Esta acción no se puede deshacer. Una vez que tu cuenta se elimine, no hay forma de recuperarla.
+    logged_out: Cerraste sesión con éxito, ¡hasta luego!
+    settings: Configuración
+    you_are_disconnected: Estás desconectado
+    modal_delete_profile_title: Estás a punto de eliminar tu cuenta
+    type_msg_here: Escribe un mensaje aquí
+    report_message: Reportar mensaje
+    settings_menu: Configuración
+    delete_message: Eliminar mensaje
+    update_profile: Actualizar
+    room_name: Nombre de la sala
+    profile_updated: Tu perfil se ha actualizado correctamente
+6:
+  id: 6
+  long_name: Português (BR)
+  short_name: pt-BR
+  translations:
+    try_reconnect: Reconectar
+    report_user: Reportar usuário
+    your_pfp_field: Sua foto de perfil
+    revoke_user: Revogar usuário
+    join_a_room_title: Entrar em uma sala
+    room_name_incorrect: O nome da sala que você tentou entrar não é válido. Por favor, selecione um dentro desta tela.
+    join_room: Entrar
+    modal_delete_profile_no: Eu mudei de ideia, não exclua minha conta
+    your_name_field: Seu nome
+    your_locale_field: Seu idioma
+    delete_profile: Excluir
+    modal_delete_profile_yes: Entendido, adeus
+    logout_menu: Sair
+    your_login_field: Seu login
+    modal_delete_profile_content: Esta ação não pode ser desfeita. Uma vez que sua conta seja excluída, não há como recuperá-la.
+    logged_out: Você saiu com sucesso, até logo!
+    settings: Configurações
+    you_are_disconnected: Você está desconectado
+    modal_delete_profile_title: Você está prestes a excluir sua conta
+    type_msg_here: Digite uma mensagem aqui
+    report_message: Reportar mensagem
+    settings_menu: Configurações
+    delete_message: Excluir mensagem
+    update_profile: Atualizar
+    room_name: Nome da sala
+    profile_updated: Seu perfil foi atualizado com sucesso
+7:
+  id: 7
+  long_name: Italiano (IT)
+  short_name: it-IT
+  translations:
+    try_reconnect: Riconnetti
+    report_user: Segnala utente
+    your_pfp_field: La tua immagine del profilo
+    revoke_user: Revoca utente
+    join_a_room_title: Unisciti a una stanza
+    room_name_incorrect: Il nome della stanza che hai cercato di unirti non è valido. Seleziona una stanza all'interno di questa schermata.
+    join_room: Unisciti
+    modal_delete_profile_no: Ho cambiato idea, non cancellare il mio account
+    your_name_field: Il tuo nome
+    your_locale_field: La tua lingua
+    delete_profile: Cancella
+    modal_delete_profile_yes: Capito, addio
+    logout_menu: Esci
+    your_login_field: Il tuo login
+    modal_delete_profile_content: Questa azione non può essere annullata. Una volta che il tuo account sarà cancellato, non sarà possibile recuperarlo.
+    logged_out: Hai effettuato correttamente l'uscita, arrivederci!
+    settings: Impostazioni
+    you_are_disconnected: Sei disconnesso
+    modal_delete_profile_title: Stai per cancellare il tuo account
+    type_msg_here: Scrivi un messaggio qui
+    report_message: Segnala messaggio
+    settings_menu: Impostazioni
+    delete_message: Cancella messaggio
+    update_profile: Aggiorna
+    room_name: Nome della stanza
+    profile_updated: Il tuo profilo è stato aggiornato correttamente
+8:
+  id: 8
+  long_name: Русский (RU)
+  short_name: ru-RU
+  translations:
+    try_reconnect: Переподключиться
+    report_user: Пожаловаться на пользователя
+    your_pfp_field: Ваше изображение профиля
+    revoke_user: Отозвать пользователя
+    join_a_room_title: Присоединиться к комнате
+    room_name_incorrect: Название комнаты, которую вы пытаетесь присоединиться, недопустимо. Пожалуйста, выберите одну из этого экрана.
+    join_room: Присоединиться
+    modal_delete_profile_no: Я передумал, не удаляйте мой аккаунт
+    your_name_field: Ваше имя
+    your_locale_field: Ваш язык
+    delete_profile: Удалить
+    modal_delete_profile_yes: Понятно, прощай
+    logout_menu: Выйти
+    your_login_field: Ваш логин
+    modal_delete_profile_content: Это действие необратимо. После удаления вашей учетной записи ее нельзя будет восстановить.
+    logged_out: Вы успешно вышли, до свидания!
+    settings: Настройки
+    you_are_disconnected: Вы отключены
+    modal_delete_profile_title: Вы собираетесь удалить свою учетную запись
+    type_msg_here: Введите сообщение здесь
+    report_message: Пожаловаться на сообщение
+    settings_menu: Настройки
+    delete_message: Удалить сообщение
+    update_profile: Обновить
+    room_name: Название комнаты
+    profile_updated: Ваш профиль успешно обновлен
+9:
+  id: 9
+  long_name: العربية (AR)
+  short_name: ar-AR
+  translations:
+    try_reconnect: إعادة الاتصال
+    report_user: الإبلاغ عن المستخدم
+    your_pfp_field: صورة الملف الشخصي الخاصة بك
+    revoke_user: إلغاء الوصول للمستخدم
+    join_a_room_title: الانضمام إلى غرفة
+    room_name_incorrect: اسم الغرفة التي حاولت الانضمام إليها غير صالح. يرجى اختيار واحدة ضمن هذه الشاشة.
+    join_room: الانضمام
+    modal_delete_profile_no: تغيرت رأيي، لا تحذف حسابي
+    your_name_field: اسمك
+    your_locale_field: اللغة الخاصة بك
+    delete_profile: حذف
+    modal_delete_profile_yes: فهمت، وداعًا
+    logout_menu: تسجيل الخروج
+    your_login_field: اسم المستخدم الخاص بك
+    modal_delete_profile_content: هذا الإجراء لا يمكن التراجع عنه. بمجرد حذف حسابك، لا يوجد طريقة لاستعادته.
+    logged_out: لقد قمت بتسجيل الخروج بنجاح، إلى اللقاء!
+    settings: الإعدادات
+    you_are_disconnected: أنت غير متصل
+    modal_delete_profile_title: أنت على وشك حذف حسابك
+    type_msg_here: اكتب رسالة هنا
+    report_message: الإبلاغ عن الرسالة
+    settings_menu: الإعدادات
+    delete_message: حذف الرسالة
+    update_profile: تحديث
+    room_name: اسم الغرفة
+    profile_updated: تم تحديث ملفك الشخصي بنجاح

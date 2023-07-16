@@ -40,7 +40,7 @@ pub async fn user_context(
             .into_response());
     }
     let Some(locale) = Locale::find_by_id(user.locale_id) else {
-        return Err((StatusCode::BAD_REQUEST, "").into_response());
+        return Err((StatusCode::BAD_REQUEST, "User's locale doesn't exist").into_response());
     };
     let available_locale = Locale::get_available_locales();
     let navlink: Vec<Navlink> = state
