@@ -234,10 +234,18 @@ impl Component for Settings {
         let pfp = match &self.user_context.user.pfp {
             None => match &self.pfp {
                 Some(_) => {
-                    html! {<span class="dark:text-gray-300">{"Your new profile picture is ready to be uploaded"}</span>}
+                    html! {
+                        <span class="dark:text-gray-300">                    
+                            <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} translation={self.user_context.translation.clone()}/>
+                        </span>
+                    }
                 }
                 None => {
-                    html! { <span class="dark:text-gray-300">{"You don't have any profile picture so far"}</span> }
+                    html! {
+                        <span class="dark:text-gray-300">                    
+                            <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} translation={self.user_context.translation.clone()}/>
+                        </span>
+                    }
                 }
             },
             Some(v) => html! { <><img class="h-10 w-10 rounded-full" src={v.clone()} /></> },
