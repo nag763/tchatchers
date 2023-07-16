@@ -6,4 +6,3 @@
 pub(crate) mod message;
 pub(crate) mod pfp;
 pub(crate) mod user;
-pub(crate) mod user_context;

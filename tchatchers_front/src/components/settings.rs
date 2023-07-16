@@ -13,6 +13,7 @@ use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
 use tchatchers_core::app_context::UserContext;
+use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::UpdatableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
 use validator::Validate;
@@ -125,10 +126,10 @@ impl Component for Settings {
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
                                 if resp.ok() {
-                                    let mut req = Requester::get("/api/app_context");
+                                    let mut req = Requester::get("/api/whoami");
                                     let resp = req.bearer(bearer).send().await;
                                     if resp.ok() {
-                                        let app_context: UserContext =
+                                        let user: PartialUser =
                                             serde_json::from_str(&resp.text().await.unwrap())
                                                 .unwrap();
                                         ToastBus::dispatcher().send(Alert {
@@ -138,6 +139,7 @@ impl Component for Settings {
                                                 "Your profile has been updated with success",
                                             ),
                                         });
+                                        let app_context = user.try_into().unwrap();
                                         link.send_message(Msg::ProfileUpdated(app_context));
                                     } else {
                                         link.send_message(Msg::ErrorFromServer(

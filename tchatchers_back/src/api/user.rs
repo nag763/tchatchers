@@ -9,6 +9,8 @@ use crate::validator::ValidJson;
 use crate::AppState;
 use crate::REFRESH_TOKEN_PATH;
 use axum::extract::State;
+use axum::response::Response;
+use axum::Json;
 use axum::{extract::Path, http::StatusCode, response::IntoResponse};
 use axum_extra::extract::cookie::Cookie;
 use axum_extra::extract::CookieJar;
@@ -17,6 +19,7 @@ use tchatchers_core::authorization_token::AuthorizationToken;
 use tchatchers_core::refresh_token::RefreshToken;
 use tchatchers_core::report::Report;
 use tchatchers_core::serializable_token::SerializableToken;
+use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, UpdatableUser, User};
 use tokio::time::{sleep, Duration};
 use tracing::log::error;
@@ -321,4 +324,21 @@ pub async fn report_user(
             )
         }
     }
+}
+
+pub async fn whoami(
+    JwtUserExtractor(jwt): JwtUserExtractor,
+    state: State<AppState>,
+) -> Result<Json<PartialUser>, Response> {
+    let Some(user) = User::find_by_id(jwt.user_id, &state.pg_pool).await else  {
+        return Err((StatusCode::FORBIDDEN, "User doesn't exist anymore, please log out.").into_response());
+    };
+    if !user.is_authorized {
+        return Err((
+            StatusCode::FORBIDDEN,
+            "This user's access has been deactivated, please log out.",
+        )
+            .into_response());
+    }
+    Ok(Json(user.into()))
 }

@@ -8,8 +8,8 @@ use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
-use tchatchers_core::app_context::UserContext;
-use tchatchers_core::user::AuthenticableUser;
+use tchatchers_core::app_context::{UserContext};
+use tchatchers_core::user::{AuthenticableUser, PartialUser};
 use web_sys::HtmlInputElement;
 use yew::{
     function_component, html, use_context, AttrValue, Component, Context, Html, NodeRef, Properties,
@@ -90,11 +90,12 @@ impl Component for SignIn {
                             if resp.ok() {
                                 let token = resp.text().await.unwrap();
                                 bearer.set(Some(token));
-                                let mut req = Requester::get("/api/app_context");
+                                let mut req = Requester::get("/api/whoami");
                                 let resp = req.bearer(bearer).send().await;
                                 if resp.ok() {
-                                    let app_context: UserContext =
+                                    let user: PartialUser =
                                         serde_json::from_str(&resp.text().await.unwrap()).unwrap();
+                                    let app_context = user.try_into().unwrap();
                                     link.send_message(Msg::LoggedIn(app_context));
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(

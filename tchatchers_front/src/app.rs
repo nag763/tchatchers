@@ -12,11 +12,12 @@ use yew_router::prelude::*;
 #[function_component(ContextualApp)]
 fn contextual_app() -> HtmlResult {
     let context = use_future(|| async {
-        let req = Requester::<()>::get("/api/app_context");
+        let req = Requester::<()>::get("/api/whoami");
         let resp = req.send().await;
         if resp.status().is_success() {
-            let app_context: AppContext =
+            let user: PartialUser =
                 serde_json::from_str(&resp.text().await.unwrap()).unwrap();
+                let app_context = user.try_into().unwrap();
             Some(app_context)
         } else {
             None

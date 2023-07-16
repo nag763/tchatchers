@@ -32,3 +32,19 @@ pub struct UserContext {
     /// Mainly used to not request them from the server if the user wants to change his language.
     pub available_locale: Vec<Locale>,
 }
+
+impl TryFrom<PartialUser> for UserContext {
+    type Error = String;
+
+    fn try_from(value: PartialUser) -> Result<Self, Self::Error> {
+        let Some(locale) =  Locale::find_by_id(value.locale_id) else {
+            return Err(format!("Locale not found for user #{}", value.id));
+        };
+        Ok(Self {
+            translation: Rc::new(locale.translations),
+            navlink: Navlink::get_visibility_for_profile(&value.profile),
+            available_locale: Locale::get_available_locales(),
+            user: value,
+        })
+    }
+}

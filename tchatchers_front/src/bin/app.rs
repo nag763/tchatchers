@@ -3,7 +3,7 @@
 
 use std::rc::Rc;
 
-use tchatchers_core::app_context::UserContext;
+use tchatchers_core::user::PartialUser;
 use tchatchers_front::components::prelude::*;
 
 use tchatchers_front::router::{switch, Route};
@@ -20,12 +20,13 @@ fn contextual_app() -> HtmlResult {
     let app_context = {
         let bearer_setter = bearer.setter();
         use_future(|| async {
-            let mut req = Requester::get("/api/app_context");
+            let mut req = Requester::get("/api/whoami");
             let resp = req.bearer_setter(bearer_setter).send().await;
             if resp.ok() {
-                let app_context: UserContext =
+                let user: PartialUser =
                     serde_json::from_str(&resp.text().await.unwrap()).unwrap();
-                Some(app_context)
+                let user_context = user.try_into().unwrap();
+                Some(user_context)
             } else {
                 None
             }

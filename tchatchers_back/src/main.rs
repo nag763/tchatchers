@@ -16,7 +16,6 @@ use api::message::delete_message;
 use api::message::report_message;
 use api::pfp::*;
 use api::user::*;
-use api::user_context::user_context;
 use axum::http::header::AUTHORIZATION;
 use axum::http::header::COOKIE;
 use axum::http::header::SEC_WEBSOCKET_PROTOCOL;
@@ -117,7 +116,7 @@ async fn main() {
         .route("/api/logout", get(logout))
         .route("/api/validate", get(validate))
         .route("/api/pfp", post(upload_pfp))
-        .route("/api/app_context", get(user_context))
+        .route("/api/whoami", get(whoami))
         .route("/api/message/:message_id", delete(delete_message))
         .route("/api/message/:message_id/report", post(report_message))
         .route("/ws/:room", get(ws_handler))
