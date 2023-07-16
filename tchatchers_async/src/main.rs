@@ -117,6 +117,9 @@ async fn main() {
     println!("Shutting down...");
 
     events.abort_all();
+    pg_pool.close().await;
+    std::mem::drop(redis_conn);
+    std::mem::drop(pg_pool);
 
     println!("All event shut down");
 
