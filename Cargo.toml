@@ -22,6 +22,5 @@ members = [
     "tchatchers_front",
     "tchatchers_cli_tools",
     "tchatchers_async",
-    "tchatchers_app"
 ]
 
