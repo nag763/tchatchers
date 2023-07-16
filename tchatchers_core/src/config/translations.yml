@@ -1,7 +1,7 @@
 translations:
   - id: 1
     long_name: English (US)
-    short_name: en-us
+    short_name: en-US
     translation_map:
       try_reconnect: Reconnect
       report_user: Report user
@@ -31,7 +31,6 @@ translations:
       profile_updated: Your profile has been updated with success
       new_pfp_ready: Your new profile picture is ready to be uploaded
       no_pfp: You don't have any profile picture so far
-
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR
@@ -67,7 +66,7 @@ translations:
 
   - id: 3
     long_name: English (UK)
-    short_name: en-uk
+    short_name: en-UK
     translation_map:
       try_reconnect: Reconnect
       report_user: Report user
@@ -295,113 +294,137 @@ translations:
       new_pfp_ready: صورة الملف الشخصي الجديدة جاهزة للتحميل
       no_pfp: ليس لديك أي صورة شخصية حتى الآن
   - id: 10
-    long_name: Chinese (Simplified)
+    long_name: 中文 (ZH)
     short_name: zh-CN
     translation_map:
-      try_reconnect: 重新连接
-      report_user: 举报用户
-      your_pfp_field: 你的头像
+      you_are_disconnected: 您已断开连接
+      profile_updated: 您的个人资料已成功更新
       revoke_user: 撤销用户
-      join_a_room_title: 加入一个房间
-      room_name_incorrect: 你尝试加入的房间名无效，请在此界面中选择一个有效房间。
       join_room: 加入
-      modal_delete_profile_no: 我改变主意，不要删除我的账号
-      your_name_field: 你的名字
-      your_locale_field: 你的语言环境
-      delete_profile: 删除
-      modal_delete_profile_yes: 知道了，再见
-      logout_menu: 登出
-      your_login_field: 你的登录名
-      modal_delete_profile_content: 此操作不可逆转，一旦你的账号被删除，将无法恢复。
-      logged_out: 你已成功登出，再见！
+      logout_menu: 注销
+      your_name_field: 您的姓名
+      room_name: 房间名称
+      your_login_field: 您的登录名
+      report_user: 举报用户
+      delete_message: 删除消息
       settings: 设置
-      you_are_disconnected: 你已断开连接
-      modal_delete_profile_title: 你即将删除你的账号
-      type_msg_here: 在此输入消息
+      your_locale_field: 您的语言环境
+      modal_delete_profile_yes: 我要删除我的账号
+      logged_out: 您已注销登录，再见！
+      modal_delete_profile_content: 此操作不可逆，一旦您的账号被删除，将无法恢复。
+      delete_profile: 删除
+      your_pfp_field: 您的头像
+      settings_menu: 设置
+      join_a_room_title: 加入一个房间
+      update_profile: 更新个人资料
       report_message: 举报消息
+      modal_delete_profile_no: 我改变主意，不要删除我的账号
+      room_name_incorrect: 您尝试加入的房间名称不正确，请在此屏幕上重新输入。
+      try_reconnect: 重新连接
+      modal_delete_profile_title: 您即将删除您的账号
+      type_msg_here: 在此输入消息
       new_pfp_ready: 您的新头像已准备好上传
-      no_pfp: 您目前没有任何个人资料照片
+      no_pfp: 您尚未设置个人资料图片
+
   - id: 11
-    long_name: Japanese
+    long_name: 日本語 (JP)
     short_name: ja-JP
     translation_map:
-      try_reconnect: 再接続する
-      report_user: ユーザーを報告する
-      your_pfp_field: あなたのプロフィール写真
-      revoke_user: ユーザーのアクセス権を取り消す
-      join_a_room_title: ルームに参加する
-      room_name_incorrect: 入ろうとしたルーム名が無効です。この画面から有効なルームを選択してください。
-      join_room: 参加する
-      modal_delete_profile_no: 考え直しました、アカウントを削除しないでください
-      your_name_field: あなたの名前
-      your_locale_field: ロケール
-      delete_profile: 削除
-      modal_delete_profile_yes: 了解しました、さようなら
-      logout_menu: ログアウト
-      your_login_field: ログイン名
-      modal_delete_profile_content: このアクションは元に戻すことができません。アカウントが削除されると、戻す方法はありません。
-      logged_out: ログアウトしました。さようなら！
-      settings: 設定
       you_are_disconnected: 接続が切断されました
-      modal_delete_profile_title: アカウントの削除を行います
-      type_msg_here: ここにメッセージを入力してください
+      profile_updated: プロフィールが正常に更新されました
+      revoke_user: ユーザーの権限を取り消す
+      join_room: 参加する
+      logout_menu: ログアウト
+      your_name_field: あなたの名前
+      room_name: ルーム名
+      your_login_field: あなたのログイン名
+      report_user: ユーザーを報告する
+      delete_message: メッセージを削除する
+      settings: 設定
+      your_locale_field: あなたのロケール
+      modal_delete_profile_yes: アカウントを削除します
+      logged_out: ログアウトしました。さようなら！
+      modal_delete_profile_content: この操作は取り消すことができません。アカウントが削除されると、元に戻すことはできません。
+      delete_profile: 削除
+      your_pfp_field: あなたのプロフィール写真
+      settings_menu: 設定
+      join_a_room_title: ルームに参加する
+      update_profile: 更新
       report_message: メッセージを報告する
-      new_pfp_ready: 新しいプロフィール画像のアップロードが準備できました
-      no_pfp: プロフィール画像はまだありません
+      modal_delete_profile_no: 考え直しました、アカウントを削除しないでください
+      room_name_incorrect: 入ろうとしたルーム名は正しくありません。この画面から正しいルームを選択してください。
+      try_reconnect: 再接続する
+      modal_delete_profile_title: アカウントを削除します
+      type_msg_here: ここにメッセージを入力してください
+      new_pfp_ready: 新しいプロフィール写真が準備できました
+      no_pfp: プロフィール写真がありません
+
   - id: 12
-    long_name: Korean
+    long_name: 한국어 (KR)
     short_name: ko-KR
     translation_map:
-      try_reconnect: 다시 연결하기
-      report_user: 사용자 신고
-      your_pfp_field: 프로필 사진
-      revoke_user: 사용자 권한 취소
-      join_a_room_title: 방 참여하기
-      room_name_incorrect: 참여하려는 방 이름이 올바르지 않습니다. 이 화면에서 올바른 방을 선택하세요.
-      join_room: 참여하기
-      modal_delete_profile_no: 제 생각이 바뀌었습니다, 계정을 삭제하지 마세요
-      your_name_field: 이름
-      your_locale_field: 로캘
-      delete_profile: 삭제
-      modal_delete_profile_yes: 알겠습니다, 안녕히 가세요
-      logout_menu: 로그아웃
-      your_login_field: 로그인
-      modal_delete_profile_content: 이 작업은 되돌릴 수 없습니다. 계정이 삭제되면 복구할 수 없습니다.
-      logged_out: 로그아웃되었습니다. 안녕히 가세요!
-      settings: 설정
       you_are_disconnected: 연결이 끊어졌습니다
-      modal_delete_profile_title: 계정을 삭제하려고 합니다
-      type_msg_here: 메시지를 여기에 입력하세요
+      profile_updated: 프로필이 성공적으로 업데이트되었습니다
+      revoke_user: 사용자 권한 취소
+      join_room: 참여하기
+      logout_menu: 로그아웃
+      your_name_field: 이름
+      room_name: 방 이름
+      your_login_field: 로그인
+      report_user: 사용자 신고
+      delete_message: 메시지 삭제
+      settings: 설정
+      your_locale_field: 로캘
+      modal_delete_profile_yes: 계정을 삭제하려고 합니다
+      logged_out: 로그아웃되었습니다. 안녕히 가세요!
+      modal_delete_profile_content: 이 작업은 되돌릴 수 없습니다. 계정이 삭제되면 복구할 수 없습니다.
+      delete_profile: 삭제
+      your_pfp_field: 프로필 사진
+      settings_menu: 설정
+      join_a_room_title: 방 참여하기
+      update_profile: 업데이트
       report_message: 메시지 신고
-      new_pfp_ready: 새 프로필 사진이 업로드 준비가 되었습니다
+      modal_delete_profile_no: 제 생각이 바뀌었습니다, 계정을 삭제하지 마세요
+      room_name_incorrect: 입력한 방 이름이 올바르지 않습니다. 이 화면에서 올바른 방을 선택하세요.
+      try_reconnect: 다시 연결하기
+      modal_delete_profile_title: 계정을 삭제하려고 합니다
+      type_msg_here: 메시지를 입력하세요
+      new_pfp_ready: 새 프로필 사진이 준비되었습니다
       no_pfp: 아직 프로필 사진이 없습니다
+
   - id: 13
-    long_name: Dutch
+    long_name: Dutch (NL)
     short_name: nl-NL
     translation_map:
-      try_reconnect: Opnieuw verbinden
-      report_user: Gebruiker rapporteren
-      your_pfp_field: Jouw profielfoto
-      revoke_user: Gebruiker intrekken
-      join_a_room_title: Word lid van een kamer
-      room_name_incorrect: De kamer die je probeerde binnen te gaan heeft een ongeldige naam. Selecteer een geldige kamer op dit scherm.
-      join_room: Lid worden
-      modal_delete_profile_no: Ik heb van gedachten veranderd, verwijder mijn account niet
-      your_name_field: Jouw naam
-      your_locale_field: Jouw taalinstelling
-      delete_profile: Verwijderen
-      modal_delete_profile_yes: Begrepen, tot ziens
-      logout_menu: Uitloggen
-      your_login_field: Jouw inlognaam
-      modal_delete_profile_content: Deze actie kan niet ongedaan worden gemaakt. Zodra jouw account is verwijderd, is er geen manier om het terug te krijgen.
-      logged_out: Je bent succesvol uitgelogd. Tot ziens!
-      settings: Instellingen
       you_are_disconnected: Je bent niet verbonden
-      modal_delete_profile_title: Je staat op het punt om jouw account te verwijderen
-      type_msg_here: Typ hier een bericht
+      profile_updated: Je profiel is succesvol bijgewerkt
+      revoke_user: Gebruiker intrekken
+      join_room: Deelnemen
+      logout_menu: Uitloggen
+      your_name_field: Jouw naam
+      room_name: Kamer naam
+      your_login_field: Jouw login
+      report_user: Gebruiker rapporteren
+      delete_message: Bericht verwijderen
+      settings: Instellingen
+      your_locale_field: Jouw taalinstelling
+      modal_delete_profile_yes: Ik wil mijn account verwijderen
+      logged_out: Je bent uitgelogd, tot ziens!
+      modal_delete_profile_content: Deze actie is niet ongedaan te maken. Zodra je account is verwijderd, is er geen mogelijkheid om het terug te krijgen.
+      delete_profile: Verwijderen
+      your_pfp_field: Jouw profielfoto
+      settings_menu: Instellingen
+      join_a_room_title: Word lid van een kamer
+      update_profile: Bijwerken
       report_message: Bericht rapporteren
+      modal_delete_profile_no: Ik heb van gedachten veranderd, verwijder mijn account niet
+      room_name_incorrect: De kamer die je hebt opgegeven is niet correct, kies een geldige kamer op dit scherm.
+      try_reconnect: Opnieuw verbinden
+      modal_delete_profile_title: Je staat op het punt om je account te verwijderen
+      type_msg_here: Typ hier een bericht
       new_pfp_ready: Je nieuwe profielfoto is klaar om te uploaden
       no_pfp: Je hebt nog geen profielfoto
+
   - id: 14
     long_name: Türkçe (TR)
     short_name: tr-TR

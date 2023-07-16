@@ -70,6 +70,7 @@ services:
       - ${SSL_CERTIFICATE_KEY:-/dev/null}:/usr/nginx/home/certs/key.pem:ro
       - ${SSL_DHPARAM_PATH:-/dev/null}:/usr/nginx/home/certs/ssl-dhparams.pem:ro
       - ./nginx.conf:/etc/nginx/nginx.conf
+      - static:/usr/share/nginx/static
     depends_on:
       - back
       - doc
