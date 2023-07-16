@@ -3,13 +3,13 @@ use std::rc::Rc;
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::common::{WaitingForResponse, I18N};
-use tchatchers_core::locale::Translation;
+use tchatchers_core::locale::TranslationMap;
 use yew::{function_component, html, Callback, Component, Context, Html, Properties};
 
 #[derive(Properties, PartialEq)]
 pub struct TryReconnectProps {
     try_reconnect: Callback<()>,
-    translation: Rc<Translation>,
+    translation: Rc<TranslationMap>,
 }
 
 #[function_component(TryReconnect)]
@@ -34,7 +34,7 @@ pub fn try_reconnect(props: &TryReconnectProps) -> Html {
 pub struct Props {
     pub called_back: bool,
     pub try_reconnect: Callback<()>,
-    pub translation: Rc<Translation>,
+    pub translation: Rc<TranslationMap>,
 }
 
 pub struct DisconnectedBar;

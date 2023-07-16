@@ -11,10 +11,16 @@ static LOCALES: OnceLock<HashMap<i32, Locale>> = OnceLock::new();
 
 /// A collection of translations for labels.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Default)]
-#[cfg_attr(feature = "back", derive(sqlx::FromRow))]
-pub struct Translation(HashMap<String, String>);
+struct Translations {
+    #[serde(rename = "translations")]
+    locales: Vec<Locale>,
+}
 
-impl std::ops::Deref for Translation {
+/// A collection of translations for labels.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Default)]
+pub struct TranslationMap(HashMap<String, String>);
+
+impl std::ops::Deref for TranslationMap {
     type Target = HashMap<String, String>;
 
     fn deref(&self) -> &Self::Target {
@@ -22,13 +28,13 @@ impl std::ops::Deref for Translation {
     }
 }
 
-impl std::ops::DerefMut for Translation {
+impl std::ops::DerefMut for TranslationMap {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl Translation {
+impl TranslationMap {
     /// Gets the translation for the specified label. Returns the default value if no translation is found.
     ///
     /// # Arguments
@@ -56,13 +62,20 @@ pub struct Locale {
     /// The locale's long name.
     pub long_name: String,
     /// Translations associated with the locale.
-    pub translations: Translation,
+    pub translation_map: TranslationMap,
 }
 
 impl Locale {
     /// Initializes the HashMap of locales.
     fn init_cell() -> HashMap<i32, Locale> {
-        serde_yaml::from_str(include_str!("config/translations.yml")).unwrap()
+        let translations: Translations =
+            serde_yaml::from_str(include_str!("config/translations.yml")).unwrap();
+        let mut cell_value = HashMap::new();
+        for locale in translations.locales {
+            let locale_id = locale.id;
+            cell_value.insert(locale_id, locale);
+        }
+        cell_value
     }
 
     /// Returns the locale with the specified ID, if found.

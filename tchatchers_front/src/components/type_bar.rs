@@ -3,7 +3,7 @@
 
 use std::rc::Rc;
 
-use tchatchers_core::locale::Translation;
+use tchatchers_core::locale::TranslationMap;
 use tchatchers_core::ws_message::WsMessage;
 use tchatchers_core::{user::PartialUser, ws_message::WsMessageContent};
 use web_sys::HtmlInputElement;
@@ -18,7 +18,7 @@ pub struct Props {
     pub pass_message_to_ws: Callback<String>,
     pub room: AttrValue,
     pub user: PartialUser,
-    pub translation: Rc<Translation>,
+    pub translation: Rc<TranslationMap>,
 }
 
 #[derive(Default)]

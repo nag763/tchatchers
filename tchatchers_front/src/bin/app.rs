@@ -23,8 +23,7 @@ fn contextual_app() -> HtmlResult {
             let mut req = Requester::get("/api/whoami");
             let resp = req.bearer_setter(bearer_setter).send().await;
             if resp.ok() {
-                let user: PartialUser =
-                    serde_json::from_str(&resp.text().await.unwrap()).unwrap();
+                let user: PartialUser = serde_json::from_str(&resp.text().await.unwrap()).unwrap();
                 let user_context = user.try_into().unwrap();
                 Some(user_context)
             } else {

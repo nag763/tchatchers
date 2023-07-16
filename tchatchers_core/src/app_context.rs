@@ -7,7 +7,7 @@
 use std::rc::Rc;
 
 use crate::{
-    locale::{Locale, Translation},
+    locale::{Locale, TranslationMap},
     navlink::Navlink,
     user::PartialUser,
 };
@@ -22,7 +22,7 @@ pub struct UserContext {
     /// The translations associated to the user's locale.
     ///
     /// Mainly used for internationalization.
-    pub translation: Rc<Translation>,
+    pub translation: Rc<TranslationMap>,
     /// The list of navigation links he can access to.
     ///
     /// This depends on the user's profile.
@@ -41,7 +41,7 @@ impl TryFrom<PartialUser> for UserContext {
             return Err(format!("Locale not found for user #{}", value.id));
         };
         Ok(Self {
-            translation: Rc::new(locale.translations),
+            translation: Rc::new(locale.translation_map),
             navlink: Navlink::get_visibility_for_profile(&value.profile),
             available_locale: Locale::get_available_locales(),
             user: value,

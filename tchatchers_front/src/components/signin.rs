@@ -8,7 +8,7 @@ use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
-use tchatchers_core::app_context::{UserContext};
+use tchatchers_core::app_context::UserContext;
 use tchatchers_core::user::{AuthenticableUser, PartialUser};
 use web_sys::HtmlInputElement;
 use yew::{

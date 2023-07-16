@@ -4,7 +4,6 @@
 /// between different user types. For instance, an admin usually does not have access to
 /// the same screens as a simple user. This difference is stored in the database and then
 /// returned to the client once they log in.
-
 use std::sync::OnceLock;
 
 use serde::{Deserialize, Serialize};
@@ -15,6 +14,7 @@ static NAVLINKS: OnceLock<Vec<Navlink>> = OnceLock::new();
 
 /// A navlink is a reference to a front-end page.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
+#[serde(rename = "navlink")]
 pub struct Navlink {
     /// In base ID.
     pub id: i32,
