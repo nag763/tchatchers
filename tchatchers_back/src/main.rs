@@ -30,12 +30,11 @@ use axum::{
 use bb8_redis::bb8;
 use bb8_redis::RedisConnectionManager;
 use sqlx_core::postgres::PgPool;
-use tokio::join;
-use tokio::signal::unix::SignalKind;
 use std::iter::once;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tchatchers_core::navlink::NavlinkManager;
+use tokio::join;
+use tokio::signal::unix::SignalKind;
 use tokio::sync::Mutex;
 use tower::ServiceBuilder;
 use tower_http::request_id::MakeRequestUuid;
@@ -65,10 +64,6 @@ pub struct AppState {
     txs: Arc<Mutex<WsRooms>>,
     /// The Postgres pool.
     pg_pool: PgPool,
-    /// The navlink manager.
-    ///
-    /// Used to cache the navlinks from the database.
-    navlink_manager: Arc<Mutex<NavlinkManager>>,
     /// Redis session pool.
     session_pool: bb8::Pool<RedisConnectionManager>,
     /// Redis async pool.
@@ -88,16 +83,18 @@ async fn main() {
     let jwt_secret = std::env::var("JWT_SECRET").expect("No jwt secret has been defined");
     let refresh_token_secret = std::env::var("REFRESH_TOKEN_SECRET")
         .expect("No refresh token signature key has been defined");
-    let (pg_pool, session_pool, async_pool) = join!(tchatchers_core::pool::get_pg_pool(), tchatchers_core::pool::get_session_pool(), tchatchers_core::pool::get_async_pool());
-    let navlink_manager = NavlinkManager::init(&pg_pool).await;
-    
+    let (pg_pool, session_pool, async_pool) = join!(
+        tchatchers_core::pool::get_pg_pool(),
+        tchatchers_core::pool::get_session_pool(),
+        tchatchers_core::pool::get_async_pool()
+    );
+
     sqlx::migrate!()
         .run(&pg_pool)
         .await
         .expect("Could not apply migrations on the database");
     let shared_state = AppState {
         refresh_token_secret,
-        navlink_manager: Arc::new(Mutex::new(navlink_manager)),
         jwt_secret,
         txs: Arc::new(Mutex::new(WsRooms::default())),
         pg_pool,
@@ -151,8 +148,6 @@ async fn main() {
                 .set_x_request_id(MakeRequestUuid)
                 .propagate_x_request_id(),
         );
-
-    
 
     // run it with hyper
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));

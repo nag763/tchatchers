@@ -14,9 +14,7 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use tchatchers_core::{
-    app_context::UserContext, navlink::Navlink, user::User, locale::Locale,
-};
+use tchatchers_core::{app_context::UserContext, locale::Locale, navlink::Navlink, user::User};
 
 use crate::{extractor::JwtUserExtractor, AppState};
 
@@ -43,15 +41,9 @@ pub async fn user_context(
         return Err((StatusCode::BAD_REQUEST, "User's locale doesn't exist").into_response());
     };
     let available_locale = Locale::get_available_locales();
-    let navlink: Vec<Navlink> = state
-        .navlink_manager
-        .lock()
-        .await
-        .get_navlink_for_profile(user.profile)
-        .map_err(|e| e.into_response())?;
     Ok(Json(UserContext {
+        navlink: Navlink::get_visibility_for_profile(&user.profile),
         user: user.into(),
-        navlink,
         translation: Rc::new(locale.translations),
         available_locale,
     }))
