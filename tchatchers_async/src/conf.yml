@@ -6,3 +6,7 @@
   queue: MessagesSeen
   interval: 15
   description: "Mark messages as read"
+- persist_messages:
+  queue: PersistMessage
+  interval: 3
+  description: "Persist messages in the database"
