@@ -156,7 +156,7 @@ impl AsyncQueue {
 
     /// Returns an iterator over all the async queue types.
     pub fn iter() -> impl Iterator<Item = Self> {
-        [Self::LoggedUsers, Self::MessagesSeen].iter().cloned()
+        [Self::LoggedUsers, Self::MessagesSeen, Self::PersistMessage, Self::CleanRoom].iter().cloned()
     }
 }
 
