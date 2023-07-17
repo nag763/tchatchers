@@ -106,14 +106,14 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                     }
                     WsMessage::Pong | WsMessage::ClientKeepAlive => continue,
                     WsMessage::Send(mut ws_message) => {
+                        let redis_pool = state.async_pool.clone();
                         ws_message.reception_status = WsReceptionStatus::Sent;
-                        if let Err(e) = ws_message.persist(&state.pg_pool).await {
-                            tracing::error!("An error happened while saving a message : {:?}", e);
-                        } else {
-                            let _ = tx.send(
-                                serde_json::to_string(&WsMessage::Receive(ws_message)).unwrap(),
-                            );
-                        }
+                        let _ = tx.send(
+                            serde_json::to_string(&WsMessage::Receive(ws_message.clone())).unwrap(),
+                        );
+                        tokio::spawn(async move {
+                            AsyncMessage::PersistMessage(ws_message).spawn(&mut redis_pool.get().await.unwrap()).await;
+                        });
                     }
                     WsMessage::RetrieveMessages(session_id) => {
                         let messages: Vec<WsMessageContent> =
@@ -128,13 +128,17 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                     }
                     WsMessage::Seen(messages) => {
                         let _ = tx.send(
-                            serde_json::to_string(&WsMessage::MessagesSeen(messages.clone())).unwrap(),
+                            serde_json::to_string(&WsMessage::MessagesSeen(messages.clone()))
+                                .unwrap(),
                         );
-                        let redis_pool = state.async_pool.clone(); 
+                        let redis_pool = state.async_pool.clone();
                         for message in messages.into_iter() {
                             let redis_pool = redis_pool.clone();
                             tokio::task::spawn(async move {
-                                AsyncMessage::spawn(AsyncMessage::MessageSeen(message), &mut redis_pool.get().await.unwrap())
+                                AsyncMessage::spawn(
+                                    AsyncMessage::MessageSeen(message),
+                                    &mut redis_pool.get().await.unwrap(),
+                                )
                                 .await;
                             });
                         }

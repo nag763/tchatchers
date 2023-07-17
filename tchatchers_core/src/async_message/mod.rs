@@ -13,6 +13,8 @@ use sqlx::PgPool;
 pub mod async_payload;
 pub mod processor;
 
+use crate::ws_message::WsMessageContent;
+
 use self::async_payload::AsyncPayload;
 
 lazy_static! {
@@ -25,6 +27,7 @@ lazy_static! {
 pub enum AsyncMessage {
     LoggedUser(i32),
     MessageSeen(uuid::Uuid),
+    PersistMessage(WsMessageContent),
 }
 
 /// Represents a queue report containing information about the latest executed processes for a queue.
@@ -69,6 +72,7 @@ impl QueueReport {
 pub enum AsyncQueue {
     LoggedUsers = 1,
     MessagesSeen = 2,
+    PersistMessage = 3,
 }
 
 impl AsyncQueue {
@@ -168,6 +172,7 @@ impl AsyncMessage {
         match self {
             AsyncMessage::LoggedUser(_) => AsyncQueue::LoggedUsers,
             AsyncMessage::MessageSeen(_) => AsyncQueue::MessagesSeen,
+            AsyncMessage::PersistMessage(_) => AsyncQueue::PersistMessage,
         }
     }
 

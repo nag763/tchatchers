@@ -235,14 +235,14 @@ impl Component for Settings {
             None => match &self.pfp {
                 Some(_) => {
                     html! {
-                        <span class="dark:text-gray-300">                    
+                        <span class="dark:text-gray-300">
                             <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} translation={self.user_context.translation.clone()}/>
                         </span>
                     }
                 }
                 None => {
                     html! {
-                        <span class="dark:text-gray-300">                    
+                        <span class="dark:text-gray-300">
                             <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} translation={self.user_context.translation.clone()}/>
                         </span>
                     }

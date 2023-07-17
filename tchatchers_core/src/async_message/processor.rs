@@ -87,6 +87,24 @@ async fn messages_seen(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
         .unwrap();
 }
 
+async fn persist_messages(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
+    let mut entities_to_update: HashMap<Uuid, WsMessageContent> =
+        HashMap::with_capacity(payloads.capacity());
+
+    for payload in payloads {
+        let AsyncMessage::PersistMessage(entity) = payload.clone().entity else {
+            warn!("Entity {:?} isn't matching the expected format", payload.id);
+            continue;
+        };
+
+        entities_to_update.insert(entity.uuid, entity);
+    }
+
+    WsMessageContent::persist_async(entities_to_update.into_values().collect(), pool)
+        .await
+        .unwrap();
+}
+
 /// Returns the appropriate processor for the given queue.
 ///
 /// This function takes a queue, a vector of `AsyncPayload` messages, and a PostgreSQL pool,
@@ -106,6 +124,7 @@ fn get_processor<'a>(
     match queue {
         AsyncQueue::LoggedUsers => return Box::pin(process_logged_users(payloads, pool)),
         AsyncQueue::MessagesSeen => return Box::pin(messages_seen(payloads, pool)),
+        AsyncQueue::PersistMessage => return Box::pin(persist_messages(payloads, pool)),
     }
 }
 

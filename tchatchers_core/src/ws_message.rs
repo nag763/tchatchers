@@ -10,6 +10,7 @@
 use crate::async_message::{AsyncOperationPGType, AsyncQueue};
 use crate::user::PartialUser;
 use chrono::{DateTime, Utc};
+use derive_more::Display;
 use uuid::Uuid;
 
 /// The types of messages shared between users.
@@ -90,7 +91,15 @@ pub enum WsReceptionStatus {
 /// Standard used to communicate inside WS between the client and the server
 /// applications.
 #[derive(
-    Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash,
+    Debug,
+    Clone,
+    serde::Serialize,
+    serde::Deserialize,
+    derivative::Derivative,
+    PartialEq,
+    Eq,
+    Hash,
+    Display,
 )]
 #[derivative(Default)]
 #[cfg_attr(
@@ -98,6 +107,7 @@ pub enum WsReceptionStatus {
     derive(sqlx::FromRow)
 )]
 #[serde(rename_all = "camelCase")]
+#[display(fmt = "[{room}:{uuid}]")]
 pub struct WsMessageContent {
     /// The message identifier, must be unique.
     #[derivative(Default(value = "Uuid::new_v4()"))]
@@ -156,20 +166,47 @@ impl WsMessageContent {
     /// # Arguments
     ///
     /// - pool : the connection pool.
-    pub async fn persist(
-        &self,
-        pool: &sqlx::PgPool,
-    ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
-        sqlx::query("INSERT INTO MESSAGE(uuid, content, author, timestamp, room, reception_status) VALUES ($1,$2,$3,$4,$5,$6)")
-            .bind(self.uuid)
-            .bind(&self.content)
-            .bind(self.author.id)
-            .bind(self.timestamp)
-            .bind(&self.room)
-            .bind(self.reception_status)
-            .execute(pool)
-            .await
+    pub async fn persist_async(values: Vec<Self>, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
+        let number_of_values = values.len();
+
+        let mut tx = pool.begin().await?;
+
+        let mut query_builder: sqlx::QueryBuilder<sqlx::Postgres> = sqlx::QueryBuilder::new(
+            "INSERT INTO MESSAGE(uuid, content, author, timestamp, room, reception_status)",
+        );
+        query_builder.push_values(values, |mut b, value| {
+            b.push_bind(value.uuid)
+                .push_bind(value.content)
+                .push_bind(value.author.id)
+                .push_bind(value.timestamp)
+                .push_bind(value.room)
+                .push_bind(value.reception_status);
+        });
+
+        let res = query_builder.build().execute(&mut tx).await?;
+
+        let updated_records = res.rows_affected();
+
+        let failed_records = number_of_values - updated_records as usize;
+
+        sqlx::query(
+            "
+            INSERT INTO PROCESS_REPORT(process_id, successfull_records, failed_records) 
+            VALUES($1, $2, $3)
+            ",
+        )
+        .bind(AsyncQueue::PersistMessage)
+        .bind(updated_records as i64)
+        .bind(failed_records as i64)
+        .execute(&mut tx)
+        .await
+        .unwrap();
+
+        tx.commit().await?;
+
+        Ok(())
     }
+
     /// Mark a list of existing messages as seen.
     ///
     /// # Arguments
