@@ -127,14 +127,17 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                         );
                     }
                     WsMessage::Seen(messages) => {
-                        let redis_conn = &mut state.async_pool.get().await.unwrap();
-                        for message in messages.iter() {
-                            AsyncMessage::spawn(AsyncMessage::MessageSeen(*message), redis_conn)
-                                .await;
-                        }
                         let _ = tx.send(
-                            serde_json::to_string(&WsMessage::MessagesSeen(messages)).unwrap(),
+                            serde_json::to_string(&WsMessage::MessagesSeen(messages.clone())).unwrap(),
                         );
+                        let redis_pool = state.async_pool.clone(); 
+                        for message in messages.into_iter() {
+                            let redis_pool = redis_pool.clone();
+                            tokio::task::spawn(async move {
+                                AsyncMessage::spawn(AsyncMessage::MessageSeen(message), &mut redis_pool.get().await.unwrap())
+                                .await;
+                            });
+                        }
                     }
                     _ => {}
                 }
