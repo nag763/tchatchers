@@ -242,7 +242,56 @@ impl WsMessageContent {
         .await
         .unwrap();
 
-        tx.commit().await.unwrap();
+        tx.commit().await?;
+
+        Ok(())
+    }
+
+    pub async fn clean_rooms(
+        room_names: std::collections::HashSet<&str>,
+        pool: &sqlx::PgPool,
+    ) -> Result<(), sqlx::Error> {
+        let mut failed_records = 0i64;
+
+        let mut tx = pool.begin().await?;
+
+        let mut uuid_to_delete: Vec<Uuid> = Vec::new();
+
+        for room in room_names {
+            let Ok(uuid) : Result<Vec<(Uuid, )>, sqlx::Error> =  sqlx::query_as("SELECT uuid FROM MESSAGE WHERE room=$1 OFFSET 100")
+                .bind(room)
+                .fetch_all(&mut tx)
+                .await else {
+                    failed_records += 1;
+                    continue;
+            };
+            uuid_to_delete.append(&mut uuid.iter().map(|u| u.0).collect());
+        }
+
+        let successfull_records = if !uuid_to_delete.is_empty() {
+            sqlx::query("DELETE FROM MESSAGE WHERE UUID = ANY($1)")
+                .bind(uuid_to_delete)
+                .execute(&mut tx)
+                .await?
+                .rows_affected() as i64                
+        } else {
+            0i64
+        };
+
+        
+        sqlx::query(
+            "
+        INSERT INTO PROCESS_REPORT(process_id, successfull_records, failed_records) 
+        VALUES($1, $2, $3)
+        ",
+        )
+        .bind(AsyncQueue::CleanRoom)
+        .bind(successfull_records)
+        .bind(failed_records)
+        .execute(&mut tx)
+        .await?;
+
+        tx.commit().await?;
 
         Ok(())
     }

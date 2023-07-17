@@ -28,6 +28,7 @@ pub enum AsyncMessage {
     LoggedUser(i32),
     MessageSeen(uuid::Uuid),
     PersistMessage(WsMessageContent),
+    CleanRoom(String),
 }
 
 /// Represents a queue report containing information about the latest executed processes for a queue.
@@ -73,6 +74,7 @@ pub enum AsyncQueue {
     LoggedUsers = 1,
     MessagesSeen = 2,
     PersistMessage = 3,
+    CleanRoom = 4,
 }
 
 impl AsyncQueue {
@@ -173,6 +175,7 @@ impl AsyncMessage {
             AsyncMessage::LoggedUser(_) => AsyncQueue::LoggedUsers,
             AsyncMessage::MessageSeen(_) => AsyncQueue::MessagesSeen,
             AsyncMessage::PersistMessage(_) => AsyncQueue::PersistMessage,
+            AsyncMessage::CleanRoom(_) => AsyncQueue::CleanRoom,
         }
     }
 

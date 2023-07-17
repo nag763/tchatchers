@@ -16,6 +16,6 @@ dotenv = "0.15.0"
 which = "4.4.0"
 validator = "0.16.1"
 log = "0.4.19"
-env_logger = { default-features = false, version = "0.10.0" }
+env_logger = { version = "0.10.0" }
 askama = { default-features = false, version = "0.12.0" }
 clap-verbosity-flag = "2.0.1"

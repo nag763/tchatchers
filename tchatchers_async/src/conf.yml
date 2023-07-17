@@ -1,6 +1,6 @@
 - logged_users:
   queue: LoggedUsers
-  interval: 60
+  interval: 30
   description: "Asynchronous queue to mark users as logged in"
 - read_messages:
   queue: MessagesSeen
@@ -10,3 +10,7 @@
   queue: PersistMessage
   interval: 3
   description: "Persist messages in the database"
+- clean_rooms:
+  queue: CleanRoom
+  interval: 30
+  description: "Clean the rooms with more than 100 messages"

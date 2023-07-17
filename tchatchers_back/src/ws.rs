@@ -15,7 +15,7 @@ use axum::{
     extract::{ws::Message, ws::WebSocket, Path, State, WebSocketUpgrade},
     response::IntoResponse,
 };
-use futures_util::{SinkExt, StreamExt};
+use futures_util::{join, SinkExt, StreamExt};
 use tchatchers_core::{
     async_message::AsyncMessage,
     room::RoomNameValidator,
@@ -112,9 +112,14 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                             serde_json::to_string(&WsMessage::Receive(ws_message.clone())).unwrap(),
                         );
                         tokio::spawn(async move {
-                            AsyncMessage::PersistMessage(ws_message)
-                                .spawn(&mut redis_pool.get().await.unwrap())
-                                .await;
+                            let (pool1, pool2) = (
+                                &mut redis_pool.get().await.unwrap(),
+                                &mut redis_pool.get().await.unwrap(),
+                            );
+                            join!(
+                                AsyncMessage::CleanRoom(ws_message.clone().room).spawn(pool1),
+                                AsyncMessage::PersistMessage(ws_message).spawn(pool2)
+                            );
                         });
                     }
                     WsMessage::RetrieveMessages(session_id) => {

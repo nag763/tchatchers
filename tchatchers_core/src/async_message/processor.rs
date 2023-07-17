@@ -5,7 +5,11 @@
 //! and a Redis connection. It delegates the processing to the appropriate function based on the queue type,
 //! updates the corresponding entities in the database, and clears the processed messages from the queue.
 
-use std::{collections::HashMap, future::Future, pin::Pin};
+use std::{
+    collections::{HashMap, HashSet},
+    future::Future,
+    pin::Pin,
+};
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -105,6 +109,23 @@ async fn persist_messages(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
         .unwrap();
 }
 
+async fn clean_rooms(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
+    let mut entities_to_delete: HashSet<&str> = HashSet::with_capacity(payloads.capacity());
+
+    for payload in payloads {
+        let AsyncMessage::CleanRoom(entity) = &payload.entity else {
+            warn!("Entity {:?} isn't matching the expected format", payload.id);
+            continue;
+        };
+
+        entities_to_delete.insert(entity);
+    }
+
+    WsMessageContent::clean_rooms(entities_to_delete, pool)
+        .await
+        .unwrap();
+}
+
 /// Returns the appropriate processor for the given queue.
 ///
 /// This function takes a queue, a vector of `AsyncPayload` messages, and a PostgreSQL pool,
@@ -125,6 +146,7 @@ fn get_processor<'a>(
         AsyncQueue::LoggedUsers => return Box::pin(process_logged_users(payloads, pool)),
         AsyncQueue::MessagesSeen => return Box::pin(messages_seen(payloads, pool)),
         AsyncQueue::PersistMessage => return Box::pin(persist_messages(payloads, pool)),
+        AsyncQueue::CleanRoom => return Box::pin(clean_rooms(payloads, pool)),
     }
 }
 
