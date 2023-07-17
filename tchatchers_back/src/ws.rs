@@ -112,7 +112,9 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                             serde_json::to_string(&WsMessage::Receive(ws_message.clone())).unwrap(),
                         );
                         tokio::spawn(async move {
-                            AsyncMessage::PersistMessage(ws_message).spawn(&mut redis_pool.get().await.unwrap()).await;
+                            AsyncMessage::PersistMessage(ws_message)
+                                .spawn(&mut redis_pool.get().await.unwrap())
+                                .await;
                         });
                     }
                     WsMessage::RetrieveMessages(session_id) => {
