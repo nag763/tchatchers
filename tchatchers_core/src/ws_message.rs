@@ -273,12 +273,11 @@ impl WsMessageContent {
                 .bind(uuid_to_delete)
                 .execute(&mut tx)
                 .await?
-                .rows_affected() as i64                
+                .rows_affected() as i64
         } else {
             0i64
         };
 
-        
         sqlx::query(
             "
         INSERT INTO PROCESS_REPORT(process_id, successfull_records, failed_records) 

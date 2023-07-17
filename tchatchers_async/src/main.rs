@@ -47,7 +47,7 @@ async fn main() {
 
     // Process each queue in separate tasks
     for config in queues_config {
-        let queue_name = config.queue.clone();
+        let queue_name = config.queue;
         let redis_conn = redis_conn.clone();
         let pg_pool = pg_pool.clone();
 
