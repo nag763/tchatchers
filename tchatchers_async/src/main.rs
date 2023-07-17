@@ -12,11 +12,7 @@ use tchatchers_core::{
     async_message::{processor::process, AsyncQueue},
     pool::{get_async_pool, get_pg_pool},
 };
-use tokio::{
-    signal::unix::SignalKind,
-    task::{JoinHandle, JoinSet},
-    time,
-};
+use tokio::{signal::unix::SignalKind, task::JoinSet, time};
 
 use crate::config::Config;
 
@@ -43,7 +39,7 @@ async fn main() {
     debug!("Queues successfully parsed from config file.");
 
     // Create a set of join handles for tracking spawned tasks
-    let mut events: JoinSet<JoinHandle<()>> = JoinSet::new();
+    let mut events: JoinSet<()> = JoinSet::new();
 
     // Process each queue in separate tasks
     for config in queues_config {

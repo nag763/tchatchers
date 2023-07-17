@@ -28,7 +28,7 @@ impl Component for Navbar {
     type Properties = Props;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        Self::default()
+        Self
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
