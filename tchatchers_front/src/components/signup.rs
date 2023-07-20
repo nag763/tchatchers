@@ -1,9 +1,12 @@
+use std::rc::Rc;
+
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use crate::components::common::{FormButton, WaitingForResponse};
+use crate::components::common::{FormButton, WaitingForResponse, I18N};
 use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
+use crate::utils::client_context::{ClientContext};
 use crate::utils::requester::Requester;
 use gloo_net::http::Request;
 use gloo_timers::callback::Timeout;
@@ -11,11 +14,28 @@ use tchatchers_core::user::InsertableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
 use validator::Validate;
 use web_sys::HtmlInputElement;
-use yew::{html, AttrValue, Component, Context, Html, NodeRef, Properties};
+use yew::{html, AttrValue, Component, Context, Html, NodeRef, Properties, use_context, function_component};
 use yew_agent::Dispatched;
+use yew_router::prelude::use_navigator;
 use yew_router::scope_ext::RouterScopeExt;
 
 const CHECK_LOGIN_AFTER: u32 = 250;
+
+#[function_component(SignUpHOC)]
+pub fn sign_up_hoc() -> Html {
+    let client_context = use_context::<Rc<ClientContext>>().expect("No app context");
+    {
+        let navigator = use_navigator().unwrap();
+        if client_context.user.is_some() {
+            navigator.replace(&Route::JoinRoom);
+            ToastBus::dispatcher().send(Alert {
+                is_success: false,
+                content: client_context.translation.get_or_default("You are already logged in", "already_logged_in"),
+            });
+        }
+    }
+    html! { <SignUp client_context={(*client_context).clone()}/> }
+}
 
 pub enum Msg {
     SubmitForm,
@@ -23,8 +43,10 @@ pub enum Msg {
     ErrorFromServer(AttrValue),
 }
 
-#[derive(Clone, PartialEq, Eq, Properties)]
-pub struct Props;
+#[derive(Clone, PartialEq, Properties)]
+pub struct Props {
+    client_context: ClientContext
+}
 
 #[derive(Default)]
 
@@ -72,17 +94,18 @@ impl Component for SignUp {
                             password.set_value("");
                             password_confirmation.set_value("");
                             link.send_message(Msg::ErrorFromServer(
-                                "The passwords do not match, please try again.".into(),
+                                ctx.props().client_context.translation.get_or_default("passwords_dont_match", "The passwords do not match").into()
                             ));
                         } else {
                             let mut req = Requester::post("/api/user");
                             req.is_json(true).json_body(payload);
+                            let translation = ctx.props().client_context.translation.clone();
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
                                 if resp.ok() {
                                     ToastBus::dispatcher().send(Alert {
                                         is_success: true,
-                                        content: "User created with success".into(),
+                                        content: translation.get_or_default("success_on_user_creation", "User created with success")
                                     });
                                     link.navigator().unwrap().push(&Route::SignIn);
                                 } else {
@@ -99,6 +122,7 @@ impl Component for SignUp {
             Msg::OnLoginChanged => {
                 if let Some(login) = self.login.cast::<HtmlInputElement>() {
                     if login.min_length() <= login.value().len().try_into().unwrap() {
+                        let translation = ctx.props().client_context.translation.clone();
                         self.check_login = Some({
                             Timeout::new(CHECK_LOGIN_AFTER, move || {
                                 wasm_bindgen_futures::spawn_local(async move {
@@ -111,7 +135,7 @@ impl Component for SignUp {
                                     let resp = req.await.unwrap();
                                     if !resp.ok() {
                                         login.set_custom_validity(
-                                            "This login is already taken by another user.",
+                                            &translation.get_or_default("login_already_taken", "The login is already token by another user")
                                         );
                                     } else {
                                         login.set_custom_validity("");
@@ -132,20 +156,21 @@ impl Component for SignUp {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let translation = ctx.props().client_context.translation.clone();
         let end_of_form: Html = match self.wait_for_api {
-            false => html! { <FormButton label="Sign up" /> },
-            true => html! { <WaitingForResponse /> },
+            false => html! { <FormButton label={translation.get_or_default("sign_up", "Sign up")} /> },
+            true => html! { <WaitingForResponse translation={translation.clone()} /> },
         };
 
         html! {
             <>
                 <div class="flex items-center justify-center h-full dark:bg-zinc-800">
                 <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
-                <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold">{"Sign up"}</h2>
+                <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold"><I18N label="sign_up" translation={translation.clone()} default="Sign up"/></h2>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
-                      {"Login"}
+                      <I18N label="login" translation={translation.clone()} default="Login"/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
@@ -155,7 +180,7 @@ impl Component for SignUp {
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
-                      {"Name"}
+                      <I18N label="name_field" translation={translation.clone()} default="Name"/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
@@ -165,7 +190,7 @@ impl Component for SignUp {
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-password">
-                      {"Password"}
+                      <I18N label="password_field" translation={translation.clone()} default="Password"/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
@@ -175,7 +200,7 @@ impl Component for SignUp {
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-password">
-                      {"Confirm your password"}
+                      <I18N label="confirm_password" translation={translation.clone()} default="Confirm your password"/>
                       </label>
                     </div>
                     <div class="md:w-2/3">

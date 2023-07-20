@@ -199,10 +199,10 @@ impl Component for Settings {
                 true
             }
             Msg::ConfirmDeletion => {
-                let translation = self.user_context.translation.as_ref();
+                let translation = ctx.props().context.translation.as_ref();
                 let mc : ModalContent = ModalContent {
                     title: translation.get_or_default("modal_delete_profile_title", "You are about to delete your account"),
-                    msg: translation.get_or_default("modal_delet", "This action is not reversible, once your account is deleted, there is no way for you to get it back."),
+                    msg: translation.get_or_default("modal_delete_content", "This action is not reversible, once your account is deleted, there is no way for you to get it back."),
                     decline_text: Some(translation.get_or_default("modal_delete_profile_no", "I changed, my mind, don't delete my account")),
                     accept_text: Some(translation.get_or_default("modal_delete_profile_yes", "Understood, farewell")),
                 };
@@ -250,13 +250,13 @@ impl Component for Settings {
         };
         let link = ctx.link().clone();
         let end_of_form = match self.wait_for_api {
-            true => html! { <WaitingForResponse /> },
+            true => html! { <WaitingForResponse translation={translation.clone()} /> },
             false => {
                 html! { <AppButton label={translation.get_or_default("update_profile", "Update profile")} /> }
             }
         };
         let delete_profile = match self.wait_for_api {
-            true => html! { <WaitingForResponse /> },
+            true => html! { <WaitingForResponse translation={translation.clone()} /> },
             false => {
                 html! { <AppButton label={translation.get_or_default("delete_profile", "Delete profile")} is_modal_opener=true callback={Callback::from(move |_ :()| {link.send_message(Msg::ConfirmDeletion)})}/> }
             }

@@ -52,7 +52,7 @@ impl Component for DisconnectedBar {
             true => {
                 html! { <TryReconnect translation={ctx.props().translation.clone()} try_reconnect={ctx.props().try_reconnect.clone()} /> }
             }
-            false => html! { <WaitingForResponse /> },
+            false => html! { <WaitingForResponse translation={ctx.props().translation.clone()} /> },
         };
         html! {
             <div class="col-span-6">

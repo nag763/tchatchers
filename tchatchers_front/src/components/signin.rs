@@ -28,7 +28,7 @@ pub fn sign_in_hoc() -> Html {
             navigator.replace(&Route::JoinRoom);
             ToastBus::dispatcher().send(Alert {
                 is_success: false,
-                content: "You are already logged in.".into(),
+                content: client_context.translation.get_or_default("You are already logged in", "already_logged_in"),
             });
         }
     }
@@ -122,7 +122,7 @@ impl Component for SignIn {
                 ctx.props().client_context.user.set(Some(new_context));
                 ToastBus::dispatcher().send(Alert {
                     is_success: true,
-                    content: "You logged in with success".into(),
+                    content: ctx.props().client_context.translation.get_or_default("login_success", "You logged in with success"),
                 });
                 ctx.link().navigator().unwrap().push(&Route::JoinRoom);
                 false
@@ -131,20 +131,21 @@ impl Component for SignIn {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let translation = ctx.props().client_context.translation.clone();
         let end_of_form = match self.wait_for_api {
-            true => html! { <WaitingForResponse /> },
-            false => html! { <FormButton label="Sign in" /> },
+            true => html! { <WaitingForResponse translation={translation.clone()} /> },
+            false => html! { <FormButton label={translation.clone().get_or_default("login", "Login")}/> },
         };
         html! {
             <>
                 <div class="flex items-center justify-center h-full dark:bg-zinc-800">
                 <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
 
-                <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold">{"Sign in"}</h2>
+                <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold"><I18N label="sign_in" translation={translation.clone()} default="Sign in"/></h2>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
-                        <I18N label={"login_field"} default={"Login"}/>
+                        <I18N label={"login"} translation={translation.clone()} default={"Login"}/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
@@ -154,7 +155,7 @@ impl Component for SignIn {
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-password">
-                      <I18N label={"password_field"} default={"Password"}/>
+                      <I18N label={"password_field"} translation={translation.clone()} default={"Password"}/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
@@ -167,7 +168,7 @@ impl Component for SignIn {
                         <div class="flex  items-center mr-4 space-x-2">
                             <input id="inline-keep-me-signed-in" type="checkbox" class="w-4 h-4 accent-purple-600 dark:accent-zinc-700" ref={&self.remember_me} />
                             <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-keep-me-signed-in">
-                            <I18N label={"keep_me_signed_in"} default={"Remember me"}/>
+                            <I18N label={"keep_me_signed_in"} translation={translation.clone()} default={"Remember me"}/>
                             </label>
                         </div>
                     </div>

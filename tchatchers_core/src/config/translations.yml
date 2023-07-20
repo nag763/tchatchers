@@ -34,6 +34,19 @@ translations:
       no_pfp: You don't have any profile picture so far
       sign_in: Sign in
       sign_up: Sign up
+      anon_guard: Please authenticate prior accessing the app functionnalities.
+      keep_me_signed_in: Keep me connected
+      login_success: You logged in with success
+      already_logged_in: You are already logged in
+      passwords_dont_match: The passwords do not match
+      success_on_user_creation: Your access has been created with success
+      login_already_taken: The login is already taken by another user 
+      login: Login
+      name_field: Name
+      password_field: Password
+      confirm_password: Confirm your password
+      modal_delete_content: This action is not reversible, once your account is deleted, there is no way for you to get it back.
+      waiting_for_server: Waiting for response...
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR
@@ -69,6 +82,20 @@ translations:
       no_pfp: Vous n'avez pas encore de photo de profil
       sign_in: Se connecter
       sign_up: Créer un compte
+      anon_guard: Veuillez vous authentifier avant d'accéder aux fonctionnalités de l'application.
+      keep_me_signed_in: Rester connecté
+      login_success: Vous êtes connecté avec succès
+      already_logged_in: Vous êtes déjà connecté
+      passwords_dont_match: Les mots de passe ne correspondent pas
+      success_on_user_creation: Votre accès a été créé avec succès
+      login_already_taken: Le nom d'utilisateur est déjà utilisé par un autre utilisateur
+      login: Nom d'utilisateur
+      name_field: Nom
+      password_field: Mot de passe
+      confirm_password: Confirmez votre mot de passe
+      modal_delete_content: Cette action n'est pas réversible, une fois votre compte supprimé, il n'y a aucun moyen de le récupérer.
+      waiting_for_server: En attente de réponse...
+
   - id: 3
     long_name: English (UK)
     short_name: en-UK
@@ -104,6 +131,20 @@ translations:
       no_pfp: You don't have any profile picture so far
       sign_in: Sign in
       sign_up: Sign up
+      anon_guard: Please authenticate prior accessing the app functionalities.
+      keep_me_signed_in: Keep me signed in
+      login_success: You logged in with success
+      already_logged_in: You are already logged in
+      passwords_dont_match: The passwords do not match
+      success_on_user_creation: Your access has been created with success
+      login_already_taken: The login is already taken by another user
+      login: Login
+      name_field: Name
+      password_field: Password
+      confirm_password: Confirm your password
+      modal_delete_content: This action is not reversible, once your account is deleted, there is no way for you to get it back.
+      waiting_for_server: Waiting for response...
+
   - id: 4
     long_name: Deutsch (DE)
     short_name: de-DE
@@ -139,6 +180,19 @@ translations:
       no_pfp: Du hast bisher kein Profilbild
       sign_in: Anmelden
       sign_up: Registrieren
+      anon_guard: Bitte authentifizieren Sie sich, bevor Sie auf die Funktionen der App zugreifen.
+      keep_me_signed_in: Angemeldet bleiben
+      login_success: Sie haben sich erfolgreich angemeldet
+      already_logged_in: Sie sind bereits angemeldet
+      passwords_dont_match: Die Passwörter stimmen nicht überein
+      success_on_user_creation: Ihr Zugriff wurde erfolgreich erstellt
+      login_already_taken: Die Anmeldung wird bereits von einem anderen Benutzer verwendet
+      login: Anmelden
+      name_field: Name
+      password_field: Passwort
+      confirm_password: Bestätigen Sie Ihr Passwort
+      modal_delete_content: Diese Aktion kann nicht rückgängig gemacht werden. Sobald Ihr Konto gelöscht ist, gibt es keine Möglichkeit, es zurückzubekommen.
+      waiting_for_server: Warten auf Antwort...
   - id: 5
     long_name: Español (ES)
     short_name: es-ES
@@ -174,6 +228,19 @@ translations:
       no_pfp: Aún no tienes ninguna foto de perfil
       sign_in: Iniciar sesión
       sign_up: Registrarse
+      anon_guard: Por favor, autentíquese antes de acceder a las funcionalidades de la aplicación.
+      keep_me_signed_in: Mantenerme conectado
+      login_success: Has iniciado sesión con éxito
+      already_logged_in: Ya estás conectado
+      passwords_dont_match: Las contraseñas no coinciden
+      success_on_user_creation: Se ha creado tu acceso con éxito
+      login_already_taken: El nombre de usuario ya está siendo utilizado por otro usuario
+      login: Nombre de usuario
+      name_field: Nombre
+      password_field: Contraseña
+      confirm_password: Confirma tu contraseña
+      modal_delete_content: Esta acción no se puede deshacer, una vez que se elimine tu cuenta, no hay forma de recuperarla.
+      waiting_for_server: Esperando respuesta...
   - id: 6
     long_name: Português (BR)
     short_name: pt-BR
@@ -209,6 +276,19 @@ translations:
       no_pfp: Você ainda não tem nenhuma foto de perfil
       sign_in: Entrar
       sign_up: Criar conta
+      anon_guard: Por favor, autentique-se antes de acessar as funcionalidades do aplicativo.
+      keep_me_signed_in: Mantenha-me conectado
+      login_success: Você fez login com sucesso
+      already_logged_in: Você já está conectado
+      passwords_dont_match: As senhas não coincidem
+      success_on_user_creation: Seu acesso foi criado com sucesso
+      login_already_taken: O login já está sendo usado por outro usuário
+      login: Login
+      name_field: Nome
+      password_field: Senha
+      confirm_password: Confirmar senha
+      modal_delete_content: Esta ação não pode ser desfeita, uma vez que sua conta for excluída, não há como recuperá-la.
+      waiting_for_server: Aguardando resposta...
   - id: 7
     long_name: Italiano (IT)
     short_name: it-IT
@@ -244,6 +324,19 @@ translations:
       no_pfp: Non hai ancora nessuna foto del profilo
       sign_in: Accedi
       sign_up: Registrati
+      anon_guard: Si prega di autenticarsi prima di accedere alle funzionalità dell'applicazione.
+      keep_me_signed_in: Mantieni l'accesso
+      login_success: Hai effettuato l'accesso con successo
+      already_logged_in: Sei già connesso
+      passwords_dont_match: Le password non corrispondono
+      success_on_user_creation: Il tuo accesso è stato creato con successo
+      login_already_taken: Il login è già utilizzato da un altro utente
+      login: Accesso
+      name_field: Nome
+      password_field: Password
+      confirm_password: Conferma la password
+      modal_delete_content: Questa azione non è reversibile, una volta eliminato il tuo account non sarà possibile recuperarlo.
+      waiting_for_server: In attesa di risposta...
   - id: 8
     long_name: Русский (RU)
     short_name: ru-RU
@@ -279,6 +372,19 @@ translations:
       no_pfp: У вас пока нет фото профиля
       sign_in: Войти
       sign_up: Зарегистрироваться
+      anon_guard: Пожалуйста, авторизуйтесь перед доступом к функциональным возможностям приложения.
+      keep_me_signed_in: Оставаться в системе
+      login_success: Вы успешно вошли в систему
+      already_logged_in: Вы уже вошли в систему
+      passwords_dont_match: Пароли не совпадают
+      success_on_user_creation: Ваш аккаунт был успешно создан
+      login_already_taken: Этот логин уже занят другим пользователем
+      login: Логин
+      name_field: Имя
+      password_field: Пароль
+      confirm_password: Подтвердите пароль
+      modal_delete_content: Это действие нельзя отменить, после удаления учетной записи вы не сможете ее восстановить.
+      waiting_for_server: Ожидание ответа...
   - id: 9
     long_name: العربية (AR)
     short_name: ar-AR
@@ -314,6 +420,19 @@ translations:
       no_pfp: ليس لديك أي صورة شخصية حتى الآن
       sign_in: تسجيل الدخول
       sign_up: إنشاء حساب
+      anon_guard: يُرجى المصادقة قبل الوصول إلى وظائف التطبيق.
+      keep_me_signed_in: البقاء متصلاً
+      login_success: تم تسجيل دخولك بنجاح
+      already_logged_in: أنت مسجل دخول بالفعل
+      passwords_dont_match: كلمات المرور غير متطابقة
+      success_on_user_creation: تم إنشاء حسابك بنجاح
+      login_already_taken: اسم المستخدم مُستخدم بالفعل من قبل مستخدم آخر
+      login: اسم المستخدم
+      name_field: الاسم
+      password_field: كلمة السر
+      confirm_password: تأكيد كلمة السر
+      modal_delete_content: هذا الإجراء لا يمكن التراجع عنه، بمجرد حذف حسابك، لن تكون هناك طريقة لاسترجاعه.
+      waiting_for_server: في انتظار الرد...
   - id: 10
     long_name: 中文 (ZH)
     short_name: zh-CN
@@ -349,6 +468,20 @@ translations:
       no_pfp: 您尚未设置个人资料图片
       sign_in: 登录
       sign_up: 注册
+      anon_guard: 请先进行身份验证，然后再访问应用程序功能。
+      keep_me_signed_in: 保持登录状态
+      login_success: 登录成功
+      already_logged_in: 你已经登录
+      passwords_dont_match: 两次密码输入不一致
+      success_on_user_creation: 用户创建成功
+      login_already_taken: 登录名已被其他用户使用
+      login: 登录
+      name_field: 姓名
+      password_field: 密码
+      confirm_password: 确认密码
+      modal_delete_content: 此操作不可逆，一旦你的账号被删除，将无法恢复。
+      waiting_for_server: 等待服务器响应...
+
   - id: 11
     long_name: 日本語 (JP)
     short_name: ja-JP
@@ -384,6 +517,20 @@ translations:
       no_pfp: プロフィール写真がありません
       sign_in: ログイン
       sign_up: サインアップ
+      anon_guard: アプリの機能にアクセスする前に認証してください。
+      keep_me_signed_in: ログイン状態を保持する
+      login_success: ログインに成功しました
+      already_logged_in: 既にログインしています
+      passwords_dont_match: パスワードが一致しません
+      success_on_user_creation: アカウントが正常に作成されました
+      login_already_taken: ログイン名はすでに他のユーザーによって使用されています
+      login: ログイン
+      name_field: 名前
+      password_field: パスワード
+      confirm_password: パスワードの確認
+      modal_delete_content: この操作は取り消せません。アカウントが削除された場合、戻すことはできません。
+      waiting_for_server: サーバーからの応答を待っています...
+
   - id: 12
     long_name: 한국어 (KR)
     short_name: ko-KR
@@ -419,6 +566,19 @@ translations:
       no_pfp: 아직 프로필 사진이 없습니다
       sign_in: 로그인
       sign_up: 회원 가입
+      anon_guard: 앱 기능에 접근하기 전에 인증해주세요.
+      keep_me_signed_in: 로그인 상태 유지
+      login_success: 로그인에 성공하였습니다
+      already_logged_in: 이미 로그인 상태입니다
+      passwords_dont_match: 비밀번호가 일치하지 않습니다
+      success_on_user_creation: 계정이 성공적으로 생성되었습니다
+      login_already_taken: 해당 로그인명은 이미 다른 사용자에 의해 사용중입니다
+      login: 로그인
+      name_field: 이름
+      password_field: 비밀번호
+      confirm_password: 비밀번호 확인
+      modal_delete_content: 이 작업은 되돌릴 수 없습니다. 계정이 삭제되면 복구할 수 없습니다.
+      waiting_for_server: 서버 응답 대기중...
 
   - id: 13
     long_name: Dutch (NL)
@@ -455,6 +615,19 @@ translations:
       no_pfp: Je hebt nog geen profielfoto
       sign_in: Inloggen
       sign_up: Account aanmaken
+      anon_guard: Gelieve te authenticeren voordat u toegang krijgt tot de app-functies.
+      keep_me_signed_in: Blijf aangemeld
+      login_success: U bent succesvol ingelogd
+      already_logged_in: U bent al ingelogd
+      passwords_dont_match: De wachtwoorden komen niet overeen
+      success_on_user_creation: Uw toegang is succesvol aangemaakt
+      login_already_taken: De gebruikersnaam is al in gebruik door een andere gebruiker
+      login: Gebruikersnaam
+      name_field: Naam
+      password_field: Wachtwoord
+      confirm_password: Bevestig uw wachtwoord
+      modal_delete_content: Deze actie is niet ongedaan te maken, zodra uw account is verwijderd, is er geen manier om het terug te krijgen.
+      waiting_for_server: Wachten op antwoord...
 
   - id: 14
     long_name: Türkçe (TR)
@@ -489,6 +662,19 @@ translations:
       profile_updated: Profiliniz başarıyla güncellendi
       sign_in: Giriş yap
       sign_up: Hesap oluştur
+      anon_guard: Uygulama işlevlerine erişmeden önce lütfen kimlik doğrulaması yapın.
+      keep_me_signed_in: Oturumu açık tut
+      login_success: Başarıyla giriş yaptınız
+      already_logged_in: Zaten oturum açtınız
+      passwords_dont_match: Parolalar eşleşmiyor
+      success_on_user_creation: Erişiminiz başarıyla oluşturuldu
+      login_already_taken: Kullanıcı adı başka bir kullanıcı tarafından zaten alınmış
+      login: Kullanıcı adı
+      name_field: Ad
+      password_field: Parola
+      confirm_password: Parolanızı onaylayın
+      modal_delete_content: Bu işlem geri alınamaz, hesabınız silindikten sonra geri almanın bir yolu yok.
+      waiting_for_server: Yanıt bekleniyor...
   - id: 15
     long_name: Polski (PL)
     short_name: pl-PL
@@ -524,6 +710,19 @@ translations:
       no_pfp: Nie masz jeszcze awatara
       sign_in: Zaloguj się
       sign_up: Załóż konto
+      anon_guard: Zaloguj się przed uzyskaniem dostępu do funkcji aplikacji.
+      keep_me_signed_in: Zostań zalogowany
+      login_success: Zalogowano pomyślnie
+      already_logged_in: Jesteś już zalogowany
+      passwords_dont_match: Hasła nie pasują do siebie
+      success_on_user_creation: Twój dostęp został pomyślnie utworzony
+      login_already_taken: Ta nazwa użytkownika jest już używana przez innego użytkownika
+      login: Nazwa użytkownika
+      name_field: Nazwa
+      password_field: Hasło
+      confirm_password: Potwierdź swoje hasło
+      modal_delete_content: Ta operacja jest nieodwracalna, po usunięciu konta nie będzie można go odzyskać.
+      waiting_for_server: Oczekiwanie na odpowiedź...
   - id: 16
     long_name: Ελληνικά (GR)
     short_name: el-GR
@@ -559,3 +758,16 @@ translations:
       no_pfp: Δεν έχετε ακόμα φωτογραφία προφίλ
       sign_in: Σύνδεση
       sign_up: Εγγραφή
+      anon_guard: Παρακαλούμε να ελέγξετε την ταυτότητά σας πριν από την πρόσβαση στις λειτουργίες της εφαρμογής.
+      keep_me_signed_in: Παραμείνετε συνδεδεμένοι
+      login_success: Συνδεθήκατε επιτυχώς
+      already_logged_in: Είστε ήδη συνδεδεμένοι
+      passwords_dont_match: Οι κωδικοί πρόσβασης δεν ταιριάζουν
+      success_on_user_creation: Ο λογαριασμός σας δημιουργήθηκε με επιτυχία
+      login_already_taken: Το όνομα χρήστη χρησιμοποιείται ήδη από άλλον χρήστη
+      login: Όνομα χρήστη
+      name_field: Όνομα
+      password_field: Κωδικός πρόσβασης
+      confirm_password: Επιβεβαιώστε τον κωδικό πρόσβασης
+      modal_delete_content: Η ενέργεια αυτή δεν μπορεί να αναιρεθεί, μόλις διαγραφεί ο λογαριασμός σας, δεν υπάρχει τρόπος να τον ανακτήσετε.
+      waiting_for_server: Αναμονή για απάντηση...
