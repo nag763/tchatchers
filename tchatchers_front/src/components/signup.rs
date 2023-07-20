@@ -10,6 +10,7 @@ use crate::utils::client_context::{ClientContext};
 use crate::utils::requester::Requester;
 use gloo_net::http::Request;
 use gloo_timers::callback::Timeout;
+use tchatchers_core::locale::Locale;
 use tchatchers_core::user::InsertableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
 use validator::Validate;
@@ -80,12 +81,14 @@ impl Component for SignUp {
                 ) {
                     let inputs = vec![&login, &name, &password];
                     if inputs.iter().all(|i| i.check_validity()) {
+                        let locale = ctx.props().client_context.locale.as_ref().clone().unwrap_or(Locale::get_default_locale()).id;
                         let link = ctx.link().clone();
                         self.wait_for_api = true;
                         let payload = InsertableUser {
                             login: login.value(),
                             name: name.value(),
                             password: password.value(),
+                            locale
                         };
                         if let Err(e) = payload.validate() {
                             let message: ValidationErrorMessage = e.into();

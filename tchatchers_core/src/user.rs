@@ -376,6 +376,10 @@ pub struct InsertableUser {
         regex(path = "RE_LIMITED_CHARS", code = "limited_chars")
     )]
     pub name: String,
+    #[validate(
+        range(min=1)
+    )]
+    pub locale: i32
 }
 
 impl InsertableUser {
@@ -389,10 +393,11 @@ impl InsertableUser {
         let salt: [u8; 32] = rand::thread_rng().gen();
         let config = argon2::Config::default();
         let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
-        sqlx::query("INSERT INTO CHATTER(login, password, name) VALUES ($1,$2,$3)")
+        sqlx::query("INSERT INTO CHATTER(login, password, name, locale_id) VALUES ($1,$2,$3,$4)")
             .bind(&self.login)
             .bind(&hash)
             .bind(&self.name)
+            .bind(&self.locale)
             .execute(pool)
             .await
     }

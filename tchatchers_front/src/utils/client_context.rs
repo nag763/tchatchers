@@ -12,6 +12,8 @@ pub struct ClientContext {
     pub bearer: UseStateHandle<Option<String>>,
     /// The user currently being logged in.
     pub user: UseStateHandle<Option<PartialUser>>,
+    /// The user's locale.
+    pub locale: Rc<Option<Locale>>,
     /// The list of navigation links he can access to.
     ///
     /// This depends on the user's profile.
