@@ -13,7 +13,6 @@ use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
 use gloo_timers::callback::{Interval, Timeout};
-use tchatchers_core::app_context::UserContext;
 use tchatchers_core::room::RoomNameValidator;
 use tchatchers_core::ws_message::{WsMessage, WsMessageContent, WsReceptionStatus};
 use uuid::Uuid;
@@ -63,7 +62,7 @@ pub struct Feed {
     is_closed: bool,
     session_id: Uuid,
     room_name_checked: bool,
-    user_context: UserContext,
+    user_context: ClientContext,
     bearer: UseStateHandle<Option<String>>,
 }
 
@@ -91,13 +90,7 @@ impl Component for Feed {
             },
             session_id: Uuid::new_v4(),
             room_name_checked: false,
-            user_context: ctx
-                .props()
-                .client_context
-                .user_context
-                .as_ref()
-                .cloned()
-                .expect("Context is defined since AuthGuarded"),
+            user_context: ctx.props().client_context.as_ref().clone(),
             bearer: ctx.props().client_context.bearer.clone(),
         }
     }
@@ -139,7 +132,7 @@ impl Component for Feed {
                     WsMessage::Receive(msg_content) => {
                         self.received_messages.insert(0, msg_content.clone());
                         if msg_content.reception_status == WsReceptionStatus::Sent
-                            && msg_content.author.id != self.user_context.user.id
+                            && msg_content.author.id != self.user_context.user.as_ref().unwrap().id
                         {
                             self.ws
                                 .tx
@@ -160,7 +153,8 @@ impl Component for Feed {
                             .into_iter()
                             .filter(|message| {
                                 message.reception_status == WsReceptionStatus::Sent
-                                    && message.author.id != self.user_context.user.id
+                                    && message.author.id
+                                        != self.user_context.user.as_ref().unwrap().id
                             })
                             .map(|m| m.uuid)
                             .collect();
@@ -253,7 +247,7 @@ impl Component for Feed {
                 let pass_message_to_ws = Callback::from(move |message: String| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar translation={self.user_context.translation.clone()} {pass_message_to_ws} user={self.user_context.user.clone()} room={ctx.props().room.clone()}/>}
+                html! {<TypeBar translation={self.user_context.translation.clone()} {pass_message_to_ws} user={self.user_context.user.as_ref().unwrap().clone()} room={ctx.props().room.clone()}/>}
             }
             false => {
                 let link = ctx.link().clone();
@@ -266,7 +260,7 @@ impl Component for Feed {
         html! {
             <div class="grid grid-rows-11 h-full dark:bg-zinc-800">
                 <div class="row-span-10 overflow-auto flex flex-col-reverse" >
-                    <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={self.user_context.user.clone()} />
+                    <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={self.user_context.user.as_ref().unwrap().clone()} />
                 </div>
                 <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center block">
                     {component}

@@ -4,10 +4,7 @@
 use crate::router::Route;
 use crate::{components::common::FormButton, utils::client_context::ClientContext};
 use std::rc::Rc;
-use tchatchers_core::{
-    app_context::UserContext, room::RoomNameValidator,
-    validation_error_message::ValidationErrorMessage,
-};
+use tchatchers_core::{room::RoomNameValidator, validation_error_message::ValidationErrorMessage};
 use validator::Validate;
 use web_sys::HtmlInputElement;
 use yew::{
@@ -21,14 +18,14 @@ use super::common::I18N;
 pub fn join_room_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().unwrap();
 
-    let app_context = client_context.user_context.clone();
+    let app_context = client_context.clone();
 
-    html! { <JoinRoom  user_context={(*app_context).clone().expect("Context defined as route is AuthGuarded")} /> }
+    html! { <JoinRoom  user_context={(*app_context).clone()} /> }
 }
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct Props {
-    user_context: UserContext,
+    user_context: ClientContext,
 }
 
 pub enum Msg {

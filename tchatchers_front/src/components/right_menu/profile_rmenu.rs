@@ -22,12 +22,7 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
 
     let bearer = client_context.bearer.clone();
 
-    let translation = client_context
-        .user_context
-        .as_ref()
-        .unwrap()
-        .translation
-        .clone();
+    let translation = client_context.translation.clone();
 
     let revoke_user_li = {
         let bearer = bearer.clone();
@@ -79,7 +74,7 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
         </li>}
     };
 
-    match client_context.user_context.as_ref().unwrap().user.profile {
+    match client_context.user.as_ref().unwrap().profile {
         Profile::Moderator | Profile::Admin => html! {
             <ul>
                 {revoke_user_li}

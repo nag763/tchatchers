@@ -2,6 +2,7 @@ translations:
   - id: 1
     long_name: English (US)
     short_name: en-US
+    web_names: [en-US, en]
     translation_map:
       try_reconnect: Reconnect
       report_user: Report user
@@ -31,9 +32,12 @@ translations:
       profile_updated: Your profile has been updated with success
       new_pfp_ready: Your new profile picture is ready to be uploaded
       no_pfp: You don't have any profile picture so far
+      sign_in: Sign in
+      sign_up: Sign up
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR
+    web_names: [fr-FR, fr]
     translation_map:
       you_are_disconnected: Vous êtes déconnecté
       profile_updated: Votre profil a été mis à jour avec succès
@@ -63,10 +67,12 @@ translations:
       type_msg_here: Commencez à écrire ici
       new_pfp_ready: Votre nouvelle photo de profil est prête à être téléchargée
       no_pfp: Vous n'avez pas encore de photo de profil
-
+      sign_in: Se connecter
+      sign_up: Créer un compte
   - id: 3
     long_name: English (UK)
     short_name: en-UK
+    web_names: [en-UK, en]
     translation_map:
       try_reconnect: Reconnect
       report_user: Report user
@@ -96,10 +102,12 @@ translations:
       profile_updated: Your profile has been updated with success
       new_pfp_ready: Your new profile picture is ready to be uploaded
       no_pfp: You don't have any profile picture so far
-
+      sign_in: Sign in
+      sign_up: Sign up
   - id: 4
     long_name: Deutsch (DE)
     short_name: de-DE
+    web_names: [de-DE, de]
     translation_map:
       try_reconnect: Verbinden
       report_user: Benutzer melden
@@ -129,10 +137,12 @@ translations:
       profile_updated: Dein Profil wurde erfolgreich aktualisiert
       new_pfp_ready: Dein neues Profilbild ist bereit zum Hochladen
       no_pfp: Du hast bisher kein Profilbild
-
+      sign_in: Anmelden
+      sign_up: Registrieren
   - id: 5
     long_name: Español (ES)
     short_name: es-ES
+    web_names: [es-ES, es]
     translation_map:
       try_reconnect: Reconectar
       report_user: Reportar usuario
@@ -162,10 +172,12 @@ translations:
       profile_updated: Tu perfil se ha actualizado correctamente
       new_pfp_ready: Tu nueva foto de perfil está lista para ser subida
       no_pfp: Aún no tienes ninguna foto de perfil
-
+      sign_in: Iniciar sesión
+      sign_up: Registrarse
   - id: 6
     long_name: Português (BR)
     short_name: pt-BR
+    web_names: [pt-BR, pt]
     translation_map:
       try_reconnect: Reconectar
       report_user: Reportar usuário
@@ -195,10 +207,12 @@ translations:
       profile_updated: Seu perfil foi atualizado com sucesso
       new_pfp_ready: Sua nova foto de perfil está pronta para ser enviada
       no_pfp: Você ainda não tem nenhuma foto de perfil
-
+      sign_in: Entrar
+      sign_up: Criar conta
   - id: 7
     long_name: Italiano (IT)
     short_name: it-IT
+    web_names: [it-IT, it]
     translation_map:
       try_reconnect: Riconnetti
       report_user: Segnala utente
@@ -228,10 +242,12 @@ translations:
       profile_updated: Il tuo profilo è stato aggiornato correttamente
       new_pfp_ready: La tua nuova immagine del profilo è pronta per essere caricata
       no_pfp: Non hai ancora nessuna foto del profilo
-
+      sign_in: Accedi
+      sign_up: Registrati
   - id: 8
     long_name: Русский (RU)
     short_name: ru-RU
+    web_names: [ru-RU, ru]
     translation_map:
       try_reconnect: Переподключиться
       report_user: Пожаловаться на пользователя
@@ -261,9 +277,12 @@ translations:
       profile_updated: Ваш профиль успешно обновлен
       new_pfp_ready: Ваше новое изображение профиля готово к загрузке
       no_pfp: У вас пока нет фото профиля
+      sign_in: Войти
+      sign_up: Зарегистрироваться
   - id: 9
     long_name: العربية (AR)
     short_name: ar-AR
+    web_names: [ar-AR, ar]
     translation_map:
       try_reconnect: إعادة الاتصال
       report_user: الإبلاغ عن المستخدم
@@ -293,9 +312,12 @@ translations:
       profile_updated: تم تحديث ملفك الشخصي بنجاح
       new_pfp_ready: صورة الملف الشخصي الجديدة جاهزة للتحميل
       no_pfp: ليس لديك أي صورة شخصية حتى الآن
+      sign_in: تسجيل الدخول
+      sign_up: إنشاء حساب
   - id: 10
     long_name: 中文 (ZH)
     short_name: zh-CN
+    web_names: [zh-CN, zh]
     translation_map:
       you_are_disconnected: 您已断开连接
       profile_updated: 您的个人资料已成功更新
@@ -325,10 +347,12 @@ translations:
       type_msg_here: 在此输入消息
       new_pfp_ready: 您的新头像已准备好上传
       no_pfp: 您尚未设置个人资料图片
-
+      sign_in: 登录
+      sign_up: 注册
   - id: 11
     long_name: 日本語 (JP)
     short_name: ja-JP
+    web_names: [ja-JP, ja]
     translation_map:
       you_are_disconnected: 接続が切断されました
       profile_updated: プロフィールが正常に更新されました
@@ -358,10 +382,12 @@ translations:
       type_msg_here: ここにメッセージを入力してください
       new_pfp_ready: 新しいプロフィール写真が準備できました
       no_pfp: プロフィール写真がありません
-
+      sign_in: ログイン
+      sign_up: サインアップ
   - id: 12
     long_name: 한국어 (KR)
     short_name: ko-KR
+    web_names: [ko-KR, ko]    
     translation_map:
       you_are_disconnected: 연결이 끊어졌습니다
       profile_updated: 프로필이 성공적으로 업데이트되었습니다
@@ -391,10 +417,13 @@ translations:
       type_msg_here: 메시지를 입력하세요
       new_pfp_ready: 새 프로필 사진이 준비되었습니다
       no_pfp: 아직 프로필 사진이 없습니다
+      sign_in: 로그인
+      sign_up: 회원 가입
 
   - id: 13
     long_name: Dutch (NL)
     short_name: nl-NL
+    web_names: [nl-NL, nl]
     translation_map:
       you_are_disconnected: Je bent niet verbonden
       profile_updated: Je profiel is succesvol bijgewerkt
@@ -424,10 +453,13 @@ translations:
       type_msg_here: Typ hier een bericht
       new_pfp_ready: Je nieuwe profielfoto is klaar om te uploaden
       no_pfp: Je hebt nog geen profielfoto
+      sign_in: Inloggen
+      sign_up: Account aanmaken
 
   - id: 14
     long_name: Türkçe (TR)
     short_name: tr-TR
+    web_names: [tr-TR, tr]
     translation_map:
       try_reconnect: Yeniden bağlan
       report_user: Kullanıcıyı bildir
@@ -455,11 +487,12 @@ translations:
       update_profile: Güncelle
       room_name: Oda adı
       profile_updated: Profiliniz başarıyla güncellendi
-      new_pfp_ready: Yeni profil resminiz yüklemek için hazır
-      no_pfp: Henüz profil fotoğrafınız yok
+      sign_in: Giriş yap
+      sign_up: Hesap oluştur
   - id: 15
     long_name: Polski (PL)
     short_name: pl-PL
+    web_names: [pl-PL, pl]
     translation_map:
       try_reconnect: Ponowne połączenie
       report_user: Zgłoś użytkownika
@@ -489,9 +522,12 @@ translations:
       profile_updated: Twój profil został pomyślnie zaktualizowany
       new_pfp_ready: Twój nowy awatar jest gotowy do przesłania
       no_pfp: Nie masz jeszcze awatara
+      sign_in: Zaloguj się
+      sign_up: Załóż konto
   - id: 16
     long_name: Ελληνικά (GR)
     short_name: el-GR
+    web_names: [el-EL, el]
     translation_map:
       try_reconnect: Επανασύνδεση
       report_user: Αναφορά χρήστη
@@ -521,3 +557,5 @@ translations:
       profile_updated: Το προφίλ σας ενημερώθηκε με επιτυχία
       new_pfp_ready: Η νέα φωτογραφία προφίλ σας είναι έτοιμη για μεταφόρτωση
       no_pfp: Δεν έχετε ακόμα φωτογραφία προφίλ
+      sign_in: Σύνδεση
+      sign_up: Εγγραφή

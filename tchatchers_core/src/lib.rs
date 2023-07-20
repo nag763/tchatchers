@@ -1,8 +1,6 @@
 //! This crate is used to define the common structs and data used both by
 //! the client and the server applications.
 
-#[cfg(feature = "front")]
-pub mod app_context;
 #[cfg(any(feature = "back", feature = "async", feature = "cli"))]
 pub mod async_message;
 pub mod authorization_token;

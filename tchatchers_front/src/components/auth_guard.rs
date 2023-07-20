@@ -18,7 +18,7 @@ where
     let client_context = use_context::<Rc<ClientContext>>().expect("No app context");
     let navigator = use_navigator().unwrap();
 
-    if client_context.user_context.is_some() {
+    if client_context.user.is_some() {
         html! { <T ..props.clone() /> }
     } else {
         navigator.replace(&Route::SignIn);

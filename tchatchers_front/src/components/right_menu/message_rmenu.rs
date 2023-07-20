@@ -24,12 +24,7 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
 
     let bearer = client_context.bearer.clone();
 
-    let translation: Rc<TranslationMap> = client_context
-        .user_context
-        .as_ref()
-        .unwrap()
-        .translation
-        .clone();
+    let translation: Rc<TranslationMap> = client_context.translation.clone();
 
     let delete_message_li = {
         let bearer = bearer.clone();
@@ -83,7 +78,7 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
         </li>}
     };
 
-    match client_context.user_context.as_ref().unwrap().user.profile {
+    match client_context.user.as_ref().unwrap().profile {
         Profile::Moderator | Profile::Admin => html! {
             <ul>
                 {delete_message_li}

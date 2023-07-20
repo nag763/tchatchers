@@ -42,11 +42,17 @@ impl Navlink {
     /// # Returns
     ///
     /// A vector of `Navlink` instances that are visible to the specified profile.
-    pub fn get_visibility_for_profile(profile: &Profile) -> Vec<Navlink> {
+    pub fn get_visibility_for_profile(profile: Option<Profile>) -> Vec<Navlink> {
         NAVLINKS
             .get_or_init(Self::init_cell)
             .iter()
-            .filter(|navlink| navlink.visibility.contains(profile))
+            .filter(|navlink| {
+                if let Some(profile) = profile {
+                    navlink.visibility.contains(&profile)
+                } else {
+                    navlink.visibility.is_empty()
+                }
+            })
             .cloned()
             .collect()
     }

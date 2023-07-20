@@ -61,6 +61,8 @@ pub struct Locale {
     pub short_name: String,
     /// The locale's long name.
     pub long_name: String,
+    /// Web locale values.
+    pub web_names: Vec<String>,
     /// Translations associated with the locale.
     pub translation_map: TranslationMap,
 }
@@ -95,5 +97,22 @@ impl Locale {
             .values()
             .cloned()
             .collect()
+    }
+
+    pub fn get_for_web_names(web_names: Vec<String>) -> Option<Locale> {
+        let locales: Vec<Locale> = LOCALES
+            .get_or_init(Self::init_cell)
+            .values()
+            .cloned()
+            .collect();
+        let index = locales
+            .iter()
+            .position(|v| web_names.iter().any(|e| v.web_names.contains(e)))?;
+        locales.get(index).cloned()
+    }
+
+    pub fn get_default_locale() -> Locale {
+        let locales = LOCALES.get_or_init(Self::init_cell);
+        locales.get(&1i32).cloned().unwrap()
     }
 }

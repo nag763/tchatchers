@@ -8,7 +8,6 @@ use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
-use tchatchers_core::app_context::UserContext;
 use tchatchers_core::user::{AuthenticableUser, PartialUser};
 use web_sys::HtmlInputElement;
 use yew::{
@@ -25,7 +24,7 @@ pub fn sign_in_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().expect("No app context");
     {
         let navigator = use_navigator().unwrap();
-        if client_context.user_context.is_some() {
+        if client_context.user.is_some() {
             navigator.replace(&Route::JoinRoom);
             ToastBus::dispatcher().send(Alert {
                 is_success: false,
@@ -38,7 +37,7 @@ pub fn sign_in_hoc() -> Html {
 
 pub enum Msg {
     SubmitForm,
-    LoggedIn(UserContext),
+    LoggedIn(PartialUser),
     ErrorFromServer(AttrValue),
 }
 
@@ -95,8 +94,7 @@ impl Component for SignIn {
                                 if resp.ok() {
                                     let user: PartialUser =
                                         serde_json::from_str(&resp.text().await.unwrap()).unwrap();
-                                    let app_context = user.try_into().unwrap();
-                                    link.send_message(Msg::LoggedIn(app_context));
+                                    link.send_message(Msg::LoggedIn(user));
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
                                         resp.text().await.unwrap().into(),
@@ -121,10 +119,7 @@ impl Component for SignIn {
                 true
             }
             Msg::LoggedIn(new_context) => {
-                ctx.props()
-                    .client_context
-                    .user_context
-                    .set(Some(new_context));
+                ctx.props().client_context.user.set(Some(new_context));
                 ToastBus::dispatcher().send(Alert {
                     is_success: true,
                     content: "You logged in with success".into(),

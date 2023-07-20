@@ -12,7 +12,7 @@ use crate::services::modal_bus::ModalBusContent;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
-use tchatchers_core::app_context::UserContext;
+use tchatchers_core::locale::Locale;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::UpdatableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
@@ -42,7 +42,7 @@ pub enum Msg {
     PfpUpdated(AttrValue),
     SubmitForm,
     ErrorFromServer(AttrValue),
-    ProfileUpdated(UserContext),
+    ProfileUpdated(PartialUser),
     ConfirmDeletion,
     DeletionConfirmed,
 }
@@ -60,7 +60,7 @@ pub struct Settings {
     server_error: Option<AttrValue>,
     ok_msg: Option<AttrValue>,
     producer: Box<dyn Bridge<ModalBus>>,
-    user_context: UserContext,
+    user_context: ClientContext,
 }
 
 impl Component for Settings {
@@ -77,12 +77,12 @@ impl Component for Settings {
             }
         };
 
-        let context_ref = ctx.props().context.user_context.as_ref().unwrap();
+        let context_ref = ctx.props().context.as_ref();
 
         Self {
             name: NodeRef::default(),
             locale_id: NodeRef::default(),
-            pfp: context_ref.user.pfp.clone(),
+            pfp: context_ref.user.as_ref().unwrap().pfp.clone(),
             user_context: context_ref.clone(),
             wait_for_api: false,
             server_error: None,
@@ -107,7 +107,7 @@ impl Component for Settings {
                             return true;
                         };
                         let payload = UpdatableUser {
-                            id: self.user_context.user.id,
+                            id: self.user_context.user.as_ref().unwrap().id,
                             locale_id,
                             name: name.value(),
                             pfp: self.pfp.clone(),
@@ -122,7 +122,7 @@ impl Component for Settings {
                             req.is_json(true).bearer(bearer.clone()).json_body(payload);
                             let link = ctx.link().clone();
                             self.wait_for_api = true;
-                            let translation = self.user_context.translation.clone();
+                            let translation = (*self.user_context.translation).clone();
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
                                 if resp.ok() {
@@ -134,13 +134,12 @@ impl Component for Settings {
                                                 .unwrap();
                                         ToastBus::dispatcher().send(Alert {
                                             is_success: true,
-                                            content: translation.as_ref().get_or_default(
+                                            content: translation.get_or_default(
                                                 "profile_updated",
                                                 "Your profile has been updated with success",
                                             ),
                                         });
-                                        let app_context = user.try_into().unwrap();
-                                        link.send_message(Msg::ProfileUpdated(app_context));
+                                        link.send_message(Msg::ProfileUpdated(user));
                                     } else {
                                         link.send_message(Msg::ErrorFromServer(
                                             resp.text().await.unwrap().into(),
@@ -155,7 +154,7 @@ impl Component for Settings {
                         }
                     }
                 }
-                true
+                false
             }
             Msg::UploadNewPfp(pfp) => {
                 self.wait_for_api = true;
@@ -185,13 +184,11 @@ impl Component for Settings {
             }
             Msg::ProfileUpdated(app_context) => {
                 self.wait_for_api = false;
-                self.user_context = app_context.clone();
-                ctx.props().context.user_context.set(Some(app_context));
-
+                let locale_id = app_context.clone().locale_id;
+                self.user_context.user.set(Some(app_context));
+                let translation = Locale::find_by_id(locale_id).unwrap().translation_map;
                 self.ok_msg = Some(
-                    self.user_context
-                        .translation
-                        .clone()
+                    translation
                         .get_or_default(
                             "profile_updated",
                             "Your profile has been updated with success",
@@ -230,20 +227,21 @@ impl Component for Settings {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let translation = self.user_context.translation.as_ref();
-        let pfp = match &self.user_context.user.pfp {
+        let translation = &ctx.props().context.translation.clone();
+        let user = &ctx.props().context.user.as_ref().cloned().unwrap();
+        let pfp = match &user.pfp {
             None => match &self.pfp {
                 Some(_) => {
                     html! {
                         <span class="dark:text-gray-300">
-                            <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} translation={self.user_context.translation.clone()}/>
+                            <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} translation={translation}/>
                         </span>
                     }
                 }
                 None => {
                     html! {
                         <span class="dark:text-gray-300">
-                            <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} translation={self.user_context.translation.clone()}/>
+                            <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} translation={translation}/>
                         </span>
                     }
                 }
@@ -270,38 +268,38 @@ impl Component for Settings {
                 <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);" >
 
                 <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold">
-                    <I18N label={"settings"} default={"Settings"} translation={self.user_context.translation.clone()}/>
+                    <I18N label={"settings"} default={"Settings"} translation={translation}/>
                 </h2>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
-                        <I18N label={"your_login_field"} default={"Your login"} translation={self.user_context.translation.clone()}/>
+                        <I18N label={"your_login_field"} default={"Your login"} translation={translation}/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="32" value={self.user_context.user.login.clone()} disabled=true/>
+                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="32" value={user.login.clone()} disabled=true/>
                     </div>
                     </div>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
-                      <I18N label={"your_name_field"} default={"Your name"} translation={self.user_context.translation.clone()}/>
+                      <I18N label={"your_name_field"} default={"Your name"} translation={translation}/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.name} value={self.user_context.user.name.clone()}/>
+                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.name} value={user.name.clone()}/>
                     </div>
                   </div>
                   <div class="md:flex md:items-center mb-6">
                   <div class="md:w-1/3">
                     <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
-                    <I18N label={"your_locale_field"} default={"Your locale"} translation={self.user_context.translation.clone()}/>
+                    <I18N label={"your_locale_field"} default={"Your locale"} translation={translation}/>
                     </label>
                   </div>
                   <div class="md:w-2/3">
                     <select class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true ref={&self.locale_id} >
                         {self.user_context.available_locale.iter().map(|l|
-                                html! {<option value={l.id.to_string()} selected={l.id == self.user_context.user.locale_id}>{l.long_name.as_str()}</option>}
+                                html! {<option value={l.id.to_string()} selected={l.id == user.locale_id}>{l.long_name.as_str()}</option>}
                         ).collect::<Html>()}
                     </select>
                   </div>
@@ -309,7 +307,7 @@ impl Component for Settings {
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
-                      <I18N label={"your_pfp_field"} default={"Your profile picture"} translation={self.user_context.translation.clone()}/>
+                      <I18N label={"your_pfp_field"} default={"Your profile picture"} translation={translation}/>
                       </label>
                     </div>
                     <div class="md:w-2/3 flex justify-center items-center space-x-4 mt-2 dark:text-gray-200">

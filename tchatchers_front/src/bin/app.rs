@@ -3,6 +3,8 @@
 
 use std::rc::Rc;
 
+use tchatchers_core::locale::Locale;
+use tchatchers_core::navlink::Navlink;
 use tchatchers_core::user::PartialUser;
 use tchatchers_front::components::prelude::*;
 
@@ -17,24 +19,62 @@ use yew_router::prelude::*;
 fn contextual_app() -> HtmlResult {
     let bearer: UseStateHandle<Option<String>> = use_state(|| None);
 
-    let app_context = {
+    let user = {
         let bearer_setter = bearer.setter();
         use_future(|| async {
             let mut req = Requester::get("/api/whoami");
             let resp = req.bearer_setter(bearer_setter).send().await;
             if resp.ok() {
                 let user: PartialUser = serde_json::from_str(&resp.text().await.unwrap()).unwrap();
-                let user_context = user.try_into().unwrap();
-                Some(user_context)
+                Some(user)
             } else {
                 None
             }
         })?
     };
 
+    let user = use_state(|| user.clone());
+
+    let navigator_language: Option<Vec<String>> =
+        tchatchers_front::utils::language::get_navigator_languages();
+
+    let translation = use_memo(
+        |user| {
+            let locale = {
+                if let Some(user) = user {
+                    Locale::find_by_id(user.locale_id)
+                } else if let Some(navigator_language) = navigator_language {
+                    Locale::get_for_web_names(navigator_language)
+                } else {
+                    None
+                }
+            };
+            if let Some(locale) = locale {
+                locale.translation_map
+            } else {
+                Locale::get_default_locale().translation_map
+            }
+        },
+        (*user).clone(),
+    );
+
+    let navlink = use_memo(
+        |user| {
+            if let Some(user) = user {
+                Navlink::get_visibility_for_profile(Some(user.profile))
+            } else {
+                Navlink::get_visibility_for_profile(None)
+            }
+        },
+        (*user).clone(),
+    );
+
     let client_context = Rc::new(ClientContext {
-        user_context: use_state(|| app_context.clone()),
+        user,
         bearer,
+        available_locale: Locale::get_available_locales(),
+        translation,
+        navlink,
     });
 
     let context = use_memo(|_| (*client_context).clone(), (*client_context).clone());

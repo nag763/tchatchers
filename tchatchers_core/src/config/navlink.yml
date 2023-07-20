@@ -1,9 +1,21 @@
+- &sign_up:
+  id: 4
+  href: /signin
+  label: sign_in
+  default_translation: Settings
+  visibility: []
+- &sign_in:
+  id: 3
+  href: /signup
+  label: sign_up
+  default_translation: Log out
+  visibility: []
 - &settings:
   id: 2
   href: /settings
   label: settings_menu
   default_translation: Settings
-  visibility: [User, Admin, Moderator]  
+  visibility: [User, Admin, Moderator]
 - &logout:
   id: 1
   href: /logout
