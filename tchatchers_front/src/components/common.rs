@@ -14,7 +14,7 @@ use super::modal::MODAL_OPENER_CLASS;
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct WaitingForResponseProperties {
-    pub translation: Rc<TranslationMap>
+    pub translation: Rc<TranslationMap>,
 }
 
 #[function_component(WaitingForResponse)]

@@ -28,7 +28,9 @@ pub fn sign_in_hoc() -> Html {
             navigator.replace(&Route::JoinRoom);
             ToastBus::dispatcher().send(Alert {
                 is_success: false,
-                content: client_context.translation.get_or_default("You are already logged in", "already_logged_in"),
+                content: client_context
+                    .translation
+                    .get_or_default("You are already logged in", "already_logged_in"),
             });
         }
     }
@@ -122,7 +124,11 @@ impl Component for SignIn {
                 ctx.props().client_context.user.set(Some(new_context));
                 ToastBus::dispatcher().send(Alert {
                     is_success: true,
-                    content: ctx.props().client_context.translation.get_or_default("login_success", "You logged in with success"),
+                    content: ctx
+                        .props()
+                        .client_context
+                        .translation
+                        .get_or_default("login_success", "You logged in with success"),
                 });
                 ctx.link().navigator().unwrap().push(&Route::JoinRoom);
                 false
@@ -134,7 +140,9 @@ impl Component for SignIn {
         let translation = ctx.props().client_context.translation.clone();
         let end_of_form = match self.wait_for_api {
             true => html! { <WaitingForResponse translation={translation.clone()} /> },
-            false => html! { <FormButton label={translation.clone().get_or_default("login", "Login")}/> },
+            false => {
+                html! { <FormButton label={translation.clone().get_or_default("sign_in", "Log in")}/> }
+            }
         };
         html! {
             <>
@@ -167,7 +175,7 @@ impl Component for SignIn {
                     <div class="md:w-2/3">
                         <div class="flex  items-center mr-4 space-x-2">
                             <input id="inline-keep-me-signed-in" type="checkbox" class="w-4 h-4 accent-purple-600 dark:accent-zinc-700" ref={&self.remember_me} />
-                            <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-keep-me-signed-in">
+                            <label class="text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-keep-me-signed-in">
                             <I18N label={"keep_me_signed_in"} translation={translation.clone()} default={"Remember me"}/>
                             </label>
                         </div>

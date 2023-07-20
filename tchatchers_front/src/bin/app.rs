@@ -38,16 +38,18 @@ fn contextual_app() -> HtmlResult {
     let navigator_language: Option<Vec<String>> =
         tchatchers_front::utils::language::get_navigator_languages();
 
-    let locale = use_memo(|user| {
-        if let Some(user) = user {
-            Locale::find_by_id(user.locale_id)
-        } else if let Some(navigator_language) = navigator_language {
-            Locale::get_for_web_names(navigator_language)
-        } else {
-            None
-        }
-    }, (*user).clone());
-    
+    let locale = use_memo(
+        |user| {
+            if let Some(user) = user {
+                Locale::find_by_id(user.locale_id)
+            } else if let Some(navigator_language) = navigator_language {
+                Locale::get_for_web_names(navigator_language)
+            } else {
+                None
+            }
+        },
+        (*user).clone(),
+    );
 
     let translation = use_memo(
         |locale| {
@@ -71,14 +73,13 @@ fn contextual_app() -> HtmlResult {
         (*user).clone(),
     );
 
-
     let client_context = Rc::new(ClientContext {
         user,
         bearer,
         available_locale: Locale::get_available_locales(),
         translation,
         navlink,
-        locale
+        locale,
     });
 
     let context = use_memo(|_| (*client_context).clone(), (*client_context).clone());

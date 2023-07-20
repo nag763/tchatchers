@@ -106,9 +106,7 @@ impl Locale {
             .cloned()
             .collect();
         for web_name in web_names {
-            if let Some(index) = locales
-            .iter()
-            .position(|v| v.web_names.contains(&web_name)) {
+            if let Some(index) = locales.iter().position(|v| v.web_names.contains(&web_name)) {
                 return locales.get(index).cloned();
             }
         }

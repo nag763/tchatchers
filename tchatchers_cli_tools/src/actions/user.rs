@@ -4,8 +4,9 @@ use crate::{
 };
 use dialoguer::{Confirm, Input, Password, Select};
 use tchatchers_core::{
+    locale::Locale,
     profile::Profile,
-    user::{InsertableUser, PartialUser, User}, locale::Locale,
+    user::{InsertableUser, PartialUser, User},
 };
 use validator::Validate;
 
@@ -158,7 +159,7 @@ impl UserAction {
             login: user_login,
             password,
             name: user_name,
-            locale: Locale::get_default_locale().id
+            locale: Locale::get_default_locale().id,
         };
 
         // Validate the `InsertableUser` object, and prompt the user to confirm if there are validation errors.

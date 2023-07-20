@@ -6,7 +6,7 @@ use crate::components::common::{FormButton, WaitingForResponse, I18N};
 use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
-use crate::utils::client_context::{ClientContext};
+use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
 use gloo_net::http::Request;
 use gloo_timers::callback::Timeout;
@@ -15,7 +15,9 @@ use tchatchers_core::user::InsertableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
 use validator::Validate;
 use web_sys::HtmlInputElement;
-use yew::{html, AttrValue, Component, Context, Html, NodeRef, Properties, use_context, function_component};
+use yew::{
+    function_component, html, use_context, AttrValue, Component, Context, Html, NodeRef, Properties,
+};
 use yew_agent::Dispatched;
 use yew_router::prelude::use_navigator;
 use yew_router::scope_ext::RouterScopeExt;
@@ -31,7 +33,9 @@ pub fn sign_up_hoc() -> Html {
             navigator.replace(&Route::JoinRoom);
             ToastBus::dispatcher().send(Alert {
                 is_success: false,
-                content: client_context.translation.get_or_default("You are already logged in", "already_logged_in"),
+                content: client_context
+                    .translation
+                    .get_or_default("You are already logged in", "already_logged_in"),
             });
         }
     }
@@ -46,7 +50,7 @@ pub enum Msg {
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
-    client_context: ClientContext
+    client_context: ClientContext,
 }
 
 #[derive(Default)]
@@ -81,14 +85,21 @@ impl Component for SignUp {
                 ) {
                     let inputs = vec![&login, &name, &password];
                     if inputs.iter().all(|i| i.check_validity()) {
-                        let locale = ctx.props().client_context.locale.as_ref().clone().unwrap_or(Locale::get_default_locale()).id;
+                        let locale = ctx
+                            .props()
+                            .client_context
+                            .locale
+                            .as_ref()
+                            .clone()
+                            .unwrap_or(Locale::get_default_locale())
+                            .id;
                         let link = ctx.link().clone();
                         self.wait_for_api = true;
                         let payload = InsertableUser {
                             login: login.value(),
                             name: name.value(),
                             password: password.value(),
-                            locale
+                            locale,
                         };
                         if let Err(e) = payload.validate() {
                             let message: ValidationErrorMessage = e.into();
@@ -97,7 +108,14 @@ impl Component for SignUp {
                             password.set_value("");
                             password_confirmation.set_value("");
                             link.send_message(Msg::ErrorFromServer(
-                                ctx.props().client_context.translation.get_or_default("passwords_dont_match", "The passwords do not match").into()
+                                ctx.props()
+                                    .client_context
+                                    .translation
+                                    .get_or_default(
+                                        "passwords_dont_match",
+                                        "The passwords do not match",
+                                    )
+                                    .into(),
                             ));
                         } else {
                             let mut req = Requester::post("/api/user");
@@ -108,7 +126,10 @@ impl Component for SignUp {
                                 if resp.ok() {
                                     ToastBus::dispatcher().send(Alert {
                                         is_success: true,
-                                        content: translation.get_or_default("success_on_user_creation", "User created with success")
+                                        content: translation.get_or_default(
+                                            "success_on_user_creation",
+                                            "User created with success",
+                                        ),
                                     });
                                     link.navigator().unwrap().push(&Route::SignIn);
                                 } else {
@@ -137,9 +158,10 @@ impl Component for SignUp {
                                     .send();
                                     let resp = req.await.unwrap();
                                     if !resp.ok() {
-                                        login.set_custom_validity(
-                                            &translation.get_or_default("login_already_taken", "The login is already token by another user")
-                                        );
+                                        login.set_custom_validity(&translation.get_or_default(
+                                            "login_already_taken",
+                                            "The login is already token by another user",
+                                        ));
                                     } else {
                                         login.set_custom_validity("");
                                     }
@@ -161,7 +183,9 @@ impl Component for SignUp {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let translation = ctx.props().client_context.translation.clone();
         let end_of_form: Html = match self.wait_for_api {
-            false => html! { <FormButton label={translation.get_or_default("sign_up", "Sign up")} /> },
+            false => {
+                html! { <FormButton label={translation.get_or_default("sign_up", "Sign up")} /> }
+            }
             true => html! { <WaitingForResponse translation={translation.clone()} /> },
         };
 

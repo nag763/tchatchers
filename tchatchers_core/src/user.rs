@@ -376,10 +376,9 @@ pub struct InsertableUser {
         regex(path = "RE_LIMITED_CHARS", code = "limited_chars")
     )]
     pub name: String,
-    #[validate(
-        range(min=1)
-    )]
-    pub locale: i32
+    /// The user's locale
+    #[validate(range(min = 1))]
+    pub locale: i32,
 }
 
 impl InsertableUser {
@@ -397,7 +396,7 @@ impl InsertableUser {
             .bind(&self.login)
             .bind(&hash)
             .bind(&self.name)
-            .bind(&self.locale)
+            .bind(self.locale)
             .execute(pool)
             .await
     }
