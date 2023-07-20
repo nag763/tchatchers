@@ -105,10 +105,14 @@ impl Locale {
             .values()
             .cloned()
             .collect();
-        let index = locales
+        for web_name in web_names {
+            if let Some(index) = locales
             .iter()
-            .position(|v| web_names.iter().any(|e| v.web_names.contains(e)))?;
-        locales.get(index).cloned()
+            .position(|v| v.web_names.contains(&web_name)) {
+                return locales.get(index).cloned();
+            }
+        }
+        None
     }
 
     pub fn get_default_locale() -> Locale {
