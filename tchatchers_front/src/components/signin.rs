@@ -30,7 +30,7 @@ pub fn sign_in_hoc() -> Html {
                 is_success: false,
                 content: client_context
                     .translation
-                    .get_or_default("You are already logged in", "already_logged_in"),
+                    .get_or_default("already_logged_in", "You are already logged in"),
             });
         }
     }
@@ -137,7 +137,7 @@ impl Component for SignIn {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let translation = ctx.props().client_context.translation.clone();
+        let translation = &ctx.props().client_context.translation.clone();
         let end_of_form = match self.wait_for_api {
             true => html! { <WaitingForResponse translation={translation.clone()} /> },
             false => {
