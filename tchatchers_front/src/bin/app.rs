@@ -73,7 +73,7 @@ fn contextual_app() -> HtmlResult {
         (*user).clone(),
     );
 
-    let client_context = Rc::new(ClientContext {
+    let context = Rc::new(ClientContext {
         user,
         bearer,
         available_locale: Locale::get_available_locales(),
@@ -81,8 +81,6 @@ fn contextual_app() -> HtmlResult {
         navlink,
         locale,
     });
-
-    let context = use_memo(|_| (*client_context).clone(), (*client_context).clone());
 
     Ok(html! {
         <BrowserRouter>
