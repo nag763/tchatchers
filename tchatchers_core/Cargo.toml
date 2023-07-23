@@ -16,11 +16,11 @@ derivative = "2.2.0"
 jsonwebtoken = { default-features = false, version = "8.3.0" }
 rand = { default-features = false, version = "0.8.5" }
 rust-argon2 = { version = "1.0.0", optional = true, default-features = false }
-serde = { version = "1.0.171", features = ["rc"], default-features = false }
+serde = { version = "1.0.174", features = ["rc"], default-features = false }
 sqlx = { version = "0.6", optional = true ,  features = ["runtime-async-std-native-tls", "postgres", "chrono", "uuid"] }
-uuid = { version = "1.4.0", features = ["v4", "serde"], default-features = false }
+uuid = { version = "1.4.1", features = ["v4", "serde"], default-features = false }
 validator = { version = "0.16.1", features = ["derive"], default-features = false }
-axum = { version = "0.6.18", optional = true , default-features = false }
+axum = { version = "0.6.19", optional = true , default-features = false }
 regex = { default-features = false, version = "1.9.1" }
 lazy_static = "1.4.0"
 derive_more = { features = ["display"], default-features = false, version = "0.99.17" }
@@ -29,8 +29,8 @@ axum-extra = { version = "0.7", optional = true }
 time = { default-features = false, version = "0.3.23" }
 cookie = { version = "0.17.0", optional = true }
 redis = { version = "0.23.0", optional = true, features = ["streams", "aio", "tokio-comp"], default-features = false }
-serde_json = { version = "1.0.102", optional = true }
+serde_json = { version = "1.0.103", optional = true }
 bb8-redis = { version = "0.13.1" , optional = true } 
-clap = { version = "4.3.12", features = ["derive", "std"], optional = true}
-serde_yaml = "0.9.23"
+clap = { version = "4.3.19", features = ["derive", "std"], optional = true}
+serde_yaml = "0.9.25"
 tokio = { version = "1.29.1", features = ["sync"] }
