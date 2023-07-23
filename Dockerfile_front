@@ -36,7 +36,15 @@ RUN cargo install trunk
 
 RUN trunk build --release
 
-WORKDIR /usr/tchatchers/front/dist
+FROM node as compressor
+
+WORKDIR /usr/tchatchers/dist
+
+COPY --from=src_builder /usr/tchatchers/front/dist /usr/tchatchers/dist
+
+RUN npm install -g uglify-js
+
+RUN for i in ./*.js; do uglifyjs $i --in-situ; done
 
 RUN gzip -r ./*
 
@@ -44,10 +52,8 @@ FROM nginx:alpine
 
 WORKDIR /usr/share/nginx/html
 
-COPY --from=src_builder /usr/tchatchers/front/dist /usr/share/nginx/html
+COPY --from=compressor /usr/tchatchers/dist /usr/share/nginx/html
 
 COPY .git/refs/heads/main /usr/share/nginx/html/.rev
-
-RUN date > /usr/share/nginx/html/.up-since
 
 EXPOSE 80

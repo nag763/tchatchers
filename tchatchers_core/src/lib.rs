@@ -5,7 +5,6 @@
 pub mod async_message;
 pub mod authorization_token;
 pub(crate) mod common;
-#[cfg(feature = "front")]
 pub mod locale;
 #[cfg(feature = "front")]
 pub mod navlink;
