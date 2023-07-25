@@ -124,7 +124,6 @@ impl Component for Settings {
                             req.is_json(true).bearer(bearer.clone()).json_body(payload);
                             let link = ctx.link().clone();
                             self.wait_for_api = true;
-                            let translation = (*self.user_context.translation).clone();
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
                                 if resp.ok() {
@@ -134,13 +133,7 @@ impl Component for Settings {
                                         let user: PartialUser =
                                             serde_json::from_str(&resp.text().await.unwrap())
                                                 .unwrap();
-                                        ToastBus::dispatcher().send(Alert {
-                                            is_success: true,
-                                            content: translation.get_or_default(
-                                                "profile_updated",
-                                                "Your profile has been updated with success",
-                                            ),
-                                        });
+
                                         link.send_message(Msg::ProfileUpdated(user));
                                     } else {
                                         link.send_message(Msg::ErrorFromServer(
@@ -196,6 +189,13 @@ impl Component for Settings {
                 let locale_id = app_context.clone().locale_id;
                 self.user_context.user.set(Some(app_context));
                 let translation = Locale::find_by_id(locale_id).unwrap().translation_map;
+                ToastBus::dispatcher().send(Alert {
+                    is_success: true,
+                    content: translation.get_or_default(
+                        "profile_updated",
+                        "Your profile has been updated with success",
+                    ),
+                });
                 self.ok_msg = Some(
                     translation
                         .get_or_default(
