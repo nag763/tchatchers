@@ -56,6 +56,7 @@ pub struct ApiResponse {
     pub kind: ApiResponseKind,
     pub label: String,
     pub text: Option<String>,
+    pub trace: uuid::Uuid
 }
 
 impl ApiResponse {
@@ -64,6 +65,7 @@ impl ApiResponse {
             label: label.into(),
             text: Locale::get_default_translation(label),
             kind,
+            trace: uuid::Uuid::new_v4()
         }
     }
 }
