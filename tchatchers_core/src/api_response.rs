@@ -18,6 +18,10 @@ pub enum ApiResponseKind {
     UserNotFound,
     MessageDoesNotExist,
     MessageAlreadyReported,
+    MessageReported,
+    MessageDeleted,
+    UserReported,
+    RevokedUser,
 }
 
 #[cfg(feature = "back")]
@@ -26,6 +30,10 @@ impl From<ApiResponseKind> for StatusCode {
         match value {
             ApiResponseKind::SimilarLoginExists => StatusCode::CONFLICT,
             ApiResponseKind::UserCreated => StatusCode::CREATED,
+            ApiResponseKind::MessageReported
+            | ApiResponseKind::MessageDeleted
+            | ApiResponseKind::UserReported
+            | ApiResponseKind::RevokedUser => StatusCode::OK,
             ApiResponseKind::MessageAlreadyReported
             | ApiResponseKind::UserNotFound
             | ApiResponseKind::UserAlreadyReported
@@ -92,6 +100,10 @@ pub enum ApiGenericResponse {
     UserNotFound,
     MessageDoesNotExist,
     MessageAlreadyReported,
+    MessageReported,
+    MessageDeleted,
+    UserReported,
+    RevokedUser,
 }
 
 impl From<ApiGenericResponse> for ApiResponse {
@@ -142,6 +154,18 @@ impl From<ApiGenericResponse> for ApiResponse {
                 ApiResponseKind::MessageAlreadyReported,
                 "message_already_reported",
             ),
+            ApiGenericResponse::MessageReported => {
+                ApiResponse::new(ApiResponseKind::MessageReported, "message_reported")
+            }
+            ApiGenericResponse::MessageDeleted => {
+                ApiResponse::new(ApiResponseKind::MessageDeleted, "message_deleted")
+            }
+            ApiGenericResponse::UserReported => {
+                ApiResponse::new(ApiResponseKind::UserReported, "user_reported")
+            }
+            ApiGenericResponse::RevokedUser => {
+                ApiResponse::new(ApiResponseKind::RevokedUser, "revoked_user")
+            }
         }
     }
 }

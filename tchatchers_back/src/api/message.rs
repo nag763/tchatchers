@@ -1,6 +1,5 @@
 use axum::{
     extract::{Path, State},
-    http::StatusCode,
     response::IntoResponse,
 };
 use tchatchers_core::{
@@ -33,7 +32,7 @@ pub async fn delete_message(
         }
     }
     WsMessageContent::delete_messages(&vec![message_id], &state.pg_pool).await?;
-    Ok((StatusCode::OK, "Message deleted"))
+    Ok(ApiGenericResponse::MessageDeleted)
 }
 
 /// Report a message.
@@ -53,7 +52,7 @@ pub async fn report_message(
     state: State<AppState>,
 ) -> impl IntoResponse {
     match Report::message(user.user_id, &message_id, &state.pg_pool).await {
-        Ok(_) => Ok((StatusCode::OK, "Message reported")),
+        Ok(_) => Ok(ApiGenericResponse::MessageReported),
         Err(e) => {
             if let Some(database_err) = e.as_database_error() {
                 if let Some(code) = database_err.code() {

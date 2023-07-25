@@ -61,6 +61,10 @@ translations:
       access_revoked: Your access has been revoked
       user_already_reported: You have already reported this user
       message_already_reported: You already reported the message
+      message_reported: The message has been reported
+      message_deleted: The message has been deleted
+      user_reported: The user has been reported
+      revoked_user: The user's access has been revoked
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR
@@ -122,6 +126,10 @@ translations:
       user_created: L'utilisateur a été créé avec succès
       access_revoked: Votre accès a été révoqué
       user_already_reported: Vous avez déjà signalé cet utilisateur
+      message_reported: Le message a été signalé
+      message_deleted: Le message a été supprimé
+      user_reported: L'utilisateur a été signalé
+      revoked_user: L'accès de l'utilisateur a été révoqué
   - id: 3
     long_name: English (UK)
     short_name: en-UK
@@ -184,6 +192,10 @@ translations:
       access_revoked: Your access has been revoked
       user_already_reported: You have already reported this user
       message_already_reported: You already reported the message
+      message_reported: The message has been reported
+      message_deleted: The message has been deleted
+      user_reported: The user has been reported
+      revoked_user: The user's access has been revoked
   - id: 4
     long_name: Deutsch (DE)
     short_name: de-DE
@@ -245,6 +257,10 @@ translations:
       user_created: Der Benutzer wurde erfolgreich erstellt
       access_revoked: Ihr Zugriff wurde widerrufen
       user_already_reported: Sie haben diesen Benutzer bereits gemeldet
+      message_reported: Die Nachricht wurde gemeldet
+      message_deleted: Die Nachricht wurde gelöscht
+      user_reported: Der Benutzer wurde gemeldet
+      revoked_user: Der Zugriff des Benutzers wurde widerrufen
   - id: 5
     long_name: Español (ES)
     short_name: es-ES
@@ -306,6 +322,10 @@ translations:
       user_created: El usuario ha sido creado con éxito
       access_revoked: Se ha revocado tu acceso
       user_already_reported: Ya has reportado a este usuario
+      message_reported: El mensaje ha sido denunciado
+      message_deleted: El mensaje ha sido eliminado
+      user_reported: El usuario ha sido denunciado
+      revoked_user: Se ha revocado el acceso del usuario
   - id: 6
     long_name: Português (BR)
     short_name: pt-BR
@@ -367,6 +387,10 @@ translations:
       user_created: O usuário foi criado com sucesso
       access_revoked: Seu acesso foi revogado
       user_already_reported: Você já reportou este usuário
+      message_reported: A mensagem foi reportada
+      message_deleted: A mensagem foi apagada
+      user_reported: O utilizador foi reportado
+      revoked_user: O acesso do utilizador foi revogado
   - id: 7
     long_name: Italiano (IT)
     short_name: it-IT
@@ -428,6 +452,10 @@ translations:
       user_created: L'utente è stato creato con successo
       access_revoked: Il tuo accesso è stato revocato
       user_already_reported: Hai già segnalato questo utente
+      message_reported: Il messaggio è stato segnalato
+      message_deleted: Il messaggio è stato eliminato
+      user_reported: L'utente è stato segnalato
+      revoked_user: L'accesso dell'utente è stato revocato
   - id: 8
     long_name: Русский (RU)
     short_name: ru-RU
@@ -489,6 +517,10 @@ translations:
       user_created: Пользователь успешно создан
       access_revoked: Ваш доступ был отозван
       user_already_reported: Вы уже сообщили об этом пользователе
+      message_reported: Сообщение было зарегистрировано
+      message_deleted: Сообщение было удалено
+      user_reported: Пользователь был зарегистрирован
+      revoked_user: Доступ пользователя был отозван
   - id: 9
     long_name: العربية (AR)
     short_name: ar-AR
@@ -550,6 +582,11 @@ translations:
       user_created: تم إنشاء المستخدم بنجاح
       access_revoked: تم سحب إذن الوصول الخاص بك
       user_already_reported: لقد قمت بالفعل بالإبلاغ عن هذا المستخدم
+      message_reported: تم الإبلاغ عن الرسالة
+      message_deleted: تم حذف الرسالة
+      user_reported: تم الإبلاغ عن المستخدم
+      revoked_user: تم سحب حق الوصول للمستخدم
+
   - id: 10
     long_name: 中文 (ZH)
     short_name: zh-CN
@@ -612,6 +649,10 @@ translations:
       user_created: 用户创建成功
       access_revoked: 您的访问权限已被撤销
       user_already_reported: 您已经举报过该用户
+      message_reported: 该消息已被举报
+      message_deleted: 该消息已被删除
+      user_reported: 该用户已被举报
+      revoked_user: 该用户的访问权限已被撤销
 
   - id: 11
     long_name: 日本語 (JP)
@@ -673,6 +714,10 @@ translations:
       user_created: ユーザーが正常に作成されました
       access_revoked: アクセス権が取り消されました
       user_already_reported: 既にこのユーザーを報告しています
+      message_reported: メッセージが報告されました
+      message_deleted: メッセージが削除されました
+      user_reported: ユーザーが報告されました
+      revoked_user: ユーザーのアクセス権が取り消されました
 
   - id: 12
     long_name: 한국어 (KR)
@@ -735,6 +780,10 @@ translations:
       user_created: 사용자가 성공적으로 생성되었습니다
       access_revoked: 접근 권한이 취소되었습니다
       user_already_reported: 이미 이 사용자를 신고했습니다
+      message_reported: 메시지가 신고되었습니다
+      message_deleted: 메시지가 삭제되었습니다
+      user_reported: 사용자가 신고되었습니다
+      revoked_user: 사용자의 액세스 권한이 취소되었습니다
 
   - id: 13
     long_name: Dutch (NL)
@@ -797,6 +846,11 @@ translations:
       user_created: De gebruiker is succesvol aangemaakt
       access_revoked: Jouw toegang is ingetrokken
       user_already_reported: Je hebt deze gebruiker al gerapporteerd
+      message_reported: Het bericht is gemeld
+      message_deleted: Het bericht is verwijderd
+      user_reported: De gebruiker is gemeld
+      revoked_user: De toegang van de gebruiker is ingetrokken
+
   - id: 14
     long_name: Türkçe (TR)
     short_name: tr-TR
@@ -856,6 +910,11 @@ translations:
       user_created: Kullanıcı başarıyla oluşturuldu
       access_revoked: Erişiminiz iptal edildi
       user_already_reported: Bu kullanıcıyı zaten bildirdiniz
+      message_reported: Mesaj bildirildi
+      message_deleted: Mesaj silindi
+      user_reported: Kullanıcı bildirildi
+      revoked_user: Kullanıcının erişimi iptal edildi
+
   - id: 15
     long_name: Polski (PL)
     short_name: pl-PL
@@ -917,6 +976,10 @@ translations:
       user_created: Użytkownik został pomyślnie utworzony
       access_revoked: Twoje uprawnienia zostały cofnięte
       user_already_reported: Już zgłosiłeś tego użytkownika
+      message_reported: Wiadomość została zgłoszona
+      message_deleted: Wiadomość została usunięta
+      user_reported: Użytkownik został zgłoszony
+      revoked_user: Dostęp użytkownika został cofnięty
   - id: 16
     long_name: Ελληνικά (GR)
     short_name: el-GR
@@ -978,3 +1041,7 @@ translations:
       user_created: Ο χρήστης δημιουργήθηκε με επιτυχία
       access_revoked: Η πρόσβασή σας έχει ανακληθεί
       user_already_reported: Έχετε ήδη αναφέρει αυτόν τον χρήστη
+      message_reported: Το μήνυμα έχει αναφοραπομηθεί
+      message_deleted: Το μήνυμα διαγράφηκε
+      user_reported: Ο χρήστης έχει αναφοραπομηθεί
+      revoked_user: Η πρόσβαση του χρήστη έχει ανακληθεί

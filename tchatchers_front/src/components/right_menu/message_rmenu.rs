@@ -1,14 +1,14 @@
 use std::rc::Rc;
 
 use serde::{Deserialize, Serialize};
-use tchatchers_core::{locale::TranslationMap, profile::Profile, ws_message::WsMessage};
+use tchatchers_core::{api_response::ApiResponse, locale::TranslationMap, profile::Profile};
 use uuid::Uuid;
 use yew::{function_component, html, use_context, Html, Properties};
 use yew_agent::Dispatched;
 
 use crate::{
     components::{common::I18N, toast::Alert},
-    services::{chat_bus::ChatBus, toast_bus::ToastBus},
+    services::toast_bus::ToastBus,
     utils::{client_context::ClientContext, requester::Requester},
 };
 
@@ -36,9 +36,14 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
                 req.bearer(bearer.clone());
                 wasm_bindgen_futures::spawn_local(async move {
                     let res = req.send().await;
-                    if res.ok() {
-                        ChatBus::dispatcher().send(WsMessage::Delete(props.message_id));
-                    }
+                    let api_resp: ApiResponse =
+                        serde_json::from_str(&res.text().await.unwrap()).unwrap();
+                    let content = api_resp.text.unwrap();
+                    let is_success = res.ok();
+                    ToastBus::dispatcher().send(Alert {
+                        is_success,
+                        content,
+                    });
                 })
             }
         };
@@ -56,19 +61,14 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
                 req.bearer(bearer.clone());
                 wasm_bindgen_futures::spawn_local(async move {
                     let res = req.send().await;
-                    if res.ok() {
-                        ToastBus::dispatcher().send(Alert {
-                            is_success: true,
-                            content: "This message has been reported with success".into(),
-                        });
-                    } else {
-                        ToastBus::dispatcher().send(Alert {
-                            is_success: false,
-                            content: res.text().await.unwrap_or_else(|_| {
-                                "A problem happened while reporting this message".into()
-                            }),
-                        });
-                    }
+                    let api_resp: ApiResponse =
+                        serde_json::from_str(&res.text().await.unwrap()).unwrap();
+                    let content = api_resp.text.unwrap();
+                    let is_success = res.ok();
+                    ToastBus::dispatcher().send(Alert {
+                        is_success,
+                        content,
+                    });
                 })
             }
         };

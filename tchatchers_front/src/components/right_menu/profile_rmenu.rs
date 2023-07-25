@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use serde::{Deserialize, Serialize};
-use tchatchers_core::profile::Profile;
+use tchatchers_core::{api_response::ApiResponse, profile::Profile};
 use yew::{function_component, html, use_context, Html, Properties};
 use yew_agent::Dispatched;
 
@@ -30,10 +30,18 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
         let revoke_user_id = {
             let props = props.clone();
             move |_| {
-                let mut req = Requester::delete(&format!("/api/user/revoke/{}", props.user_id));
+                let mut req = Requester::post(&format!("/api/user/revoke/{}", props.user_id));
                 req.bearer(bearer.clone());
                 wasm_bindgen_futures::spawn_local(async move {
-                    req.send().await;
+                    let res = req.send().await;
+                    let api_resp: ApiResponse =
+                        serde_json::from_str(&res.text().await.unwrap()).unwrap();
+                    let content = api_resp.text.unwrap();
+                    let is_success = res.ok();
+                    ToastBus::dispatcher().send(Alert {
+                        is_success,
+                        content,
+                    });
                 })
             }
         };
@@ -52,19 +60,14 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
                 req.bearer(bearer.clone());
                 wasm_bindgen_futures::spawn_local(async move {
                     let res = req.send().await;
-                    if res.ok() {
-                        ToastBus::dispatcher().send(Alert {
-                            is_success: true,
-                            content: "This user has been reported with success".into(),
-                        });
-                    } else {
-                        ToastBus::dispatcher().send(Alert {
-                            is_success: false,
-                            content: res.text().await.unwrap_or_else(|_| {
-                                "A problem happened while reporting this user".into()
-                            }),
-                        });
-                    }
+                    let api_resp: ApiResponse =
+                        serde_json::from_str(&res.text().await.unwrap()).unwrap();
+                    let content = api_resp.text.unwrap();
+                    let is_success = res.ok();
+                    ToastBus::dispatcher().send(Alert {
+                        is_success,
+                        content,
+                    });
                 })
             }
         };

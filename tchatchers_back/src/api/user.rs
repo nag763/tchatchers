@@ -269,7 +269,7 @@ pub async fn revoke_user(
     State(state): State<AppState>,
 ) -> Result<impl IntoResponse, ApiGenericResponse> {
     User::update_activation_status(user_id, false, &state.pg_pool).await?;
-    Ok(StatusCode::OK)
+    Ok(ApiGenericResponse::RevokedUser)
 }
 
 /// Report a user.
@@ -289,7 +289,7 @@ pub async fn report_user(
     state: State<AppState>,
 ) -> impl IntoResponse {
     match Report::user(user.user_id, reported_user, &state.pg_pool).await {
-        Ok(_) => Ok((StatusCode::OK, "User reported")),
+        Ok(_) => Ok(ApiGenericResponse::UserReported),
         Err(e) => {
             if let Some(database_err) = e.as_database_error() {
                 if let Some(code) = database_err.code() {
