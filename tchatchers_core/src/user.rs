@@ -63,6 +63,9 @@ pub struct User {
     /// Timestamp on when the user got updated the last time.
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
     pub last_update: DateTime<Utc>,
+    /// Timestamp on when the user logged on the last time.
+    #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    pub last_logon: DateTime<Utc>,
     /// The user's profile.
     #[cfg_attr(
         any(feature = "back", feature = "cli", feature = "async"),
@@ -270,6 +273,9 @@ pub struct PartialUser {
     /// Timestamp on when the user got updated the last time.
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
     pub last_update: DateTime<Utc>,
+    /// Timestamp on when the user logged on the last time.
+    #[derivative(Default(value = "chrono::offset::Utc::now()"))]
+    pub last_logon: DateTime<Utc>,
     /// The locale associated with the user.
     pub locale_id: i32,
     // The profile of the user.
@@ -289,6 +295,7 @@ impl From<User> for PartialUser {
             is_authorized: user.is_authorized,
             created_at: user.created_at,
             last_update: user.last_update,
+            last_logon: user.last_logon,
         }
     }
 }
