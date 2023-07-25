@@ -34,9 +34,8 @@ pub fn sign_up_hoc() -> Html {
             navigator.replace(&Route::JoinRoom);
             ToastBus::dispatcher().send(Alert {
                 is_success: false,
-                content: client_context
-                    .translation
-                    .get_or_default("You are already logged in", "already_logged_in"),
+                label: "already_logged_in".into(),
+                default: "You are already logged in".into(),
             });
         }
     }
@@ -122,16 +121,13 @@ impl Component for SignUp {
                         } else {
                             let mut req = Requester::post("/api/user");
                             req.is_json(true).json_body(payload);
-                            let translation = ctx.props().client_context.translation.clone();
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
                                 if resp.ok() {
                                     ToastBus::dispatcher().send(Alert {
                                         is_success: true,
-                                        content: translation.get_or_default(
-                                            "success_on_user_creation",
-                                            "User created with success",
-                                        ),
+                                        label: "success_on_user_creation".into(),
+                                        default: "User created with success".into(),
                                     });
                                     link.navigator().unwrap().push(&Route::SignIn);
                                 } else {

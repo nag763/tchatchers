@@ -24,10 +24,8 @@ where
         navigator.replace(&Route::SignIn);
         ToastBus::dispatcher().send(Alert {
             is_success: false,
-            content: client_context.translation.get_or_default(
-                "anon_guard",
-                "Please authenticate prior accessing the app functionnalities",
-            ),
+            label: "anon_guard".into(),
+            default: "Please authenticate prior accessing the app functionnalities".into(),
         });
         html! {<></>}
     }

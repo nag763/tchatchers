@@ -118,7 +118,8 @@ impl Component for Feed {
                                 {
                                     ToastBus::dispatcher().send(Alert {
                                         is_success: false,
-                                        content: self.user_context.translation.clone().get_or_default("room_name_incorrect", "The room name you tried to join is not valid, please select one within this screen."),
+                                        label: "room_name_incorrect".into(),
+                                        default: "The room name you tried to join is not valid, please select one within this screen.".into(),
                                     });
                                     ctx.link().navigator().unwrap().push(&Route::JoinRoom);
                                 } else {

@@ -15,13 +15,12 @@ pub fn log_out_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().unwrap();
     let navigator = use_navigator().unwrap();
     let mut req = Requester::get("/api/logout");
-    let translations = client_context.translation.clone();
     wasm_bindgen_futures::spawn_local(async move {
         req.send().await;
         ToastBus::dispatcher().send(Alert {
             is_success: true,
-            content: translations
-                .get_or_default("logged_out", "You logged out with success, see you !"),
+            label: "logged_out".into(),
+            default: "You logged out with success, see you !".into(),
         });
         client_context.user.set(None);
         client_context.bearer.set(None);

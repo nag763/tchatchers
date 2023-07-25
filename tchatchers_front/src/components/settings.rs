@@ -191,10 +191,8 @@ impl Component for Settings {
                 let translation = Locale::find_by_id(locale_id).unwrap().translation_map;
                 ToastBus::dispatcher().send(Alert {
                     is_success: true,
-                    content: translation.get_or_default(
-                        "profile_updated",
-                        "Your profile has been updated with success",
-                    ),
+                    label: "profile_updated".into(),
+                    default: "Your profile has been updated with success".into(),
                 });
                 self.ok_msg = Some(
                     translation

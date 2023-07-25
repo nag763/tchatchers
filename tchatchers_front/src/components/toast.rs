@@ -2,22 +2,34 @@ use std::rc::Rc;
 
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use crate::services::toast_bus::ToastBus;
+use crate::{services::toast_bus::ToastBus, utils::client_context::ClientContext};
 use gloo_timers::callback::Timeout;
 use serde::{Deserialize, Serialize};
-use yew::{html, Component, Context, Html};
+use yew::{function_component, html, use_context, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
+
+#[function_component(ToastHOC)]
+pub fn sign_up_hoc() -> Html {
+    let client_context = use_context::<Rc<ClientContext>>().expect("No app context");
+    html! { <Toast client_context={(*client_context).clone()}/> }
+}
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Alert {
     pub is_success: bool,
-    pub content: String,
+    pub label: String,
+    pub default: String,
 }
 
 pub enum Msg {
     NewToast(Alert),
     Hide,
     StopBounce,
+}
+
+#[derive(Clone, PartialEq, Properties)]
+pub struct Props {
+    client_context: ClientContext,
 }
 
 pub struct Toast {
@@ -31,7 +43,7 @@ pub struct Toast {
 
 impl Component for Toast {
     type Message = Msg;
-    type Properties = ();
+    type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
         let cb = {
@@ -51,7 +63,11 @@ impl Component for Toast {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::NewToast(alert) => {
-                self.msg = alert.content;
+                self.msg = ctx
+                    .props()
+                    .client_context
+                    .translation
+                    .get_or_default(&alert.label, "Message unknown");
                 self.is_success = alert.is_success;
                 self.visible = true;
                 self.cooldown = Some({

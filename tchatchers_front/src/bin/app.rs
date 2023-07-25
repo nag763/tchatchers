@@ -8,6 +8,7 @@ use tchatchers_core::navlink::Navlink;
 use tchatchers_core::user::PartialUser;
 use tchatchers_front::components::prelude::*;
 
+use tchatchers_front::components::toast::ToastHOC;
 use tchatchers_front::router::{switch, Route};
 use tchatchers_front::utils::client_context::ClientContext;
 use tchatchers_front::utils::requester::Requester;
@@ -87,7 +88,7 @@ fn contextual_app() -> HtmlResult {
             <ContextProvider<Rc<ClientContext>> context={context}>
                 <div class="h-screen grid grid-rows-12">
                     <NavbarHOC/>
-                    <Toast />
+                    <ToastHOC />
                         <Modal />
                     <div class="row-span-11 overflow-y-auto">
                         <Switch<Route> render={switch} />

@@ -29,9 +29,8 @@ pub fn sign_in_hoc() -> Html {
             navigator.replace(&Route::JoinRoom);
             ToastBus::dispatcher().send(Alert {
                 is_success: false,
-                content: client_context
-                    .translation
-                    .get_or_default("already_logged_in", "You are already logged in"),
+                label: "already_logged_in".into(),
+                default: "You are already logged in".into(),
             });
         }
     }
@@ -130,11 +129,8 @@ impl Component for SignIn {
                 ctx.props().client_context.user.set(Some(new_context));
                 ToastBus::dispatcher().send(Alert {
                     is_success: true,
-                    content: ctx
-                        .props()
-                        .client_context
-                        .translation
-                        .get_or_default("login_success", "You logged in with success"),
+                    label: "login_success".into(),
+                    default: "You logged in with success".into(),
                 });
                 ctx.link().navigator().unwrap().push(&Route::JoinRoom);
                 false

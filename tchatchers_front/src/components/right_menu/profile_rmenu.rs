@@ -36,11 +36,13 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
                     let res = req.send().await;
                     let api_resp: ApiResponse =
                         serde_json::from_str(&res.text().await.unwrap()).unwrap();
-                    let content = api_resp.text.unwrap();
+                    let label = api_resp.label;
+                    let default: String = api_resp.text.unwrap_or("Unknown response".into());
                     let is_success = res.ok();
                     ToastBus::dispatcher().send(Alert {
                         is_success,
-                        content,
+                        label,
+                        default,
                     });
                 })
             }
@@ -62,11 +64,13 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
                     let res = req.send().await;
                     let api_resp: ApiResponse =
                         serde_json::from_str(&res.text().await.unwrap()).unwrap();
-                    let content = api_resp.text.unwrap();
+                    let label = api_resp.label;
+                    let default: String = api_resp.text.unwrap_or("Unknown response".into());
                     let is_success = res.ok();
                     ToastBus::dispatcher().send(Alert {
                         is_success,
-                        content,
+                        label,
+                        default,
                     });
                 })
             }
