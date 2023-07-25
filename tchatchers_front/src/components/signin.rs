@@ -8,6 +8,7 @@ use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
+use tchatchers_core::api_response::ApiResponse;
 use tchatchers_core::user::{AuthenticableUser, PartialUser};
 use web_sys::HtmlInputElement;
 use yew::{
@@ -40,7 +41,8 @@ pub fn sign_in_hoc() -> Html {
 pub enum Msg {
     SubmitForm,
     LoggedIn(PartialUser),
-    ErrorFromServer(AttrValue),
+    ErrorFromServer(ApiResponse),
+    LocalError(AttrValue),
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -99,12 +101,12 @@ impl Component for SignIn {
                                     link.send_message(Msg::LoggedIn(user));
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
-                                        resp.text().await.unwrap().into(),
+                                        serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
                                     ));
                                 }
                             } else {
                                 link.send_message(Msg::ErrorFromServer(
-                                    resp.text().await.unwrap().into(),
+                                    serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
                                 ));
                             }
                         });
@@ -112,8 +114,12 @@ impl Component for SignIn {
                 }
                 true
             }
-            Msg::ErrorFromServer(s) => {
-                self.server_error = Some(s);
+            Msg::ErrorFromServer(resp) => {
+                let err = ctx.props().client_context.translation.get_or_default(
+                    &resp.label,
+                    &resp.text.unwrap_or("A server error has been met".into()),
+                );
+                self.server_error = Some(err.into());
                 self.wait_for_api = false;
                 if let Some(password) = self.password.cast::<HtmlInputElement>() {
                     password.set_value("");
@@ -132,6 +138,14 @@ impl Component for SignIn {
                 });
                 ctx.link().navigator().unwrap().push(&Route::JoinRoom);
                 false
+            }
+            Msg::LocalError(s) => {
+                self.server_error = Some(s);
+                self.wait_for_api = false;
+                if let Some(password) = self.password.cast::<HtmlInputElement>() {
+                    password.set_value("");
+                }
+                true
             }
         }
     }

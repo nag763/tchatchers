@@ -47,6 +47,20 @@ translations:
       confirm_password: Confirm your password
       modal_delete_content: This action is not reversible, once your account is deleted, there is no way for you to get it back.
       waiting_for_server: Waiting for response...
+      unsufficient_priviledges: You don't have permission to access this resource
+      authentication_expired: Authentication is not valid, please log in again.
+      route_requires_authentication: You need to be authentified to access this resource
+      similar_login_exists: A user with a similar login already exists
+      internal_error: An internal error happened
+      bad_credentials: We couldn't connect you, please ensure that the login and password are correct before trying again
+      account_not_found: Your account hasn't been found back, please log in again
+      user_not_found: The user hasn't been found
+      message_does_not_exist: The message does not exist
+      message_alread_reported: The message has already been reported
+      user_created: The user has been created with success
+      access_revoked: Your access has been revoked
+      user_already_reported: You have already reported this user
+      message_already_reported: You already reported the message
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR
@@ -95,7 +109,19 @@ translations:
       confirm_password: Confirmez votre mot de passe
       modal_delete_content: Cette action n'est pas réversible, une fois votre compte supprimé, il n'y a aucun moyen de le récupérer.
       waiting_for_server: En attente de réponse...
-
+      unsufficient_priviledges: Vous n'avez pas la permission d'accéder à cette ressource
+      authentication_expired: L'authentification n'est pas valide, veuillez vous reconnecter.
+      route_requires_authentication: Vous devez être authentifié pour accéder à cette ressource
+      similar_login_exists: Un utilisateur avec un login similaire existe déjà
+      internal_error: Une erreur interne est survenue
+      bad_credentials: Nous n'avons pas pu vous connecter, veuillez vous assurer que le login et le mot de passe sont corrects avant de réessayer
+      account_not_found: Votre compte n'a pas été retrouvé, veuillez vous reconnecter
+      user_not_found: L'utilisateur n'a pas été trouvé
+      message_does_not_exist: Le message n'existe pas
+      message_already_reported: Le message a déjà été signalé
+      user_created: L'utilisateur a été créé avec succès
+      access_revoked: Votre accès a été révoqué
+      user_already_reported: Vous avez déjà signalé cet utilisateur
   - id: 3
     long_name: English (UK)
     short_name: en-UK
@@ -144,7 +170,20 @@ translations:
       confirm_password: Confirm your password
       modal_delete_content: This action is not reversible, once your account is deleted, there is no way for you to get it back.
       waiting_for_server: Waiting for response...
-
+      unsufficient_priviledges: You don't have permission to access this resource
+      authentication_expired: Authentication is not valid, please log in again.
+      route_requires_authentication: You need to be authentified to access this resource
+      similar_login_exists: A user with a similar login already exists
+      internal_error: An internal error happened
+      bad_credentials: We couldn't connect you, please ensure that the login and password are correct before trying again
+      account_not_found: Your account hasn't been found back, please log in again
+      user_not_found: The user hasn't been found
+      message_does_not_exist: The message does not exist
+      message_alread_reported: The message has already been reported
+      user_created: The user has been created with success
+      access_revoked: Your access has been revoked
+      user_already_reported: You have already reported this user
+      message_already_reported: You already reported the message
   - id: 4
     long_name: Deutsch (DE)
     short_name: de-DE
@@ -193,6 +232,19 @@ translations:
       confirm_password: Bestätigen Sie Ihr Passwort
       modal_delete_content: Diese Aktion kann nicht rückgängig gemacht werden. Sobald Ihr Konto gelöscht ist, gibt es keine Möglichkeit, es zurückzubekommen.
       waiting_for_server: Warten auf Antwort...
+      unsufficient_priviledges: Sie haben keine Berechtigung, auf diese Ressource zuzugreifen
+      authentication_expired: Die Authentifizierung ist ungültig, bitte melden Sie sich erneut an.
+      route_requires_authentication: Sie müssen angemeldet sein, um auf diese Ressource zugreifen zu können
+      similar_login_exists: Ein Benutzer mit ähnlichem Login existiert bereits
+      internal_error: Ein interner Fehler ist aufgetreten
+      bad_credentials: Wir konnten Sie nicht verbinden, bitte stellen Sie sicher, dass der Login und das Passwort korrekt sind, bevor Sie es erneut versuchen
+      account_not_found: Ihr Konto wurde nicht gefunden, bitte melden Sie sich erneut an
+      user_not_found: Der Benutzer wurde nicht gefunden
+      message_does_not_exist: Die Nachricht existiert nicht
+      message_already_reported: Die Nachricht wurde bereits gemeldet
+      user_created: Der Benutzer wurde erfolgreich erstellt
+      access_revoked: Ihr Zugriff wurde widerrufen
+      user_already_reported: Sie haben diesen Benutzer bereits gemeldet
   - id: 5
     long_name: Español (ES)
     short_name: es-ES
@@ -241,6 +293,19 @@ translations:
       confirm_password: Confirma tu contraseña
       modal_delete_content: Esta acción no se puede deshacer, una vez que se elimine tu cuenta, no hay forma de recuperarla.
       waiting_for_server: Esperando respuesta...
+      unsufficient_priviledges: No tienes permiso para acceder a este recurso
+      authentication_expired: La autenticación no es válida, por favor vuelve a iniciar sesión.
+      route_requires_authentication: Debes estar autenticado para acceder a este recurso
+      similar_login_exists: Ya existe un usuario con un login similar
+      internal_error: Ha ocurrido un error interno
+      bad_credentials: No pudimos conectarte, por favor asegúrate de que el login y la contraseña sean correctos antes de intentarlo nuevamente
+      account_not_found: No se ha encontrado tu cuenta, por favor inicia sesión nuevamente
+      user_not_found: El usuario no ha sido encontrado
+      message_does_not_exist: El mensaje no existe
+      message_already_reported: El mensaje ya ha sido reportado
+      user_created: El usuario ha sido creado con éxito
+      access_revoked: Se ha revocado tu acceso
+      user_already_reported: Ya has reportado a este usuario
   - id: 6
     long_name: Português (BR)
     short_name: pt-BR
@@ -289,6 +354,19 @@ translations:
       confirm_password: Confirmar senha
       modal_delete_content: Esta ação não pode ser desfeita, uma vez que sua conta for excluída, não há como recuperá-la.
       waiting_for_server: Aguardando resposta...
+      unsufficient_priviledges: Você não tem permissão para acessar este recurso
+      authentication_expired: A autenticação não é válida, faça o login novamente.
+      route_requires_authentication: Você precisa estar autenticado para acessar este recurso
+      similar_login_exists: Já existe um usuário com um login similar
+      internal_error: Ocorreu um erro interno
+      bad_credentials: Não foi possível conectar você, verifique se o login e a senha estão corretos antes de tentar novamente
+      account_not_found: Sua conta não foi encontrada, faça o login novamente
+      user_not_found: O usuário não foi encontrado
+      message_does_not_exist: A mensagem não existe
+      message_already_reported: A mensagem já foi reportada
+      user_created: O usuário foi criado com sucesso
+      access_revoked: Seu acesso foi revogado
+      user_already_reported: Você já reportou este usuário
   - id: 7
     long_name: Italiano (IT)
     short_name: it-IT
@@ -337,6 +415,19 @@ translations:
       confirm_password: Conferma la password
       modal_delete_content: Questa azione non è reversibile, una volta eliminato il tuo account non sarà possibile recuperarlo.
       waiting_for_server: In attesa di risposta...
+      unsufficient_priviledges: Non hai i permessi per accedere a questa risorsa
+      authentication_expired: L'autenticazione non è valida, effettua nuovamente il login.
+      route_requires_authentication: Devi essere autenticato per accedere a questa risorsa
+      similar_login_exists: Esiste già un utente con un login simile
+      internal_error: Si è verificato un errore interno
+      bad_credentials: Non siamo riusciti a connetterti, assicurati che il login e la password siano corretti prima di riprovare
+      account_not_found: Il tuo account non è stato trovato, effettua nuovamente il login
+      user_not_found: L'utente non è stato trovato
+      message_does_not_exist: Il messaggio non esiste
+      message_already_reported: Il messaggio è già stato segnalato
+      user_created: L'utente è stato creato con successo
+      access_revoked: Il tuo accesso è stato revocato
+      user_already_reported: Hai già segnalato questo utente
   - id: 8
     long_name: Русский (RU)
     short_name: ru-RU
@@ -385,6 +476,19 @@ translations:
       confirm_password: Подтвердите пароль
       modal_delete_content: Это действие нельзя отменить, после удаления учетной записи вы не сможете ее восстановить.
       waiting_for_server: Ожидание ответа...
+      unsufficient_priviledges: У вас нет прав доступа к этому ресурсу
+      authentication_expired: Аутентификация недействительна, пожалуйста, войдите в систему снова.
+      route_requires_authentication: Для доступа к этому ресурсу требуется аутентификация
+      similar_login_exists: Пользователь с похожим именем уже существует
+      internal_error: Произошла внутренняя ошибка
+      bad_credentials: Мы не смогли вас подключить, пожалуйста, убедитесь, что логин и пароль введены правильно перед повторной попыткой
+      account_not_found: Ваш аккаунт не найден, пожалуйста, войдите в систему снова
+      user_not_found: Пользователь не найден
+      message_does_not_exist: Сообщение не существует
+      message_already_reported: Сообщение уже было сообщено
+      user_created: Пользователь успешно создан
+      access_revoked: Ваш доступ был отозван
+      user_already_reported: Вы уже сообщили об этом пользователе
   - id: 9
     long_name: العربية (AR)
     short_name: ar-AR
@@ -433,6 +537,19 @@ translations:
       confirm_password: تأكيد كلمة السر
       modal_delete_content: هذا الإجراء لا يمكن التراجع عنه، بمجرد حذف حسابك، لن تكون هناك طريقة لاسترجاعه.
       waiting_for_server: في انتظار الرد...
+      unsufficient_priviledges: ليس لديك الإذن للوصول إلى هذا المورد
+      authentication_expired: الاعتماد غير صالح، يرجى تسجيل الدخول مرة أخرى.
+      route_requires_authentication: يجب أن تكون مُسجَّل الدخول للوصول إلى هذا المورد
+      similar_login_exists: هناك مستخدم بنفس اسم الدخول موجود بالفعل
+      internal_error: حدث خطأ داخلي
+      bad_credentials: لم نتمكن من الاتصال بك، يرجى التأكد من صحة اسم الدخول وكلمة المرور قبل المحاولة مرة أخرى
+      account_not_found: لم يتم العثور على حسابك، يرجى تسجيل الدخول مرة أخرى
+      user_not_found: لم يتم العثور على المستخدم
+      message_does_not_exist: هذه الرسالة غير موجودة
+      message_already_reported: تم بالفعل الإبلاغ عن هذه الرسالة
+      user_created: تم إنشاء المستخدم بنجاح
+      access_revoked: تم سحب إذن الوصول الخاص بك
+      user_already_reported: لقد قمت بالفعل بالإبلاغ عن هذا المستخدم
   - id: 10
     long_name: 中文 (ZH)
     short_name: zh-CN
@@ -481,6 +598,20 @@ translations:
       confirm_password: 确认密码
       modal_delete_content: 此操作不可逆，一旦你的账号被删除，将无法恢复。
       waiting_for_server: 等待服务器响应...
+      waiting_for_server: サーバーからの応答を待っています...
+      unsufficient_priviledges: 您无权访问此资源
+      authentication_expired: 认证无效，请重新登录。
+      route_requires_authentication: 您需要登录以访问此资源
+      similar_login_exists: 已存在相似的登录名用户
+      internal_error: 发生了内部错误
+      bad_credentials: 我们无法连接您，请确保登录名和密码正确后再试
+      account_not_found: 未找到您的账户，请重新登录
+      user_not_found: 用户未找到
+      message_does_not_exist: 该消息不存在
+      message_already_reported: 该消息已被举报
+      user_created: 用户创建成功
+      access_revoked: 您的访问权限已被撤销
+      user_already_reported: 您已经举报过该用户
 
   - id: 11
     long_name: 日本語 (JP)
@@ -529,7 +660,19 @@ translations:
       password_field: パスワード
       confirm_password: パスワードの確認
       modal_delete_content: この操作は取り消せません。アカウントが削除された場合、戻すことはできません。
-      waiting_for_server: サーバーからの応答を待っています...
+      unsufficient_priviledges: このリソースにアクセスする権限がありません
+      authentication_expired: 認証が無効です。もう一度ログインしてください。
+      route_requires_authentication: このリソースにアクセスするには、認証が必要です
+      similar_login_exists: すでに類似したログイン名のユーザーが存在します
+      internal_error: 内部エラーが発生しました
+      bad_credentials: 接続できませんでした。ログイン名とパスワードが正しいことを確認してからもう一度試してください
+      account_not_found: アカウントが見つかりませんでした。もう一度ログインしてください
+      user_not_found: ユーザーが見つかりません
+      message_does_not_exist: メッセージが存在しません
+      message_already_reported: メッセージはすでに報告されています
+      user_created: ユーザーが正常に作成されました
+      access_revoked: アクセス権が取り消されました
+      user_already_reported: 既にこのユーザーを報告しています
 
   - id: 12
     long_name: 한국어 (KR)
@@ -579,6 +722,19 @@ translations:
       confirm_password: 비밀번호 확인
       modal_delete_content: 이 작업은 되돌릴 수 없습니다. 계정이 삭제되면 복구할 수 없습니다.
       waiting_for_server: 서버 응답 대기중...
+      unsufficient_priviledges: 이 리소스에 대한 권한이 없습니다
+      authentication_expired: 인증이 유효하지 않습니다. 다시 로그인하십시오.
+      route_requires_authentication: 이 리소스에 접근하려면 인증이 필요합니다
+      similar_login_exists: 유사한 로그인이 이미 존재합니다
+      internal_error: 내부 오류가 발생했습니다
+      bad_credentials: 연결에 실패했습니다. 로그인과 비밀번호가 정확한지 확인하고 다시 시도하세요
+      account_not_found: 계정을 찾을 수 없습니다. 다시 로그인하세요
+      user_not_found: 사용자를 찾을 수 없습니다
+      message_does_not_exist: 메시지가 존재하지 않습니다
+      message_already_reported: 이미 해당 메시지를 신고했습니다
+      user_created: 사용자가 성공적으로 생성되었습니다
+      access_revoked: 접근 권한이 취소되었습니다
+      user_already_reported: 이미 이 사용자를 신고했습니다
 
   - id: 13
     long_name: Dutch (NL)
@@ -628,7 +784,19 @@ translations:
       confirm_password: Bevestig uw wachtwoord
       modal_delete_content: Deze actie is niet ongedaan te maken, zodra uw account is verwijderd, is er geen manier om het terug te krijgen.
       waiting_for_server: Wachten op antwoord...
-
+      unsufficient_priviledges: Je hebt geen toestemming om toegang te krijgen tot deze bron
+      authentication_expired: De authenticatie is niet geldig, log opnieuw in.
+      route_requires_authentication: Je moet ingelogd zijn om toegang te krijgen tot deze bron
+      similar_login_exists: Een gebruiker met een vergelijkbare inlognaam bestaat al
+      internal_error: Er is een interne fout opgetreden
+      bad_credentials: We konden je niet verbinden, zorg ervoor dat de inlognaam en het wachtwoord correct zijn voordat je het opnieuw probeert
+      account_not_found: Jouw account is niet gevonden, log opnieuw in
+      user_not_found: De gebruiker is niet gevonden
+      message_does_not_exist: Het bericht bestaat niet
+      message_already_reported: Het bericht is al gerapporteerd
+      user_created: De gebruiker is succesvol aangemaakt
+      access_revoked: Jouw toegang is ingetrokken
+      user_already_reported: Je hebt deze gebruiker al gerapporteerd
   - id: 14
     long_name: Türkçe (TR)
     short_name: tr-TR
@@ -675,6 +843,19 @@ translations:
       confirm_password: Parolanızı onaylayın
       modal_delete_content: Bu işlem geri alınamaz, hesabınız silindikten sonra geri almanın bir yolu yok.
       waiting_for_server: Yanıt bekleniyor...
+      unsufficient_priviledges: Bu kaynağa erişim izniniz yok
+      authentication_expired: Kimlik doğrulama geçerli değil, lütfen tekrar giriş yapın.
+      route_requires_authentication: Bu kaynağa erişmek için giriş yapmanız gerekiyor
+      similar_login_exists: Benzer bir kullanıcı adı zaten var
+      internal_error: Bir iç hata oluştu
+      bad_credentials: Sizi bağlayamadık, lütfen tekrar denemeden önce giriş bilgilerinizin doğru olduğundan emin olun
+      account_not_found: Hesabınız bulunamadı, lütfen tekrar giriş yapın
+      user_not_found: Kullanıcı bulunamadı
+      message_does_not_exist: Mesaj mevcut değil
+      message_already_reported: Mesaj zaten bildirilmiş
+      user_created: Kullanıcı başarıyla oluşturuldu
+      access_revoked: Erişiminiz iptal edildi
+      user_already_reported: Bu kullanıcıyı zaten bildirdiniz
   - id: 15
     long_name: Polski (PL)
     short_name: pl-PL
@@ -723,6 +904,19 @@ translations:
       confirm_password: Potwierdź swoje hasło
       modal_delete_content: Ta operacja jest nieodwracalna, po usunięciu konta nie będzie można go odzyskać.
       waiting_for_server: Oczekiwanie na odpowiedź...
+      unsufficient_priviledges: Nie masz uprawnień do dostępu do tego zasobu
+      authentication_expired: Autoryzacja nie jest ważna, proszę zaloguj się ponownie.
+      route_requires_authentication: Aby uzyskać dostęp do tego zasobu, musisz być zalogowany
+      similar_login_exists: Użytkownik o podobnym loginie już istnieje
+      internal_error: Wystąpił wewnętrzny błąd
+      bad_credentials: Nie możemy cię połączyć, upewnij się, że login i hasło są poprawne przed ponowną próbą
+      account_not_found: Twoje konto nie zostało znalezione, zaloguj się ponownie
+      user_not_found: Użytkownik nie został znaleziony
+      message_does_not_exist: Wiadomość nie istnieje
+      message_already_reported: Wiadomość została już zgłoszona
+      user_created: Użytkownik został pomyślnie utworzony
+      access_revoked: Twoje uprawnienia zostały cofnięte
+      user_already_reported: Już zgłosiłeś tego użytkownika
   - id: 16
     long_name: Ελληνικά (GR)
     short_name: el-GR
@@ -771,3 +965,16 @@ translations:
       confirm_password: Επιβεβαιώστε τον κωδικό πρόσβασης
       modal_delete_content: Η ενέργεια αυτή δεν μπορεί να αναιρεθεί, μόλις διαγραφεί ο λογαριασμός σας, δεν υπάρχει τρόπος να τον ανακτήσετε.
       waiting_for_server: Αναμονή για απάντηση...
+      unsufficient_priviledges: Δεν έχετε άδεια πρόσβασης σε αυτό το πόρο
+      authentication_expired: Η πιστοποίηση δεν είναι έγκυρη, παρακαλούμε συνδεθείτε ξανά.
+      route_requires_authentication: Χρειάζεται να είστε συνδεδεμένοι για να αποκτήσετε πρόσβαση σε αυτό το πόρο
+      similar_login_exists: Υπάρχει ήδη χρήστης με παρόμοιο όνομα σύνδεσης
+      internal_error: Παρουσιάστηκε εσωτερικό σφάλμα
+      bad_credentials: Δεν μπορέσαμε να σας συνδέσουμε, παρακαλούμε βεβαιωθείτε ότι το όνομα σύνδεσης και ο κωδικός πρόσβασης είναι σωστά πριν δοκιμάσετε ξανά
+      account_not_found: Ο λογαριασμός σας δεν βρέθηκε, παρακαλούμε συνδεθείτε ξανά
+      user_not_found: Δεν βρέθηκε ο χρήστης
+      message_does_not_exist: Το μήνυμα δεν υπάρχει
+      message_already_reported: Το μήνυμα έχει ήδη αναφερθεί
+      user_created: Ο χρήστης δημιουργήθηκε με επιτυχία
+      access_revoked: Η πρόσβασή σας έχει ανακληθεί
+      user_already_reported: Έχετε ήδη αναφέρει αυτόν τον χρήστη

@@ -9,11 +9,11 @@ use crate::validator::ValidJson;
 use crate::AppState;
 use crate::REFRESH_TOKEN_PATH;
 use axum::extract::State;
-use axum::response::Response;
 use axum::Json;
 use axum::{extract::Path, http::StatusCode, response::IntoResponse};
 use axum_extra::extract::cookie::Cookie;
 use axum_extra::extract::CookieJar;
+use tchatchers_core::api_response::ApiGenericResponse;
 use tchatchers_core::async_message::AsyncMessage;
 use tchatchers_core::authorization_token::AuthorizationToken;
 use tchatchers_core::refresh_token::RefreshToken;
@@ -22,7 +22,6 @@ use tchatchers_core::serializable_token::SerializableToken;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, UpdatableUser, User};
 use tokio::time::{sleep, Duration};
-use tracing::log::error;
 
 /// Creates a user.
 ///
@@ -36,17 +35,12 @@ pub async fn create_user(
     State(state): State<AppState>,
     ValidJson(new_user): ValidJson<InsertableUser>,
 ) -> impl IntoResponse {
-    if User::login_exists(&new_user.login, &state.pg_pool).await {
-        return Err((
-            StatusCode::BAD_REQUEST,
-            "A user with a similar login already exists",
-        ));
+    if User::login_exists(&new_user.login, &state.pg_pool).await? {
+        return Err(ApiGenericResponse::SimilarLoginExists);
     }
 
-    match new_user.insert(&state.pg_pool).await {
-        Ok(_) => Ok((StatusCode::CREATED, "User created with success")),
-        Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened")),
-    }
+    new_user.insert(&state.pg_pool).await?;
+    Ok(ApiGenericResponse::UserCreated)
 }
 
 /// Check whether a login exists or not.
@@ -60,11 +54,11 @@ pub async fn create_user(
 pub async fn login_exists(
     Path(login): Path<String>,
     State(state): State<AppState>,
-) -> impl IntoResponse {
-    match User::login_exists(&login, &state.pg_pool).await {
-        false => StatusCode::OK,
-        true => StatusCode::CONFLICT,
-    };
+) -> Result<impl IntoResponse, ApiGenericResponse> {
+    match User::login_exists(&login, &state.pg_pool).await? {
+        false => Ok(StatusCode::OK),
+        true => Err(ApiGenericResponse::SimilarLoginExists),
+    }
 }
 
 /// Authenticate a user.
@@ -83,7 +77,7 @@ pub async fn authenticate(
 ) -> impl IntoResponse {
     let Some(user) = authenticable_user.authenticate(&state.pg_pool).await else {
             sleep(Duration::from_secs(3)).await;
-            return Err((StatusCode::NOT_FOUND, "We couldn't connect you, please ensure that the login and password are correct before trying again"));
+            return Err(ApiGenericResponse::BadCredentials);
     };
     if user.is_authorized {
         let refresh_token = {
@@ -108,7 +102,7 @@ pub async fn authenticate(
             jwt.encode(&state.jwt_secret).unwrap(),
         ))
     } else {
-        Err((StatusCode::FORBIDDEN, "This user's access has been revoked, contact an admin if you believe you should access this service"))
+        Err(ApiGenericResponse::AccessRevoked)
     }
 }
 
@@ -139,12 +133,12 @@ pub async fn reauthenticate(
 ) -> impl IntoResponse {
     // Attempt to retrieve the refresh token from the cookie jar.
     let Some(cookie) = cookie_jar.get(REFRESH_TOKEN_PATH) else {
-        return Err((StatusCode::BAD_REQUEST, "Your session has expired. Please log in again."))
+        return Err(ApiGenericResponse::AuthenticationExpired)
     };
 
     // Decode the refresh token and verify that it is legitimate.
     let Ok(refresh_token) = RefreshToken::decode(cookie.value(), &state.refresh_token_secret) else {
-        return Err((StatusCode::BAD_REQUEST, "Your authentication token is expired or illegitimate. Please log in again."))
+        return Err(ApiGenericResponse::AuthenticationRequired)
     };
 
     // Refresh the token.
@@ -154,10 +148,7 @@ pub async fn reauthenticate(
 
         if !refresh_token.is_head_token(&mut redis_conn).await {
             refresh_token.revoke_family(&mut redis_conn).await;
-            return Err((
-                StatusCode::UNAUTHORIZED,
-                "There was an issue while refreshing your session. Please log in again.",
-            ));
+            return Err(ApiGenericResponse::AuthenticationExpired);
         } else {
             let refreshed_token = refresh_token.renew();
             refreshed_token.set_as_head_token(&mut redis_conn).await;
@@ -167,15 +158,12 @@ pub async fn reauthenticate(
 
     // Retrieve the user corresponding to the refresh token's user ID from the database.
     let Some(user) = User::find_by_id(refresh_token.user_id, &state.pg_pool).await else {
-        return Err((StatusCode::NOT_FOUND, "Your account hasn't been found back, please log in again."))
+        return Err(ApiGenericResponse::AccountNotFound)
     };
 
     // Verify that the user's account is authorized.
     if !user.is_authorized {
-        return Err((
-            StatusCode::FORBIDDEN,
-            "Your account has been deactivated. Please log out.",
-        ));
+        return Err(ApiGenericResponse::AccessRevoked);
     }
 
     // Queue the information that user reauthenticated.
@@ -253,14 +241,11 @@ pub async fn update_user(
     ValidJson(user): ValidJson<UpdatableUser>,
 ) -> impl IntoResponse {
     if jwt.user_id == user.id {
-        if let Err(err) = user.update(&state.pg_pool).await {
-            error!("An error happened while trying to update the record : \n---New record :{:#?}---\nError : {}", user, err);
-            return Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened"));
-        };
+        user.update(&state.pg_pool).await?;
 
         Ok((StatusCode::OK, "User updated with success"))
     } else {
-        Err((StatusCode::UNAUTHORIZED, "You can't update other users"))
+        Err(ApiGenericResponse::UnsifficentPriviledges)
     }
 }
 
@@ -270,11 +255,9 @@ pub async fn update_user(
 pub async fn delete_user(
     JwtUserExtractor(jwt): JwtUserExtractor,
     State(state): State<AppState>,
-) -> impl IntoResponse {
-    match User::delete_one(jwt.user_id, &state.pg_pool).await {
-        Ok(_) => Ok((StatusCode::OK, "User updated with success")),
-        Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened")),
-    }
+) -> Result<impl IntoResponse, ApiGenericResponse> {
+    User::delete_one(jwt.user_id, &state.pg_pool).await?;
+    Ok(StatusCode::OK)
 }
 
 /// Revokes a user's access.
@@ -284,11 +267,9 @@ pub async fn revoke_user(
     Path(user_id): Path<i32>,
     ModeratorExtractor(_): ModeratorExtractor,
     State(state): State<AppState>,
-) -> impl IntoResponse {
-    match User::update_activation_status(user_id, false, &state.pg_pool).await {
-        Ok(_) => Ok((StatusCode::OK, "User revoked")),
-        Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "An error happened")),
-    }
+) -> Result<impl IntoResponse, ApiGenericResponse> {
+    User::update_activation_status(user_id, false, &state.pg_pool).await?;
+    Ok(StatusCode::OK)
 }
 
 /// Report a user.
@@ -308,20 +289,17 @@ pub async fn report_user(
     state: State<AppState>,
 ) -> impl IntoResponse {
     match Report::user(user.user_id, reported_user, &state.pg_pool).await {
-        Ok(_) => (StatusCode::OK, "User reported"),
+        Ok(_) => Ok((StatusCode::OK, "User reported")),
         Err(e) => {
             if let Some(database_err) = e.as_database_error() {
                 if let Some(code) = database_err.code() {
                     if code == "23505" {
-                        return (StatusCode::BAD_REQUEST, "You already reported this user");
+                        return Err(ApiGenericResponse::UserAlreadyReported);
                     }
                 }
             }
             eprintln!("{}", e);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "An error happened while reporting this message",
-            )
+            Err(ApiGenericResponse::DbError)
         }
     }
 }
@@ -329,16 +307,12 @@ pub async fn report_user(
 pub async fn whoami(
     JwtUserExtractor(jwt): JwtUserExtractor,
     state: State<AppState>,
-) -> Result<Json<PartialUser>, Response> {
+) -> Result<Json<PartialUser>, ApiGenericResponse> {
     let Some(user) = User::find_by_id(jwt.user_id, &state.pg_pool).await else  {
-        return Err((StatusCode::FORBIDDEN, "User doesn't exist anymore, please log out.").into_response());
+        return Err(ApiGenericResponse::UserNotFound);
     };
     if !user.is_authorized {
-        return Err((
-            StatusCode::FORBIDDEN,
-            "This user's access has been deactivated, please log out.",
-        )
-            .into_response());
+        return Err(ApiGenericResponse::AccessRevoked);
     }
     Ok(Json(user.into()))
 }

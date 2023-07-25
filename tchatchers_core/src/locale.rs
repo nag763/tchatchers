@@ -117,4 +117,10 @@ impl Locale {
         let locales = LOCALES.get_or_init(Self::init_cell);
         locales.get(&1i32).cloned().unwrap()
     }
+
+    pub fn get_default_translation(label: &str) -> Option<String> {
+        let locales = LOCALES.get_or_init(Self::init_cell);
+        let default_locale = locales.get(&1)?;
+        default_locale.translation_map.get(label).cloned()
+    }
 }

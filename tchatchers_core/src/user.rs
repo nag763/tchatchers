@@ -94,13 +94,12 @@ impl User {
     /// # Arguments
     ///
     /// - login : The login to look up.
-    pub async fn login_exists(login: &str, pool: &PgPool) -> bool {
+    pub async fn login_exists(login: &str, pool: &PgPool) -> Result<bool, sqlx::Error> {
         let row: (bool,) = sqlx::query_as("SELECT COUNT(id)!=0 FROM CHATTER WHERE login=$1")
             .bind(login)
             .fetch_one(pool)
-            .await
-            .unwrap();
-        row.0
+            .await?;
+        Ok(row.0)
     }
 
     /// Delete the user from the database.

@@ -3,7 +3,10 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-use tchatchers_core::{profile::Profile, report::Report, ws_message::WsMessageContent};
+use tchatchers_core::{
+    api_response::ApiGenericResponse, profile::Profile, report::Report,
+    ws_message::WsMessageContent,
+};
 use uuid::Uuid;
 
 use crate::{extractor::JwtUserExtractor, AppState};
@@ -24,18 +27,13 @@ pub async fn delete_message(
         match WsMessageContent::get_one(&message_id, &state.pg_pool).await {
             Some(message) if message.author.id == user.user_id => (),
             Some(_) => {
-                return (
-                    StatusCode::FORBIDDEN,
-                    "The user can only delete his own requests",
-                )
+                return Err(ApiGenericResponse::UnsifficentPriviledges);
             }
-            None => return (StatusCode::NOT_FOUND, "This message doesn't exist"),
+            None => return Err(ApiGenericResponse::MessageDoesNotExist),
         }
     }
-    match WsMessageContent::delete_messages(&vec![message_id], &state.pg_pool).await {
-        Ok(_) => (StatusCode::OK, "Message deleted"),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "An error happened"),
-    }
+    WsMessageContent::delete_messages(&vec![message_id], &state.pg_pool).await?;
+    Ok((StatusCode::OK, "Message deleted"))
 }
 
 /// Report a message.
@@ -55,23 +53,17 @@ pub async fn report_message(
     state: State<AppState>,
 ) -> impl IntoResponse {
     match Report::message(user.user_id, &message_id, &state.pg_pool).await {
-        Ok(_) => (StatusCode::OK, "Message reported"),
+        Ok(_) => Ok((StatusCode::OK, "Message reported")),
         Err(e) => {
             if let Some(database_err) = e.as_database_error() {
                 if let Some(code) = database_err.code() {
                     if code == "23505" {
-                        return (
-                            StatusCode::BAD_REQUEST,
-                            "This message has already been reported",
-                        );
+                        return Err(ApiGenericResponse::MessageAlreadyReported);
                     }
                 }
             }
             eprintln!("{}", e);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "An error happened while reporting this message",
-            )
+            Err(ApiGenericResponse::DbError)
         }
     }
 }

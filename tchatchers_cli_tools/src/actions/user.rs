@@ -124,7 +124,7 @@ impl UserAction {
             let login: String = Input::new()
                 .with_prompt("Write the user's login")
                 .interact_text()?;
-            if !User::login_exists(&login, &pool).await {
+            if !User::login_exists(&login, &pool).await? {
                 break login;
             } else {
                 println!(

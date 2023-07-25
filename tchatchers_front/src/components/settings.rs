@@ -12,6 +12,7 @@ use crate::services::modal_bus::ModalBusContent;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
+use tchatchers_core::api_response::ApiResponse;
 use tchatchers_core::locale::Locale;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::UpdatableUser;
@@ -41,7 +42,8 @@ pub enum Msg {
     UploadNewPfp(Option<js_sys::ArrayBuffer>),
     PfpUpdated(AttrValue),
     SubmitForm,
-    ErrorFromServer(AttrValue),
+    ErrorFromServer(ApiResponse),
+    LocalError(AttrValue),
     ProfileUpdated(PartialUser),
     ConfirmDeletion,
     DeletionConfirmed,
@@ -103,7 +105,7 @@ impl Component for Settings {
                 ) {
                     if name.check_validity() {
                         let Ok(locale_id) = locale_id.value().parse() else {
-                            ctx.link().send_message(Msg::ErrorFromServer("The given locale isn't valid".into()));
+                            ctx.link().send_message(Msg::LocalError("The given locale isn't valid".into()));
                             return true;
                         };
                         let payload = UpdatableUser {
@@ -115,7 +117,7 @@ impl Component for Settings {
                         if let Err(e) = payload.validate() {
                             let message: ValidationErrorMessage = e.into();
                             ctx.link()
-                                .send_message(Msg::ErrorFromServer(message.to_string().into()));
+                                .send_message(Msg::LocalError(message.to_string().into()));
                         } else {
                             let bearer = ctx.props().context.bearer.clone();
                             let mut req = Requester::put("/api/user");
@@ -142,12 +144,13 @@ impl Component for Settings {
                                         link.send_message(Msg::ProfileUpdated(user));
                                     } else {
                                         link.send_message(Msg::ErrorFromServer(
-                                            resp.text().await.unwrap().into(),
+                                            serde_json::from_str(&resp.text().await.unwrap())
+                                                .unwrap(),
                                         ));
                                     }
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
-                                        resp.text().await.unwrap().into(),
+                                        serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
                                     ));
                                 }
                             });
@@ -166,15 +169,21 @@ impl Component for Settings {
                     if resp.ok() {
                         link.send_message(Msg::PfpUpdated(resp.text().await.unwrap().into()));
                     } else {
-                        link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap().into()));
+                        link.send_message(Msg::ErrorFromServer(
+                            serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
+                        ));
                     }
                 });
                 true
             }
-            Msg::ErrorFromServer(s) => {
+            Msg::ErrorFromServer(resp) => {
                 self.wait_for_api = false;
                 self.ok_msg = None;
-                self.server_error = Some(s);
+                let err = ctx.props().context.translation.get_or_default(
+                    &resp.label,
+                    &resp.text.unwrap_or("A server error has been met".into()),
+                );
+                self.server_error = Some(err.into());
                 true
             }
             Msg::PfpUpdated(pfp_path) => {
@@ -218,9 +227,17 @@ impl Component for Settings {
                     if resp.ok() {
                         link.navigator().unwrap().push(&Route::LogOut);
                     } else {
-                        link.send_message(Msg::ErrorFromServer(resp.text().await.unwrap().into()));
+                        link.send_message(Msg::ErrorFromServer(
+                            serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
+                        ));
                     }
                 });
+                true
+            }
+            Msg::LocalError(s) => {
+                self.wait_for_api = false;
+                self.ok_msg = None;
+                self.server_error = Some(s);
                 true
             }
         }

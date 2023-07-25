@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-back = ["dep:sqlx", "dep:rust-argon2", "dep:axum", "dep:axum-extra", "dep:cookie", "dep:redis", "dep:serde_json", "dep:bb8-redis"]
+back = ["dep:sqlx", "dep:rust-argon2", "dep:axum", "dep:axum-extra", "dep:cookie", "dep:redis", "dep:bb8-redis"]
 front = ["uuid/js"]
-cli = ["dep:sqlx", "dep:rust-argon2", "dep:clap", "dep:serde_json", "dep:redis", "dep:bb8-redis"]
-async = ["dep:sqlx", "dep:redis", "dep:serde_json", "dep:bb8-redis"]
+cli = ["dep:sqlx", "dep:rust-argon2", "dep:clap", "dep:redis", "dep:bb8-redis"]
+async = ["dep:sqlx", "dep:redis", "dep:bb8-redis"]
 
 
 [dependencies]
@@ -29,7 +29,7 @@ axum-extra = { version = "0.7", optional = true }
 time = { default-features = false, version = "0.3.23" }
 cookie = { version = "0.17.0", optional = true }
 redis = { version = "0.23.0", optional = true, features = ["streams", "aio", "tokio-comp"], default-features = false }
-serde_json = { version = "1.0.103", optional = true }
+serde_json = { version = "1.0.103" }
 bb8-redis = { version = "0.13.1" , optional = true } 
 clap = { version = "4.3.19", features = ["derive", "std"], optional = true}
 serde_yaml = "0.9.25"

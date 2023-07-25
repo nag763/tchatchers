@@ -10,6 +10,7 @@ use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
 use gloo_net::http::Request;
 use gloo_timers::callback::Timeout;
+use tchatchers_core::api_response::ApiResponse;
 use tchatchers_core::locale::Locale;
 use tchatchers_core::user::InsertableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
@@ -45,7 +46,8 @@ pub fn sign_up_hoc() -> Html {
 pub enum Msg {
     SubmitForm,
     OnLoginChanged,
-    ErrorFromServer(AttrValue),
+    ErrorFromServer(ApiResponse),
+    LocalError(AttrValue),
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -103,11 +105,11 @@ impl Component for SignUp {
                         };
                         if let Err(e) = payload.validate() {
                             let message: ValidationErrorMessage = e.into();
-                            link.send_message(Msg::ErrorFromServer(message.to_string().into()));
+                            link.send_message(Msg::LocalError(message.to_string().into()));
                         } else if !password.value().eq(&password_confirmation.value()) {
                             password.set_value("");
                             password_confirmation.set_value("");
-                            link.send_message(Msg::ErrorFromServer(
+                            link.send_message(Msg::LocalError(
                                 ctx.props()
                                     .client_context
                                     .translation
@@ -134,7 +136,7 @@ impl Component for SignUp {
                                     link.navigator().unwrap().push(&Route::SignIn);
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
-                                        resp.text().await.unwrap().into(),
+                                        serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
                                     ));
                                 }
                             });
@@ -172,7 +174,16 @@ impl Component for SignUp {
                 }
                 true
             }
-            Msg::ErrorFromServer(e) => {
+            Msg::ErrorFromServer(resp) => {
+                self.wait_for_api = false;
+                let err = ctx.props().client_context.translation.get_or_default(
+                    &resp.label,
+                    &resp.text.unwrap_or("A server error has been met".into()),
+                );
+                self.server_error = Some(err.into());
+                true
+            }
+            Msg::LocalError(e) => {
                 self.wait_for_api = false;
                 self.server_error = Some(e);
                 true

@@ -8,11 +8,11 @@ use axum::{
     async_trait,
     extract::FromRequestParts,
     headers::{authorization::Bearer, Authorization},
-    http::{request::Parts, StatusCode},
+    http::request::Parts,
     TypedHeader,
 };
 use tchatchers_core::{
-    authorization_token::AuthorizationToken, profile::Profile,
+    api_response::ApiGenericResponse, authorization_token::AuthorizationToken, profile::Profile,
     serializable_token::SerializableToken,
 };
 
@@ -23,24 +23,18 @@ pub struct JwtUserExtractor(pub AuthorizationToken);
 
 #[async_trait]
 impl FromRequestParts<AppState> for JwtUserExtractor {
-    type Rejection = (StatusCode, &'static str);
+    type Rejection = ApiGenericResponse;
 
     async fn from_request_parts(
         parts: &mut Parts,
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
         let Ok(TypedHeader(Authorization(jwt))) =  TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, state).await else {
-            return Err((
-                StatusCode::UNAUTHORIZED,
-                "This route requires authentication",
-            ));
+            return Err(ApiGenericResponse::AuthenticationRequired);
         };
         match AuthorizationToken::decode(jwt.token(), &state.jwt_secret) {
             Ok(v) => Ok(JwtUserExtractor(v)),
-            Err(_) => Err((
-                StatusCode::UNAUTHORIZED,
-                "Authentication is not valid, please log in again.",
-            )),
+            Err(_) => Err(ApiGenericResponse::AuthenticationExpired),
         }
     }
 }
@@ -53,7 +47,7 @@ pub struct ModeratorExtractor(pub AuthorizationToken);
 
 #[async_trait]
 impl FromRequestParts<AppState> for ModeratorExtractor {
-    type Rejection = (StatusCode, &'static str);
+    type Rejection = ApiGenericResponse;
 
     async fn from_request_parts(
         parts: &mut Parts,
@@ -61,10 +55,7 @@ impl FromRequestParts<AppState> for ModeratorExtractor {
     ) -> Result<Self, Self::Rejection> {
         let jwt = JwtUserExtractor::from_request_parts(parts, state).await?.0;
         if jwt.user_profile < Profile::Moderator {
-            Err((
-                StatusCode::UNAUTHORIZED,
-                "You don't have sufficient privileges",
-            ))
+            Err(ApiGenericResponse::UnsifficentPriviledges)
         } else {
             Ok(ModeratorExtractor(jwt))
         }
@@ -79,7 +70,7 @@ pub struct AdminExtractor(pub AuthorizationToken);
 
 #[async_trait]
 impl FromRequestParts<AppState> for AdminExtractor {
-    type Rejection = (StatusCode, &'static str);
+    type Rejection = ApiGenericResponse;
 
     async fn from_request_parts(
         parts: &mut Parts,
@@ -87,10 +78,7 @@ impl FromRequestParts<AppState> for AdminExtractor {
     ) -> Result<Self, Self::Rejection> {
         let jwt = JwtUserExtractor::from_request_parts(parts, state).await?.0;
         if jwt.user_profile < Profile::Admin {
-            Err((
-                StatusCode::UNAUTHORIZED,
-                "You don't have sufficient privileges",
-            ))
+            Err(ApiGenericResponse::UnsifficentPriviledges)
         } else {
             Ok(AdminExtractor(jwt))
         }
