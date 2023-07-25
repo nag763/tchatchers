@@ -42,7 +42,7 @@ async fn run_main() -> Result<(), CliError> {
     env_logger::Builder::new()
         .filter_level(args.verbose.log_level_filter())
         .init();
-    debug!("Parsed CLI args: {:?}", args);
+    debug!("Parsed CLI args: {:#?}", args);
 
     match args.env {
         None => dotenv::dotenv().ok(),

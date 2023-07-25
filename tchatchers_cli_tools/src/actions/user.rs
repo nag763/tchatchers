@@ -102,7 +102,7 @@ impl UserAction {
             println!("No result found for your search criteria.")
         } else {
             for (i, user) in result.iter().enumerate() {
-                println!("- {i} : {user:?}");
+                println!("- {i} : {user:#?}");
             }
         }
 
