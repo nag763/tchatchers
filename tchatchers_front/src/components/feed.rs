@@ -139,7 +139,7 @@ impl Component for Feed {
                                 .tx
                                 .clone()
                                 .try_send(
-                                    serde_json::to_string(&WsMessage::Seen(vec![msg_content.uuid]))
+                                    postcard::to_stdvec(&WsMessage::Seen(vec![msg_content.uuid]))
                                         .unwrap(),
                                 )
                                 .unwrap();
@@ -166,7 +166,7 @@ impl Component for Feed {
                                 .tx
                                 .clone()
                                 .try_send(
-                                    serde_json::to_string(&WsMessage::Seen(messages_seen)).unwrap(),
+                                    postcard::to_stdvec(&WsMessage::Seen(messages_seen)).unwrap(),
                                 )
                                 .unwrap();
                         }
@@ -179,7 +179,7 @@ impl Component for Feed {
                             self.ws
                                 .tx
                                 .clone()
-                                .try_send(serde_json::to_string(&msg).unwrap())
+                                .try_send(postcard::to_stdvec(&msg).unwrap())
                                 .unwrap();
                             self.ws_keep_alive = {
                                 let tx = self.ws.tx.clone();
@@ -200,7 +200,7 @@ impl Component for Feed {
                         self.ws
                             .tx
                             .clone()
-                            .try_send(serde_json::to_string(&message).unwrap())
+                            .try_send(postcard::to_stdvec(&message).unwrap())
                             .unwrap();
                         self.received_messages.retain(|msg| msg_uuid != msg.uuid);
                     }
@@ -214,7 +214,7 @@ impl Component for Feed {
                 self.ws
                     .tx
                     .clone()
-                    .try_send(serde_json::to_string(&WsMessage::Ping).unwrap())
+                    .try_send(postcard::to_stdvec(&WsMessage::Ping).unwrap())
                     .unwrap();
                 false
             }
@@ -225,7 +225,7 @@ impl Component for Feed {
                 self.ws
                     .tx
                     .clone()
-                    .try_send(serde_json::to_string(&WsMessage::Ping).unwrap())
+                    .try_send(postcard::to_stdvec(&WsMessage::Ping).unwrap())
                     .unwrap();
                 self.called_back = false;
                 true
@@ -245,7 +245,7 @@ impl Component for Feed {
         let component: Html = match self.is_connected {
             true => {
                 let tx = self.ws.tx.clone();
-                let pass_message_to_ws = Callback::from(move |message: String| {
+                let pass_message_to_ws = Callback::from(move |message: Vec<u8>| {
                     tx.clone().try_send(message).unwrap();
                 });
                 html! {<TypeBar translation={self.user_context.translation.clone()} {pass_message_to_ws} user={self.user_context.user.as_ref().unwrap().clone()} room={ctx.props().room.clone()}/>}
@@ -273,7 +273,7 @@ impl Component for Feed {
     fn destroy(&mut self, ctx: &Context<Self>) {
         self.ws
             .tx
-            .try_send(serde_json::to_string(&WsMessage::Close).unwrap())
+            .try_send(postcard::to_stdvec(&WsMessage::Close).unwrap())
             .unwrap();
         ctx.link().send_message(Msg::CutWs)
     }

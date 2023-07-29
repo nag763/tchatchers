@@ -15,7 +15,7 @@ pub enum Msg {
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
-    pub pass_message_to_ws: Callback<String>,
+    pub pass_message_to_ws: Callback<Vec<u8>>,
     pub room: AttrValue,
     pub user: PartialUser,
     pub translation: Rc<TranslationMap>,
@@ -49,7 +49,7 @@ impl Component for TypeBar {
                     };
                     ctx.props()
                         .pass_message_to_ws
-                        .emit(serde_json::to_string(&WsMessage::Send(msg)).unwrap());
+                        .emit(postcard::to_stdvec(&WsMessage::Send(msg)).unwrap());
                     input.set_value("");
                 }
 

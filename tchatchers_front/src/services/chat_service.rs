@@ -11,7 +11,7 @@ use yew_agent::Dispatched;
 
 #[derive(Clone, Debug)]
 pub struct WebsocketService {
-    pub tx: Sender<String>,
+    pub tx: Sender<Vec<u8>>,
 }
 
 impl WebsocketService {
@@ -34,12 +34,12 @@ impl WebsocketService {
 
         let (mut write, mut read) = ws.split();
 
-        let (in_tx, mut in_rx) = futures::channel::mpsc::channel::<String>(1000);
+        let (in_tx, mut in_rx) = futures::channel::mpsc::channel::<Vec<u8>>(1000);
         let mut event_bus = ChatBus::dispatcher();
 
         spawn_local(async move {
             while let Some(s) = in_rx.next().await {
-                write.send(Message::Text(s)).await.unwrap();
+                write.send(Message::Bytes(s)).await.unwrap();
             }
         });
 
@@ -47,16 +47,13 @@ impl WebsocketService {
             while let Some(msg) = read.next().await {
                 match msg {
                     Ok(Message::Text(data)) => {
-                        if let Ok(msg) = serde_json::from_str(&data) {
+                        if let Ok(msg) = postcard::from_bytes(data.as_bytes()) {
                             event_bus.send(msg);
                         }
                     }
                     Ok(Message::Bytes(b)) => {
-                        let decoded = std::str::from_utf8(&b);
-                        if let Ok(val) = decoded {
-                            if let Ok(msg) = serde_json::from_str(val) {
-                                event_bus.send(msg);
-                            }
+                        if let Ok(msg) = postcard::from_bytes(&b) {
+                            event_bus.send(msg);
                         }
                     }
                     Err(e) => match e {

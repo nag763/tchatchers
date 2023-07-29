@@ -27,10 +27,10 @@ use validator::Validate;
 
 /// Hashmap that contains the room name as key and the websocket data as value.
 #[derive(Default, Debug)]
-pub struct WsRooms(HashMap<String, broadcast::Sender<String>>);
+pub struct WsRooms(HashMap<String, broadcast::Sender<Vec<u8>>>);
 
 impl Deref for WsRooms {
-    type Target = HashMap<String, broadcast::Sender<String>>;
+    type Target = HashMap<String, broadcast::Sender<Vec<u8>>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -89,7 +89,7 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
     let mut send_task = tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
             // In any websocket error, break loop.
-            if sender.send(Message::Text(msg)).await.is_err() {
+            if sender.send(Message::Binary(msg)).await.is_err() {
                 break;
             }
         }
@@ -97,19 +97,19 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
 
     // This task will receive messages from client and send them to broadcast subscribers.
     let mut recv_task = tokio::spawn(async move {
-        while let Some(Ok(Message::Text(text))) = receiver.next().await {
-            if let Ok(msg) = serde_json::from_str(text.as_str()) {
+        while let Some(Ok(Message::Binary(text))) = receiver.next().await {
+            if let Ok(msg) = postcard::from_bytes(&text) {
                 match msg {
                     WsMessage::Close => break,
                     WsMessage::Ping => {
-                        let _ = tx.send(serde_json::to_string(&WsMessage::Pong).unwrap());
+                        let _ = tx.send(postcard::to_stdvec(&WsMessage::Pong).unwrap());
                     }
                     WsMessage::Pong | WsMessage::ClientKeepAlive => continue,
                     WsMessage::Send(mut ws_message) => {
                         let redis_pool = state.async_pool.clone();
                         ws_message.reception_status = WsReceptionStatus::Sent;
                         let _ = tx.send(
-                            serde_json::to_string(&WsMessage::Receive(ws_message.clone())).unwrap(),
+                            postcard::to_stdvec(&WsMessage::Receive(ws_message.clone())).unwrap(),
                         );
                         tokio::spawn(async move {
                             let (pool1, pool2) = (
@@ -126,7 +126,7 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                         let messages: Vec<WsMessageContent> =
                             WsMessageContent::query_all_for_room(&room, &state.pg_pool).await;
                         let _ = tx.send(
-                            serde_json::to_string(&WsMessage::MessagesRetrieved {
+                            postcard::to_stdvec(&WsMessage::MessagesRetrieved {
                                 messages,
                                 session_id,
                             })
@@ -135,7 +135,7 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                     }
                     WsMessage::Seen(messages) => {
                         let _ = tx.send(
-                            serde_json::to_string(&WsMessage::MessagesSeen(messages.clone()))
+                            postcard::to_stdvec(&WsMessage::MessagesSeen(messages.clone()))
                                 .unwrap(),
                         );
                         let redis_pool = state.async_pool.clone();
