@@ -18,9 +18,7 @@ use super::common::I18N;
 pub fn join_room_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().unwrap();
 
-    let app_context = client_context.clone();
-
-    html! { <JoinRoom  user_context={(*app_context).clone()} /> }
+    html! { <JoinRoom  user_context={(*client_context).clone()} /> }
 }
 
 #[derive(Properties, PartialEq, Clone)]

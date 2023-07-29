@@ -186,7 +186,7 @@ impl Component for Settings {
             }
             Msg::ProfileUpdated(app_context) => {
                 self.wait_for_api = false;
-                let locale_id = app_context.clone().locale_id;
+                let locale_id = app_context.locale_id;
                 self.user_context.user.set(Some(app_context));
                 let translation = Locale::find_by_id(locale_id).unwrap().translation_map;
                 ToastBus::dispatcher().send(Alert {
