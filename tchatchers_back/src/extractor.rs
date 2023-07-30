@@ -9,7 +9,7 @@ use axum::{
     body::{Bytes, HttpBody},
     extract::{FromRequest, FromRequestParts},
     headers::{authorization::Bearer, Authorization},
-    http::{header, request::Parts, HeaderValue, Request, HeaderMap},
+    http::{header, request::Parts, HeaderMap, HeaderValue, Request},
     response::IntoResponse,
     BoxError, TypedHeader,
 };
@@ -113,7 +113,7 @@ fn postcard_content_type(headers: &HeaderMap) -> bool {
     let is_postcard_content_type = mime.type_() == "application"
         && (mime.subtype() == "postcard" || mime.suffix().map_or(false, |name| name == "postcard"));
 
-        is_postcard_content_type
+    is_postcard_content_type
 }
 
 /// A validated JSON input.

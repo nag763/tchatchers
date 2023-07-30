@@ -121,9 +121,7 @@ impl Component for Settings {
                         } else {
                             let bearer = ctx.props().context.bearer.clone();
                             let mut req = Requester::put("/api/user");
-                            req
-                                .bearer(bearer.clone())
-                                .postcard_body(payload);
+                            req.bearer(bearer.clone()).postcard_body(payload);
                             let link = ctx.link().clone();
                             self.wait_for_api = true;
                             wasm_bindgen_futures::spawn_local(async move {

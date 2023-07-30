@@ -91,7 +91,6 @@ impl ApiResponse {
     }
 }
 
-
 #[cfg(feature = "back")]
 impl IntoResponse for ApiResponse {
     fn into_response(self) -> Response {
@@ -199,7 +198,10 @@ impl From<ApiGenericResponse> for ApiResponse {
             ApiGenericResponse::ValidationError(errors) => {
                 ApiResponse::errors(ApiResponseKind::ValidationError, "validation_error", errors)
             }
-            ApiGenericResponse::ContentTypeError => ApiResponse::new(ApiResponseKind::ContentTypeError, "content_type_missing_or_not_accepted"),
+            ApiGenericResponse::ContentTypeError => ApiResponse::new(
+                ApiResponseKind::ContentTypeError,
+                "content_type_missing_or_not_accepted",
+            ),
         }
     }
 }
