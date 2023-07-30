@@ -17,9 +17,9 @@ use axum::{
 };
 use futures_util::{join, SinkExt, StreamExt};
 use tchatchers_core::{
+    api_response::ApiGenericResponse,
     async_message::AsyncMessage,
     room::RoomNameValidator,
-    validation_error_message::ValidationErrorMessage,
     ws_message::{WsMessage, WsMessageContent, WsReceptionStatus},
 };
 use tokio::sync::broadcast;
@@ -55,10 +55,10 @@ pub async fn ws_handler(
     ws: WebSocketUpgrade,
     State(state): State<AppState>,
     Path(room): Path<String>,
-) -> impl IntoResponse {
+) -> Result<impl IntoResponse, ApiGenericResponse> {
     let room_name_validator: RoomNameValidator = RoomNameValidator::from(room.clone());
     if let Err(e) = room_name_validator.validate() {
-        return Err(ValidationErrorMessage::from(e).into_response());
+        return Err(ApiGenericResponse::from(e));
     }
     Ok(ws.on_upgrade(|socket| handle_socket(socket, state, room)))
 }

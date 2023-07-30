@@ -65,6 +65,10 @@ translations:
       message_deleted: The message has been deleted
       user_reported: The user has been reported
       revoked_user: The user's access has been revoked
+      expected_byte: The API expected a byte format, was found another format.
+      serialization_error: The request is malformed as the serialization format isn't the one expected.
+      validation_error: The request you sent is invalid, some validation errors have been met.
+      content_type_missing_or_not_accepted: The content type is either missing or not accepted.
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR
@@ -130,6 +134,11 @@ translations:
       message_deleted: Le message a été supprimé
       user_reported: L'utilisateur a été signalé
       revoked_user: L'accès de l'utilisateur a été révoqué
+      expected_byte: L'API attendait un format en octet, mais un autre format a été trouvé.
+      serialization_error: La requête est mal formée car le format de sérialisation n'est pas celui attendu.
+      validation_error: La requête que vous avez envoyée est invalide, certaines erreurs de validation ont été rencontrées.
+      content_type_missing_or_not_accepted: Le type de contenu est manquant ou non accepté.
+
   - id: 3
     long_name: English (UK)
     short_name: en-UK
@@ -196,6 +205,10 @@ translations:
       message_deleted: The message has been deleted
       user_reported: The user has been reported
       revoked_user: The user's access has been revoked
+      expected_byte: The API expected a byte format, was found another format.
+      serialization_error: The request is malformed as the serialization format isn't the one expected.
+      validation_error: The request you sent is invalid, some validation errors have been met.
+      content_type_missing_or_not_accepted: The content type is either missing or not accepted.
   - id: 4
     long_name: Deutsch (DE)
     short_name: de-DE
@@ -261,6 +274,11 @@ translations:
       message_deleted: Die Nachricht wurde gelöscht
       user_reported: Der Benutzer wurde gemeldet
       revoked_user: Der Zugriff des Benutzers wurde widerrufen
+      expected_byte: Die API erwartet ein Byte-Format, aber ein anderes Format wurde gefunden.
+      serialization_error: Die Anfrage ist fehlerhaft, da das Serialisierungsformat nicht erwartet wird.
+      validation_error: Die von Ihnen gesendete Anfrage ist ungültig. Es sind einige Validierungsfehler aufgetreten.
+      content_type_missing_or_not_accepted: Der Inhaltstyp fehlt oder wird nicht akzeptiert.
+
   - id: 5
     long_name: Español (ES)
     short_name: es-ES
@@ -326,6 +344,11 @@ translations:
       message_deleted: El mensaje ha sido eliminado
       user_reported: El usuario ha sido denunciado
       revoked_user: Se ha revocado el acceso del usuario
+      expected_byte: La API esperaba un formato de byte, se encontró otro formato.
+      serialization_error: La solicitud no es válida, ya que el formato de serialización no es el esperado.
+      validation_error: La solicitud que envió no es válida, se encontraron algunos errores de validación.
+      content_type_missing_or_not_accepted: Falta el tipo de contenido o no es aceptado.
+
   - id: 6
     long_name: Português (BR)
     short_name: pt-BR
@@ -391,6 +414,11 @@ translations:
       message_deleted: A mensagem foi apagada
       user_reported: O utilizador foi reportado
       revoked_user: O acesso do utilizador foi revogado
+      expected_byte: A API esperava um formato de byte, mas foi encontrado outro formato.
+      serialization_error: O pedido está malformado, pois o formato de serialização não é o esperado.
+      validation_error: O pedido que você enviou é inválido, alguns erros de validação foram encontrados.
+      content_type_missing_or_not_accepted: O tipo de conteúdo está faltando ou não é aceito.
+
   - id: 7
     long_name: Italiano (IT)
     short_name: it-IT
@@ -456,6 +484,11 @@ translations:
       message_deleted: Il messaggio è stato eliminato
       user_reported: L'utente è stato segnalato
       revoked_user: L'accesso dell'utente è stato revocato
+      expected_byte: L'API si aspettava un formato di byte, è stato trovato un formato diverso.
+      serialization_error: La richiesta non è valida poiché il formato di serializzazione non è quello previsto.
+      validation_error: La richiesta inviata non è valida, sono stati riscontrati alcuni errori di convalida.
+      content_type_missing_or_not_accepted: Il tipo di contenuto è mancante o non accettato.
+
   - id: 8
     long_name: Русский (RU)
     short_name: ru-RU
@@ -521,6 +554,11 @@ translations:
       message_deleted: Сообщение было удалено
       user_reported: Пользователь был зарегистрирован
       revoked_user: Доступ пользователя был отозван
+      expected_byte: API ожидал формат байта, был найден другой формат.
+      serialization_error: Запрос сформирован неправильно, так как формат сериализации не соответствует ожидаемому.
+      validation_error: Отправленный вами запрос недействителен, возникли некоторые ошибки проверки данных.
+      content_type_missing_or_not_accepted: Тип контента отсутствует или не принимается.
+
   - id: 9
     long_name: العربية (AR)
     short_name: ar-AR
@@ -586,6 +624,11 @@ translations:
       message_deleted: تم حذف الرسالة
       user_reported: تم الإبلاغ عن المستخدم
       revoked_user: تم سحب حق الوصول للمستخدم
+      expected_byte: توقعت واجهة برمجة التطبيقات (API) تنسيق بالبايت، ولكن تم العثور على تنسيق آخر.
+      serialization_error: الطلب غير صحيح حيث أن تنسيق التسلسل ليس كما هو متوقع.
+      validation_error: الطلب الذي أرسلته غير صالح، تم اكتشاف بعض أخطاء التحقق.
+      content_type_missing_or_not_accepted: نوع المحتوى غير موجود أو غير مقبول.
+
 
   - id: 10
     long_name: 中文 (ZH)
@@ -653,6 +696,10 @@ translations:
       message_deleted: 该消息已被删除
       user_reported: 该用户已被举报
       revoked_user: 该用户的访问权限已被撤销
+      expected_byte: API 预期为字节格式，但找到了其他格式。
+      serialization_error: 请求格式不正确，因为序列化格式与预期不符。
+      validation_error: 您发送的请求无效，遇到一些验证错误。
+      content_type_missing_or_not_accepted: 缺少内容类型或内容类型不被接受。
 
   - id: 11
     long_name: 日本語 (JP)
@@ -718,6 +765,10 @@ translations:
       message_deleted: メッセージが削除されました
       user_reported: ユーザーが報告されました
       revoked_user: ユーザーのアクセス権が取り消されました
+      expected_byte: APIはバイト形式を予期していましたが、別の形式が見つかりました。
+      serialization_error: リクエストが不正です。シリアル化形式が予期されるものと一致しません。
+      validation_error: 送信されたリクエストは無効です。いくつかの検証エラーが発生しました。
+      content_type_missing_or_not_accepted: コンテンツタイプが不足しているか、受け入れられません。
 
   - id: 12
     long_name: 한국어 (KR)
@@ -784,6 +835,11 @@ translations:
       message_deleted: 메시지가 삭제되었습니다
       user_reported: 사용자가 신고되었습니다
       revoked_user: 사용자의 액세스 권한이 취소되었습니다
+      expected_byte: API가 바이트 형식을 예상했지만 다른 형식이 발견되었습니다.
+      serialization_error: 요청이 잘못되었습니다. 직렬화 형식이 예상과 일치하지 않습니다.
+      validation_error: 보낸 요청이 유효하지 않습니다. 일부 유효성 검사 오류가 발생했습니다.
+      content_type_missing_or_not_accepted: 콘텐츠 유형이 없거나 허용되지 않습니다.
+
 
   - id: 13
     long_name: Dutch (NL)
@@ -850,6 +906,10 @@ translations:
       message_deleted: Het bericht is verwijderd
       user_reported: De gebruiker is gemeld
       revoked_user: De toegang van de gebruiker is ingetrokken
+      expected_byte: De API verwachtte een byte-formaat, maar er is een ander formaat gevonden.
+      serialization_error: Het verzoek is ongeldig omdat het serialisatieformaat niet overeenkomt met het verwachte formaat.
+      validation_error: Het door u verzonden verzoek is ongeldig, er zijn enkele validatiefouten opgetreden.
+      content_type_missing_or_not_accepted: Het inhoudstype ontbreekt of wordt niet geaccepteerd.
 
   - id: 14
     long_name: Türkçe (TR)
@@ -914,6 +974,10 @@ translations:
       message_deleted: Mesaj silindi
       user_reported: Kullanıcı bildirildi
       revoked_user: Kullanıcının erişimi iptal edildi
+      expected_byte: API, bir byte formatı bekliyordu, başka bir format bulundu.
+      serialization_error: İstek, serileştirme formatının beklenenle uyumlu olmadığından hatalı.
+      validation_error: Gönderdiğiniz istek geçersiz, bazı doğrulama hataları oluştu.
+      content_type_missing_or_not_accepted: İçerik türü eksik veya kabul edilmiyor.
 
   - id: 15
     long_name: Polski (PL)
@@ -980,6 +1044,11 @@ translations:
       message_deleted: Wiadomość została usunięta
       user_reported: Użytkownik został zgłoszony
       revoked_user: Dostęp użytkownika został cofnięty
+      expected_byte: API oczekiwało formatu bajtowego, ale znaleziono inny format.
+      serialization_error: Żądanie jest nieprawidłowe, ponieważ format serializacji nie jest zgodny z oczekiwanym.
+      validation_error: Wysłane przez Ciebie żądanie jest nieprawidłowe, wystąpiły pewne błędy walidacji.
+      content_type_missing_or_not_accepted: Brak typu zawartości lub nie jest on akceptowany.
+
   - id: 16
     long_name: Ελληνικά (GR)
     short_name: el-GR
@@ -1045,3 +1114,7 @@ translations:
       message_deleted: Το μήνυμα διαγράφηκε
       user_reported: Ο χρήστης έχει αναφοραπομηθεί
       revoked_user: Η πρόσβαση του χρήστη έχει ανακληθεί
+      expected_byte: Το API προσδοκούσε ένα διαμορφωμένο σε byte μορφότυπο, βρέθηκε κάποιος άλλος μορφότυπος.
+      serialization_error: Το αίτημα δεν είναι σωστό καθώς η μορφή της σειριοποίησης δεν είναι αυτή που αναμένεται.
+      validation_error: Το αίτημα που αποστείλατε δεν είναι έγκυρο, συναντήθηκαν ορισμένα σφάλματα επικύρωσης.
+      content_type_missing_or_not_accepted: Ο τύπος περιεχομένου λείπει ή δεν γίνεται αποδεκτός.

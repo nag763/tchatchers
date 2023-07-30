@@ -35,7 +35,7 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
                 wasm_bindgen_futures::spawn_local(async move {
                     let res = req.send().await;
                     let api_resp: ApiResponse =
-                        serde_json::from_str(&res.text().await.unwrap()).unwrap();
+                        postcard::from_bytes(&res.binary().await.unwrap()).unwrap();
                     let label = api_resp.label;
                     let default: String = api_resp.text.unwrap_or("Unknown response".into());
                     let is_success = res.ok();
@@ -63,7 +63,7 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
                 wasm_bindgen_futures::spawn_local(async move {
                     let res = req.send().await;
                     let api_resp: ApiResponse =
-                        serde_json::from_str(&res.text().await.unwrap()).unwrap();
+                        postcard::from_bytes(&res.binary().await.unwrap()).unwrap();
                     let label = api_resp.label;
                     let default: String = api_resp.text.unwrap_or("Unknown response".into());
                     let is_success = res.ok();

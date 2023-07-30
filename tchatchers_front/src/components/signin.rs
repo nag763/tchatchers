@@ -84,7 +84,7 @@ impl Component for SignIn {
                             session_only: !remember_me.checked(),
                         };
                         let mut req = Requester::post("/api/authenticate");
-                        req.is_json(true).json_body(payload);
+                        req.postcard_body(payload);
                         let link = ctx.link().clone();
                         let bearer = ctx.props().client_context.bearer.clone();
                         wasm_bindgen_futures::spawn_local(async move {
@@ -96,16 +96,18 @@ impl Component for SignIn {
                                 let resp = req.bearer(bearer).send().await;
                                 if resp.ok() {
                                     let user: PartialUser =
-                                        serde_json::from_str(&resp.text().await.unwrap()).unwrap();
+                                        postcard::from_bytes(&resp.binary().await.unwrap())
+                                            .unwrap();
                                     link.send_message(Msg::LoggedIn(user));
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
-                                        serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
+                                        postcard::from_bytes(&resp.binary().await.unwrap())
+                                            .unwrap(),
                                     ));
                                 }
                             } else {
                                 link.send_message(Msg::ErrorFromServer(
-                                    serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
+                                    postcard::from_bytes(&resp.binary().await.unwrap()).unwrap(),
                                 ));
                             }
                         });

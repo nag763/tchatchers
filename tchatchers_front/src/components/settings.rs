@@ -121,7 +121,9 @@ impl Component for Settings {
                         } else {
                             let bearer = ctx.props().context.bearer.clone();
                             let mut req = Requester::put("/api/user");
-                            req.is_json(true).bearer(bearer.clone()).json_body(payload);
+                            req
+                                .bearer(bearer.clone())
+                                .postcard_body(payload);
                             let link = ctx.link().clone();
                             self.wait_for_api = true;
                             wasm_bindgen_futures::spawn_local(async move {
@@ -131,19 +133,20 @@ impl Component for Settings {
                                     let resp = req.bearer(bearer).send().await;
                                     if resp.ok() {
                                         let user: PartialUser =
-                                            serde_json::from_str(&resp.text().await.unwrap())
+                                            postcard::from_bytes(&resp.binary().await.unwrap())
                                                 .unwrap();
 
                                         link.send_message(Msg::ProfileUpdated(user));
                                     } else {
                                         link.send_message(Msg::ErrorFromServer(
-                                            serde_json::from_str(&resp.text().await.unwrap())
+                                            postcard::from_bytes(&resp.binary().await.unwrap())
                                                 .unwrap(),
                                         ));
                                     }
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
-                                        serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
+                                        postcard::from_bytes(&resp.binary().await.unwrap())
+                                            .unwrap(),
                                     ));
                                 }
                             });
@@ -163,7 +166,7 @@ impl Component for Settings {
                         link.send_message(Msg::PfpUpdated(resp.text().await.unwrap().into()));
                     } else {
                         link.send_message(Msg::ErrorFromServer(
-                            serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
+                            postcard::from_bytes(&resp.binary().await.unwrap()).unwrap(),
                         ));
                     }
                 });
@@ -226,7 +229,7 @@ impl Component for Settings {
                         link.navigator().unwrap().push(&Route::LogOut);
                     } else {
                         link.send_message(Msg::ErrorFromServer(
-                            serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
+                            postcard::from_bytes(&resp.binary().await.unwrap()).unwrap(),
                         ));
                     }
                 });

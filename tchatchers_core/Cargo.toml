@@ -34,3 +34,4 @@ bb8-redis = { version = "0.13.1" , optional = true }
 clap = { version = "4.3.19", features = ["derive", "std"], optional = true}
 serde_yaml = "0.9.25"
 tokio = { version = "1.29.1", features = ["sync"] }
+postcard = { version = "1.0.6", default-features = false }

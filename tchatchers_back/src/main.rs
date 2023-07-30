@@ -9,7 +9,6 @@
 
 pub mod api;
 pub mod extractor;
-pub mod validator;
 pub mod ws;
 
 use api::message::delete_message;

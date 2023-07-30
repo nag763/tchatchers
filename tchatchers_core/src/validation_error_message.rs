@@ -7,15 +7,6 @@ use std::fmt::Display;
 use axum::{http::StatusCode, response::IntoResponse};
 use validator::ValidationErrors;
 
-/// The error message struct.
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct ValidationErrorMessage {
-    /// The concerned error field.
-    field: String,
-    /// The code error on the field.
-    code: String,
-}
-
 impl From<ValidationErrors> for ValidationErrorMessage {
     fn from(errors: ValidationErrors) -> Self {
         let field_errors = errors.field_errors();
@@ -26,6 +17,15 @@ impl From<ValidationErrors> for ValidationErrorMessage {
             code: first_error_code.to_string(),
         }
     }
+}
+
+/// The error message struct.
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct ValidationErrorMessage {
+    /// The concerned error field.
+    pub field: String,
+    /// The code error on the field.
+    pub code: String,
 }
 
 impl Display for ValidationErrorMessage {

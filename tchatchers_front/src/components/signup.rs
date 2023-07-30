@@ -120,7 +120,7 @@ impl Component for SignUp {
                             ));
                         } else {
                             let mut req = Requester::post("/api/user");
-                            req.is_json(true).json_body(payload);
+                            req.postcard_body(payload);
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
                                 if resp.ok() {
@@ -132,7 +132,8 @@ impl Component for SignUp {
                                     link.navigator().unwrap().push(&Route::SignIn);
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
-                                        serde_json::from_str(&resp.text().await.unwrap()).unwrap(),
+                                        postcard::from_bytes(&resp.binary().await.unwrap())
+                                            .unwrap(),
                                     ));
                                 }
                             });

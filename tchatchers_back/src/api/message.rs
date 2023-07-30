@@ -61,8 +61,7 @@ pub async fn report_message(
                     }
                 }
             }
-            eprintln!("{}", e);
-            Err(ApiGenericResponse::DbError)
+            Err(ApiGenericResponse::DbError(e.to_string()))
         }
     }
 }

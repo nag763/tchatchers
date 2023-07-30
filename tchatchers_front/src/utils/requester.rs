@@ -3,6 +3,7 @@
 
 use async_recursion::async_recursion;
 use gloo_net::http::{Method, Request, Response};
+use js_sys::Uint8Array;
 use wasm_bindgen::JsValue;
 use yew::{UseStateHandle, UseStateSetter};
 
@@ -13,7 +14,7 @@ pub struct Requester {
     endpoint: Option<String>,
     method: Option<Method>,
     payload: Option<JsValue>,
-    is_json: bool,
+    is_postcard: bool,
     bearer_value: Option<String>,
     bearer_setter: Option<UseStateSetter<Option<String>>>,
 }
@@ -66,13 +67,11 @@ impl Requester {
         self
     }
 
-    pub fn json_body<U: serde::Serialize>(&mut self, body: U) -> &mut Self {
-        self.payload = Some(serde_json::to_string(&body).unwrap().into());
-        self
-    }
-
-    pub fn is_json(&mut self, is_json: bool) -> &mut Self {
-        self.is_json = is_json;
+    pub fn postcard_body<U: serde::Serialize>(&mut self, body: U) -> &mut Self {
+        let bytes = postcard::to_stdvec(&body).unwrap();
+        let array = Uint8Array::from(&bytes[..]);
+        self.payload = Some(array.into());
+        self.is_postcard = true;
         self
     }
 
@@ -103,8 +102,8 @@ impl Requester {
             if let Some(bearer) = &self.bearer_value {
                 builder = builder.header("Authorization", &format!("Bearer {bearer}"));
             }
-            if self.is_json {
-                builder = builder.header("Content-Type", "application/json");
+            if self.is_postcard {
+                builder = builder.header("Content-Type", "application/postcard");
             }
             let resp = builder.send().await.unwrap();
             if resp.status() == UNAUTHORIZED && endpoint != "/api/authenticate" {

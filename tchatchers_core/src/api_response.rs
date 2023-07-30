@@ -1,7 +1,8 @@
 #[cfg(feature = "back")]
 use axum::{http::StatusCode, response::IntoResponse, response::Response};
+use validator::ValidationErrors;
 
-use crate::locale::Locale;
+use crate::{locale::Locale, validation_error_message::ValidationErrorMessage};
 
 #[derive(serde::Deserialize, serde::Serialize)]
 pub enum ApiResponseKind {
@@ -22,6 +23,10 @@ pub enum ApiResponseKind {
     MessageDeleted,
     UserReported,
     RevokedUser,
+    ByteRejection,
+    SerializationError,
+    ValidationError,
+    ContentTypeError,
 }
 
 #[cfg(feature = "back")]
@@ -39,7 +44,11 @@ impl From<ApiResponseKind> for StatusCode {
             | ApiResponseKind::UserAlreadyReported
             | ApiResponseKind::AccountNotFound
             | ApiResponseKind::BadCredentials
-            | ApiResponseKind::MessageDoesNotExist => StatusCode::BAD_REQUEST,
+            | ApiResponseKind::MessageDoesNotExist
+            | ApiResponseKind::ByteRejection
+            | ApiResponseKind::ValidationError
+            | ApiResponseKind::ContentTypeError
+            | ApiResponseKind::SerializationError => StatusCode::BAD_REQUEST,
             ApiResponseKind::AuthenticationRequired | ApiResponseKind::AuthenticationExpired => {
                 StatusCode::UNAUTHORIZED
             }
@@ -57,6 +66,7 @@ pub struct ApiResponse {
     pub label: String,
     pub text: Option<String>,
     pub trace: uuid::Uuid,
+    pub errors: Vec<String>,
 }
 
 impl ApiResponse {
@@ -66,22 +76,26 @@ impl ApiResponse {
             text: Locale::get_default_translation(label),
             kind,
             trace: uuid::Uuid::new_v4(),
+            errors: vec![],
+        }
+    }
+
+    pub fn errors(kind: ApiResponseKind, label: &str, errors: Vec<String>) -> ApiResponse {
+        Self {
+            label: label.into(),
+            text: Locale::get_default_translation(label),
+            kind,
+            trace: uuid::Uuid::new_v4(),
+            errors,
         }
     }
 }
 
-impl TryFrom<String> for ApiResponse {
-    type Error = serde_json::Error;
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        serde_json::from_str(&value)
-    }
-}
 
 #[cfg(feature = "back")]
 impl IntoResponse for ApiResponse {
     fn into_response(self) -> Response {
-        let payload = serde_json::to_string(&self).unwrap();
+        let payload = postcard::to_stdvec(&self).unwrap();
         let code: StatusCode = self.kind.into();
         (code, payload).into_response()
     }
@@ -93,7 +107,7 @@ pub enum ApiGenericResponse {
     AuthenticationExpired,
     UnsifficentPriviledges,
     SimilarLoginExists,
-    DbError,
+    DbError(String),
     UserCreated,
     BadCredentials,
     AccessRevoked,
@@ -106,6 +120,10 @@ pub enum ApiGenericResponse {
     MessageDeleted,
     UserReported,
     RevokedUser,
+    ByteRejection(String),
+    SerializationError(String),
+    ValidationError(Vec<String>),
+    ContentTypeError,
 }
 
 impl From<ApiGenericResponse> for ApiResponse {
@@ -126,8 +144,8 @@ impl From<ApiGenericResponse> for ApiResponse {
             ApiGenericResponse::SimilarLoginExists => {
                 ApiResponse::new(ApiResponseKind::SimilarLoginExists, "similar_login_exists")
             }
-            ApiGenericResponse::DbError => {
-                ApiResponse::new(ApiResponseKind::DbError, "internal_error")
+            ApiGenericResponse::DbError(errors) => {
+                ApiResponse::errors(ApiResponseKind::DbError, "internal_error", vec![errors])
             }
             ApiGenericResponse::UserCreated => {
                 ApiResponse::new(ApiResponseKind::UserCreated, "user_created")
@@ -168,14 +186,28 @@ impl From<ApiGenericResponse> for ApiResponse {
             ApiGenericResponse::RevokedUser => {
                 ApiResponse::new(ApiResponseKind::RevokedUser, "revoked_user")
             }
+            ApiGenericResponse::ByteRejection(errors) => ApiResponse::errors(
+                ApiResponseKind::ByteRejection,
+                "expected_byte",
+                vec![errors],
+            ),
+            ApiGenericResponse::SerializationError(errors) => ApiResponse::errors(
+                ApiResponseKind::SerializationError,
+                "serialization_error",
+                vec![errors],
+            ),
+            ApiGenericResponse::ValidationError(errors) => {
+                ApiResponse::errors(ApiResponseKind::ValidationError, "validation_error", errors)
+            }
+            ApiGenericResponse::ContentTypeError => ApiResponse::new(ApiResponseKind::ContentTypeError, "content_type_missing_or_not_accepted"),
         }
     }
 }
 
 #[cfg(feature = "back")]
 impl From<sqlx::error::Error> for ApiGenericResponse {
-    fn from(_value: sqlx::error::Error) -> Self {
-        Self::DbError
+    fn from(value: sqlx::error::Error) -> Self {
+        Self::DbError(value.to_string())
     }
 }
 
@@ -184,5 +216,35 @@ impl IntoResponse for ApiGenericResponse {
     fn into_response(self) -> Response {
         let api_response: ApiResponse = self.into();
         api_response.into_response()
+    }
+}
+
+#[cfg(feature = "back")]
+impl From<axum::extract::rejection::BytesRejection> for ApiGenericResponse {
+    fn from(value: axum::extract::rejection::BytesRejection) -> Self {
+        Self::ByteRejection(value.to_string())
+    }
+}
+
+impl From<postcard::Error> for ApiGenericResponse {
+    fn from(value: postcard::Error) -> Self {
+        Self::SerializationError(value.to_string())
+    }
+}
+
+impl From<ValidationErrors> for ApiGenericResponse {
+    fn from(value: ValidationErrors) -> Self {
+        let mut validation_errors: Vec<ValidationErrorMessage> = vec![];
+        for errors in value.field_errors() {
+            let field = errors.0;
+            for field_errors in errors.1 {
+                validation_errors.push(ValidationErrorMessage {
+                    field: field.to_string(),
+                    code: field_errors.code.to_string(),
+                })
+            }
+        }
+        let errors = validation_errors.iter().map(|v| v.to_string()).collect();
+        ApiGenericResponse::ValidationError(errors)
     }
 }

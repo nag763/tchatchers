@@ -22,3 +22,4 @@ sqlx = {features = ["uuid"], version = "0.6.3" }
 tower = { default-features = false, version = "0.4.13" }
 bb8-redis = "0.13.1"
 postcard = { version = "1.0.6", default-features = false, features = ["use-std"] }
+mime = "0.3.17"
