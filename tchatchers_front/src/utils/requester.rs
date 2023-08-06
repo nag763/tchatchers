@@ -2,7 +2,7 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use async_recursion::async_recursion;
-use gloo_net::http::{Method, Request, Response};
+use gloo_net::http::{Method, Request, Response, RequestBuilder};
 use js_sys::Uint8Array;
 use wasm_bindgen::JsValue;
 use yew::{UseStateHandle, UseStateSetter};
@@ -94,18 +94,21 @@ impl Requester {
     #[async_recursion(?Send)]
     pub async fn send(&mut self) -> Response {
         if let (Some(method), Some(endpoint)) = (&self.method, &self.endpoint) {
-            let mut builder = Request::new(endpoint);
-            builder = builder.method(*method);
-            if let Some(payload) = &self.payload {
-                builder = builder.body(payload);
-            }
+            let mut builder = RequestBuilder::new(endpoint);
+            builder = builder.method(method.clone());
             if let Some(bearer) = &self.bearer_value {
                 builder = builder.header("Authorization", &format!("Bearer {bearer}"));
             }
             if self.is_postcard {
                 builder = builder.header("Content-Type", "application/postcard");
             }
-            let resp = builder.send().await.unwrap();
+            let req: Request = if let Some(payload) = &self.payload {
+                builder.body(payload).unwrap()
+            } else {
+                builder.build().unwrap()
+            };
+            
+            let resp = req.send().await.unwrap();
             if resp.status() == UNAUTHORIZED && endpoint != "/api/authenticate" {
                 let reauth = Self {
                     endpoint: Some("/api/authenticate".into()),
