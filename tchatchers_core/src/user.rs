@@ -205,7 +205,7 @@ impl User {
             ) ON COMMIT DROP;
         ",
         )
-        .execute(&mut tx)
+        .execute(&mut *tx)
         .await?;
 
         for operation in userid_identifier {
@@ -219,12 +219,12 @@ impl User {
             .bind(operation.entity_id)
             .bind(operation.queue_id)
             .bind(operation.timestamp)
-            .execute(&mut tx)
+            .execute(&mut *tx)
             .await?;
         }
 
-        sqlx::query("UPDATE CHATTER c SET LAST_LOGON = tr.timestamp FROM tmp_user_update tr WHERE tr.entity_id = c.id").execute(&mut tx).await?;
-        sqlx::query("UPDATE tmp_user_update tr SET is_updated=true FROM CHATTER c WHERE tr.entity_id = c.id").execute(&mut tx).await?;
+        sqlx::query("UPDATE CHATTER c SET LAST_LOGON = tr.timestamp FROM tmp_user_update tr WHERE tr.entity_id = c.id").execute(&mut *tx).await?;
+        sqlx::query("UPDATE tmp_user_update tr SET is_updated=true FROM CHATTER c WHERE tr.entity_id = c.id").execute(&mut *tx).await?;
 
         sqlx::query("
         INSERT INTO PROCESS_REPORT(process_id, successfull_records, failed_records) 
@@ -232,7 +232,7 @@ impl User {
         FROM tmp_user_update
         ")
             .bind(AsyncQueue::LoggedUsers as i32)
-            .execute(&mut tx)
+            .execute(&mut *tx)
             .await
             .unwrap();
 

@@ -183,7 +183,7 @@ impl WsMessageContent {
                 .push_bind(value.reception_status);
         });
 
-        let res = query_builder.build().execute(&mut tx).await?;
+        let res = query_builder.build().execute(&mut *tx).await?;
 
         let updated_records = res.rows_affected();
 
@@ -198,7 +198,7 @@ impl WsMessageContent {
         .bind(AsyncQueue::PersistMessage)
         .bind(updated_records as i64)
         .bind(failed_records as i64)
-        .execute(&mut tx)
+        .execute(&mut *tx)
         .await
         .unwrap();
 
@@ -223,7 +223,7 @@ impl WsMessageContent {
             sqlx::query("UPDATE MESSAGE m SET RECEPTION_STATUS = $1 WHERE uuid = ANY($2)")
                 .bind(WsReceptionStatus::Seen)
                 .bind(messages.iter().map(|m| m.entity_id).collect::<Vec<Uuid>>())
-                .execute(&mut tx)
+                .execute(&mut *tx)
                 .await?
                 .rows_affected();
 
@@ -238,7 +238,7 @@ impl WsMessageContent {
         .bind(AsyncQueue::MessagesSeen)
         .bind(updated_records as i64)
         .bind(failed_records as i64)
-        .execute(&mut tx)
+        .execute(&mut *tx)
         .await
         .unwrap();
 
@@ -260,7 +260,7 @@ impl WsMessageContent {
         for room in room_names {
             let Ok(uuid) : Result<Vec<(Uuid, )>, sqlx::Error> =  sqlx::query_as("SELECT uuid FROM MESSAGE WHERE room=$1 OFFSET 100")
                 .bind(room)
-                .fetch_all(&mut tx)
+                .fetch_all(&mut *tx)
                 .await else {
                     failed_records += 1;
                     continue;
@@ -271,7 +271,7 @@ impl WsMessageContent {
         let successfull_records = if !uuid_to_delete.is_empty() {
             sqlx::query("DELETE FROM MESSAGE WHERE UUID = ANY($1)")
                 .bind(uuid_to_delete)
-                .execute(&mut tx)
+                .execute(&mut *tx)
                 .await?
                 .rows_affected() as i64
         } else {
@@ -287,7 +287,7 @@ impl WsMessageContent {
         .bind(AsyncQueue::CleanRoom)
         .bind(successfull_records)
         .bind(failed_records)
-        .execute(&mut tx)
+        .execute(&mut *tx)
         .await?;
 
         tx.commit().await?;

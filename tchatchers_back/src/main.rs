@@ -27,7 +27,7 @@ use axum::{
 };
 use bb8_redis::bb8;
 use bb8_redis::RedisConnectionManager;
-use sqlx_core::postgres::PgPool;
+use sqlx::postgres::PgPool;
 use std::iter::once;
 use std::net::SocketAddr;
 use std::sync::Arc;

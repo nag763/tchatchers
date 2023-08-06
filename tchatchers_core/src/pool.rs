@@ -21,7 +21,7 @@ use sqlx::PgPool;
 
 /// Returns a postgres pool from the user env.
 pub async fn get_pg_pool() -> PgPool {
-    let mut connect_options = sqlx::postgres::PgConnectOptions::new()
+    let connect_options = sqlx::postgres::PgConnectOptions::new()
         .host(&std::env::var("POSTGRES_HOST").expect("No host defined in .env"))
         .port(
             std::env::var("POSTGRES_PORT")
@@ -31,7 +31,8 @@ pub async fn get_pg_pool() -> PgPool {
         )
         .database(&std::env::var("POSTGRES_DB").expect("No schema defined in .env"))
         .username(&std::env::var("POSTGRES_USER").expect("No user defined in .env"))
-        .password(&std::env::var("POSTGRES_PASSWORD").expect("No password defined in .env"));
+        .password(&std::env::var("POSTGRES_PASSWORD").expect("No password defined in .env"))
+        ;
     let connect_options = match std::env::var("SQLX_LOG").ok() {
         Some(v) => connect_options
             .log_statements(LevelFilter::from_str(&v).unwrap_or(LevelFilter::Error))
