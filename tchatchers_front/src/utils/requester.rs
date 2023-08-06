@@ -2,7 +2,7 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use async_recursion::async_recursion;
-use gloo_net::http::{Method, Request, Response, RequestBuilder};
+use gloo_net::http::{Method, Request, RequestBuilder, Response};
 use js_sys::Uint8Array;
 use wasm_bindgen::JsValue;
 use yew::{UseStateHandle, UseStateSetter};
@@ -107,7 +107,7 @@ impl Requester {
             } else {
                 builder.build().unwrap()
             };
-            
+
             let resp = req.send().await.unwrap();
             if resp.status() == UNAUTHORIZED && endpoint != "/api/authenticate" {
                 let reauth = Self {
