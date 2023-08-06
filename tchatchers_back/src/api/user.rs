@@ -5,14 +5,15 @@
 
 use crate::extractor::JwtUserExtractor;
 use crate::extractor::ModeratorExtractor;
-use crate::extractor::Postcard;
-use crate::extractor::ValidPostcard;
+use crate::extractor::Payload;
+use crate::extractor::ValidPayload;
 use crate::AppState;
 use crate::REFRESH_TOKEN_PATH;
 use axum::extract::State;
 use axum::{extract::Path, http::StatusCode, response::IntoResponse};
 use axum_extra::extract::cookie::Cookie;
 use axum_extra::extract::CookieJar;
+use tchatchers_core::api_response::AcceptedContentType;
 use tchatchers_core::api_response::ApiGenericResponse;
 use tchatchers_core::async_message::AsyncMessage;
 use tchatchers_core::authorization_token::AuthorizationToken;
@@ -33,7 +34,7 @@ use tokio::time::{sleep, Duration};
 /// - state : The data shared across thread.
 pub async fn create_user(
     State(state): State<AppState>,
-    ValidPostcard(new_user): ValidPostcard<InsertableUser>,
+    ValidPayload(new_user): ValidPayload<InsertableUser>,
 ) -> impl IntoResponse {
     if User::login_exists(&new_user.login, &state.pg_pool).await? {
         return Err(ApiGenericResponse::SimilarLoginExists);
@@ -73,7 +74,7 @@ pub async fn login_exists(
 pub async fn authenticate(
     cookie_jar: CookieJar,
     State(state): State<AppState>,
-    ValidPostcard(authenticable_user): ValidPostcard<AuthenticableUser>,
+    ValidPayload(authenticable_user): ValidPayload<AuthenticableUser>,
 ) -> impl IntoResponse {
     let Some(user) = authenticable_user.authenticate(&state.pg_pool).await else {
             sleep(Duration::from_secs(3)).await;
@@ -238,7 +239,7 @@ pub async fn validate(_: JwtUserExtractor) -> impl IntoResponse {
 pub async fn update_user(
     JwtUserExtractor(jwt): JwtUserExtractor,
     State(state): State<AppState>,
-    ValidPostcard(user): ValidPostcard<UpdatableUser>,
+    ValidPayload(user): ValidPayload<UpdatableUser>,
 ) -> impl IntoResponse {
     if jwt.user_id == user.id {
         user.update(&state.pg_pool).await?;
@@ -305,13 +306,14 @@ pub async fn report_user(
 
 pub async fn whoami(
     JwtUserExtractor(jwt): JwtUserExtractor,
+    content_type: AcceptedContentType,
     state: State<AppState>,
-) -> Result<Postcard<PartialUser>, ApiGenericResponse> {
+) -> Result<Payload<PartialUser>, ApiGenericResponse> {
     let Some(user) = User::find_by_id(jwt.user_id, &state.pg_pool).await else  {
         return Err(ApiGenericResponse::UserNotFound);
     };
     if !user.is_authorized {
         return Err(ApiGenericResponse::AccessRevoked);
     }
-    Ok(Postcard(user.into()))
+    Ok(Payload(content_type, user.into()))
 }

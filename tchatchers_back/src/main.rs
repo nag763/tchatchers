@@ -17,7 +17,6 @@ use api::pfp::*;
 use api::user::*;
 use axum::http::header::AUTHORIZATION;
 use axum::http::header::COOKIE;
-use axum::http::header::SEC_WEBSOCKET_PROTOCOL;
 use axum::routing::delete;
 use axum::routing::get_service;
 use axum::{
@@ -28,6 +27,7 @@ use axum::{
 use bb8_redis::bb8;
 use bb8_redis::RedisConnectionManager;
 use sqlx_core::postgres::PgPool;
+use tower_http::compression::CompressionLayer;
 use std::iter::once;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -138,14 +138,12 @@ async fn main() {
         )
         .layer(SetSensitiveRequestHeadersLayer::new(once(COOKIE)))
         .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
-        .layer(SetSensitiveRequestHeadersLayer::new(once(
-            SEC_WEBSOCKET_PROTOCOL,
-        )))
         .layer(
             ServiceBuilder::new()
                 .set_x_request_id(MakeRequestUuid)
                 .propagate_x_request_id(),
-        );
+        )
+        .layer(CompressionLayer::new());
 
     // run it with hyper
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));

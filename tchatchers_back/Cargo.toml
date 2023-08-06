@@ -12,7 +12,7 @@ sqlx-core = { version = "0.6.3", default-features = false }
 dotenv = "0.15.0"
 futures-util = { default-features = false, version = "0.3.28" }
 uuid = { version = "1.4.1", default-features = false }
-tower-http = { version = "0.4.3", features = ["fs", "trace", "util", "request-id", "sensitive-headers"], default-features = false }
+tower-http = { version = "0.4.3", features = ["fs", "trace", "util", "request-id", "sensitive-headers", "compression-gzip"], default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"]}
 axum-extra = { version = "0.7.5", features = ["cookie"] }
 tracing = { default-features = false, version = "0.1.37" }
@@ -22,4 +22,4 @@ sqlx = {features = ["uuid"], version = "0.6.3" }
 tower = { default-features = false, version = "0.4.13" }
 bb8-redis = "0.13.1"
 postcard = { version = "1.0.6", default-features = false, features = ["use-std"] }
-mime = "0.3.17"
+serde_json = "1.0.104"
