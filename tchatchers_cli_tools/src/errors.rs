@@ -35,6 +35,8 @@ pub enum ErrorKind {
     TemplateError,
     /// Error with inconsistent args received.
     UnreachableError,
+    /// Error linked with acquiring or performing operations on redis pool.
+    RedisError,
 }
 
 impl From<sqlx::Error> for CliError {
@@ -52,6 +54,12 @@ impl From<std::io::Error> for CliError {
 impl From<askama::Error> for CliError {
     fn from(value: askama::Error) -> Self {
         Self::new(value.to_string(), ErrorKind::TemplateError)
+    }
+}
+
+impl From<redis::RedisError> for CliError {
+    fn from(value: redis::RedisError) -> Self {
+        Self::new(value.to_string(), ErrorKind::RedisError)
     }
 }
 

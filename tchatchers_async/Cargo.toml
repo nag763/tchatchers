@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.72"
 dotenv = { version = "0.15.0", default-features = false }
 env_logger = "0.10.0"
 log = "0.4.19"

@@ -2169,6 +2169,8 @@ dependencies = [
  "percent-encoding",
  "pin-project-lite",
  "ryu",
+ "sha1_smol",
+ "socket2",
  "tokio",
  "tokio-util",
  "url",
@@ -2451,6 +2453,12 @@ dependencies = [
  "cpufeatures",
  "digest",
 ]
+
+[[package]]
+name = "sha1_smol"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae1a47186c03a32177042e55dbc5fd5aee900b8e0069a8d70fba96a9375cd012"
 
 [[package]]
 name = "sha2"
@@ -2816,6 +2824,7 @@ checksum = "2047c6ded9c721764247e62cd3b03c09ffc529b2ba5b10ec482ae507a4a70160"
 name = "tchatchers_async"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "dotenv",
  "env_logger",
  "log",
@@ -2916,6 +2925,7 @@ dependencies = [
  "dotenv",
  "env_logger",
  "log",
+ "redis",
  "sqlx",
  "tchatchers_core",
  "tokio",

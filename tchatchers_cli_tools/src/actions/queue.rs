@@ -33,7 +33,7 @@ impl QueueArgAction {
                 return Ok(());
             }
         }
-        let pg_pool = pool::get_pg_pool().await;
+        let pg_pool = pool::get_pg_pool().await?;
 
         let reports = match queue {
             Some(queue) => QueueReport::latest_for_queue(queue, limit, &pg_pool).await?,
@@ -73,9 +73,9 @@ impl QueueArgAction {
     ///
     /// - `queue`: An `AsyncQueue` representing the queue to delete events from.
     /// - `list`: A vector of strings representing the events to delete.
-    pub async fn delete_events(queue: AsyncQueue, list: Vec<String>) {
+    pub async fn delete_events(queue: AsyncQueue, list: Vec<String>) -> Result<(), CliError> {
         let number_of_elements_to_delete = list.len();
-        let redis_pool = pool::get_async_pool().await;
+        let redis_pool = pool::get_async_pool().await?;
         let mut redis_conn = redis_pool.get().await.unwrap();
         let number_of_events_deleted = queue.delete(list, &mut redis_conn).await;
         match number_of_events_deleted {
@@ -83,6 +83,7 @@ impl QueueArgAction {
             0 => println!("No events were deleted"),
             v => println!("The number of elements deleted {v} doesn't match the number of requested elements to delete {number_of_elements_to_delete}"),
         };
+        Ok(())
     }
 
     /// Reads events from the specified queue.
@@ -92,14 +93,15 @@ impl QueueArgAction {
     /// # Arguments
     ///
     /// - `queue`: An `AsyncQueue` representing the queue to read events from.
-    pub async fn read_events(queue: AsyncQueue) {
-        let redis_pool = pool::get_async_pool().await;
+    pub async fn read_events(queue: AsyncQueue) -> Result<(), CliError> {
+        let redis_pool = pool::get_async_pool().await?;
         let mut redis_conn = redis_pool.get().await.unwrap();
         if let Some(events) = queue.read_events_with_timeout(&mut redis_conn).await {
             print!("{events:#?}");
         } else {
             println!("[{queue}] No event founds to process");
         }
+        Ok(())
     }
 
     /// Clears events from the specified queue.
@@ -110,11 +112,12 @@ impl QueueArgAction {
     /// # Arguments
     ///
     /// - `queue`: An `AsyncQueue` representing the queue to clear.
-    pub async fn clear(queue: AsyncQueue) {
-        let redis_pool = pool::get_async_pool().await;
+    pub async fn clear(queue: AsyncQueue) -> Result<(), CliError> {
+        let redis_pool = pool::get_async_pool().await?;
         let mut redis_conn = redis_pool.get().await.unwrap();
         let number_of_events_cleared = queue.clear_with_timeout(&mut redis_conn).await;
         println!("[{queue}] {number_of_events_cleared} events cleared");
+        Ok(())
     }
 
     /// Processes events from the specified queue.
@@ -126,8 +129,8 @@ impl QueueArgAction {
     /// # Arguments
     ///
     /// - `queue`: An `AsyncQueue` representing the queue to process events from.
-    pub async fn process(queue: AsyncQueue) {
-        let (redis_pool, pg_pool) = (pool::get_async_pool().await, pool::get_pg_pool().await);
+    pub async fn process(queue: AsyncQueue) -> Result<(), CliError> {
+        let (redis_pool, pg_pool) = (pool::get_async_pool().await?, pool::get_pg_pool().await?);
         let mut redis_conn = redis_pool.get().await.unwrap();
         if let Some(events) = queue.read_events_with_timeout(&mut redis_conn).await {
             let events_number = events.len();
@@ -137,5 +140,6 @@ impl QueueArgAction {
         } else {
             println!("[{queue}] No event founds to process");
         }
+        Ok(())
     }
 }

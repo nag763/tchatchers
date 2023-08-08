@@ -20,7 +20,7 @@ use sqlx::ConnectOptions;
 use sqlx::PgPool;
 
 /// Returns a postgres pool from the user env.
-pub async fn get_pg_pool() -> PgPool {
+pub async fn get_pg_pool() -> Result<PgPool, sqlx::Error> {
     let connect_options = sqlx::postgres::PgConnectOptions::new()
         .host(&std::env::var("POSTGRES_HOST").expect("No host defined in .env"))
         .port(
@@ -42,33 +42,22 @@ pub async fn get_pg_pool() -> PgPool {
         .max_connections(15)
         .connect_with(connect_options)
         .await
-        .unwrap()
 }
 
-#[cfg(feature = "back")]
-pub async fn get_session_pool() -> Pool<RedisConnectionManager> {
+#[cfg(any(feature = "back", feature = "cli"))]
+pub async fn get_session_pool() -> Result<Pool<RedisConnectionManager>, redis::RedisError> {
     let redis_host = std::env::var("REDIS_HOST").expect("No redis host defined in .env");
     let redis_port = std::env::var("REDIS_PORT").expect("No redis port defined in .env");
     let client =
-        bb8_redis::RedisConnectionManager::new(format!("redis://{redis_host}:{redis_port}/1"))
-            .unwrap();
-    bb8::Pool::builder()
-        .max_size(15)
-        .build(client)
-        .await
-        .unwrap()
+        bb8_redis::RedisConnectionManager::new(format!("redis://{redis_host}:{redis_port}/1"))?;
+    bb8::Pool::builder().max_size(15).build(client).await
 }
 
 #[cfg(any(feature = "back", feature = "async", feature = "cli"))]
-pub async fn get_async_pool() -> Pool<RedisConnectionManager> {
+pub async fn get_async_pool() -> Result<Pool<RedisConnectionManager>, redis::RedisError> {
     let redis_host = std::env::var("REDIS_HOST").expect("No redis host defined in .env");
     let redis_port = std::env::var("REDIS_PORT").expect("No redis port defined in .env");
     let client =
-        bb8_redis::RedisConnectionManager::new(format!("redis://{redis_host}:{redis_port}/2"))
-            .unwrap();
-    bb8::Pool::builder()
-        .max_size(15)
-        .build(client)
-        .await
-        .unwrap()
+        bb8_redis::RedisConnectionManager::new(format!("redis://{redis_host}:{redis_port}/2"))?;
+    bb8::Pool::builder().max_size(15).build(client).await
 }

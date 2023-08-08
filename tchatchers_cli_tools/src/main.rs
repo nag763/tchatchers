@@ -117,19 +117,19 @@ async fn run_main() -> Result<(), CliError> {
         args::CliEntityArg::Queue { action } => match action {
             args::queue::QueueArg::Clear { queue } => {
                 info!("Clearing queue {}...", queue);
-                QueueArgAction::clear(queue).await
+                QueueArgAction::clear(queue).await?
             }
             args::queue::QueueArg::Process { queue } => {
                 info!("Processing queue {}...", queue);
-                QueueArgAction::process(queue).await
+                QueueArgAction::process(queue).await?
             }
             args::queue::QueueArg::ReadEvents { queue } => {
                 info!("Reading events from queue {}...", queue);
-                QueueArgAction::read_events(queue).await
+                QueueArgAction::read_events(queue).await?
             }
             args::queue::QueueArg::DeleteEvents { queue, events } => {
                 info!("Deleting events from queue {}...", queue);
-                QueueArgAction::delete_events(queue, events).await
+                QueueArgAction::delete_events(queue, events).await?
             }
             args::queue::QueueArg::Report { queue, limit } => {
                 info!(

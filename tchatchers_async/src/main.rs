@@ -20,7 +20,7 @@ use crate::config::Config;
 extern crate log;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     // Initialize the logger
     env_logger::init();
     debug!("Starting async component");
@@ -31,6 +31,9 @@ async fn main() {
 
     // Acquire the connection pools
     let (pg_pool, redis_conn) = tokio::join!(get_pg_pool(), get_async_pool());
+
+    let (pg_pool, redis_conn) = (pg_pool?, redis_conn?);
+
     debug!("Pools acquired with success");
 
     // Read the configuration file
@@ -118,4 +121,5 @@ async fn main() {
     std::mem::drop(pg_pool);
 
     println!("All event shut down");
+    anyhow::Ok(())
 }

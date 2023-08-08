@@ -87,6 +87,8 @@ async fn main() -> anyhow::Result<()> {
         tchatchers_core::pool::get_async_pool()
     );
 
+    let (pg_pool, session_pool, async_pool) = (pg_pool?, session_pool?, async_pool?);
+
     sqlx::migrate!()
         .run(&pg_pool)
         .await

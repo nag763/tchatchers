@@ -273,8 +273,50 @@ impl EnvAction {
         }
 
         println!("\t---\n\tConnection to database\n\t---");
-        tchatchers_core::pool::get_pg_pool().await;
-        println!("- [{CHECKMARK_EMOJI}] Connection to database");
+
+        let (pg_conn, session_conn, queue_conn) = tokio::join!(
+            async { tchatchers_core::pool::get_pg_pool().await },
+            async {
+                let pool = tchatchers_core::pool::get_session_pool().await?;
+                pool.get_owned().await
+            },
+            async {
+                let pool = tchatchers_core::pool::get_async_pool().await?;
+                pool.get_owned().await
+            }
+        );
+        let (pg_conn, session_conn, queue_conn) = (
+            {
+                match pg_conn {
+                    Ok(_) => CHECKMARK_EMOJI,
+                    Err(_) => {
+                        errors.push(EnvironmentCheckErrorTypes::Error);
+                        ERROR_EMOJI
+                    }
+                }
+            },
+            {
+                match session_conn {
+                    Ok(_) => CHECKMARK_EMOJI,
+                    Err(_) => {
+                        errors.push(EnvironmentCheckErrorTypes::Error);
+                        ERROR_EMOJI
+                    }
+                }
+            },
+            {
+                match queue_conn {
+                    Ok(_) => CHECKMARK_EMOJI,
+                    Err(_) => {
+                        errors.push(EnvironmentCheckErrorTypes::Error);
+                        ERROR_EMOJI
+                    }
+                }
+            },
+        );
+        println!("- [{pg_conn}] Connection to postgres database");
+        println!("- [{session_conn}] Connection to session database");
+        println!("- [{queue_conn}] Connection to queue database");
 
         println!("\t---\n");
 

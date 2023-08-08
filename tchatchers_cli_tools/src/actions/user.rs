@@ -24,7 +24,7 @@ impl UserAction {
     ///
     /// Returns `Ok(())` if the user was successfully deleted, or an error of type `CliError` if an error occurred during the operation.
     pub async fn delete_user(user_identifier: UserIdentifier) -> Result<(), CliError> {
-        let pool = tchatchers_core::pool::get_pg_pool().await;
+        let pool = tchatchers_core::pool::get_pg_pool().await?;
         let result = match user_identifier {
             UserIdentifier::Id { value } => User::delete_one(value, &pool).await?,
             UserIdentifier::Login { value } => User::delete_login(&value, &pool).await?,
@@ -51,7 +51,7 @@ impl UserAction {
         user_identifier: UserIdentifier,
         is_authorized: bool,
     ) -> Result<(), CliError> {
-        let pool = tchatchers_core::pool::get_pg_pool().await;
+        let pool = tchatchers_core::pool::get_pg_pool().await?;
         let result = match user_identifier {
             UserIdentifier::Id { value } => {
                 User::update_activation_status(value, is_authorized, &pool).await?
@@ -80,7 +80,7 @@ impl UserAction {
     /// * `Err(CliError)` if there is an error during the operation.
     pub async fn search_user(user_search: UserSearch) -> Result<(), CliError> {
         // Get the database connection pool.
-        let pool = tchatchers_core::pool::get_pg_pool().await;
+        let pool = tchatchers_core::pool::get_pg_pool().await?;
 
         // Perform the search based on the specified criteria.
         let result = match user_search {
@@ -117,7 +117,7 @@ impl UserAction {
     /// * `Err(CliError)` if there is an error during the operation.
     pub async fn create_user() -> Result<(), CliError> {
         // Get the database connection pool.
-        let pool = tchatchers_core::pool::get_pg_pool().await;
+        let pool = tchatchers_core::pool::get_pg_pool().await?;
 
         // Prompt the user to enter the user login.
         let user_login: String = loop {
