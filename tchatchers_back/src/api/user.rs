@@ -81,17 +81,18 @@ pub async fn authenticate(
     };
     if user.is_authorized {
         let refresh_token = {
-            let mut redis_conn = state.session_pool.get().await.unwrap();
+            let mut redis_conn = state.session_pool.get().await?;
 
             let token = RefreshToken::new(user.id, authenticable_user.session_only);
             token.set_as_head_token(&mut redis_conn).await;
             token
         };
         std::mem::drop(tokio::spawn(async move {
-            let mut redis_conn = state.async_pool.get().await.unwrap();
+            let mut redis_conn = state.async_pool.get().await?;
             AsyncMessage::LoggedUser(user.id)
                 .spawn(&mut redis_conn)
                 .await;
+            anyhow::Ok(())
         }));
         let jwt: AuthorizationToken = AuthorizationToken::from(user);
         Ok((
@@ -99,7 +100,7 @@ pub async fn authenticate(
             refresh_token
                 .store_in_jar(&state.refresh_token_secret, cookie_jar)
                 .unwrap(),
-            jwt.encode(&state.jwt_secret).unwrap(),
+            jwt.encode(&state.jwt_secret)?,
         ))
     } else {
         Err(ApiGenericResponse::AccessRevoked)
@@ -144,7 +145,7 @@ pub async fn reauthenticate(
     // Refresh the token.
     let refreshed_token = {
         // Get a Redis connection from the Redis connection pool.
-        let mut redis_conn = state.session_pool.get().await.unwrap();
+        let mut redis_conn = state.session_pool.get().await?;
 
         if !refresh_token.is_head_token(&mut redis_conn).await {
             refresh_token.revoke_family(&mut redis_conn).await;
@@ -167,23 +168,20 @@ pub async fn reauthenticate(
     }
 
     // Queue the information that user reauthenticated.
-    tokio::spawn(async move {
-        let mut redis_conn = state.async_pool.get().await.unwrap();
+    std::mem::drop(tokio::spawn(async move {
+        let mut redis_conn = state.async_pool.get().await?;
         AsyncMessage::LoggedUser(user.id)
             .spawn(&mut redis_conn)
             .await;
-    });
+        anyhow::Ok(())
+    }));
 
-    let encoded_jwt: String = AuthorizationToken::from(user)
-        .encode(&state.jwt_secret)
-        .unwrap();
+    let encoded_jwt: String = AuthorizationToken::from(user).encode(&state.jwt_secret)?;
 
     // Renew the refresh token and store the updated value in the cookie jar.
     Ok((
         StatusCode::OK,
-        refreshed_token
-            .store_in_jar(&state.refresh_token_secret, cookie_jar)
-            .unwrap(),
+        refreshed_token.store_in_jar(&state.refresh_token_secret, cookie_jar)?,
         encoded_jwt,
     ))
 }
@@ -195,24 +193,25 @@ pub async fn reauthenticate(
 /// # Arguments
 ///
 /// - cookie_jar : The user's cookies.
-pub async fn logout(State(state): State<AppState>, cookie_jar: CookieJar) -> impl IntoResponse {
+pub async fn logout(
+    State(state): State<AppState>,
+    cookie_jar: CookieJar,
+) -> Result<impl IntoResponse, ApiGenericResponse> {
     // Attempt to retrieve the refresh token from the cookie jar.
     if let Some(cookie) = cookie_jar.get(REFRESH_TOKEN_PATH) {
         if let Ok(refresh_token) = RefreshToken::decode(cookie.value(), &state.refresh_token_secret)
         {
-            {
-                // Get a Redis connection from the Redis connection pool.
-                let mut redis_conn = state.session_pool.get().await.unwrap();
+            // Get a Redis connection from the Redis connection pool.
+            let mut redis_conn = state.session_pool.get().await?;
 
-                refresh_token.revoke_family(&mut redis_conn).await;
-            }
+            refresh_token.revoke_family(&mut redis_conn).await;
         }
     }
 
     let mut cookie = Cookie::named(REFRESH_TOKEN_PATH);
     cookie.set_path("/");
     let new_jar = cookie_jar.remove(cookie);
-    (StatusCode::OK, new_jar).into_response()
+    Ok((StatusCode::OK, new_jar).into_response())
 }
 
 /// Checks whether the authentication is legit, or if the user is authenticated

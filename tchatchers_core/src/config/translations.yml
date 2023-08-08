@@ -69,6 +69,7 @@ translations:
       serialization_error: The request is malformed as the serialization format isn't the one expected.
       validation_error: The request you sent is invalid, some validation errors have been met.
       content_type_missing_or_not_accepted: The content type is either missing or not accepted.
+      io_error: An error happened while reading or writing the content.
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR

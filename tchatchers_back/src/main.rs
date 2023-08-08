@@ -69,7 +69,7 @@ pub struct AppState {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
@@ -161,6 +161,6 @@ async fn main() {
             }
             println!("Shutting down...");
         })
-        .await
-        .unwrap();
+        .await?;
+    Ok(())
 }

@@ -5,6 +5,7 @@
 
 use crate::extractor::JwtUserExtractor;
 use axum::{body::Bytes, http::StatusCode, response::IntoResponse};
+use tchatchers_core::api_response::ApiGenericResponse;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
@@ -16,11 +17,14 @@ use uuid::Uuid;
 /// # Arguments
 ///
 /// - body : the picture content.
-pub async fn upload_pfp(JwtUserExtractor(_): JwtUserExtractor, body: Bytes) -> impl IntoResponse {
+pub async fn upload_pfp(
+    JwtUserExtractor(_): JwtUserExtractor,
+    body: Bytes,
+) -> Result<impl IntoResponse, ApiGenericResponse> {
     let file_name = Uuid::new_v4().to_string();
     let rel_file_path = format!("./static/{}", file_name);
     let served_file_path: String = format!("/static/{}", file_name);
-    let mut file = File::create(&rel_file_path).await.unwrap();
-    file.write_all(&body).await.unwrap();
-    (StatusCode::OK, served_file_path)
+    let mut file = File::create(&rel_file_path).await?;
+    file.write_all(&body).await?;
+    Ok((StatusCode::OK, served_file_path))
 }

@@ -27,6 +27,7 @@ pub enum ApiResponseKind {
     SerializationError,
     ValidationError,
     ContentTypeError,
+    IoError,
 }
 
 #[cfg(feature = "back")]
@@ -55,7 +56,9 @@ impl From<ApiResponseKind> for StatusCode {
             ApiResponseKind::UnsifficentPriviledges | ApiResponseKind::AccessRevoked => {
                 StatusCode::FORBIDDEN
             }
-            ApiResponseKind::DbError => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiResponseKind::DbError | ApiResponseKind::IoError => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
         }
     }
 }
@@ -123,6 +126,7 @@ pub enum ApiGenericResponse {
     SerializationError(String),
     ValidationError(Vec<String>),
     ContentTypeError,
+    IoError(String),
 }
 
 impl From<ApiGenericResponse> for ApiResponse {
@@ -202,6 +206,9 @@ impl From<ApiGenericResponse> for ApiResponse {
                 ApiResponseKind::ContentTypeError,
                 "content_type_missing_or_not_accepted",
             ),
+            ApiGenericResponse::IoError(e) => {
+                ApiResponse::errors(ApiResponseKind::IoError, "io_error", vec![e.to_string()])
+            }
         }
     }
 }
@@ -225,6 +232,26 @@ impl IntoResponse for ApiGenericResponse {
 impl From<axum::extract::rejection::BytesRejection> for ApiGenericResponse {
     fn from(value: axum::extract::rejection::BytesRejection) -> Self {
         Self::ByteRejection(value.to_string())
+    }
+}
+
+#[cfg(feature = "back")]
+impl From<bb8_redis::bb8::RunError<redis::RedisError>> for ApiGenericResponse {
+    fn from(value: bb8_redis::bb8::RunError<redis::RedisError>) -> Self {
+        Self::DbError(value.to_string())
+    }
+}
+
+impl From<std::io::Error> for ApiGenericResponse {
+    fn from(value: std::io::Error) -> Self {
+        Self::IoError(value.to_string())
+    }
+}
+
+#[cfg(feature = "back")]
+impl From<jsonwebtoken::errors::Error> for ApiGenericResponse {
+    fn from(value: jsonwebtoken::errors::Error) -> Self {
+        Self::SerializationError(value.to_string())
     }
 }
 

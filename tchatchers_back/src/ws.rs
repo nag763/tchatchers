@@ -96,65 +96,64 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
     });
 
     // This task will receive messages from client and send them to broadcast subscribers.
-    let mut recv_task = tokio::spawn(async move {
-        while let Some(Ok(Message::Binary(text))) = receiver.next().await {
-            if let Ok(msg) = postcard::from_bytes(&text) {
-                match msg {
-                    WsMessage::Close => break,
-                    WsMessage::Ping => {
-                        let _ = tx.send(postcard::to_stdvec(&WsMessage::Pong).unwrap());
-                    }
-                    WsMessage::Pong | WsMessage::ClientKeepAlive => continue,
-                    WsMessage::Send(mut ws_message) => {
-                        let redis_pool = state.async_pool.clone();
-                        ws_message.reception_status = WsReceptionStatus::Sent;
-                        let _ = tx.send(
-                            postcard::to_stdvec(&WsMessage::Receive(ws_message.clone())).unwrap(),
-                        );
-                        tokio::spawn(async move {
-                            let (pool1, pool2) = (
-                                &mut redis_pool.get().await.unwrap(),
-                                &mut redis_pool.get().await.unwrap(),
-                            );
-                            join!(
-                                AsyncMessage::CleanRoom(ws_message.clone().room).spawn(pool1),
-                                AsyncMessage::PersistMessage(ws_message).spawn(pool2)
-                            );
-                        });
-                    }
-                    WsMessage::RetrieveMessages(session_id) => {
-                        let messages: Vec<WsMessageContent> =
-                            WsMessageContent::query_all_for_room(&room, &state.pg_pool).await;
-                        let _ = tx.send(
-                            postcard::to_stdvec(&WsMessage::MessagesRetrieved {
-                                messages,
-                                session_id,
-                            })
-                            .unwrap(),
-                        );
-                    }
-                    WsMessage::Seen(messages) => {
-                        let _ = tx.send(
-                            postcard::to_stdvec(&WsMessage::MessagesSeen(messages.clone()))
-                                .unwrap(),
-                        );
-                        let redis_pool = state.async_pool.clone();
-                        for message in messages.into_iter() {
-                            let redis_pool = redis_pool.clone();
-                            tokio::task::spawn(async move {
-                                AsyncMessage::spawn(
-                                    AsyncMessage::MessageSeen(message),
-                                    &mut redis_pool.get().await.unwrap(),
-                                )
-                                .await;
+    let mut recv_task: tokio::task::JoinHandle<Result<(), ApiGenericResponse>> =
+        tokio::spawn(async move {
+            while let Some(Ok(Message::Binary(text))) = receiver.next().await {
+                if let Ok(msg) = postcard::from_bytes(&text) {
+                    match msg {
+                        WsMessage::Close => break,
+                        WsMessage::Ping => {
+                            let _ = tx.send(postcard::to_stdvec(&WsMessage::Pong)?);
+                        }
+                        WsMessage::Pong | WsMessage::ClientKeepAlive => continue,
+                        WsMessage::Send(mut ws_message) => {
+                            let redis_pool = state.async_pool.clone();
+                            ws_message.reception_status = WsReceptionStatus::Sent;
+                            let _ = tx.send(postcard::to_stdvec(&WsMessage::Receive(
+                                ws_message.clone(),
+                            ))?);
+                            tokio::spawn(async move {
+                                let (pool1, pool2) =
+                                    (&mut redis_pool.get().await?, &mut redis_pool.get().await?);
+                                join!(
+                                    AsyncMessage::CleanRoom(ws_message.clone().room).spawn(pool1),
+                                    AsyncMessage::PersistMessage(ws_message).spawn(pool2)
+                                );
+                                anyhow::Ok(())
                             });
                         }
+                        WsMessage::RetrieveMessages(session_id) => {
+                            let messages: Vec<WsMessageContent> =
+                                WsMessageContent::query_all_for_room(&room, &state.pg_pool).await;
+                            let _ = tx.send(postcard::to_stdvec(&WsMessage::MessagesRetrieved {
+                                messages,
+                                session_id,
+                            })?);
+                        }
+                        WsMessage::Seen(messages) => {
+                            let _ = tx.send(postcard::to_stdvec(&WsMessage::MessagesSeen(
+                                messages.clone(),
+                            ))?);
+                            let redis_pool = state.async_pool.clone();
+                            for message in messages.into_iter() {
+                                let redis_pool = redis_pool.clone();
+                                std::mem::drop(tokio::task::spawn(async move {
+                                    let mut redis_conn = redis_pool.get().await?;
+                                    AsyncMessage::spawn(
+                                        AsyncMessage::MessageSeen(message),
+                                        &mut redis_conn,
+                                    )
+                                    .await;
+                                    anyhow::Ok(())
+                                }));
+                            }
+                        }
+                        _ => {}
                     }
-                    _ => {}
                 }
             }
-        }
-    });
+            Ok(())
+        });
 
     tokio::select! {
         _ = (&mut send_task) => recv_task.abort(),
