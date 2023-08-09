@@ -124,7 +124,7 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                         }
                         WsMessage::RetrieveMessages(session_id) => {
                             let messages: Vec<WsMessageContent> =
-                                WsMessageContent::query_all_for_room(&room, &state.pg_pool).await;
+                                WsMessageContent::query_all_for_room(&room, &state.pg_pool).await?;
                             let _ = tx.send(postcard::to_stdvec(&WsMessage::MessagesRetrieved {
                                 messages,
                                 session_id,

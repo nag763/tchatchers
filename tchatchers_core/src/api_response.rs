@@ -28,6 +28,7 @@ pub enum ApiResponseKind {
     ValidationError,
     ContentTypeError,
     IoError,
+    RedisError,
 }
 
 #[cfg(feature = "back")]
@@ -56,7 +57,7 @@ impl From<ApiResponseKind> for StatusCode {
             ApiResponseKind::UnsifficentPriviledges | ApiResponseKind::AccessRevoked => {
                 StatusCode::FORBIDDEN
             }
-            ApiResponseKind::DbError | ApiResponseKind::IoError => {
+            ApiResponseKind::DbError | ApiResponseKind::IoError | ApiResponseKind::RedisError => {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
         }
@@ -110,6 +111,7 @@ pub enum ApiGenericResponse {
     UnsifficentPriviledges,
     SimilarLoginExists,
     DbError(String),
+    RedisError(String),
     UserCreated,
     BadCredentials,
     AccessRevoked,
@@ -209,6 +211,11 @@ impl From<ApiGenericResponse> for ApiResponse {
             ApiGenericResponse::IoError(e) => {
                 ApiResponse::errors(ApiResponseKind::IoError, "io_error", vec![e.to_string()])
             }
+            ApiGenericResponse::RedisError(e) => ApiResponse::errors(
+                ApiResponseKind::RedisError,
+                "internal_error",
+                vec![e.to_string()],
+            ),
         }
     }
 }
@@ -252,6 +259,13 @@ impl From<std::io::Error> for ApiGenericResponse {
 impl From<jsonwebtoken::errors::Error> for ApiGenericResponse {
     fn from(value: jsonwebtoken::errors::Error) -> Self {
         Self::SerializationError(value.to_string())
+    }
+}
+
+#[cfg(feature = "back")]
+impl From<redis::RedisError> for ApiGenericResponse {
+    fn from(value: redis::RedisError) -> Self {
+        Self::RedisError(value.to_string())
     }
 }
 

@@ -83,12 +83,11 @@ impl User {
     ///
     /// - id : The id of the user we are looking for.
     /// - pool : The pool of connection.
-    pub async fn find_by_id(id: i32, pool: &PgPool) -> Option<Self> {
+    pub async fn find_by_id(id: i32, pool: &PgPool) -> Result<Option<Self>, sqlx::error::Error> {
         sqlx::query_as("SELECT * FROM CHATTER WHERE id=$1")
             .bind(id)
             .fetch_optional(pool)
             .await
-            .unwrap()
     }
 
     /// Look up whether a login exists in the database.
@@ -233,10 +232,9 @@ impl User {
         ")
             .bind(AsyncQueue::LoggedUsers as i32)
             .execute(&mut *tx)
-            .await
-            .unwrap();
+            .await?;
 
-        tx.commit().await.unwrap();
+        tx.commit().await?;
 
         Ok(())
     }
@@ -482,15 +480,17 @@ impl AuthenticableUser {
     /// # Arguments
     ///
     /// - pool : The connection pool.
-    pub async fn authenticate(&self, pool: &PgPool) -> Option<User> {
-        let user: User = sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1")
+    pub async fn authenticate(&self, pool: &PgPool) -> Result<Option<User>, sqlx::error::Error> {
+        let user: Option<User> = sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1")
             .bind(&self.login)
             .fetch_optional(pool)
-            .await
-            .unwrap()?;
+            .await?;
+        let Some(user) = user else {
+            return Ok(None);
+        };
         match argon2::verify_encoded(&user.password, self.password.as_bytes()).unwrap() {
-            true => Some(user),
-            false => None,
+            true => Ok(Some(user)),
+            false => Ok(None),
         }
     }
 }

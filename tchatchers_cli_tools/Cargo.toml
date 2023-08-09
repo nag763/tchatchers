@@ -20,3 +20,4 @@ env_logger = { version = "0.10.0" }
 askama = { default-features = false, version = "0.12.0" }
 clap-verbosity-flag = "2.0.1"
 redis = "0.23.1"
+bb8 = "0.8.1"

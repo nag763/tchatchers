@@ -2,18 +2,6 @@
 lto = true
 codegen-units = 1
 
-[profile.release.package.tchatchers_back]
-strip = true
-
-[profile.release.package.tchatchers_async]
-strip = true
-
-[profile.release.package.tct]
-strip = true
-
-[profile.release.package.tchatchers_front]
-opt-level = 'z'
-
 [workspace]
 
 members = [

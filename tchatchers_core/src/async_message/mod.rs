@@ -88,9 +88,13 @@ impl AsyncQueue {
     /// # Returns
     ///
     /// The number of IDs deleted from the queue.
-    pub async fn delete(&self, list: Vec<String>, conn: &mut redis::aio::Connection) -> usize {
+    pub async fn delete(
+        &self,
+        list: Vec<String>,
+        conn: &mut redis::aio::Connection,
+    ) -> Result<usize, redis::RedisError> {
         debug!("[{self}] IDs to delete: {list:#?}");
-        conn.xdel(self.to_string(), &list).await.unwrap()
+        conn.xdel(self.to_string(), &list).await
     }
 
     /// Clears the queue by deleting all events.
@@ -105,14 +109,17 @@ impl AsyncQueue {
     /// # Returns
     ///
     /// The number of events cleared from the queue.
-    pub async fn clear_with_timeout(&self, conn: &mut redis::aio::Connection) -> usize {
-        let events = self.read_events_with_timeout(conn).await;
+    pub async fn clear_with_timeout(
+        &self,
+        conn: &mut redis::aio::Connection,
+    ) -> Result<usize, redis::RedisError> {
+        let events = self.read_events_with_timeout(conn).await?;
         if let Some(events) = events {
             let id_list: Vec<String> = events.into_iter().filter_map(|li| li.id).collect();
-            self.delete(id_list, conn).await
+            Ok(self.delete(id_list, conn).await?)
         } else {
             warn!("[{self}] No events found while attempting to clear the queue");
-            0
+            Ok(0)
         }
     }
 
@@ -131,7 +138,7 @@ impl AsyncQueue {
     pub async fn read_events_with_timeout(
         &self,
         conn: &mut redis::aio::Connection,
-    ) -> Option<Vec<AsyncPayload>> {
+    ) -> Result<Option<Vec<AsyncPayload>>, redis::RedisError> {
         AsyncPayload::read_events(&self.to_string(), &NOT_BLOCKING_OPTIONS, conn).await
     }
 
@@ -150,7 +157,7 @@ impl AsyncQueue {
     pub async fn read_events(
         &self,
         conn: &mut redis::aio::Connection,
-    ) -> Option<Vec<AsyncPayload>> {
+    ) -> Result<Option<Vec<AsyncPayload>>, redis::RedisError> {
         AsyncPayload::read_events(&self.to_string(), &DEFAULT_EVENT_OPTIONS, conn).await
     }
 

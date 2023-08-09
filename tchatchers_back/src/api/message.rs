@@ -23,7 +23,7 @@ pub async fn delete_message(
     state: State<AppState>,
 ) -> impl IntoResponse {
     if user.user_profile == Profile::User {
-        match WsMessageContent::get_one(&message_id, &state.pg_pool).await {
+        match WsMessageContent::get_one(&message_id, &state.pg_pool).await? {
             Some(message) if message.author.id == user.user_id => (),
             Some(_) => {
                 return Err(ApiGenericResponse::UnsifficentPriviledges);

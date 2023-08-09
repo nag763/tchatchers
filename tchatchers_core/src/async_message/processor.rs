@@ -28,7 +28,10 @@ use super::{async_payload::AsyncPayload, AsyncMessage, AsyncOperationPGType, Asy
 ///
 /// * `payloads` - A vector of `AsyncPayload` messages to process.
 /// * `pool` - A reference to the PostgreSQL pool for database operations.
-async fn process_logged_users(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
+async fn process_logged_users(
+    payloads: &Vec<AsyncPayload>,
+    pool: &PgPool,
+) -> Result<(), sqlx::Error> {
     let mut entities_to_update: HashMap<i32, AsyncOperationPGType<i32>> =
         HashMap::with_capacity(payloads.capacity());
     for payload in payloads {
@@ -49,9 +52,7 @@ async fn process_logged_users(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
         }
     }
 
-    User::mark_users_as_logged(entities_to_update.into_values().collect(), pool)
-        .await
-        .unwrap();
+    User::mark_users_as_logged(entities_to_update.into_values().collect(), pool).await
 }
 
 /// Processes messages related to seen messages.
@@ -64,7 +65,7 @@ async fn process_logged_users(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
 ///
 /// * `payloads` - A vector of `AsyncPayload` messages to process.
 /// * `pool` - A reference to the PostgreSQL pool for database operations.
-async fn messages_seen(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
+async fn messages_seen(payloads: &Vec<AsyncPayload>, pool: &PgPool) -> Result<(), sqlx::Error> {
     let mut entities_to_update: HashMap<Uuid, AsyncOperationPGType<Uuid>> =
         HashMap::with_capacity(payloads.capacity());
 
@@ -86,12 +87,10 @@ async fn messages_seen(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
         }
     }
 
-    WsMessageContent::mark_as_seen_async(entities_to_update.into_values().collect(), pool)
-        .await
-        .unwrap();
+    WsMessageContent::mark_as_seen_async(entities_to_update.into_values().collect(), pool).await
 }
 
-async fn persist_messages(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
+async fn persist_messages(payloads: &Vec<AsyncPayload>, pool: &PgPool) -> Result<(), sqlx::Error> {
     let mut entities_to_update: HashMap<Uuid, WsMessageContent> =
         HashMap::with_capacity(payloads.capacity());
 
@@ -104,12 +103,10 @@ async fn persist_messages(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
         entities_to_update.insert(entity.uuid, entity);
     }
 
-    WsMessageContent::persist_async(entities_to_update.into_values().collect(), pool)
-        .await
-        .unwrap();
+    WsMessageContent::persist_async(entities_to_update.into_values().collect(), pool).await
 }
 
-async fn clean_rooms(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
+async fn clean_rooms(payloads: &Vec<AsyncPayload>, pool: &PgPool) -> Result<(), sqlx::Error> {
     let mut entities_to_delete: HashSet<&str> = HashSet::with_capacity(payloads.capacity());
 
     for payload in payloads {
@@ -121,9 +118,7 @@ async fn clean_rooms(payloads: &Vec<AsyncPayload>, pool: &PgPool) {
         entities_to_delete.insert(entity);
     }
 
-    WsMessageContent::clean_rooms(entities_to_delete, pool)
-        .await
-        .unwrap();
+    WsMessageContent::clean_rooms(entities_to_delete, pool).await
 }
 
 /// Returns the appropriate processor for the given queue.
@@ -141,7 +136,7 @@ fn get_processor<'a>(
     queue: AsyncQueue,
     payloads: &'a Vec<AsyncPayload>,
     pool: &'a PgPool,
-) -> Pin<Box<dyn Future<Output = ()> + Send + 'a>> {
+) -> Pin<Box<dyn Future<Output = Result<(), sqlx::Error>> + Send + 'a>> {
     match queue {
         AsyncQueue::LoggedUsers => return Box::pin(process_logged_users(payloads, pool)),
         AsyncQueue::MessagesSeen => return Box::pin(messages_seen(payloads, pool)),
@@ -167,16 +162,17 @@ pub async fn process(
     messages: Vec<AsyncPayload>,
     pg_pool: &PgPool,
     redis_conn: &mut redis::aio::Connection,
-) {
+) -> Result<(), Box<dyn std::error::Error>> {
     let number_of_messages = messages.len();
     let processor = get_processor(queue, &messages, pg_pool);
-    processor.await;
+    processor.await?;
     info!("[{queue}] {number_of_messages} messages passed");
     let id_list: Vec<String> = messages.into_iter().filter_map(|li| li.id).collect();
-    let number_of_id_deleted = queue.delete(id_list, redis_conn).await;
+    let number_of_id_deleted = queue.delete(id_list, redis_conn).await?;
     if number_of_id_deleted != number_of_messages {
-        warn!("[{queue}] The number of ID deleted from the queue doesn't match the number of initial elements : Messages ({number_of_messages}) ; Deleted ({number_of_id_deleted})")
+        warn!("[{queue}] The number of ID deleted from the queue doesn't match the number of initial elements : Messages ({number_of_messages}) ; Deleted ({number_of_id_deleted})");
     } else {
-        info!("[{queue}] Was successfully cleared of its events")
+        info!("[{queue}] Was successfully cleared of its events");
     }
+    Ok(())
 }

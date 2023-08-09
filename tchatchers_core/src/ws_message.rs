@@ -138,14 +138,13 @@ impl WsMessageContent {
     /// # Arguments
     ///
     /// - uuid: message id.
-    pub async fn get_one(uuid: &Uuid, pool: &sqlx::PgPool) -> Option<Self> {
+    pub async fn get_one(uuid: &Uuid, pool: &sqlx::PgPool) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as(
             "SELECT * FROM MESSAGE m INNER JOIN CHATTER c ON m.author = c.id WHERE uuid=$1 LIMIT 1",
         )
         .bind(uuid)
         .fetch_optional(pool)
         .await
-        .unwrap()
     }
 
     /// Returns the first 100 messages for a given room name.
@@ -153,12 +152,14 @@ impl WsMessageContent {
     /// # Arguments
     ///
     /// - room_name : The room the query is made for.
-    pub async fn query_all_for_room(room_name: &str, pool: &sqlx::PgPool) -> Vec<Self> {
+    pub async fn query_all_for_room(
+        room_name: &str,
+        pool: &sqlx::PgPool,
+    ) -> Result<Vec<Self>, sqlx::Error> {
         sqlx::query_as("SELECT * FROM MESSAGE m INNER JOIN CHATTER c ON m.author = c.id WHERE room=$1 ORDER BY timestamp DESC LIMIT 100 ")
             .bind(room_name)
             .fetch_all(pool)
             .await
-            .unwrap()
     }
 
     /// Insert the message in the database.
@@ -199,8 +200,7 @@ impl WsMessageContent {
         .bind(updated_records as i64)
         .bind(failed_records as i64)
         .execute(&mut *tx)
-        .await
-        .unwrap();
+        .await?;
 
         tx.commit().await?;
 
@@ -239,8 +239,7 @@ impl WsMessageContent {
         .bind(updated_records as i64)
         .bind(failed_records as i64)
         .execute(&mut *tx)
-        .await
-        .unwrap();
+        .await?;
 
         tx.commit().await?;
 
@@ -338,10 +337,9 @@ impl WsMessageStats {
     /// # Arguments
     ///
     /// - pool : The connection pool.
-    pub async fn get_activity(pool: &sqlx::PgPool) -> Vec<Self> {
+    pub async fn get_activity(pool: &sqlx::PgPool) -> Result<Vec<Self>, sqlx::Error> {
         sqlx::query_as("SELECT COUNT(*) as number_of_messages, room FROM MESSAGE GROUP BY room ORDER BY number_of_messages DESC")
             .fetch_all(pool)
             .await
-            .unwrap()
     }
 }

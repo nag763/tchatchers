@@ -2865,6 +2865,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "axum-extra",
+ "bb8",
  "bb8-redis",
  "chrono",
  "clap",
@@ -2918,6 +2919,7 @@ name = "tct"
 version = "0.1.0"
 dependencies = [
  "askama",
+ "bb8",
  "clap",
  "clap-verbosity-flag",
  "derive_more",

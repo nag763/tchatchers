@@ -149,11 +149,9 @@ impl AsyncPayload {
         queue_name: &str,
         options: &StreamReadOptions,
         conn: &mut redis::aio::Connection,
-    ) -> Option<Vec<Self>> {
-        let stream_events: Option<StreamReadReply> = conn
-            .xread_options(&[queue_name], &["0"], options)
-            .await
-            .unwrap();
+    ) -> Result<Option<Vec<Self>>, redis::RedisError> {
+        let stream_events: Option<StreamReadReply> =
+            conn.xread_options(&[queue_name], &["0"], options).await?;
         if let Some(stream_events) = stream_events {
             let mut events: Vec<Self> = Vec::new();
             let mut rejects: Vec<String> = Vec::new();
@@ -175,13 +173,13 @@ impl AsyncPayload {
             trace!("[{queue_name}] Events:\n{:#?}", events);
             if !rejects.is_empty() {
                 warn!("[{queue_name}] Reject list isn't empty, rejects will be deleted.");
-                let events: i32 = conn.xdel(&[queue_name], &rejects).await.unwrap();
+                let events: i32 = conn.xdel(&[queue_name], &rejects).await?;
                 info!("[{queue_name}] {events} rejects deleted.");
             }
-            Some(events)
+            Ok(Some(events))
         } else {
             info!("[{queue_name}] No events found in queue, returning none");
-            None
+            Ok(None)
         }
     }
 }

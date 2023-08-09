@@ -3,6 +3,8 @@ use std::{
     process::{ExitCode, Termination},
 };
 
+use bb8::RunError;
+
 /// Common errors returned during the runtime.
 ///
 /// These errors are wrapped and then returned as a positive integer error.
@@ -60,6 +62,12 @@ impl From<askama::Error> for CliError {
 impl From<redis::RedisError> for CliError {
     fn from(value: redis::RedisError) -> Self {
         Self::new(value.to_string(), ErrorKind::RedisError)
+    }
+}
+
+impl<E> From<RunError<E>> for CliError {
+    fn from(_value: RunError<E>) -> Self {
+        Self::new("Redis pool erorr".into(), ErrorKind::RedisError)
     }
 }
 

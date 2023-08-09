@@ -75,7 +75,7 @@ pub async fn authenticate(
     State(state): State<AppState>,
     ValidPostcard(authenticable_user): ValidPostcard<AuthenticableUser>,
 ) -> impl IntoResponse {
-    let Some(user) = authenticable_user.authenticate(&state.pg_pool).await else {
+    let Some(user) = authenticable_user.authenticate(&state.pg_pool).await? else {
             sleep(Duration::from_secs(3)).await;
             return Err(ApiGenericResponse::BadCredentials);
     };
@@ -84,7 +84,7 @@ pub async fn authenticate(
             let mut redis_conn = state.session_pool.get().await?;
 
             let token = RefreshToken::new(user.id, authenticable_user.session_only);
-            token.set_as_head_token(&mut redis_conn).await;
+            token.set_as_head_token(&mut redis_conn).await?;
             token
         };
         std::mem::drop(tokio::spawn(async move {
@@ -97,9 +97,7 @@ pub async fn authenticate(
         let jwt: AuthorizationToken = AuthorizationToken::from(user);
         Ok((
             StatusCode::OK,
-            refresh_token
-                .store_in_jar(&state.refresh_token_secret, cookie_jar)
-                .unwrap(),
+            refresh_token.store_in_jar(&state.refresh_token_secret, cookie_jar)?,
             jwt.encode(&state.jwt_secret)?,
         ))
     } else {
@@ -147,18 +145,18 @@ pub async fn reauthenticate(
         // Get a Redis connection from the Redis connection pool.
         let mut redis_conn = state.session_pool.get().await?;
 
-        if !refresh_token.is_head_token(&mut redis_conn).await {
-            refresh_token.revoke_family(&mut redis_conn).await;
+        if !refresh_token.is_head_token(&mut redis_conn).await? {
+            refresh_token.revoke_family(&mut redis_conn).await?;
             return Err(ApiGenericResponse::AuthenticationExpired);
         } else {
             let refreshed_token = refresh_token.renew();
-            refreshed_token.set_as_head_token(&mut redis_conn).await;
+            refreshed_token.set_as_head_token(&mut redis_conn).await?;
             refreshed_token
         }
     };
 
     // Retrieve the user corresponding to the refresh token's user ID from the database.
-    let Some(user) = User::find_by_id(refresh_token.user_id, &state.pg_pool).await else {
+    let Some(user) = User::find_by_id(refresh_token.user_id, &state.pg_pool).await? else {
         return Err(ApiGenericResponse::AccountNotFound)
     };
 
@@ -204,7 +202,7 @@ pub async fn logout(
             // Get a Redis connection from the Redis connection pool.
             let mut redis_conn = state.session_pool.get().await?;
 
-            refresh_token.revoke_family(&mut redis_conn).await;
+            refresh_token.revoke_family(&mut redis_conn).await?;
         }
     }
 
@@ -306,7 +304,7 @@ pub async fn whoami(
     JwtUserExtractor(jwt): JwtUserExtractor,
     state: State<AppState>,
 ) -> Result<Postcard<PartialUser>, ApiGenericResponse> {
-    let Some(user) = User::find_by_id(jwt.user_id, &state.pg_pool).await else  {
+    let Some(user) = User::find_by_id(jwt.user_id, &state.pg_pool).await? else  {
         return Err(ApiGenericResponse::UserNotFound);
     };
     if !user.is_authorized {

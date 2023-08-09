@@ -42,7 +42,7 @@ async fn main() -> anyhow::Result<()> {
     debug!("Queues successfully parsed from config file.");
 
     // Create a set of join handles for tracking spawned tasks
-    let mut events: JoinSet<()> = JoinSet::new();
+    let mut events: JoinSet<anyhow::Result<()>> = JoinSet::new();
 
     // Process each queue in separate tasks
     for config in queues_config {
@@ -65,12 +65,9 @@ async fn main() -> anyhow::Result<()> {
                 trace!("[{}] Ticking clock", queue_name);
                 interval.tick().await;
                 debug!("[{}] Waiting to process events", queue_name);
-
+                let conn = &mut redis_conn.get().await?;
                 // Read events from the queue
-                if let Some(events) = queue_name
-                    .read_events(&mut redis_conn.get().await.unwrap())
-                    .await
-                {
+                if let Some(events) = queue_name.read_events(conn).await? {
                     let events_number = events.len();
                     debug!(
                         "[{}] {} Events found and starting to be processed",
