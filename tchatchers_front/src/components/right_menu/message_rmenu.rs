@@ -1,14 +1,14 @@
 use std::rc::Rc;
 
 use serde::{Deserialize, Serialize};
-use tchatchers_core::{api_response::ApiResponse, locale::TranslationMap, profile::Profile};
+use tchatchers_core::{api_response::ApiResponse, locale::TranslationMap, profile::Profile, ws_message::WsMessage};
 use uuid::Uuid;
 use yew::{function_component, html, use_context, Html, Properties};
 use yew_agent::Dispatched;
 
 use crate::{
     components::{common::I18N, toast::Alert},
-    services::toast_bus::ToastBus,
+    services::{toast_bus::ToastBus, chat_bus::ChatBus},
     utils::{client_context::ClientContext, requester::Requester},
 };
 
@@ -46,6 +46,9 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
                         label,
                         default,
                     });
+                    if is_success {
+                        ChatBus::dispatcher().send(WsMessage::Delete(props.message_id));
+                    }
                 })
             }
         };
