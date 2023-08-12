@@ -34,22 +34,15 @@ fn profile_picture(profile_picture_properties: &ProfilePictureProperties) -> Htm
     let is_self = profile_picture_properties.is_self;
 
     html! {
-        if profile_picture_properties.display_pfp {
-            <div>
-                <div class={"flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"} title={profile_picture_properties.author.clone()} oncontextmenu={move |me: MouseEvent|
-                    {
-                        if !is_self {
-                            me.prevent_default();
-                            RMenuBus::dispatcher().send(RMenusBusEvents::OpenRMenu(me.client_x(), me.client_y(), RMenuKind::ProfileRMenu(ProfileRMenuProps{ user_id })));
-                        }
-                    }}>
-                    <img class="h-10 w-10 rounded-full" src={profile_picture_properties.pfp.clone()} alt="No img"/>
-                </div>
-            </div>
-        } else {
-            <></>
-        }
-
+        <div class={classes!(String::from("flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"), (!profile_picture_properties.display_pfp).then_some("invisible"))} title={profile_picture_properties.author.clone()} oncontextmenu={move |me: MouseEvent|
+            {
+                if !is_self {
+                    me.prevent_default();
+                    RMenuBus::dispatcher().send(RMenusBusEvents::OpenRMenu(me.client_x(), me.client_y(), RMenuKind::ProfileRMenu(ProfileRMenuProps{ user_id })));
+                }
+            }}>
+            <img class="h-10 w-10 rounded-full" src={profile_picture_properties.pfp.clone()} alt="No img"/>
+        </div>
     }
 }
 
