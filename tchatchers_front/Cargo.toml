@@ -5,10 +5,10 @@ edition = "2021"
 
 [dependencies]
 futures = "0.3.28"
-gloo-console = "0.2.3"
-gloo-net = "0.3.1"
-gloo-timers = "0.2.6"
-serde = { version = "1.0.182", features = ["derive"] }
+gloo-console = "0.3.0"
+gloo-net = "0.4.0"
+gloo-timers = "0.3.0"
+serde = { version = "1.0.183", features = ["derive"] }
 wasm-bindgen = "0.2.87"
 wasm-bindgen-futures = "0.4.37"
 web-sys = { version = "0.3.64", features = ["HtmlDocument", "FileReader", "Event", "Navigator"] }
