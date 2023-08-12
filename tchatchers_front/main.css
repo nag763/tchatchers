@@ -12,3 +12,31 @@
     -webkit-hyphens: auto;
     hyphens: auto;
 }
+
+
+@layer components {
+    .chat-component {
+        @apply flex w-full space-x-3 px-3;
+    }
+
+    .reversed-chat-component {
+        @apply flex-row-reverse space-x-reverse ml-auto;
+    }
+
+    .message-common {
+        @apply relative p-3 text-sm mb-2 break-when-needed max-w-xs;
+    }
+
+    .message-user {
+        @apply message-common bg-blue-600 text-white rounded-l-lg rounded-br-lg;
+    }
+
+    .message-other {
+        @apply bg-gray-300 message-common rounded-r-lg rounded-bl-lg;
+    }
+    
+    .app-button {
+        @apply shadow bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded md:whitespace-nowrap;
+    }
+
+}

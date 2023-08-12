@@ -5,7 +5,9 @@ use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessageContent, WsReceptionStatus};
 use uuid::Uuid;
 use web_sys::MouseEvent;
-use yew::{function_component, html, use_state, AttrValue, Component, Context, Html, Properties};
+use yew::{
+    classes, function_component, html, use_state, AttrValue, Component, Context, Html, Properties,
+};
 use yew_agent::Dispatched;
 
 use crate::components::right_menu::message_rmenu::MessageRMenuProps;
@@ -28,26 +30,26 @@ struct ProfilePictureProperties {
 
 #[function_component(ProfilePicture)]
 fn profile_picture(profile_picture_properties: &ProfilePictureProperties) -> Html {
-    let class = match profile_picture_properties.display_pfp {
-        true => "flex-shrink-0 h-10 w-10 rounded-full bg-gray-300",
-        false => "flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 invisible",
-    };
-
     let user_id = profile_picture_properties.author_id;
     let is_self = profile_picture_properties.is_self;
 
     html! {
-        <div>
-            <div {class} title={profile_picture_properties.author.clone()} oncontextmenu={move |me: MouseEvent|
-                {
-                    if !is_self {
-                        me.prevent_default();
-                        RMenuBus::dispatcher().send(RMenusBusEvents::OpenRMenu(me.client_x(), me.client_y(), RMenuKind::ProfileRMenu(ProfileRMenuProps{ user_id })));
-                    }
-                }}>
-                <img class="h-10 w-10 rounded-full" src={profile_picture_properties.pfp.clone()} alt="No img"/>
+        if profile_picture_properties.display_pfp {
+            <div>
+                <div class={"flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"} title={profile_picture_properties.author.clone()} oncontextmenu={move |me: MouseEvent|
+                    {
+                        if !is_self {
+                            me.prevent_default();
+                            RMenuBus::dispatcher().send(RMenusBusEvents::OpenRMenu(me.client_x(), me.client_y(), RMenuKind::ProfileRMenu(ProfileRMenuProps{ user_id })));
+                        }
+                    }}>
+                    <img class="h-10 w-10 rounded-full" src={profile_picture_properties.pfp.clone()} alt="No img"/>
+                </div>
             </div>
-        </div>
+        } else {
+            <></>
+        }
+
     }
 }
 
@@ -73,30 +75,12 @@ fn message(message_properties: &MessageProperties) -> Html {
         timestamp.minute()
     )
     .into();
-    let class: &str = match message_properties.is_user {
-        true => {
-            "relative bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg mb-2 text-sm break-when-needed max-w-xs"
-        }
-        false => "relative bg-gray-300 mb-2 p-3 rounded-r-lg rounded-bl-lg text-sm break-when-needed max-w-xs",
-    };
     let reception_checkmark = match message_properties.reception_status {
-        WsReceptionStatus::Sent if message_properties.is_user => Some(html! {
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-2 h-2">
-             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
-
-        }),
-        WsReceptionStatus::Seen if message_properties.is_user => Some(html! {
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-2 h-2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-
-        }),
+        WsReceptionStatus::Sent if message_properties.is_user => Some("M4.5 12.75l6 6 9-13.5"),
+        WsReceptionStatus::Seen if message_properties.is_user => {
+            Some("M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+        }
         _ => None,
-    };
-    let div_class = match message_properties.is_user {
-        true => "flex ",
-        false => "flex flex-row-reverse",
     };
 
     let message_id = message_properties.uuid;
@@ -104,9 +88,9 @@ fn message(message_properties: &MessageProperties) -> Html {
 
     let hide_timestamp = use_state(|| true);
     html! {
-        <div id={message_id.to_string()} class={div_class}>
+        <div id={message_id.to_string()} class={classes!("flex", (!message_properties.is_user).then_some("flex-row-reverse"))}>
             <small hidden={*hide_timestamp} class="dark:text-white mx-2">{&title}</small>
-            <p {title} class={class} onclick={move |_me| hide_timestamp.set(!*hide_timestamp)} oncontextmenu={move |me: MouseEvent|
+            <p {title} class={classes!(if message_properties.is_user { "message-user" } else { "message-other" } )} onclick={move |_me| hide_timestamp.set(!*hide_timestamp)} oncontextmenu={move |me: MouseEvent|
                 {
                     me.prevent_default();
                     RMenuBus::dispatcher().send(RMenusBusEvents::OpenRMenu(me.client_x(), me.client_y(), RMenuKind::MessageRMenu(MessageRMenuProps{ message_id, is_self })));
@@ -114,7 +98,11 @@ fn message(message_properties: &MessageProperties) -> Html {
             >
                 {message_properties.content.as_str()}
                     <span class="absolute right-0 bottom-0 pb-1 pr-1">
-                    {reception_checkmark}
+                    if let Some(reception_checkmark) = reception_checkmark {
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-2 h-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d={reception_checkmark} />
+                        </svg>
+                    }
                     </span>
             </p>
         </div>
@@ -139,15 +127,8 @@ struct UserChatProperties {
 
 #[function_component(UserChat)]
 fn user_chat(user_chat_properties: &UserChatProperties) -> Html {
-    let mut class: String = match user_chat_properties.is_user {
-        true => "flex flex-row-reverse w-full space-x-3 space-x-reverse ml-auto px-3".into(),
-        false => "flex w-full space-x-3 px-3".into(),
-    };
-    if user_chat_properties.display_pfp {
-        class += " mt-3";
-    }
     html! {
-        <div {class}>
+        <div class={classes!("chat-component", user_chat_properties.is_user.then_some("reversed-chat-component"), user_chat_properties.display_pfp.then_some("mt-3"))} >
             <ProfilePicture pfp={user_chat_properties.pfp.clone()} author={user_chat_properties.author.clone()} display_pfp={user_chat_properties.display_pfp} author_id={user_chat_properties.author_id} is_self={user_chat_properties.is_user}/>
             <Message uuid={user_chat_properties.uuid} reception_status={user_chat_properties.reception_status} content={user_chat_properties.content.clone()} is_user={user_chat_properties.is_user} timestamp={user_chat_properties.timestamp} />
         </div>

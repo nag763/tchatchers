@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::rc::Rc;
 
 // Copyright ⓒ 2022 LABEYE Loïc
@@ -8,7 +9,7 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::{Event, EventTarget, FileReader, InputEvent};
 use web_sys::{HtmlInputElement, MouseEvent};
-use yew::{function_component, html, use_state, AttrValue, Callback, Html, Properties};
+use yew::{classes, function_component, html, use_state, AttrValue, Callback, Html, Properties};
 
 use super::modal::MODAL_OPENER_CLASS;
 
@@ -34,7 +35,8 @@ pub fn waiting_for_response(props: &WaitingForResponseProperties) -> Html {
 pub struct FormButtonProperties {
     pub label: AttrValue,
     pub callback: Option<Callback<()>>,
-    pub is_modal_opener: Option<bool>,
+    #[prop_or_default]
+    pub is_modal_opener: bool,
 }
 
 #[function_component(FormButton)]
@@ -57,16 +59,12 @@ pub fn app_button(props: &FormButtonProperties) -> Html {
     };
     let callback = props.callback.clone();
     let onclick = move |_: MouseEvent| {
-        if let Some(callback) = callback.clone() {
+        if let Some(callback) = callback.borrow() {
             callback.emit(());
         }
     };
-    let additionnal_class: &str = match props.is_modal_opener {
-        Some(v) if v => MODAL_OPENER_CLASS,
-        _ => "",
-    };
     html! {
-        <button class={format!("shadow bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded md:whitespace-nowrap {}", additionnal_class)} type={button_type} {onclick}>
+        <button class={classes!("app-button", props.is_modal_opener.then_some(MODAL_OPENER_CLASS))} type={button_type} {onclick}>
             {&props.label}
         </button>
     }
@@ -127,9 +125,11 @@ pub struct I18nProperties {
 
 #[function_component(I18N)]
 pub fn i18n(props: &I18nProperties) -> Html {
-    if let Some(translated) = props.translation.get(props.label.as_str()) {
-        html! {<>{translated}</>}
-    } else {
-        html! {<>{&props.default}</>}
+    html! {
+        if let Some(translated) = props.translation.get(props.label.as_str()) {
+            <>{translated}</>
+        } else {
+            <>{&props.default}</>
+        }
     }
 }
