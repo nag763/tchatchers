@@ -48,8 +48,8 @@ pub enum AsyncPayloadParseErrorKind {
     TimestampNotCorrect,
 }
 
-impl From<serde_json::Error> for AsyncPayloadParseError {
-    fn from(value: serde_json::Error) -> Self {
+impl From<postcard::Error> for AsyncPayloadParseError {
+    fn from(value: postcard::Error) -> Self {
         Self {
             kind: AsyncPayloadParseErrorKind::UndeserializableValue,
             reason: value.to_string(),
@@ -82,22 +82,25 @@ impl TryFrom<(&str, &str, HashMap<String, redis::Value>)> for AsyncPayload {
         let queue = map.0;
         let key = map.1;
         let value = map.2;
-        let redis_entity: String = redis::from_redis_value(&value["val"])?;
+        let redis_entity: Vec<u8> = redis::from_redis_value(&value["val"])?;
         let redis_timestamp: String = redis::from_redis_value(&value["timestamp"])?;
         Ok(AsyncPayload {
             queue: queue.to_string(),
             id: Some(key.to_string()),
-            entity: serde_json::from_str(&redis_entity)?,
+            entity: postcard::from_bytes(&redis_entity)?,
             timestamp: chrono::DateTime::parse_from_rfc2822(&redis_timestamp)?.into(),
         })
     }
 }
 
-impl From<AsyncPayload> for [(String, String); 2] {
+impl From<AsyncPayload> for [(String, Vec<u8>); 2] {
     fn from(val: AsyncPayload) -> Self {
         [
-            ("val".into(), serde_json::to_string(&val.entity).unwrap()),
-            ("timestamp".into(), chrono::Utc::now().to_rfc2822()),
+            ("val".into(), postcard::to_stdvec(&val.entity).unwrap()),
+            (
+                "timestamp".into(),
+                chrono::Utc::now().to_rfc2822().as_bytes().into(),
+            ),
         ]
     }
 }
@@ -128,7 +131,7 @@ impl AsyncPayload {
         queue_name: &str,
         conn: &mut redis::aio::Connection,
     ) -> Result<String, RedisError> {
-        let redis_payload: [(String, String); 2] = self.into();
+        let redis_payload: [(String, Vec<u8>); 2] = self.into();
         let event_id: String = conn.xadd(queue_name, "*", &redis_payload).await?;
         debug!("[{queue_name}] Event #{event_id} registered");
         Ok(event_id)

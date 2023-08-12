@@ -2214,9 +2214,9 @@ dependencies = [
 
 [[package]]
 name = "redis"
-version = "0.23.1"
+version = "0.23.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff5d95dd18a4d76650f0c2607ed8ebdbf63baf9cb934e1c233cd220c694db1d7"
+checksum = "ffd6543a7bc6428396845f6854ccf3d1ae8823816592e2cbe74f20f50f209d02"
 dependencies = [
  "async-trait",
  "bytes",
@@ -2947,11 +2947,9 @@ dependencies = [
  "regex",
  "rust-argon2",
  "serde",
- "serde_json",
  "serde_yaml",
  "sqlx",
  "time 0.3.25",
- "tokio",
  "uuid",
  "validator",
 ]
@@ -3109,9 +3107,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.30.0"
+version = "1.31.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d3ce25f50619af8b0aec2eb23deebe84249e19e2ddd393a6e16e3300a6dadfd"
+checksum = "40de3a2ba249dcb097e01be5e67a5ff53cf250397715a071a81543e8a832a920"
 dependencies = [
  "backtrace",
  "bytes",

@@ -1,14 +1,16 @@
 use std::rc::Rc;
 
 use serde::{Deserialize, Serialize};
-use tchatchers_core::{api_response::ApiResponse, locale::TranslationMap, profile::Profile, ws_message::WsMessage};
+use tchatchers_core::{
+    api_response::ApiResponse, locale::TranslationMap, profile::Profile, ws_message::WsMessage,
+};
 use uuid::Uuid;
 use yew::{function_component, html, use_context, Html, Properties};
 use yew_agent::Dispatched;
 
 use crate::{
     components::{common::I18N, toast::Alert},
-    services::{toast_bus::ToastBus, chat_bus::ChatBus},
+    services::{chat_bus::ChatBus, toast_bus::ToastBus},
     utils::{client_context::ClientContext, requester::Requester},
 };
 
