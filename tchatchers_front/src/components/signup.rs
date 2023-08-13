@@ -239,9 +239,9 @@ impl Component for SignUp {
                     {self.server_error.as_ref().unwrap_or(&AttrValue::default())}
                   </small>
                     if self.wait_for_api {
-                        <FormButton label={translation.get_or_default("sign_up", "Sign up")} />
-                    } else {
                         <WaitingForResponse translation={translation.clone()} />
+                    } else {
+                        <FormButton label={translation.get_or_default("sign_up", "Sign up")} />
                     }
                 </form>
                 </div>
