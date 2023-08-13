@@ -392,7 +392,7 @@ impl InsertableUser {
     #[cfg(feature = "back")]
     pub async fn insert(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
         let salt: [u8; 32] = rand::thread_rng().gen();
-        let config = argon2::Config::default();
+        let config = argon2::Config::rfc9106_low_mem();
         let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
         sqlx::query("INSERT INTO CHATTER(login, password, name, locale_id) VALUES ($1,$2,$3,$4)")
             .bind(&self.login)
@@ -416,7 +416,7 @@ impl InsertableUser {
         pool: &PgPool,
     ) -> Result<PgQueryResult, sqlx::Error> {
         let salt: [u8; 32] = rand::thread_rng().gen();
-        let config = argon2::Config::default();
+        let config = argon2::Config::rfc9106_low_mem();
         let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
         sqlx::query("INSERT INTO CHATTER(login, password, name, profile_id) VALUES ($1,$2,$3,$4)")
             .bind(&self.login)
