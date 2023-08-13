@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use crate::components::common::{FormButton, WaitingForResponse};
+use crate::components::common::{FormButton, WaitingForResponse, FormSection};
 use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
@@ -156,26 +156,8 @@ impl Component for SignIn {
                 <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
 
                 <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold"><I18N label="sign_in" translation={translation.clone()} default="Sign in"/></h2>
-                  <div class="md:flex md:items-center mb-6">
-                    <div class="md:w-1/3">
-                      <label class="common-form-label" for="inline-full-name">
-                        <I18N label={"login"} translation={translation.clone()} default={"Login"}/>
-                      </label>
-                    </div>
-                    <div class="md:w-2/3">
-                      <input class="common-input" id="inline-full-name" type="text" required=true minlength="3" ref={&self.login} />
-                    </div>
-                  </div>
-                  <div class="md:flex md:items-center mb-6">
-                    <div class="md:w-1/3">
-                      <label class="common-form-label" for="inline-password">
-                      <I18N label={"password_field"} translation={translation.clone()} default={"Password"}/>
-                      </label>
-                    </div>
-                    <div class="md:w-2/3">
-                      <input class="common-input" id="inline-password" type="password" required=true minlength="4" ref={&self.password} />
-                    </div>
-                  </div>
+                  <FormSection label={"login"} translation={translation.clone()} default={"Login"} minlength="3" attr_ref={&self.login} required=true />
+                  <FormSection label={"password_field"} translation={translation.clone()} required=true  default={"Password"} minlength="4" input_type="password" attr_ref={&self.password} />
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3"/>
                     <div class="md:w-2/3">

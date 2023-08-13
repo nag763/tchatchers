@@ -9,7 +9,7 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::{Event, EventTarget, FileReader, InputEvent};
 use web_sys::{HtmlInputElement, MouseEvent};
-use yew::{classes, function_component, html, use_state, AttrValue, Callback, Html, Properties};
+use yew::{classes, function_component, html, use_state, AttrValue, Callback, Html, Properties, NodeRef};
 
 use super::modal::MODAL_OPENER_CLASS;
 
@@ -131,5 +131,35 @@ pub fn i18n(props: &I18nProperties) -> Html {
         } else {
             <>{&props.default}</>
         }
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct FormSectionProperties {
+    pub default: AttrValue,
+    pub label: AttrValue,
+    #[prop_or_default]
+    pub translation: Rc<TranslationMap>,
+    pub attr_ref: NodeRef,
+    pub minlength : Option<AttrValue>,
+    pub maxlength: Option<AttrValue>,
+    pub required: bool,
+    #[prop_or_default("text")]
+    pub input_type: AttrValue
+}
+
+#[function_component(FormSection)]
+pub fn form_section(props: &FormSectionProperties) -> Html {
+    html!{
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3">
+                <label class="common-form-label">
+                <I18N label={&props.label} translation={props.translation.clone()} default={&props.default}/>
+            </label>
+            </div>
+                <div class="md:w-2/3">
+                <input class="common-input" type={&props.input_type} required={props.required} minlength={&props.minlength} maxlength={&props.maxlength} ref={&props.attr_ref} />
+            </div>
+        </div>
     }
 }
