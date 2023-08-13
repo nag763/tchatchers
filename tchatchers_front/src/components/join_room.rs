@@ -82,12 +82,12 @@ impl Component for JoinRoom {
                 </h2>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
-                      <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                      <label class="common-form-label" for="inline-full-name">
                         <I18N label={"room_name"} default={"Room name"} translation={ctx.props().user_context.translation.clone()}/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="1" ref={&self.room_name} />
+                      <input class="common-input" id="inline-full-name" type="text" required=true minlength="1" ref={&self.room_name} />
                     </div>
                   </div>
                     <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.verification_error.is_none()}>

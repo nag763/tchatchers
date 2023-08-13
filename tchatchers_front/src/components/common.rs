@@ -64,7 +64,7 @@ pub fn app_button(props: &FormButtonProperties) -> Html {
         }
     };
     html! {
-        <button class={classes!(String::from("bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded md:whitespace-nowrap"), props.is_modal_opener.then_some(MODAL_OPENER_CLASS))} type={button_type} {onclick}>
+        <button class={classes!("common-button", props.is_modal_opener.then_some(MODAL_OPENER_CLASS))} type={button_type} {onclick}>
             {&props.label}
         </button>
     }

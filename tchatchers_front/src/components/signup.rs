@@ -190,62 +190,59 @@ impl Component for SignUp {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let translation = ctx.props().client_context.translation.clone();
-        let end_of_form: Html = match self.wait_for_api {
-            false => {
-                html! { <FormButton label={translation.get_or_default("sign_up", "Sign up")} /> }
-            }
-            true => html! { <WaitingForResponse translation={translation.clone()} /> },
-        };
-
         html! {
             <>
                 <div class="flex items-center justify-center h-full dark:bg-zinc-800">
-                <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
+                <form class="w-full max-w-sm border-2 dark:border-zinc-700 px²-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
                 <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold"><I18N label="sign_up" translation={translation.clone()} default="Sign up"/></h2>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
-                      <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                      <label class="common-form-label" for="inline-full-name">
                       <I18N label="login" translation={translation.clone()} default="Login"/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="32" ref={&self.login} oninput={ctx.link().callback(|_| Msg::OnLoginChanged)}/>
+                      <input class="common-input" id="inline-full-name" type="text" required=true minlength="3" maxlength="32" ref={&self.login} oninput={ctx.link().callback(|_| Msg::OnLoginChanged)}/>
                     </div>
                   </div>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
-                      <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                      <label class="common-form-label" for="inline-full-name">
                       <I18N label="name_field" translation={translation.clone()} default="Name"/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" type="text" required=true minlength="3" maxlength="16" ref={&self.name} />
+                      <input class="common-input" type="text" required=true minlength="3" maxlength="16" ref={&self.name} />
                     </div>
                   </div>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
-                      <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-password">
+                      <label class="common-form-label" for="inline-password">
                       <I18N label="password_field" translation={translation.clone()} default="Password"/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-password" type="password" required=true minlength="8" maxlength="128" ref={&self.password} />
+                      <input class="common-input" id="inline-password" type="password" required=true minlength="8" maxlength="128" ref={&self.password} />
                     </div>
                   </div>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
-                      <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-password">
+                      <label class="common-form-label" for="inline-password">
                       <I18N label="confirm_password" translation={translation.clone()} default="Confirm your password"/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-password" type="password" required=true minlength="8" maxlength="128" ref={&self.password_confirmation} />
+                      <input class="common-input" id="inline-password" type="password" required=true minlength="8" maxlength="128" ref={&self.password_confirmation} />
                     </div>
                   </div>
                   <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.server_error.is_none()}>
                     {self.server_error.as_ref().unwrap_or(&AttrValue::default())}
                   </small>
-                  {end_of_form}
+                    if self.wait_for_api {
+                        <FormButton label={translation.get_or_default("sign_up", "Sign up")} />
+                    } else {
+                        <WaitingForResponse translation={translation.clone()} /> 
+                    }
                 </form>
                 </div>
             </>

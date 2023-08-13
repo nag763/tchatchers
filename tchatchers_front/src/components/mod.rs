@@ -10,7 +10,6 @@ pub mod join_room;
 pub mod logout;
 pub mod modal;
 pub mod navbar;
-pub mod navlink;
 pub mod not_found;
 pub mod right_menu;
 pub mod settings;

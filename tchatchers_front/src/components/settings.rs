@@ -245,39 +245,16 @@ impl Component for Settings {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let translation = &ctx.props().context.translation.clone();
         let user = &ctx.props().context.user.as_ref().cloned().unwrap();
-        let pfp = match &user.pfp {
-            None => match &self.pfp {
-                Some(_) => {
-                    html! {
-                        <span class="dark:text-gray-300">
-                            <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} translation={translation}/>
-                        </span>
-                    }
-                }
-                None => {
-                    html! {
-                        <span class="dark:text-gray-300">
-                            <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} translation={translation}/>
-                        </span>
-                    }
-                }
-            },
-            Some(v) => html! { <><img class="h-10 w-10 rounded-full" src={v.clone()} /></> },
+        let delete_profile_callback = {
+            let link = ctx.link().clone();
+            Callback::from(move |_ :()| {link.send_message(Msg::ConfirmDeletion)})
         };
-        let link = ctx.link().clone();
-        let end_of_form = match self.wait_for_api {
-            true => html! { <WaitingForResponse translation={translation.clone()} /> },
-            false => {
-                html! { <AppButton label={translation.get_or_default("update_profile", "Update profile")} /> }
-            }
+        let on_file_attached = {
+            let link = ctx.link().clone();
+            Callback::from(move |file_path: Option<js_sys::ArrayBuffer>| {
+                link.send_message(Msg::UploadNewPfp (file_path));
+            })
         };
-        let delete_profile = match self.wait_for_api {
-            true => html! { <WaitingForResponse translation={translation.clone()} /> },
-            false => {
-                html! { <AppButton label={translation.get_or_default("delete_profile", "Delete profile")} is_modal_opener=true callback={Callback::from(move |_ :()| {link.send_message(Msg::ConfirmDeletion)})}/> }
-            }
-        };
-        let link = ctx.link().clone();
         html! {
             <>
                 <div class="flex items-center justify-center h-full dark:bg-zinc-800">
@@ -288,32 +265,32 @@ impl Component for Settings {
                 </h2>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
-                      <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                      <label class="common-form-label" for="inline-full-name">
                         <I18N label={"your_login_field"} default={"Your login"} translation={translation}/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="32" value={user.login.clone()} disabled=true/>
+                      <input class="common-input" id="inline-full-name" type="text" required=true minlength="3" maxlength="32" value={user.login.clone()} disabled=true/>
                     </div>
                     </div>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
-                      <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                      <label class="common-form-label" for="inline-full-name">
                       <I18N label={"your_name_field"} default={"Your name"} translation={translation}/>
                       </label>
                     </div>
                     <div class="md:w-2/3">
-                      <input class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.name} value={user.name.clone()}/>
+                      <input class="common-input" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.name} value={user.name.clone()}/>
                     </div>
                   </div>
                   <div class="md:flex md:items-center mb-6">
                   <div class="md:w-1/3">
-                    <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                    <label class="common-form-label" for="inline-full-name">
                     <I18N label={"your_locale_field"} default={"Your locale"} translation={translation}/>
                     </label>
                   </div>
                   <div class="md:w-2/3">
-                    <select class="peer bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500" id="inline-full-name" type="text" required=true ref={&self.locale_id} >
+                    <select class="common-input" id="inline-full-name" type="text" required=true ref={&self.locale_id} >
                         {self.user_context.available_locale.iter().map(|l|
                                 html! {<option value={l.id.to_string()} selected={l.id == user.locale_id}>{l.long_name.as_str()}</option>}
                         ).collect::<Html>()}
@@ -322,15 +299,21 @@ impl Component for Settings {
                 </div>
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
-                      <label class="block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                      <label class="common-form-label" for="inline-full-name">
                       <I18N label={"your_pfp_field"} default={"Your profile picture"} translation={translation}/>
                       </label>
                     </div>
                     <div class="md:w-2/3 flex justify-center items-center space-x-4 mt-2 dark:text-gray-200">
-                    {pfp}
-                    <FileAttacher disabled=false accept={Some(AttrValue::from(".png,.webp,.jpg,.jpg"))} on_file_attached={Callback::from(move |file_path: Option<js_sys::ArrayBuffer>| {
-                        link.send_message(Msg::UploadNewPfp (file_path));
-        })}/>
+                        <span class="dark:text-gray-300">
+                            if let Some(v) = &user.pfp {
+                                <><img class="h-10 w-10 rounded-full" src={v.clone()} /></>
+                            } else if self.pfp.is_some() {
+                                <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} translation={translation}/>
+                            } else {
+                                <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} translation={translation}/>
+                            }
+                        </span>
+                        <FileAttacher disabled=false accept={Some(AttrValue::from(".png,.webp,.jpg,.jpg"))} {on_file_attached}/>
                     </div>
                   </div>
                   <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.server_error.is_none()}>
@@ -342,8 +325,12 @@ impl Component for Settings {
                   <div class="flex items-center">
                   <div class="w-1/3"></div>
                   <div class="flex flex-row w-2/3 justify-end space-x-3">
-                     {delete_profile}
-                     {end_of_form}
+                    if self.wait_for_api {
+                        <WaitingForResponse translation={translation.clone()} /> 
+                    } else {
+                        <AppButton label={translation.get_or_default("delete_profile", "Delete profile")} is_modal_opener=true callback={delete_profile_callback}/>
+                        <AppButton label={translation.get_or_default("update_profile", "Update profile")} /> 
+                    }
                   </div>
                 </div>
                 </form>
