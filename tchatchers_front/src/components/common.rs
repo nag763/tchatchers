@@ -9,7 +9,9 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::{Event, EventTarget, FileReader, InputEvent};
 use web_sys::{HtmlInputElement, MouseEvent};
-use yew::{classes, function_component, html, use_state, AttrValue, Callback, Html, Properties, NodeRef};
+use yew::{
+    classes, function_component, html, use_state, AttrValue, Callback, Html, NodeRef, Properties,
+};
 
 use super::modal::MODAL_OPENER_CLASS;
 
@@ -141,16 +143,16 @@ pub struct FormSectionProperties {
     #[prop_or_default]
     pub translation: Rc<TranslationMap>,
     pub attr_ref: NodeRef,
-    pub minlength : Option<AttrValue>,
+    pub minlength: Option<AttrValue>,
     pub maxlength: Option<AttrValue>,
     pub required: bool,
     #[prop_or_default("text")]
-    pub input_type: AttrValue
+    pub input_type: AttrValue,
 }
 
 #[function_component(FormSection)]
 pub fn form_section(props: &FormSectionProperties) -> Html {
-    html!{
+    html! {
         <div class="md:flex md:items-center mb-6">
             <div class="md:w-1/3">
                 <label class="common-form-label">

@@ -7,7 +7,7 @@ use crate::services::toast_bus::ToastBus;
 use crate::utils::requester::Requester;
 use crate::{components::toast::Alert, utils::client_context::ClientContext};
 use yew::suspense::use_future;
-use yew::{function_component, html, use_context, Html, Suspense, HtmlResult};
+use yew::{function_component, html, use_context, Html, HtmlResult, Suspense};
 use yew_agent::Dispatched;
 use yew_router::prelude::use_navigator;
 

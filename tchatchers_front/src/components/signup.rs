@@ -241,7 +241,7 @@ impl Component for SignUp {
                     if self.wait_for_api {
                         <FormButton label={translation.get_or_default("sign_up", "Sign up")} />
                     } else {
-                        <WaitingForResponse translation={translation.clone()} /> 
+                        <WaitingForResponse translation={translation.clone()} />
                     }
                 </form>
                 </div>

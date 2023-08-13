@@ -43,7 +43,7 @@ impl Component for Navbar {
                             <Link<Route> key={n.id} to={Route::from_path(&n.href, &HashMap::default()).unwrap()} classes="inline-block text-sm px-4 py-2 leading-none text-white" >
                                 <I18N label={n.label} default={n.default_translation} translation={client_context.clone().translation}/>
                             </Link<Route> >
-                        }).collect::<Html>() 
+                        }).collect::<Html>()
                     }
                 </div>
             </nav>

@@ -247,12 +247,12 @@ impl Component for Settings {
         let user = &ctx.props().context.user.as_ref().cloned().unwrap();
         let delete_profile_callback = {
             let link = ctx.link().clone();
-            Callback::from(move |_ :()| {link.send_message(Msg::ConfirmDeletion)})
+            Callback::from(move |_: ()| link.send_message(Msg::ConfirmDeletion))
         };
         let on_file_attached = {
             let link = ctx.link().clone();
             Callback::from(move |file_path: Option<js_sys::ArrayBuffer>| {
-                link.send_message(Msg::UploadNewPfp (file_path));
+                link.send_message(Msg::UploadNewPfp(file_path));
             })
         };
         html! {
@@ -326,10 +326,10 @@ impl Component for Settings {
                   <div class="w-1/3"></div>
                   <div class="flex flex-row w-2/3 justify-end space-x-3">
                     if self.wait_for_api {
-                        <WaitingForResponse translation={translation.clone()} /> 
+                        <WaitingForResponse translation={translation.clone()} />
                     } else {
                         <AppButton label={translation.get_or_default("delete_profile", "Delete profile")} is_modal_opener=true callback={delete_profile_callback}/>
-                        <AppButton label={translation.get_or_default("update_profile", "Update profile")} /> 
+                        <AppButton label={translation.get_or_default("update_profile", "Update profile")} />
                     }
                   </div>
                 </div>

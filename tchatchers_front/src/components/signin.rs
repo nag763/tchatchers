@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use crate::components::common::{FormButton, WaitingForResponse, FormSection};
+use crate::components::common::{FormButton, FormSection, WaitingForResponse};
 use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
@@ -175,7 +175,7 @@ impl Component for SignIn {
                     if self.wait_for_api {
                         <WaitingForResponse translation={translation.clone()} />
                     } else {
-                        <FormButton label={translation.clone().get_or_default("sign_in", "Log in")}/> 
+                        <FormButton label={translation.clone().get_or_default("sign_in", "Log in")}/>
                     }
                 </form>
                 </div>

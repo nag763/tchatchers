@@ -31,6 +31,7 @@ use sqlx::postgres::PgPool;
 use std::iter::once;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::join;
 use tokio::signal::unix::SignalKind;
 use tokio::sync::Mutex;
@@ -38,6 +39,7 @@ use tower::ServiceBuilder;
 use tower_http::request_id::MakeRequestUuid;
 use tower_http::sensitive_headers::SetSensitiveRequestHeadersLayer;
 use tower_http::services::ServeDir;
+use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::DefaultOnFailure;
 use tower_http::trace::DefaultOnRequest;
 use tower_http::trace::DefaultOnResponse;
@@ -147,7 +149,8 @@ async fn main() -> anyhow::Result<()> {
             ServiceBuilder::new()
                 .set_x_request_id(MakeRequestUuid)
                 .propagate_x_request_id(),
-        );
+        )
+        .layer(TimeoutLayer::new(Duration::from_secs(10)));
 
     // run it with hyper
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
