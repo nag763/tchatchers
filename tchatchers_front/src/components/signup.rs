@@ -8,8 +8,6 @@ use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
-use gloo_net::http::Request;
-use gloo_timers::callback::Timeout;
 use tchatchers_core::api_response::ApiResponse;
 use tchatchers_core::locale::Locale;
 use tchatchers_core::user::InsertableUser;
@@ -22,8 +20,6 @@ use yew::{
 use yew_agent::Dispatched;
 use yew_router::prelude::use_navigator;
 use yew_router::scope_ext::RouterScopeExt;
-
-const CHECK_LOGIN_AFTER: u32 = 250;
 
 #[function_component(SignUpHOC)]
 pub fn sign_up_hoc() -> Html {
@@ -44,7 +40,6 @@ pub fn sign_up_hoc() -> Html {
 
 pub enum Msg {
     SubmitForm,
-    OnLoginChanged,
     ErrorFromServer(ApiResponse),
     LocalError(AttrValue),
 }
@@ -61,7 +56,6 @@ pub struct SignUp {
     password: NodeRef,
     name: NodeRef,
     password_confirmation: NodeRef,
-    check_login: Option<Timeout>,
     wait_for_api: bool,
     server_error: Option<AttrValue>,
 }
@@ -142,35 +136,6 @@ impl Component for SignUp {
                 }
                 true
             }
-            Msg::OnLoginChanged => {
-                if let Some(login) = self.login.cast::<HtmlInputElement>() {
-                    if login.min_length() <= login.value().len().try_into().unwrap() {
-                        let translation = ctx.props().client_context.translation.clone();
-                        self.check_login = Some({
-                            Timeout::new(CHECK_LOGIN_AFTER, move || {
-                                wasm_bindgen_futures::spawn_local(async move {
-                                    let req = Request::get(&format!(
-                                        "/api/login_exists/{}",
-                                        login.value()
-                                    ))
-                                    .header("content-type", "application/json")
-                                    .send();
-                                    let resp = req.await.unwrap();
-                                    if !resp.ok() {
-                                        login.set_custom_validity(&translation.get_or_default(
-                                            "login_already_taken",
-                                            "The login is already token by another user",
-                                        ));
-                                    } else {
-                                        login.set_custom_validity("");
-                                    }
-                                });
-                            })
-                        });
-                    }
-                }
-                true
-            }
             Msg::ErrorFromServer(resp) => {
                 self.wait_for_api = false;
                 let err = ctx.props().client_context.translation.get_or_default(
@@ -192,7 +157,7 @@ impl Component for SignUp {
         let translation = &ctx.props().client_context.translation;
         html! {
             <Form label="sign_up" {translation} default="Sign upp" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.server_error}>
-            <FormSection label={"login"} {translation} default={"Login"} minlength="3" maxlength="32" attr_ref={&self.login} required=true oninput={ctx.link().callback(|_| Msg::OnLoginChanged)} />
+            <FormSection label={"login"} {translation} default={"Login"} minlength="3" maxlength="32" attr_ref={&self.login} required=true />
             <FormSection label={"name_field"} {translation} default={"Name"} minlength="3" maxlength="16" attr_ref={&self.name} required=true />
             <FormSection label={"password_field"} {translation} default={"Password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password} required=true />
             <FormSection label={"confirm_password"} {translation} default={"Confirm your password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password_confirmation} required=true />

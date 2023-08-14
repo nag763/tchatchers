@@ -36,7 +36,7 @@
     }
     
     .common-button {
-        @apply bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:outline-none text-white font-bold py-2 px-4 rounded md:whitespace-nowrap;
+        @apply bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:outline-none text-white font-bold py-2 px-4 rounded;
     }
 
     .common-input {
