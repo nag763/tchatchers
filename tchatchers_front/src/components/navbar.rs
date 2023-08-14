@@ -31,7 +31,8 @@ impl Component for Navbar {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let client_context = ctx.props().app_context.clone();
+        let client_context = &ctx.props().app_context;
+        let translation = &client_context.translation;
         html! {
             <nav class="flex items-center justify-between flex-wrap bg-zinc-800 px-6 row-span-1">
                 <Link<Route> to={if client_context.user.is_some() { Route::JoinRoom } else { Route::SignIn }} classes="flex items-center flex-shrink-0 text-white mr-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600 hover:animate-pulse">
@@ -41,7 +42,7 @@ impl Component for Navbar {
                     {
                         (*client_context.navlink).clone().into_iter().map(|n| html!{
                             <Link<Route> key={n.id} to={Route::from_path(&n.href, &HashMap::default()).unwrap()} classes="inline-block text-sm px-4 py-2 leading-none text-white" >
-                                <I18N label={n.label} default={n.default_translation} translation={client_context.clone().translation}/>
+                                <I18N label={n.label} default={n.default_translation} {translation}/>
                             </Link<Route> >
                         }).collect::<Html>()
                     }

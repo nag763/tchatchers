@@ -26,11 +26,10 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
 
     let bearer = client_context.bearer.clone();
 
-    let translation: Rc<TranslationMap> = client_context.translation.clone();
+    let translation = &client_context.translation;
 
     let delete_message_li = {
         let bearer = bearer.clone();
-        let translation = translation.clone();
         let delete_message_id = {
             let props = props.clone();
             move |_| {

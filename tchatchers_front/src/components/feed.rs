@@ -140,7 +140,8 @@ impl Component for Feed {
                                 .clone()
                                 .try_send(
                                     postcard::to_stdvec(&WsMessage::Seen(vec![msg_content.uuid]))
-                                        .unwrap(),
+                                        .unwrap()
+                                        .to_vec(),
                                 )
                                 .unwrap();
                         }
@@ -242,20 +243,21 @@ impl Component for Feed {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let translation = &ctx.props().client_context.translation;
         let component: Html = match self.is_connected {
             true => {
                 let tx = self.ws.tx.clone();
                 let pass_message_to_ws = Callback::from(move |message: Vec<u8>| {
                     tx.clone().try_send(message).unwrap();
                 });
-                html! {<TypeBar translation={self.user_context.translation.clone()} {pass_message_to_ws} user={self.user_context.user.as_ref().unwrap().clone()} room={ctx.props().room.clone()}/>}
+                html! {<TypeBar {translation} {pass_message_to_ws} user={self.user_context.user.as_ref().unwrap().clone()} room={ctx.props().room.clone()}/>}
             }
             false => {
                 let link = ctx.link().clone();
                 let try_reconnect = Callback::from(move |_: ()| {
                     link.send_message(Msg::TryReconnect);
                 });
-                html! {<DisconnectedBar translation={self.user_context.translation.clone()} called_back={self.called_back} {try_reconnect} />}
+                html! {<DisconnectedBar {translation} called_back={self.called_back} {try_reconnect} />}
             }
         };
         html! {

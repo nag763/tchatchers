@@ -15,13 +15,14 @@ pub struct TryReconnectProps {
 #[function_component(TryReconnect)]
 pub fn try_reconnect(props: &TryReconnectProps) -> Html {
     let onclick_event = props.try_reconnect.clone();
+    let translation = &props.translation;
     html! {
         <div class="flex items-center justify-center gap-2 lg:gap-12 dark:text-gray-200">
             <span>
-            <I18N  label={"you_are_disconnected"} default={"You are disconnected"} translation={props.translation.clone()}/>
+            <I18N  label={"you_are_disconnected"} default={"You are disconnected"} {translation} />
             </span>
             <button class="common-button" onclick={move |_| onclick_event.emit(())} >
-            <I18N  label={"try_reconnect"} default={"Reconnect"} translation={props.translation.clone()}/>
+            <I18N  label={"try_reconnect"} default={"Reconnect"} {translation} />
             </button>
         </div>
     }
@@ -45,12 +46,13 @@ impl Component for DisconnectedBar {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let translation = &ctx.props().translation;
         html! {
             <div class="col-span-6">
                 if ctx.props().called_back {
-                    <TryReconnect translation={ctx.props().translation.clone()} try_reconnect={ctx.props().try_reconnect.clone()} />
+                    <TryReconnect {translation} try_reconnect={ctx.props().try_reconnect.clone()} />
                 } else {
-                    <WaitingForResponse translation={ctx.props().translation.clone()} />
+                    <WaitingForResponse {translation} />
                 }
             </div>
         }

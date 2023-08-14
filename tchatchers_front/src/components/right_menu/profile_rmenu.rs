@@ -22,11 +22,10 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
 
     let bearer = client_context.bearer.clone();
 
-    let translation = client_context.translation.clone();
+    let translation = &client_context.translation;
 
     let revoke_user_li = {
         let bearer = bearer.clone();
-        let translation = translation.clone();
         let revoke_user_id = {
             let props = props.clone();
             move |_| {
