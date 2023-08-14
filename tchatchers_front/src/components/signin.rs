@@ -149,31 +149,26 @@ impl Component for SignIn {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let translation = &ctx.props().client_context.translation.clone();
+        let translation = &ctx.props().client_context.translation;
         html! {
-            <Form label="sign_in" translation={translation.clone()} default="Sign in" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)}>
-                <FormSection label={"login"} translation={translation.clone()} default={"Login"} minlength="3" attr_ref={&self.login} required=true />
-                <FormSection label={"password_field"} translation={translation.clone()} required=true  default={"Password"} minlength="4" input_type="password" attr_ref={&self.password} />
+            <Form label="sign_in" {translation} default="Sign in" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.server_error}>
+                <FormSection label={"login"} {translation} default={"Login"} minlength="3" attr_ref={&self.login} required=true />
+                <FormSection label={"password_field"} {translation} required=true  default={"Password"} minlength="4" input_type="password" attr_ref={&self.password} />
                 <div class="md:flex md:items-center mb-6">
                 <div class="md:w-1/3"/>
                 <div class="md:w-2/3">
                     <div class="flex  items-center mr-4 space-x-2">
                         <input id="inline-keep-me-signed-in" type="checkbox" class="w-4 h-4 accent-purple-600 dark:accent-zinc-700" ref={&self.remember_me} />
                         <label class="text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-keep-me-signed-in">
-                        <I18N label={"keep_me_signed_in"} translation={translation.clone()} default={"Remember me"}/>
+                        <I18N label={"keep_me_signed_in"} {translation} default={"Remember me"}/>
                         </label>
                     </div>
                 </div>
                 </div>
-                if let Some(server_error) = &self.server_error {
-                <small class="flex mt-4 mb-2 items-center text-red-500">
-                    {server_error}
-                </small>
-                }
                 if self.wait_for_api {
-                <WaitingForResponse translation={translation.clone()} />
+                <WaitingForResponse {translation} />
                 } else {
-                <FormButton label={translation.clone().get_or_default("sign_in", "Log in")}/>
+                <FormButton label={"sign_in"} default={"Log in"} {translation} />
                 }
             </Form>
         }

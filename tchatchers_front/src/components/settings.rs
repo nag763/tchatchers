@@ -245,7 +245,7 @@ impl Component for Settings {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let translation = &ctx.props().context.translation.clone();
+        let translation = &ctx.props().context.translation;
         let user = &ctx.props().context.user.as_ref().cloned().unwrap();
         let delete_profile_callback = {
             let link = ctx.link().clone();
@@ -259,13 +259,13 @@ impl Component for Settings {
         };
         html! {
 
-            <Form label="settings" translation={translation.clone()} default="Settings" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)}>
-                  <FormSection label={"your_login_field"} translation={translation.clone()} default={"Your login"} value={user.login.clone()} disabled=true />
-                  <FormSection label={"your_name_field"} translation={translation.clone()} default={"Your name"} value={user.name.clone()} minlength="3" maxlength="16" attr_ref={&self.name} />
+            <Form label="settings" {translation} default="Settings" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.server_error} form_ok={&self.ok_msg}>
+                  <FormSection label={"your_login_field"} {translation} default={"Your login"} value={user.login.clone()} disabled=true />
+                  <FormSection label={"your_name_field"} {translation} default={"Your name"} value={user.name.clone()} minlength="3" maxlength="16" attr_ref={&self.name} />
                   <div class="md:flex md:items-center mb-6">
                   <div class="md:w-1/3">
                     <label class="common-form-label" for="inline-full-name">
-                    <I18N label={"your_locale_field"} default={"Your locale"} translation={translation}/>
+                    <I18N label={"your_locale_field"} default={"Your locale"} {translation}/>
                     </label>
                   </div>
                   <div class="md:w-2/3">
@@ -279,7 +279,7 @@ impl Component for Settings {
                   <div class="md:flex md:items-center mb-6">
                     <div class="md:w-1/3">
                       <label class="common-form-label" for="inline-full-name">
-                      <I18N label={"your_pfp_field"} default={"Your profile picture"} translation={translation}/>
+                      <I18N label={"your_pfp_field"} default={"Your profile picture"} {translation}/>
                       </label>
                     </div>
                     <div class="md:w-2/3 flex justify-center items-center space-x-4 mt-2 dark:text-gray-200">
@@ -287,32 +287,22 @@ impl Component for Settings {
                             if let Some(v) = &user.pfp {
                                 <><img class="h-10 w-10 rounded-full" src={v.clone()} /></>
                             } else if self.pfp.is_some() {
-                                <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} translation={translation}/>
+                                <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} {translation}/>
                             } else {
-                                <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} translation={translation}/>
+                                <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} {translation}/>
                             }
                         </span>
                         <FileAttacher disabled=false accept={Some(AttrValue::from(".png,.webp,.jpg,.jpg"))} {on_file_attached}/>
                     </div>
                   </div>
-                  if let Some(server_error) = &self.server_error {
-                    <small class="flex mt-4 mb-2 items-center text-red-500">
-                        {server_error}
-                    </small>
-                  }
-                  if let Some(ok_msg) = &self.ok_msg {
-                    <small class="flex mt-4 mb-2 items-center text-green-500">
-                        {ok_msg}
-                    </small>
-                  }
                   <div class="flex items-center">
                   <div class="w-1/3"></div>
                   <div class="flex flex-row w-2/3 justify-end space-x-3">
                     if self.wait_for_api {
-                        <WaitingForResponse translation={translation.clone()} />
+                        <WaitingForResponse {translation} />
                     } else {
-                        <AppButton label={translation.get_or_default("delete_profile", "Delete profile")} is_modal_opener=true callback={delete_profile_callback}/>
-                        <AppButton label={translation.get_or_default("update_profile", "Update profile")} />
+                        <AppButton label={"delete_profile"} default={"Delete profile"} {translation} is_modal_opener=true callback={delete_profile_callback}/>
+                        <AppButton label={"update_profile"} default={"Update profile"} {translation} />
                     }
                   </div>
                 </div>

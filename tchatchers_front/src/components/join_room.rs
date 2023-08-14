@@ -71,16 +71,11 @@ impl Component for JoinRoom {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let translation = ctx.props().user_context.translation.clone();
+        let translation = &ctx.props().user_context.translation;
         html! {
-            <Form label="join_a_room_title" translation={translation.clone()} default="Join a room" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)}>
-                <FormSection label={"room_name"} translation={translation.clone()} default={"Room name"} minlength="1" attr_ref={&self.room_name} required=true />
-                if let Some(verification_error) = &self.verification_error {
-                    <small class="flex mt-4 mb-2 items-center text-red-500">
-                        {verification_error}
-                    </small>
-                }
-                <FormButton label={ctx.props().user_context.translation.as_ref().get_or_default("join_room", "Join")} />
+            <Form label="join_a_room_title" {translation} default="Join a room" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.verification_error} >
+                <FormSection label={"room_name"} {translation} default={"Room name"} minlength="1" attr_ref={&self.room_name} required=true />
+                <FormButton label={"join_room"} default={"Join"} {translation} />
             </Form>
         }
     }

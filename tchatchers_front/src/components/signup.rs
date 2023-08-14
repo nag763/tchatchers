@@ -189,22 +189,17 @@ impl Component for SignUp {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let translation = ctx.props().client_context.translation.clone();
+        let translation = &ctx.props().client_context.translation;
         html! {
-            <Form label="sign_up" translation={translation.clone()} default="Sign upp" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)}>
-            <FormSection label={"login"} translation={translation.clone()} default={"Login"} minlength="3" maxlength="32" attr_ref={&self.login} required=true oninput={ctx.link().callback(|_| Msg::OnLoginChanged)} />
-            <FormSection label={"name_field"} translation={translation.clone()} default={"Name"} minlength="3" maxlength="16" attr_ref={&self.name} required=true />
-            <FormSection label={"password_field"} translation={translation.clone()} default={"Password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password} required=true />
-            <FormSection label={"confirm_password"} translation={translation.clone()} default={"Confirm your password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password_confirmation} required=true />
-            if let Some(server_error) = &self.server_error {
-                <small class="flex mt-4 mb-2 items-center text-red-500">
-                    {server_error}
-                </small>
-            }
+            <Form label="sign_up" {translation} default="Sign upp" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.server_error}>
+            <FormSection label={"login"} {translation} default={"Login"} minlength="3" maxlength="32" attr_ref={&self.login} required=true oninput={ctx.link().callback(|_| Msg::OnLoginChanged)} />
+            <FormSection label={"name_field"} {translation} default={"Name"} minlength="3" maxlength="16" attr_ref={&self.name} required=true />
+            <FormSection label={"password_field"} {translation} default={"Password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password} required=true />
+            <FormSection label={"confirm_password"} {translation} default={"Confirm your password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password_confirmation} required=true />
             if self.wait_for_api {
-                <WaitingForResponse translation={translation.clone()} />
+                <WaitingForResponse {translation} />
             } else {
-                <FormButton label={translation.get_or_default("sign_up", "Sign up")} />
+                <FormButton label={"sign_up"} default={"Sign up"} {translation} />
             }
             </Form>
         }
