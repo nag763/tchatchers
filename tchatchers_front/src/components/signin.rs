@@ -169,14 +169,16 @@ impl Component for SignIn {
                         </div>
                     </div>
                   </div>
-                  <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.server_error.is_none()}>
-                    {self.server_error.as_ref().unwrap_or(&AttrValue::default())}
-                  </small>
-                    if self.wait_for_api {
-                        <WaitingForResponse translation={translation.clone()} />
-                    } else {
-                        <FormButton label={translation.clone().get_or_default("sign_in", "Log in")}/>
-                    }
+                  if let Some(server_error) = &self.server_error {
+                    <small class="flex mt-4 mb-2 items-center text-red-500">
+                        {server_error}
+                    </small>
+                  }
+                  if self.wait_for_api {
+                    <WaitingForResponse translation={translation.clone()} />
+                  } else {
+                    <FormButton label={translation.clone().get_or_default("sign_in", "Log in")}/>
+                  }
                 </form>
                 </div>
             </>

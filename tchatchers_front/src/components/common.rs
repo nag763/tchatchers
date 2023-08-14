@@ -142,16 +142,27 @@ pub struct FormSectionProperties {
     pub label: AttrValue,
     #[prop_or_default]
     pub translation: Rc<TranslationMap>,
+    #[prop_or_default]
     pub attr_ref: NodeRef,
+    #[prop_or_default]
     pub minlength: Option<AttrValue>,
+    #[prop_or_default]
     pub maxlength: Option<AttrValue>,
+    #[prop_or_default]
     pub required: bool,
-    #[prop_or_default("text")]
+    #[prop_or(AttrValue::from("text"))]
     pub input_type: AttrValue,
+    #[prop_or_default]
+    pub oninput: Option<Callback<InputEvent>>,
+    #[prop_or_default]
+    pub disabled: bool,
+    #[prop_or_default]
+    pub value: AttrValue,
 }
 
 #[function_component(FormSection)]
 pub fn form_section(props: &FormSectionProperties) -> Html {
+    let oninput = props.oninput.clone();
     html! {
         <div class="md:flex md:items-center mb-6">
             <div class="md:w-1/3">
@@ -160,7 +171,7 @@ pub fn form_section(props: &FormSectionProperties) -> Html {
             </label>
             </div>
                 <div class="md:w-2/3">
-                <input class="common-input" type={&props.input_type} required={props.required} minlength={&props.minlength} maxlength={&props.maxlength} ref={&props.attr_ref} />
+                <input class="common-input" type={&props.input_type} required={props.required} minlength={&props.minlength} maxlength={&props.maxlength} ref={&props.attr_ref} {oninput} disabled={props.disabled} value={&props.value} />
             </div>
         </div>
     }

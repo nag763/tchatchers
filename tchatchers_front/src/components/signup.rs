@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use crate::components::common::{FormButton, WaitingForResponse, I18N};
+use crate::components::common::{FormButton, FormSection, WaitingForResponse, I18N};
 use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
@@ -193,56 +193,22 @@ impl Component for SignUp {
         html! {
             <>
                 <div class="flex items-center justify-center h-full dark:bg-zinc-800">
-                <form class="w-full max-w-sm border-2 dark:border-zinc-700 px²-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
+                <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="return false;">
                 <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold"><I18N label="sign_up" translation={translation.clone()} default="Sign up"/></h2>
-                  <div class="md:flex md:items-center mb-6">
-                    <div class="md:w-1/3">
-                      <label class="common-form-label" for="inline-full-name">
-                      <I18N label="login" translation={translation.clone()} default="Login"/>
-                      </label>
-                    </div>
-                    <div class="md:w-2/3">
-                      <input class="common-input" id="inline-full-name" type="text" required=true minlength="3" maxlength="32" ref={&self.login} oninput={ctx.link().callback(|_| Msg::OnLoginChanged)}/>
-                    </div>
-                  </div>
-                  <div class="md:flex md:items-center mb-6">
-                    <div class="md:w-1/3">
-                      <label class="common-form-label" for="inline-full-name">
-                      <I18N label="name_field" translation={translation.clone()} default="Name"/>
-                      </label>
-                    </div>
-                    <div class="md:w-2/3">
-                      <input class="common-input" type="text" required=true minlength="3" maxlength="16" ref={&self.name} />
-                    </div>
-                  </div>
-                  <div class="md:flex md:items-center mb-6">
-                    <div class="md:w-1/3">
-                      <label class="common-form-label" for="inline-password">
-                      <I18N label="password_field" translation={translation.clone()} default="Password"/>
-                      </label>
-                    </div>
-                    <div class="md:w-2/3">
-                      <input class="common-input" id="inline-password" type="password" required=true minlength="8" maxlength="128" ref={&self.password} />
-                    </div>
-                  </div>
-                  <div class="md:flex md:items-center mb-6">
-                    <div class="md:w-1/3">
-                      <label class="common-form-label" for="inline-password">
-                      <I18N label="confirm_password" translation={translation.clone()} default="Confirm your password"/>
-                      </label>
-                    </div>
-                    <div class="md:w-2/3">
-                      <input class="common-input" id="inline-password" type="password" required=true minlength="8" maxlength="128" ref={&self.password_confirmation} />
-                    </div>
-                  </div>
-                  <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.server_error.is_none()}>
-                    {self.server_error.as_ref().unwrap_or(&AttrValue::default())}
-                  </small>
-                    if self.wait_for_api {
-                        <WaitingForResponse translation={translation.clone()} />
-                    } else {
-                        <FormButton label={translation.get_or_default("sign_up", "Sign up")} />
-                    }
+                  <FormSection label={"login"} translation={translation.clone()} default={"Login"} minlength="3" maxlength="32" attr_ref={&self.login} required=true oninput={ctx.link().callback(|_| Msg::OnLoginChanged)} />
+                  <FormSection label={"name_field"} translation={translation.clone()} default={"Name"} minlength="3" maxlength="16" attr_ref={&self.name} required=true />
+                  <FormSection label={"password_field"} translation={translation.clone()} default={"Password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password} required=true />
+                  <FormSection label={"confirm_password"} translation={translation.clone()} default={"Confirm your password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password_confirmation} required=true />
+                  if let Some(server_error) = &self.server_error {
+                    <small class="flex mt-4 mb-2 items-center text-red-500">
+                        {server_error}
+                    </small>
+                  }
+                  if self.wait_for_api {
+                    <WaitingForResponse translation={translation.clone()} />
+                  } else {
+                    <FormButton label={translation.get_or_default("sign_up", "Sign up")} />
+                  }
                 </form>
                 </div>
             </>

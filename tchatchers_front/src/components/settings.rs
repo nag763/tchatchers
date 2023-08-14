@@ -4,6 +4,7 @@ use std::rc::Rc;
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::common::AppButton;
 use crate::components::common::FileAttacher;
+use crate::components::common::FormSection;
 use crate::components::common::WaitingForResponse;
 use crate::components::toast::Alert;
 use crate::router::Route;
@@ -263,26 +264,8 @@ impl Component for Settings {
                 <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold">
                     <I18N label={"settings"} default={"Settings"} translation={translation}/>
                 </h2>
-                  <div class="md:flex md:items-center mb-6">
-                    <div class="md:w-1/3">
-                      <label class="common-form-label" for="inline-full-name">
-                        <I18N label={"your_login_field"} default={"Your login"} translation={translation}/>
-                      </label>
-                    </div>
-                    <div class="md:w-2/3">
-                      <input class="common-input" id="inline-full-name" type="text" required=true minlength="3" maxlength="32" value={user.login.clone()} disabled=true/>
-                    </div>
-                    </div>
-                  <div class="md:flex md:items-center mb-6">
-                    <div class="md:w-1/3">
-                      <label class="common-form-label" for="inline-full-name">
-                      <I18N label={"your_name_field"} default={"Your name"} translation={translation}/>
-                      </label>
-                    </div>
-                    <div class="md:w-2/3">
-                      <input class="common-input" id="inline-full-name" type="text" required=true minlength="3" maxlength="16" ref={&self.name} value={user.name.clone()}/>
-                    </div>
-                  </div>
+                  <FormSection label={"your_login_field"} translation={translation.clone()} default={"Your login"} value={user.login.clone()} disabled=true />
+                  <FormSection label={"your_name_field"} translation={translation.clone()} default={"Your name"} value={user.name.clone()} minlength="3" maxlength="16" attr_ref={&self.name} />
                   <div class="md:flex md:items-center mb-6">
                   <div class="md:w-1/3">
                     <label class="common-form-label" for="inline-full-name">
@@ -316,12 +299,16 @@ impl Component for Settings {
                         <FileAttacher disabled=false accept={Some(AttrValue::from(".png,.webp,.jpg,.jpg"))} {on_file_attached}/>
                     </div>
                   </div>
-                  <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.server_error.is_none()}>
-                    {self.server_error.as_ref().unwrap_or(&AttrValue::default())}
-                  </small>
-                  <small class="flex mt-4 mb-2 items-center text-green-500" hidden={self.ok_msg.is_none()}>
-                    {self.ok_msg.as_ref().unwrap_or(&AttrValue::default())}
-                  </small>
+                  if let Some(server_error) = &self.server_error {
+                    <small class="flex mt-4 mb-2 items-center text-red-500">
+                        {server_error}
+                    </small>
+                  }
+                  if let Some(ok_msg) = &self.ok_msg {
+                    <small class="flex mt-4 mb-2 items-center text-green-500">
+                        {ok_msg}
+                    </small>
+                  }
                   <div class="flex items-center">
                   <div class="w-1/3"></div>
                   <div class="flex flex-row w-2/3 justify-end space-x-3">
