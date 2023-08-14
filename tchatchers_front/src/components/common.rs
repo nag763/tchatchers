@@ -202,7 +202,7 @@ pub fn form(props: &FormProperties) -> Html {
     let translation = &props.translation;
     html! {
         <div class="flex items-center justify-center h-full dark:bg-zinc-800">
-            <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" {onsubmit} action="javascript:void(0);">
+            <form class="w-full max-w-sm lg:max-w-md xl:max-w-lg border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" {onsubmit} action="javascript:void(0);">
             <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold"><I18N label={&props.label} {translation} default={&props.default} />
             </h2>
             { for props.children.iter() }
