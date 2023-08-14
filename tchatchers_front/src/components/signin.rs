@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use crate::components::common::{FormButton, FormSection, WaitingForResponse};
+use crate::components::common::{Form, FormButton, FormSection, WaitingForResponse};
 use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
@@ -151,37 +151,31 @@ impl Component for SignIn {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let translation = &ctx.props().client_context.translation.clone();
         html! {
-            <>
-                <div class="flex items-center justify-center h-full dark:bg-zinc-800">
-                <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
-
-                <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold"><I18N label="sign_in" translation={translation.clone()} default="Sign in"/></h2>
-                  <FormSection label={"login"} translation={translation.clone()} default={"Login"} minlength="3" attr_ref={&self.login} required=true />
-                  <FormSection label={"password_field"} translation={translation.clone()} required=true  default={"Password"} minlength="4" input_type="password" attr_ref={&self.password} />
-                  <div class="md:flex md:items-center mb-6">
-                    <div class="md:w-1/3"/>
-                    <div class="md:w-2/3">
-                        <div class="flex  items-center mr-4 space-x-2">
-                            <input id="inline-keep-me-signed-in" type="checkbox" class="w-4 h-4 accent-purple-600 dark:accent-zinc-700" ref={&self.remember_me} />
-                            <label class="text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-keep-me-signed-in">
-                            <I18N label={"keep_me_signed_in"} translation={translation.clone()} default={"Remember me"}/>
-                            </label>
-                        </div>
+            <Form label="sign_in" translation={translation.clone()} default="Sign in" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)}>
+                <FormSection label={"login"} translation={translation.clone()} default={"Login"} minlength="3" attr_ref={&self.login} required=true />
+                <FormSection label={"password_field"} translation={translation.clone()} required=true  default={"Password"} minlength="4" input_type="password" attr_ref={&self.password} />
+                <div class="md:flex md:items-center mb-6">
+                <div class="md:w-1/3"/>
+                <div class="md:w-2/3">
+                    <div class="flex  items-center mr-4 space-x-2">
+                        <input id="inline-keep-me-signed-in" type="checkbox" class="w-4 h-4 accent-purple-600 dark:accent-zinc-700" ref={&self.remember_me} />
+                        <label class="text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-keep-me-signed-in">
+                        <I18N label={"keep_me_signed_in"} translation={translation.clone()} default={"Remember me"}/>
+                        </label>
                     </div>
-                  </div>
-                  if let Some(server_error) = &self.server_error {
-                    <small class="flex mt-4 mb-2 items-center text-red-500">
-                        {server_error}
-                    </small>
-                  }
-                  if self.wait_for_api {
-                    <WaitingForResponse translation={translation.clone()} />
-                  } else {
-                    <FormButton label={translation.clone().get_or_default("sign_in", "Log in")}/>
-                  }
-                </form>
                 </div>
-            </>
+                </div>
+                if let Some(server_error) = &self.server_error {
+                <small class="flex mt-4 mb-2 items-center text-red-500">
+                    {server_error}
+                </small>
+                }
+                if self.wait_for_api {
+                <WaitingForResponse translation={translation.clone()} />
+                } else {
+                <FormButton label={translation.clone().get_or_default("sign_in", "Log in")}/>
+                }
+            </Form>
         }
     }
 }

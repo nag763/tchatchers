@@ -1,6 +1,7 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
+use crate::components::common::{Form, FormSection};
 use crate::router::Route;
 use crate::{components::common::FormButton, utils::client_context::ClientContext};
 use std::rc::Rc;
@@ -11,8 +12,6 @@ use yew::{
     function_component, html, use_context, AttrValue, Component, Context, Html, NodeRef, Properties,
 };
 use yew_router::scope_ext::RouterScopeExt;
-
-use super::common::I18N;
 
 #[function_component(JoinRoomHOC)]
 pub fn join_room_hoc() -> Html {
@@ -72,31 +71,17 @@ impl Component for JoinRoom {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let translation = ctx.props().user_context.translation.clone();
         html! {
-            <>
-                <div class="flex items-center justify-center h-full dark:bg-zinc-800">
-                <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6 lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
-
-                <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold">
-                    <I18N label={"join_a_room_title"} default={"Join a room"} translation={ctx.props().user_context.translation.clone()}/>
-                </h2>
-                  <div class="md:flex md:items-center mb-6">
-                    <div class="md:w-1/3">
-                      <label class="common-form-label" for="inline-full-name">
-                        <I18N label={"room_name"} default={"Room name"} translation={ctx.props().user_context.translation.clone()}/>
-                      </label>
-                    </div>
-                    <div class="md:w-2/3">
-                      <input class="common-input" id="inline-full-name" type="text" required=true minlength="1" ref={&self.room_name} />
-                    </div>
-                  </div>
-                    <small class="flex mt-4 mb-2 items-center text-red-500" hidden={self.verification_error.is_none()}>
-                        {self.verification_error.as_ref().unwrap_or(&AttrValue::default())}
+            <Form label="join_a_room_title" translation={translation.clone()} default="Join a room" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)}>
+                <FormSection label={"room_name"} translation={translation.clone()} default={"Room name"} minlength="1" attr_ref={&self.room_name} required=true />
+                if let Some(verification_error) = &self.verification_error {
+                    <small class="flex mt-4 mb-2 items-center text-red-500">
+                        {verification_error}
                     </small>
-                  <FormButton label={ctx.props().user_context.translation.as_ref().get_or_default("join_room", "Join")} />
-                </form>
-                </div>
-            </>
+                }
+                <FormButton label={ctx.props().user_context.translation.as_ref().get_or_default("join_room", "Join")} />
+            </Form>
         }
     }
 }

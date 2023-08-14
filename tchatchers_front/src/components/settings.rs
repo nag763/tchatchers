@@ -4,6 +4,7 @@ use std::rc::Rc;
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::common::AppButton;
 use crate::components::common::FileAttacher;
+use crate::components::common::Form;
 use crate::components::common::FormSection;
 use crate::components::common::WaitingForResponse;
 use crate::components::toast::Alert;
@@ -257,13 +258,8 @@ impl Component for Settings {
             })
         };
         html! {
-            <>
-                <div class="flex items-center justify-center h-full dark:bg-zinc-800">
-                <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);" >
 
-                <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold">
-                    <I18N label={"settings"} default={"Settings"} translation={translation}/>
-                </h2>
+            <Form label="settings" translation={translation.clone()} default="Settings" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)}>
                   <FormSection label={"your_login_field"} translation={translation.clone()} default={"Your login"} value={user.login.clone()} disabled=true />
                   <FormSection label={"your_name_field"} translation={translation.clone()} default={"Your name"} value={user.name.clone()} minlength="3" maxlength="16" attr_ref={&self.name} />
                   <div class="md:flex md:items-center mb-6">
@@ -320,9 +316,7 @@ impl Component for Settings {
                     }
                   </div>
                 </div>
-                </form>
-                </div>
-            </>
+                </Form >
         }
     }
 }

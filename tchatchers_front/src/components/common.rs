@@ -7,10 +7,11 @@ use js_sys::ArrayBuffer;
 use tchatchers_core::locale::TranslationMap;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
-use web_sys::{Event, EventTarget, FileReader, InputEvent};
+use web_sys::{Event, EventTarget, FileReader, InputEvent, SubmitEvent};
 use web_sys::{HtmlInputElement, MouseEvent};
 use yew::{
-    classes, function_component, html, use_state, AttrValue, Callback, Html, NodeRef, Properties,
+    classes, function_component, html, use_state, AttrValue, Callback, Children, Html, NodeRef,
+    Properties,
 };
 
 use super::modal::MODAL_OPENER_CLASS;
@@ -173,6 +174,31 @@ pub fn form_section(props: &FormSectionProperties) -> Html {
                 <div class="md:w-2/3">
                 <input class="common-input" type={&props.input_type} required={props.required} minlength={&props.minlength} maxlength={&props.maxlength} ref={&props.attr_ref} {oninput} disabled={props.disabled} value={&props.value} />
             </div>
+        </div>
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct FormProperties {
+    pub default: AttrValue,
+    pub label: AttrValue,
+    #[prop_or_default]
+    pub translation: Rc<TranslationMap>,
+    #[prop_or_default]
+    pub onsubmit: Option<Callback<SubmitEvent>>,
+    pub children: Children,
+}
+
+#[function_component(Form)]
+pub fn form(props: &FormProperties) -> Html {
+    let onsubmit = props.onsubmit.clone();
+    html! {
+        <div class="flex items-center justify-center h-full dark:bg-zinc-800">
+            <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" {onsubmit} action="javascript:void(0);">
+            <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold"><I18N label={&props.label} translation={props.translation.clone()} default={&props.default} />
+            </h2>
+            { for props.children.iter() }
+            </form>
         </div>
     }
 }
