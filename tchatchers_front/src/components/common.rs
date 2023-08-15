@@ -163,8 +163,6 @@ pub struct FormInputProperties {
     #[prop_or(AttrValue::from("text"))]
     pub input_type: AttrValue,
     #[prop_or_default]
-    pub oninput: Option<Callback<InputEvent>>,
-    #[prop_or_default]
     pub disabled: bool,
     #[prop_or_default]
     pub value: AttrValue,
@@ -172,7 +170,6 @@ pub struct FormInputProperties {
 
 #[function_component(FormInput)]
 pub fn form_input(props: &FormInputProperties) -> Html {
-    let oninput = props.oninput.clone();
     let translation = &props.translation;
     html! {
         <div class="md:flex md:items-center mb-6">
@@ -182,7 +179,7 @@ pub fn form_input(props: &FormInputProperties) -> Html {
             </label>
             </div>
                 <div class="md:w-2/3">
-                <input class="common-input" type={&props.input_type} required={props.required} minlength={&props.minlength} maxlength={&props.maxlength} ref={&props.attr_ref} {oninput} disabled={props.disabled} value={&props.value} />
+                <input class="common-input" type={&props.input_type} required={props.required} minlength={&props.minlength} maxlength={&props.maxlength} ref={&props.attr_ref} disabled={props.disabled} value={&props.value} />
             </div>
         </div>
     }
@@ -213,7 +210,7 @@ pub fn form_select(props: &FormSelectProperties) -> Html {
             </div>
             <div class="md:w-2/3">
             <select class="common-input" id="inline-full-name" type="text" required=true ref={&props.attr_ref} value={&props.default_value} >
-                {for props.values.iter().map(|l| html! {<option value={&l.0}>{&l.1}</option>})}
+                {for props.values.iter().map(|l| html! {<option value={&l.0} selected={if let Some(value) = &props.default_value {value == &l.0} else {false}} >{&l.1}</option>})}
             </select>
             </div>
         </div>
@@ -307,7 +304,7 @@ pub fn form(props: &FormProperties) -> Html {
     let translation = &props.translation;
     html! {
         <div class="flex items-center justify-center h-full dark:bg-zinc-800">
-            <form class="w-full max-w-sm border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" {onsubmit} action="javascript:void(0);">
+            <form class="w-full max-w-sm lg:max-w-md xl:max-w-lg border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" {onsubmit} action="javascript:void(0);">
             <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold"><I18N label={&props.label} {translation} default={&props.default} />
             </h2>
             { for props.children.iter() }

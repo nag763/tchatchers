@@ -13,7 +13,6 @@
     hyphens: auto;
 }
 
-
 @layer components {
     .chat-component {
         @apply flex w-full space-x-3 px-3;
@@ -24,30 +23,30 @@
     }
 
     .message-common {
-        @apply relative p-3 text-sm mb-2 break-when-needed max-w-xs;
+        @apply antialiased relative p-3 text-sm mb-2 break-when-needed max-w-xs;
     }
 
     .message-user {
-        @apply message-common bg-blue-600 text-white rounded-l-lg rounded-br-lg;
+        @apply antialiased message-common bg-blue-600 text-white rounded-l-lg rounded-br-lg;
     }
 
     .message-other {
-        @apply bg-gray-300 message-common rounded-r-lg rounded-bl-lg;
+        @apply antialiased bg-gray-300 message-common rounded-r-lg rounded-bl-lg;
     }
     
     .common-button {
-        @apply bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:outline-none text-white font-bold py-2 px-4 rounded md:whitespace-nowrap;
+        @apply antialiased bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:outline-none text-white font-bold py-2 px-4 rounded;
     }
 
     .common-input {
-        @apply bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500;
+        @apply antialiased bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500;
     }
 
     .common-form-section {
-        @apply md:flex md:items-center mb-6;
+        @apply antialiased md:flex md:items-center mb-6;
     }
 
     .common-form-label {
-        @apply block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4;
+        @apply antialiased block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4;
     }
 }
