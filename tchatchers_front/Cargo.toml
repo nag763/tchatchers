@@ -22,3 +22,4 @@ uuid = { version = "1.4.1", features = ["v4"] }
 validator = "0.16.1"
 async-recursion = "1.0.4"
 postcard = { version = "1.0.6", features = ["use-std"], default-features = false }
+derive_more = "0.99.17"

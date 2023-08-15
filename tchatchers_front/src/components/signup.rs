@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use crate::components::common::{Form, FormButton, FormSection, WaitingForResponse};
+use crate::components::common::{Form, FormButton, FormInput, WaitingForResponse, FormFreeSection};
 use crate::components::toast::Alert;
 use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
@@ -145,7 +145,7 @@ impl Component for SignUp {
             Msg::OnLoginChanged => {
                 if let Some(login) = self.login.cast::<HtmlInputElement>() {
                     if login.min_length() <= login.value().len().try_into().unwrap() {
-                        let translation = ctx.props().client_context.translation.clone();
+                        let translation = ctx.props().client_context.translation.clone()    ;
                         self.check_login = Some({
                             Timeout::new(CHECK_LOGIN_AFTER, move || {
                                 wasm_bindgen_futures::spawn_local(async move {
@@ -192,15 +192,17 @@ impl Component for SignUp {
         let translation = &ctx.props().client_context.translation;
         html! {
             <Form label="sign_up" {translation} default="Sign upp" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.server_error}>
-            <FormSection label={"login"} {translation} default={"Login"} minlength="3" maxlength="32" attr_ref={&self.login} required=true oninput={ctx.link().callback(|_| Msg::OnLoginChanged)} />
-            <FormSection label={"name_field"} {translation} default={"Name"} minlength="3" maxlength="16" attr_ref={&self.name} required=true />
-            <FormSection label={"password_field"} {translation} default={"Password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password} required=true />
-            <FormSection label={"confirm_password"} {translation} default={"Confirm your password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password_confirmation} required=true />
-            if self.wait_for_api {
-                <WaitingForResponse {translation} />
-            } else {
-                <FormButton label={"sign_up"} default={"Sign up"} {translation} />
-            }
+            <FormInput label={"login"} {translation} default={"Login"} minlength="3" maxlength="32" attr_ref={&self.login} required=true oninput={ctx.link().callback(|_| Msg::OnLoginChanged)} />
+            <FormInput label={"name_field"} {translation} default={"Name"} minlength="3" maxlength="16" attr_ref={&self.name} required=true />
+            <FormInput label={"password_field"} {translation} default={"Password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password} required=true />
+            <FormInput label={"confirm_password"} {translation} default={"Confirm your password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password_confirmation} required=true />
+            <FormFreeSection>
+                if self.wait_for_api {
+                    <WaitingForResponse {translation} />
+                } else {
+                    <FormButton label={"sign_up"} default={"Sign up"} {translation} />
+                }
+            </FormFreeSection>
             </Form>
         }
     }

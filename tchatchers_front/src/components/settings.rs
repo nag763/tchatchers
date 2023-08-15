@@ -5,7 +5,9 @@ use std::rc::Rc;
 use crate::components::common::AppButton;
 use crate::components::common::FileAttacher;
 use crate::components::common::Form;
-use crate::components::common::FormSection;
+use crate::components::common::FormFreeSection;
+use crate::components::common::FormInput;
+use crate::components::common::FormSelect;
 use crate::components::common::WaitingForResponse;
 use crate::components::toast::Alert;
 use crate::router::Route;
@@ -13,6 +15,7 @@ use crate::services::modal_bus::ModalBus;
 use crate::services::modal_bus::ModalBusContent;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
+use crate::utils::keyed_list::KeyedList;
 use crate::utils::requester::Requester;
 use tchatchers_core::api_response::ApiResponse;
 use tchatchers_core::locale::Locale;
@@ -260,52 +263,43 @@ impl Component for Settings {
         html! {
 
             <Form label="settings" {translation} default="Settings" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.server_error} form_ok={&self.ok_msg}>
-                  <FormSection label={"your_login_field"} {translation} default={"Your login"} value={user.login.clone()} disabled=true />
-                  <FormSection label={"your_name_field"} {translation} default={"Your name"} value={user.name.clone()} minlength="3" maxlength="16" attr_ref={&self.name} />
-                  <div class="md:flex md:items-center mb-6">
-                  <div class="md:w-1/3">
-                    <label class="common-form-label" for="inline-full-name">
-                    <I18N label={"your_locale_field"} default={"Your locale"} {translation}/>
-                    </label>
-                  </div>
-                  <div class="md:w-2/3">
-                    <select class="common-input" id="inline-full-name" type="text" required=true ref={&self.locale_id} >
-                        {self.user_context.available_locale.iter().map(|l|
-                                html! {<option value={l.id.to_string()} selected={l.id == user.locale_id}>{l.long_name.as_str()}</option>}
-                        ).collect::<Html>()}
-                    </select>
-                  </div>
-                </div>
-                  <div class="md:flex md:items-center mb-6">
-                    <div class="md:w-1/3">
-                      <label class="common-form-label" for="inline-full-name">
-                      <I18N label={"your_pfp_field"} default={"Your profile picture"} {translation}/>
-                      </label>
+                  <FormInput label={"your_login_field"} {translation} default={"Your login"} value={user.login.clone()} disabled=true />
+                  <FormInput label={"your_name_field"} {translation} default={"Your name"} value={user.name.clone()} minlength="3" maxlength="16" attr_ref={&self.name} />
+                  <FormSelect label={"your_locale_field"} default={"Your locale"} {translation} default_value={AttrValue::from(user.locale_id.to_string())} values={KeyedList::from(Locale::get_keyed_list())} />
+                  <FormFreeSection>
+                    <div class="md:flex md:items-center mb-6">
+                        <div class="md:w-1/3">
+                        <label class="common-form-label" for="inline-full-name">
+                        <I18N label={"your_pfp_field"} default={"Your profile picture"} {translation}/>
+                        </label>
+                        </div>
+                        <div class="md:w-2/3 flex justify-center items-center space-x-4 mt-2 dark:text-gray-200">
+                            <span class="dark:text-gray-300">
+                                if let Some(v) = &user.pfp {
+                                    <><img class="h-10 w-10 rounded-full" src={v.clone()} /></>
+                                } else if self.pfp.is_some() {
+                                    <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} {translation}/>
+                                } else {
+                                    <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} {translation}/>
+                                }
+                            </span>
+                            <FileAttacher disabled=false accept={Some(AttrValue::from(".png,.webp,.jpg,.jpg"))} {on_file_attached}/>
+                        </div>
                     </div>
-                    <div class="md:w-2/3 flex justify-center items-center space-x-4 mt-2 dark:text-gray-200">
-                        <span class="dark:text-gray-300">
-                            if let Some(v) = &user.pfp {
-                                <><img class="h-10 w-10 rounded-full" src={v.clone()} /></>
-                            } else if self.pfp.is_some() {
-                                <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} {translation}/>
-                            } else {
-                                <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} {translation}/>
-                            }
-                        </span>
-                        <FileAttacher disabled=false accept={Some(AttrValue::from(".png,.webp,.jpg,.jpg"))} {on_file_attached}/>
+                  </FormFreeSection>
+                  <FormFreeSection>
+                    <div class="flex items-center">
+                    <div class="w-1/3"></div>
+                    <div class="flex flex-row w-2/3 justify-end space-x-3">
+                        if self.wait_for_api {
+                            <WaitingForResponse {translation} />
+                        } else {
+                            <AppButton label={"delete_profile"} default={"Delete profile"} {translation} is_modal_opener=true callback={delete_profile_callback}/>
+                            <AppButton label={"update_profile"} default={"Update profile"} {translation} />
+                        }
                     </div>
-                  </div>
-                  <div class="flex items-center">
-                  <div class="w-1/3"></div>
-                  <div class="flex flex-row w-2/3 justify-end space-x-3">
-                    if self.wait_for_api {
-                        <WaitingForResponse {translation} />
-                    } else {
-                        <AppButton label={"delete_profile"} default={"Delete profile"} {translation} is_modal_opener=true callback={delete_profile_callback}/>
-                        <AppButton label={"update_profile"} default={"Update profile"} {translation} />
-                    }
-                  </div>
-                </div>
+                    </div>
+                </FormFreeSection>
                 </Form >
         }
     }

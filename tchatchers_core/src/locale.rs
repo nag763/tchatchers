@@ -123,4 +123,9 @@ impl Locale {
         let default_locale = locales.get(&1)?;
         default_locale.translation_map.get(label).cloned()
     }
+
+    pub fn get_keyed_list() -> Vec<(i32, String)> {
+        let locales = LOCALES.get_or_init(Self::init_cell);
+        locales.iter().map(|(key, locale)| (*key, locale.long_name.clone())).collect()
+    }
 }

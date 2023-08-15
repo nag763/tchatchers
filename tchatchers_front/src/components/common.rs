@@ -9,10 +9,14 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::{Event, EventTarget, FileReader, InputEvent, SubmitEvent};
 use web_sys::{HtmlInputElement, MouseEvent};
+use yew::html::ChildrenRenderer;
+use yew::virtual_dom::VChild;
 use yew::{
     classes, function_component, html, use_state, AttrValue, Callback, Children, Html, NodeRef,
     Properties,
 };
+
+use crate::utils::keyed_list::KeyedList;
 
 use super::modal::MODAL_OPENER_CLASS;
 
@@ -143,7 +147,7 @@ pub fn i18n(props: &I18nProperties) -> Html {
 }
 
 #[derive(Properties, PartialEq)]
-pub struct FormSectionProperties {
+pub struct FormInputProperties {
     pub default: AttrValue,
     pub label: AttrValue,
     #[prop_or_default]
@@ -166,8 +170,8 @@ pub struct FormSectionProperties {
     pub value: AttrValue,
 }
 
-#[function_component(FormSection)]
-pub fn form_section(props: &FormSectionProperties) -> Html {
+#[function_component(FormInput)]
+pub fn form_input(props: &FormInputProperties) -> Html {
     let oninput = props.oninput.clone();
     let translation = &props.translation;
     html! {
@@ -185,6 +189,104 @@ pub fn form_section(props: &FormSectionProperties) -> Html {
 }
 
 #[derive(Properties, PartialEq)]
+pub struct FormSelectProperties {
+    pub default: AttrValue,
+    pub label: AttrValue,
+    #[prop_or_default]
+    pub translation: Rc<TranslationMap>,
+    #[prop_or_default]
+    pub attr_ref: NodeRef,
+    #[prop_or_default]
+    pub default_value: Option<AttrValue>,
+    pub values: KeyedList,
+}
+
+#[function_component(FormSelect)]
+pub fn form_select(props: &FormSelectProperties) -> Html {
+    let translation = &props.translation;
+    html! {
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3">
+            <label class="common-form-label" for="inline-full-name">
+            <I18N label={&props.label} {translation} default={&props.default}/>
+            </label>
+            </div>
+            <div class="md:w-2/3">
+            <select class="common-input" id="inline-full-name" type="text" required=true ref={&props.attr_ref} value={&props.default_value} >
+                {for props.values.iter().map(|l| html! {<option value={&l.0}>{&l.1}</option>})}
+            </select>
+            </div>
+        </div>
+    } 
+}
+
+#[derive(Properties, PartialEq)]
+pub struct FormCheckboxProperties {
+    pub default: AttrValue,
+    pub label: AttrValue,
+    #[prop_or_default]
+    pub translation: Rc<TranslationMap>,
+    #[prop_or_default]
+    pub attr_ref: NodeRef,
+}
+
+
+#[function_component(FormCheckbox)]
+pub fn form_checkbox(props: &FormCheckboxProperties) -> Html {
+    let translation = &props.translation;
+    html! {
+        <div class="md:flex md:items-center mb-6">
+        <div class="md:w-1/3"/>
+        <div class="md:w-2/3">
+            <div class="flex  items-center mr-4 space-x-2">
+                <input type="checkbox" class="w-4 h-4 accent-purple-600 dark:accent-zinc-700" ref={&props.attr_ref} />
+                <label class="text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-keep-me-signed-in">
+                <I18N label={&props.label} {translation} default={&props.default}/>
+                </label>
+            </div>
+        </div>
+        </div>
+    } 
+}
+
+
+#[derive(Properties, PartialEq)]
+pub struct FormFreeSectionProperties {
+    pub children: Children,
+}
+
+
+#[function_component(FormFreeSection)]
+pub fn form_free_section(props: &FormFreeSectionProperties) -> Html {
+    html! {
+        <>
+        {for props.children.iter()}
+        </>
+    } 
+}
+
+#[derive(Clone, PartialEq, derive_more::From)]
+pub enum FormSection {
+    Input(VChild<FormInput>),
+    Button(VChild<FormButton>),
+    Select(VChild<FormSelect>),
+    Checkbox(VChild<FormCheckbox>),
+    FreeSection(VChild<FormFreeSection>)
+}
+
+impl Into<Html> for FormSection {
+    fn into(self) -> Html {
+        match self {
+            FormSection::Input(child) => child.into(),
+            FormSection::Button(child) => child.into(),
+            FormSection::Select(child) => child.into(),
+            FormSection::Checkbox(child) => child.into(),
+            FormSection::FreeSection(child) => child.into(),
+        }
+    }
+}
+
+#[derive(Properties, PartialEq)]
 pub struct FormProperties {
     pub default: AttrValue,
     pub label: AttrValue,
@@ -192,7 +294,7 @@ pub struct FormProperties {
     pub translation: Rc<TranslationMap>,
     #[prop_or_default]
     pub onsubmit: Option<Callback<SubmitEvent>>,
-    pub children: Children,
+    pub children: ChildrenRenderer<FormSection>,
     #[prop_or_default]
     pub form_error: Option<AttrValue>,
     #[prop_or_default]

@@ -1,7 +1,7 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use crate::components::common::{Form, FormSection};
+use crate::components::common::{Form, FormInput};
 use crate::router::Route;
 use crate::{components::common::FormButton, utils::client_context::ClientContext};
 use std::rc::Rc;
@@ -74,7 +74,7 @@ impl Component for JoinRoom {
         let translation = &ctx.props().user_context.translation;
         html! {
             <Form label="join_a_room_title" {translation} default="Join a room" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.verification_error} >
-                <FormSection label={"room_name"} {translation} default={"Room name"} minlength="1" attr_ref={&self.room_name} required=true />
+                <FormInput label={"room_name"} {translation} default={"Room name"} minlength="1" attr_ref={&self.room_name} required=true />
                 <FormButton label={"join_room"} default={"Join"} {translation} />
             </Form>
         }

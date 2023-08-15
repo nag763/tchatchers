@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{rc::Rc};
 
 use yew::{function_component, html, use_context, BaseComponent, Html};
 use yew_agent::Dispatched;
