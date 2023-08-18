@@ -126,6 +126,9 @@ impl Locale {
 
     pub fn get_keyed_list() -> Vec<(i32, String)> {
         let locales = LOCALES.get_or_init(Self::init_cell);
-        locales.iter().map(|(key, locale)| (*key, locale.long_name.clone())).collect()
+        locales
+            .iter()
+            .map(|(key, locale)| (*key, locale.long_name.clone()))
+            .collect()
     }
 }

@@ -214,7 +214,7 @@ pub fn form_select(props: &FormSelectProperties) -> Html {
             </select>
             </div>
         </div>
-    } 
+    }
 }
 
 #[derive(Properties, PartialEq)]
@@ -226,7 +226,6 @@ pub struct FormCheckboxProperties {
     #[prop_or_default]
     pub attr_ref: NodeRef,
 }
-
 
 #[function_component(FormCheckbox)]
 pub fn form_checkbox(props: &FormCheckboxProperties) -> Html {
@@ -243,15 +242,13 @@ pub fn form_checkbox(props: &FormCheckboxProperties) -> Html {
             </div>
         </div>
         </div>
-    } 
+    }
 }
-
 
 #[derive(Properties, PartialEq)]
 pub struct FormFreeSectionProperties {
     pub children: Children,
 }
-
 
 #[function_component(FormFreeSection)]
 pub fn form_free_section(props: &FormFreeSectionProperties) -> Html {
@@ -259,7 +256,7 @@ pub fn form_free_section(props: &FormFreeSectionProperties) -> Html {
         <>
         {for props.children.iter()}
         </>
-    } 
+    }
 }
 
 #[derive(Clone, PartialEq, derive_more::From)]
@@ -268,7 +265,7 @@ pub enum FormSection {
     Button(VChild<FormButton>),
     Select(VChild<FormSelect>),
     Checkbox(VChild<FormCheckbox>),
-    FreeSection(VChild<FormFreeSection>)
+    FreeSection(VChild<FormFreeSection>),
 }
 
 impl Into<Html> for FormSection {

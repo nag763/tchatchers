@@ -70,6 +70,7 @@ translations:
       validation_error: The request you sent is invalid, some validation errors have been met.
       content_type_missing_or_not_accepted: The content type is either missing or not accepted.
       io_error: An error happened while reading or writing the content.
+      max_conns_reached: The number of maximum simultaneous connections has been reached
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR
@@ -139,7 +140,7 @@ translations:
       serialization_error: La requête est mal formée car le format de sérialisation n'est pas celui attendu.
       validation_error: La requête que vous avez envoyée est invalide, certaines erreurs de validation ont été rencontrées.
       content_type_missing_or_not_accepted: Le type de contenu est manquant ou non accepté.
-
+      max_conns_reached: Le nombre maximum de connexions simultanées a été atteint
   - id: 3
     long_name: English (UK)
     short_name: en-UK
@@ -210,6 +211,7 @@ translations:
       serialization_error: The request is malformed as the serialization format isn't the one expected.
       validation_error: The request you sent is invalid, some validation errors have been met.
       content_type_missing_or_not_accepted: The content type is either missing or not accepted.
+      max_conns_reached: The number of maximum simultaneous connections has been reached
   - id: 4
     long_name: Deutsch (DE)
     short_name: de-DE
@@ -279,7 +281,7 @@ translations:
       serialization_error: Die Anfrage ist fehlerhaft, da das Serialisierungsformat nicht erwartet wird.
       validation_error: Die von Ihnen gesendete Anfrage ist ungültig. Es sind einige Validierungsfehler aufgetreten.
       content_type_missing_or_not_accepted: Der Inhaltstyp fehlt oder wird nicht akzeptiert.
-
+      max_conns_reached: Die maximale Anzahl gleichzeitiger Verbindungen wurde erreicht
   - id: 5
     long_name: Español (ES)
     short_name: es-ES
@@ -349,7 +351,7 @@ translations:
       serialization_error: La solicitud no es válida, ya que el formato de serialización no es el esperado.
       validation_error: La solicitud que envió no es válida, se encontraron algunos errores de validación.
       content_type_missing_or_not_accepted: Falta el tipo de contenido o no es aceptado.
-
+      max_conns_reached: El número de conexiones simultáneas máximas ha sido alcanzado
   - id: 6
     long_name: Português (BR)
     short_name: pt-BR
@@ -419,7 +421,7 @@ translations:
       serialization_error: O pedido está malformado, pois o formato de serialização não é o esperado.
       validation_error: O pedido que você enviou é inválido, alguns erros de validação foram encontrados.
       content_type_missing_or_not_accepted: O tipo de conteúdo está faltando ou não é aceito.
-
+      max_conns_reached: O número máximo de conexões simultâneas foi atingido
   - id: 7
     long_name: Italiano (IT)
     short_name: it-IT
@@ -489,7 +491,7 @@ translations:
       serialization_error: La richiesta non è valida poiché il formato di serializzazione non è quello previsto.
       validation_error: La richiesta inviata non è valida, sono stati riscontrati alcuni errori di convalida.
       content_type_missing_or_not_accepted: Il tipo di contenuto è mancante o non accettato.
-
+      max_conns_reached: È stato raggiunto il numero massimo di connessioni simultanee
   - id: 8
     long_name: Русский (RU)
     short_name: ru-RU
@@ -559,7 +561,7 @@ translations:
       serialization_error: Запрос сформирован неправильно, так как формат сериализации не соответствует ожидаемому.
       validation_error: Отправленный вами запрос недействителен, возникли некоторые ошибки проверки данных.
       content_type_missing_or_not_accepted: Тип контента отсутствует или не принимается.
-
+      max_conns_reached: Количество максимальных одновременных подключений достигнуто
   - id: 9
     long_name: العربية (AR)
     short_name: ar-AR
@@ -629,7 +631,7 @@ translations:
       serialization_error: الطلب غير صحيح حيث أن تنسيق التسلسل ليس كما هو متوقع.
       validation_error: الطلب الذي أرسلته غير صالح، تم اكتشاف بعض أخطاء التحقق.
       content_type_missing_or_not_accepted: نوع المحتوى غير موجود أو غير مقبول.
-
+      max_conns_reached: تم الوصول إلى الحد الأقصى لعدد الاتصالات المتزامنة
 
   - id: 10
     long_name: 中文 (ZH)
@@ -701,7 +703,8 @@ translations:
       serialization_error: 请求格式不正确，因为序列化格式与预期不符。
       validation_error: 您发送的请求无效，遇到一些验证错误。
       content_type_missing_or_not_accepted: 缺少内容类型或内容类型不被接受。
-
+      max_conns_reached: 已达到最大同时连接数
+ 
   - id: 11
     long_name: 日本語 (JP)
     short_name: ja-JP
@@ -770,6 +773,7 @@ translations:
       serialization_error: リクエストが不正です。シリアル化形式が予期されるものと一致しません。
       validation_error: 送信されたリクエストは無効です。いくつかの検証エラーが発生しました。
       content_type_missing_or_not_accepted: コンテンツタイプが不足しているか、受け入れられません。
+      max_conns_reached: 同時接続の最大数に達しました
 
   - id: 12
     long_name: 한국어 (KR)
@@ -840,7 +844,7 @@ translations:
       serialization_error: 요청이 잘못되었습니다. 직렬화 형식이 예상과 일치하지 않습니다.
       validation_error: 보낸 요청이 유효하지 않습니다. 일부 유효성 검사 오류가 발생했습니다.
       content_type_missing_or_not_accepted: 콘텐츠 유형이 없거나 허용되지 않습니다.
-
+      max_conns_reached: 최대 동시 연결 수에 도달했습니다
 
   - id: 13
     long_name: Dutch (NL)
@@ -911,7 +915,7 @@ translations:
       serialization_error: Het verzoek is ongeldig omdat het serialisatieformaat niet overeenkomt met het verwachte formaat.
       validation_error: Het door u verzonden verzoek is ongeldig, er zijn enkele validatiefouten opgetreden.
       content_type_missing_or_not_accepted: Het inhoudstype ontbreekt of wordt niet geaccepteerd.
-
+      max_conns_reached: Het maximale aantal gelijktijdige verbindingen is bereikt
   - id: 14
     long_name: Türkçe (TR)
     short_name: tr-TR
@@ -979,7 +983,7 @@ translations:
       serialization_error: İstek, serileştirme formatının beklenenle uyumlu olmadığından hatalı.
       validation_error: Gönderdiğiniz istek geçersiz, bazı doğrulama hataları oluştu.
       content_type_missing_or_not_accepted: İçerik türü eksik veya kabul edilmiyor.
-
+      max_conns_reached: Maksimum eşzamanlı bağlantı sayısına ulaşıldı
   - id: 15
     long_name: Polski (PL)
     short_name: pl-PL
@@ -1049,7 +1053,7 @@ translations:
       serialization_error: Żądanie jest nieprawidłowe, ponieważ format serializacji nie jest zgodny z oczekiwanym.
       validation_error: Wysłane przez Ciebie żądanie jest nieprawidłowe, wystąpiły pewne błędy walidacji.
       content_type_missing_or_not_accepted: Brak typu zawartości lub nie jest on akceptowany.
-
+      max_conns_reached: Osiągnięto maksymalną liczbę jednoczesnych połączeń
   - id: 16
     long_name: Ελληνικά (GR)
     short_name: el-GR
@@ -1119,3 +1123,4 @@ translations:
       serialization_error: Το αίτημα δεν είναι σωστό καθώς η μορφή της σειριοποίησης δεν είναι αυτή που αναμένεται.
       validation_error: Το αίτημα που αποστείλατε δεν είναι έγκυρο, συναντήθηκαν ορισμένα σφάλματα επικύρωσης.
       content_type_missing_or_not_accepted: Ο τύπος περιεχομένου λείπει ή δεν γίνεται αποδεκτός.
+      max_conns_reached: Έχει επιτευχθεί ο μέγιστος αριθμός ταυτόχρονων συνδέσεων
