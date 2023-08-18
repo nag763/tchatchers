@@ -15,6 +15,7 @@ struct NginxConfigTemplate {
     http_only: bool,
     disable_security: bool,
     disable_http2: bool,
+    disable_rate_limiting: bool,
     version: String,
     server_name: String,
 }
@@ -378,6 +379,16 @@ impl EnvAction {
             .default(false)
             .interact_text()?;
 
+        let disable_rate_limiting : bool = if disable_security {
+            println!("* Rate limiting has been deactivated as security is disabled");
+            true  
+        } else {
+            Input::new()
+            .with_prompt("* Do you want to disable rate limiting ?")
+            .default(false)
+            .interact_text()?
+        };
+
         let version: String = Input::new()
             .with_prompt("* What is the version of the tool?")
             .interact_text()?;
@@ -391,6 +402,7 @@ impl EnvAction {
             http_only,
             disable_security,
             disable_http2,
+            disable_rate_limiting,
             version,
             server_name,
         }
