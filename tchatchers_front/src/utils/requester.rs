@@ -6,8 +6,12 @@ use gloo_net::http::{Method, Request, RequestBuilder, Response};
 use js_sys::Uint8Array;
 use wasm_bindgen::JsValue;
 use yew::{UseStateHandle, UseStateSetter};
+use yew_agent::Dispatched;
+
+use crate::{components::toast::Alert, services::toast_bus::ToastBus};
 
 const UNAUTHORIZED: u16 = 401u16;
+const TOO_MANY_REQUESTS: u16 = 429u16;
 
 #[derive(Default, Debug, Clone)]
 pub struct Requester {
@@ -128,6 +132,14 @@ impl Requester {
                     resp
                 }
             } else {
+                if resp.status() == TOO_MANY_REQUESTS {
+                    ToastBus::dispatcher().send(Alert {
+                        is_success: true,
+                        label: "max_conns_reached".into(),
+                        default: "The number of maxium simulatenous connections has been reached"
+                            .into(),
+                    });
+                }
                 resp
             }
         } else {

@@ -10,7 +10,7 @@ use crate::router::Route;
 use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
-use tchatchers_core::api_response::ApiResponse;
+use tchatchers_core::api_response::{ApiGenericResponse, ApiResponse};
 use tchatchers_core::user::{AuthenticableUser, PartialUser};
 use web_sys::HtmlInputElement;
 use yew::{
@@ -100,6 +100,11 @@ impl Component for SignIn {
                                             .unwrap();
                                     link.send_message(Msg::LoggedIn(user));
                                 } else {
+                                    if resp.status() == 429u16 {
+                                        link.send_message(Msg::ErrorFromServer(
+                                            ApiGenericResponse::TooManyRequests.into(),
+                                        ))
+                                    }
                                     link.send_message(Msg::ErrorFromServer(
                                         postcard::from_bytes(&resp.binary().await.unwrap())
                                             .unwrap(),

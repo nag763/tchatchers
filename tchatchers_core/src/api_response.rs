@@ -29,6 +29,7 @@ pub enum ApiResponseKind {
     ContentTypeError,
     IoError,
     RedisError,
+    TooManyRequests,
 }
 
 #[cfg(feature = "back")]
@@ -57,6 +58,7 @@ impl From<ApiResponseKind> for StatusCode {
             ApiResponseKind::UnsifficentPriviledges | ApiResponseKind::AccessRevoked => {
                 StatusCode::FORBIDDEN
             }
+            ApiResponseKind::TooManyRequests => StatusCode::TOO_MANY_REQUESTS,
             ApiResponseKind::DbError | ApiResponseKind::IoError | ApiResponseKind::RedisError => {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
@@ -129,6 +131,7 @@ pub enum ApiGenericResponse {
     ValidationError(Vec<String>),
     ContentTypeError,
     IoError(String),
+    TooManyRequests,
 }
 
 impl From<ApiGenericResponse> for ApiResponse {
@@ -215,6 +218,11 @@ impl From<ApiGenericResponse> for ApiResponse {
                 ApiResponseKind::RedisError,
                 "internal_error",
                 vec![e.to_string()],
+            ),
+            ApiGenericResponse::TooManyRequests => ApiResponse::errors(
+                ApiResponseKind::TooManyRequests,
+                "max_conns_reached",
+                vec!["Too many requests received from the client".to_string()],
             ),
         }
     }
