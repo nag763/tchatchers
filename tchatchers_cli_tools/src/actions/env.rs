@@ -379,14 +379,14 @@ impl EnvAction {
             .default(false)
             .interact_text()?;
 
-        let disable_rate_limiting : bool = if disable_security {
+        let disable_rate_limiting: bool = if disable_security {
             println!("* Rate limiting has been deactivated as security is disabled");
-            true  
+            true
         } else {
             Input::new()
-            .with_prompt("* Do you want to disable rate limiting ?")
-            .default(false)
-            .interact_text()?
+                .with_prompt("* Do you want to disable rate limiting ?")
+                .default(false)
+                .interact_text()?
         };
 
         let version: String = Input::new()
