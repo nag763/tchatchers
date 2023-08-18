@@ -268,9 +268,9 @@ pub enum FormSection {
     FreeSection(VChild<FormFreeSection>),
 }
 
-impl Into<Html> for FormSection {
-    fn into(self) -> Html {
-        match self {
+impl From<FormSection> for Html {
+    fn from(val: FormSection) -> Self {
+        match val {
             FormSection::Input(child) => child.into(),
             FormSection::Button(child) => child.into(),
             FormSection::Select(child) => child.into(),
