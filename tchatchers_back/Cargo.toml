@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 axum = { version = "0.6.20", features = ["ws", "json", "headers", "http1"], default-features = false }
-tokio = { version = "1.30", features = ["full"], default-features = false }
+tokio = { version = "1.32", features = ["full"], default-features = false }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 sqlx-core = { version = "0.7", default-features=false }
 dotenv = "0.15.0"
@@ -23,4 +23,4 @@ tower = { default-features = false, version = "0.4.13" }
 bb8-redis = "0.13.1"
 postcard = { version = "1.0.6", default-features = false, features = ["use-std"] }
 mime = "0.3.17"
-anyhow = "1.0.72"
+anyhow = "1.0.75"
