@@ -265,7 +265,7 @@ impl Component for Settings {
             <Form label="settings" {translation} default="Settings" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.server_error} form_ok={&self.ok_msg}>
                   <FormInput label={"your_login_field"} {translation} default={"Your login"} value={user.login.clone()} disabled=true />
                   <FormInput label={"your_name_field"} {translation} default={"Your name"} value={user.name.clone()} minlength="3" maxlength="16" attr_ref={&self.name} />
-                  <FormSelect label={"your_locale_field"} default={"Your locale"} {translation} default_value={AttrValue::from(user.locale_id.to_string())} values={KeyedList::from(Locale::get_keyed_list())} />
+                  <FormSelect label={"your_locale_field"} default={"Your locale"} {translation} attr_ref={&self.locale_id} default_value={AttrValue::from(user.locale_id.to_string())} values={KeyedList::from(Locale::get_keyed_list())} />
                   <FormFreeSection>
                     <div class="md:flex md:items-center mb-6">
                         <div class="md:w-1/3">
