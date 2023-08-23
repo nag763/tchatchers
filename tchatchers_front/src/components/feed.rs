@@ -18,8 +18,8 @@ use tchatchers_core::ws_message::{WsMessage, WsMessageContent, WsReceptionStatus
 use uuid::Uuid;
 use validator::Validate;
 use yew::{
-    function_component, html, use_context, AttrValue, Callback, Component, Context, Html,
-    Properties, UseStateHandle,
+    function_component, html, use_context, AttrValue, Component, Context, Html, Properties,
+    UseStateHandle,
 };
 use yew_agent::Dispatched;
 use yew_agent::{Bridge, Bridged};
@@ -222,29 +222,19 @@ impl Component for Feed {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let translation = &ctx.props().client_context.translation;
-        let component: Html = match self.is_connected {
-            true => {
-                let tx = self.ws.tx.clone();
-                let pass_message_to_ws = Callback::from(move |message: WsMessage| {
-                    tx.clone().try_send(message).unwrap();
-                });
-                html! {<TypeBar {translation} {pass_message_to_ws} user={self.user_context.user.as_ref().unwrap().clone()} room={ctx.props().room.clone()}/>}
-            }
-            false => {
-                let link = ctx.link().clone();
-                let try_reconnect = Callback::from(move |_: ()| {
-                    link.send_message(Msg::TryReconnect);
-                });
-                html! {<DisconnectedBar {translation} called_back={self.called_back} {try_reconnect} />}
-            }
-        };
+        let tx = self.ws.tx.clone();
+        let link = ctx.link().clone();
         html! {
             <div class="grid grid-rows-11 h-full dark:bg-zinc-800">
                 <div class="row-span-10 overflow-auto flex flex-col-reverse" >
                     <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={self.user_context.user.as_ref().unwrap().clone()} />
                 </div>
                 <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center block">
-                    {component}
+                    if self.is_connected {
+                        <TypeBar {translation} pass_message_to_ws={move |message| tx.clone().try_send(message).unwrap()} user={self.user_context.user.as_ref().unwrap().clone()} room={ctx.props().room.clone()} />
+                    } else {
+                        <DisconnectedBar {translation} called_back={self.called_back} try_reconnect={move |_| link.send_message(Msg::TryReconnect)} />
+                    }
                 </div>
             </div>
         }
