@@ -13,7 +13,7 @@ use crate::{components::toast::Alert, services::toast_bus::ToastBus};
 const UNAUTHORIZED: u16 = 401u16;
 const TOO_MANY_REQUESTS: u16 = 429u16;
 
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct Requester {
     endpoint: Option<String>,
     method: Option<Method>,

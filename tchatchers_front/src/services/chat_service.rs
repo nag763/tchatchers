@@ -11,7 +11,7 @@ use yew_agent::Dispatched;
 
 #[derive(Clone, Debug)]
 pub struct WebsocketService {
-    pub tx: Sender<Vec<u8>>,
+    pub tx: Sender<WsMessage>,
 }
 
 impl WebsocketService {
@@ -34,12 +34,15 @@ impl WebsocketService {
 
         let (mut write, mut read) = ws.split();
 
-        let (in_tx, mut in_rx) = futures::channel::mpsc::channel::<Vec<u8>>(1000);
+        let (in_tx, mut in_rx) = futures::channel::mpsc::channel::<WsMessage>(1000);
         let mut event_bus = ChatBus::dispatcher();
 
         spawn_local(async move {
             while let Some(s) = in_rx.next().await {
-                write.send(Message::Bytes(s)).await.unwrap();
+                write
+                    .send(Message::Bytes(postcard::to_stdvec(&s).unwrap()))
+                    .await
+                    .unwrap();
             }
         });
 

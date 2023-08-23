@@ -5,7 +5,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = { version = "0.6.20", features = ["ws", "json", "headers", "http1"], default-features = false }
+axum = { version = "0.6.20", features = ["ws", "headers", "http2"], default-features = false }
 tokio = { version = "1.32", features = ["full"], default-features = false }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 sqlx-core = { version = "0.7", default-features=false }

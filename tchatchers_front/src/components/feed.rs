@@ -138,11 +138,7 @@ impl Component for Feed {
                             self.ws
                                 .tx
                                 .clone()
-                                .try_send(
-                                    postcard::to_stdvec(&WsMessage::Seen(vec![msg_content.uuid]))
-                                        .unwrap()
-                                        .to_vec(),
-                                )
+                                .try_send(WsMessage::Seen(vec![msg_content.uuid]))
                                 .unwrap();
                         }
                     }
@@ -166,9 +162,7 @@ impl Component for Feed {
                             self.ws
                                 .tx
                                 .clone()
-                                .try_send(
-                                    postcard::to_stdvec(&WsMessage::Seen(messages_seen)).unwrap(),
-                                )
+                                .try_send(WsMessage::Seen(messages_seen))
                                 .unwrap();
                         }
                     }
@@ -177,15 +171,11 @@ impl Component for Feed {
 
                         if self.received_messages.is_empty() {
                             let msg = WsMessage::RetrieveMessages(self.session_id);
-                            self.ws
-                                .tx
-                                .clone()
-                                .try_send(postcard::to_stdvec(&msg).unwrap())
-                                .unwrap();
+                            self.ws.tx.clone().try_send(msg).unwrap();
                             self.ws_keep_alive = {
                                 let tx = self.ws.tx.clone();
                                 Some(Interval::new(30_000, move || {
-                                    tx.clone().try_send("Keep Alive".into()).unwrap()
+                                    tx.clone().try_send(WsMessage::ClientKeepAlive).unwrap()
                                 }))
                             }
                         }
@@ -198,11 +188,7 @@ impl Component for Feed {
                         }
                     }
                     WsMessage::Delete(msg_uuid) => {
-                        self.ws
-                            .tx
-                            .clone()
-                            .try_send(postcard::to_stdvec(&message).unwrap())
-                            .unwrap();
+                        self.ws.tx.clone().try_send(*message).unwrap();
                         self.received_messages.retain(|msg| msg_uuid != msg.uuid);
                     }
                     _ => {
@@ -212,22 +198,14 @@ impl Component for Feed {
                 true
             }
             Msg::CheckWsState => {
-                self.ws
-                    .tx
-                    .clone()
-                    .try_send(postcard::to_stdvec(&WsMessage::Ping).unwrap())
-                    .unwrap();
+                self.ws.tx.clone().try_send(WsMessage::Ping).unwrap();
                 false
             }
             Msg::TryReconnect => {
                 gloo_console::log!("Try reconnect...");
                 let ws: WebsocketService = WebsocketService::new(&ctx.props().room);
                 self.ws = ws;
-                self.ws
-                    .tx
-                    .clone()
-                    .try_send(postcard::to_stdvec(&WsMessage::Ping).unwrap())
-                    .unwrap();
+                self.ws.tx.clone().try_send(WsMessage::Ping).unwrap();
                 self.called_back = false;
                 true
             }
@@ -247,7 +225,7 @@ impl Component for Feed {
         let component: Html = match self.is_connected {
             true => {
                 let tx = self.ws.tx.clone();
-                let pass_message_to_ws = Callback::from(move |message: Vec<u8>| {
+                let pass_message_to_ws = Callback::from(move |message: WsMessage| {
                     tx.clone().try_send(message).unwrap();
                 });
                 html! {<TypeBar {translation} {pass_message_to_ws} user={self.user_context.user.as_ref().unwrap().clone()} room={ctx.props().room.clone()}/>}
@@ -273,10 +251,7 @@ impl Component for Feed {
     }
 
     fn destroy(&mut self, ctx: &Context<Self>) {
-        self.ws
-            .tx
-            .try_send(postcard::to_stdvec(&WsMessage::Close).unwrap())
-            .unwrap();
+        self.ws.tx.try_send(WsMessage::Close).unwrap();
         ctx.link().send_message(Msg::CutWs)
     }
 }
