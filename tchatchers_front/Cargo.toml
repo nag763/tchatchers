@@ -11,7 +11,7 @@ gloo-timers = "0.3.0"
 serde = { version = "1.0.183", features = ["derive"] }
 wasm-bindgen = "0.2.87"
 wasm-bindgen-futures = "0.4.37"
-web-sys = { version = "0.3.64", features = ["HtmlDocument", "FileReader", "Event", "Navigator"] }
+web-sys = { version = "0.3.64", features = ["HtmlDocument", "FileReader", "Event", "Navigator", "FormData"] }
 yew = { version = "0.20.0", features = ["csr"] }
 yew-agent = "0.2.0"
 yew-router = "0.17.0"

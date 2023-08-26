@@ -438,7 +438,6 @@ pub struct UpdatableUser {
         regex(path = "RE_LIMITED_CHARS", code = "limited_chars")
     )]
     pub name: String,
-    pub pfp: Option<String>,
     pub locale_id: i32,
 }
 
@@ -450,11 +449,18 @@ impl UpdatableUser {
     ///
     /// - pool : The connection pool.
     pub async fn update(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
-        sqlx::query("UPDATE CHATTER SET name=$1, pfp=$2, locale_id=$3 WHERE id=$4")
+        sqlx::query("UPDATE CHATTER SET name=$1, locale_id=$2 WHERE id=$3")
             .bind(&self.name)
-            .bind(&self.pfp)
             .bind(self.locale_id)
             .bind(self.id)
+            .execute(pool)
+            .await
+    }
+
+    pub async fn set_pfp(id: i32, pfp: &str, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query("UPDATE CHATTER SET pfp=$1 WHERE id=$2")
+            .bind(pfp)
+            .bind(id)
             .execute(pool)
             .await
     }

@@ -19,6 +19,7 @@ pub struct Requester {
     method: Option<Method>,
     payload: Option<JsValue>,
     is_postcard: bool,
+    is_multipart: bool,
     bearer_value: Option<String>,
     bearer_setter: Option<UseStateSetter<Option<String>>>,
 }
@@ -76,6 +77,12 @@ impl Requester {
         let array = Uint8Array::from(&bytes[..]);
         self.payload = Some(array.into());
         self.is_postcard = true;
+        self
+    }
+
+    pub fn multipart_body<U: Into<JsValue>>(&mut self, body: U) -> &mut Self {
+        self.payload = Some(body.into());
+        self.is_multipart = true;
         self
     }
 

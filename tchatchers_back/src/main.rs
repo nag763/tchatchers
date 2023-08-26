@@ -13,7 +13,6 @@ pub mod ws;
 
 use api::message::delete_message;
 use api::message::report_message;
-use api::pfp::*;
 use api::user::*;
 use axum::http::header::AUTHORIZATION;
 use axum::http::header::COOKIE;
@@ -118,7 +117,6 @@ async fn main() -> anyhow::Result<()> {
         )
         .route("/api/logout", get(logout))
         .route("/api/validate", get(validate))
-        .route("/api/pfp", post(upload_pfp))
         .route("/api/whoami", get(whoami))
         .route("/api/message/:message_id", delete(delete_message))
         .route("/api/message/:message_id/report", post(report_message))

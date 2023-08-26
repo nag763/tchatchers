@@ -3,17 +3,14 @@ use std::rc::Rc;
 
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use js_sys::ArrayBuffer;
 use tchatchers_core::locale::TranslationMap;
-use wasm_bindgen::closure::Closure;
-use wasm_bindgen::JsCast;
-use web_sys::{Event, EventTarget, FileReader, InputEvent, SubmitEvent};
-use web_sys::{HtmlInputElement, MouseEvent};
+use web_sys::MouseEvent;
+use web_sys::{HtmlInputElement, SubmitEvent};
 use yew::html::ChildrenRenderer;
 use yew::virtual_dom::VChild;
 use yew::{
-    classes, function_component, html, use_state, AttrValue, Callback, Children, Html, NodeRef,
-    Properties,
+    classes, function_component, html, use_force_update, use_memo, AttrValue, Callback, Children,
+    Html, NodeRef, Properties,
 };
 
 use crate::utils::keyed_list::KeyedList;
@@ -83,51 +80,6 @@ pub fn app_button(props: &FormButtonProperties) -> Html {
 }
 
 #[derive(Properties, PartialEq)]
-pub struct FileAttacherProps {
-    pub on_file_attached: Callback<Option<ArrayBuffer>>,
-    pub disabled: bool,
-    pub accept: Option<AttrValue>,
-}
-
-#[function_component(FileAttacher)]
-pub fn file_attacher(props: &FileAttacherProps) -> Html {
-    let is_file_attached = use_state(|| false);
-    let svg_path = match *is_file_attached {
-        true => "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
-        false => "M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13",
-    };
-
-    let oninput_event = props.on_file_attached.clone();
-    let onload = Closure::wrap(Box::new(move |event: Event| {
-        let element = event.target().unwrap().dyn_into::<FileReader>().unwrap();
-        let data = element.result().unwrap();
-        let buffer: ArrayBuffer = data.dyn_into::<ArrayBuffer>().unwrap();
-        is_file_attached.set(true);
-        oninput_event.emit(Some(buffer));
-    }) as Box<dyn FnMut(_)>);
-    let fr = web_sys::FileReader::new().unwrap();
-
-    let oninput = move |ie: InputEvent| {
-        let target: Option<EventTarget> = ie.target();
-        let input = target.and_then(|t| t.dyn_into::<HtmlInputElement>().ok());
-        let file = input.unwrap().files().unwrap();
-        fr.set_onloadend(Some(onload.as_ref().unchecked_ref()));
-        fr.read_as_array_buffer(&file.get(0).unwrap()).unwrap();
-    };
-
-    html! {
-        <>
-            <label for="file-upload">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d={svg_path} />
-                </svg>
-            </label>
-            <input id="file-upload" type="file" hidden=true disabled={props.disabled} {oninput} accept={props.accept.clone().unwrap_or_default()} />
-        </>
-    }
-}
-
-#[derive(Properties, PartialEq)]
 pub struct I18nProperties {
     pub default: AttrValue,
     pub label: AttrValue,
@@ -143,6 +95,73 @@ pub fn i18n(props: &I18nProperties) -> Html {
         } else {
             <>{&props.default}</>
         }
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct FormFileProperties {
+    pub default: AttrValue,
+    pub label: AttrValue,
+    #[prop_or_default]
+    pub translation: Rc<TranslationMap>,
+    #[prop_or_default]
+    pub attr_ref: NodeRef,
+    #[prop_or_default]
+    pub disabled: bool,
+    #[prop_or_default]
+    pub accept: Option<AttrValue>,
+    #[prop_or_default]
+    pub current_path: Option<String>,
+}
+
+#[function_component(FormFile)]
+pub fn file_attacher(props: &FormFileProperties) -> Html {
+    let translation = &props.translation;
+    let trigger = use_force_update();
+    let is_a_file_uploaded = {
+        let attr_ref = props.attr_ref.cast::<HtmlInputElement>();
+        use_memo(
+            |attr_ref| {
+                if let Some(attr_ref) = attr_ref {
+                    attr_ref.value().ne("")
+                } else {
+                    false
+                }
+            },
+            attr_ref,
+        )
+    };
+
+    let svg_path = match *is_a_file_uploaded {
+        true => "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",    
+        false => "M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13",
+    };
+
+    html! {
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3">
+            <label class="common-form-label" for="inline-full-name">
+            <I18N label={&props.label} default={&props.default} {translation}/>
+            </label>
+            </div>
+            <div class="md:w-2/3 flex justify-center items-center space-x-4 mt-2 dark:text-gray-200">
+                <span class="dark:text-gray-300">
+                    if let Some(v) = &props.current_path {
+                        <><img class="h-10 w-10 rounded-full" src={v.clone()} /></>
+                    } else if *is_a_file_uploaded {
+                        <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} {translation}/>
+                    } else {
+                        <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} {translation}/>
+                    }
+                </span>
+                <label for="file-upload">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d={svg_path} />
+                </svg>
+                </label>
+                <input id="file-upload" type="file" hidden=true disabled={props.disabled} ref={&props.attr_ref} onchange={move |_| {gloo_console::log!("On change"); trigger.force_update();}} accept={props.accept.clone().unwrap_or_default()} />
+            </div>
+        </div>
     }
 }
 
@@ -266,6 +285,7 @@ pub enum FormSection {
     Select(VChild<FormSelect>),
     Checkbox(VChild<FormCheckbox>),
     FreeSection(VChild<FormFreeSection>),
+    File(VChild<FormFile>),
 }
 
 impl From<FormSection> for Html {
@@ -276,6 +296,7 @@ impl From<FormSection> for Html {
             FormSection::Select(child) => child.into(),
             FormSection::Checkbox(child) => child.into(),
             FormSection::FreeSection(child) => child.into(),
+            FormSection::File(child) => child.into(),
         }
     }
 }

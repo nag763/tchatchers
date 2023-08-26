@@ -30,6 +30,7 @@ pub enum ApiResponseKind {
     IoError,
     RedisError,
     TooManyRequests,
+    MultipartError,
 }
 
 #[cfg(feature = "back")]
@@ -51,7 +52,8 @@ impl From<ApiResponseKind> for StatusCode {
             | ApiResponseKind::ByteRejection
             | ApiResponseKind::ValidationError
             | ApiResponseKind::ContentTypeError
-            | ApiResponseKind::SerializationError => StatusCode::BAD_REQUEST,
+            | ApiResponseKind::SerializationError
+            | ApiResponseKind::MultipartError => StatusCode::BAD_REQUEST,
             ApiResponseKind::AuthenticationRequired | ApiResponseKind::AuthenticationExpired => {
                 StatusCode::UNAUTHORIZED
             }
@@ -132,6 +134,7 @@ pub enum ApiGenericResponse {
     ContentTypeError,
     IoError(String),
     TooManyRequests,
+    MultipartError(String),
 }
 
 impl From<ApiGenericResponse> for ApiResponse {
@@ -224,6 +227,9 @@ impl From<ApiGenericResponse> for ApiResponse {
                 "max_conns_reached",
                 vec!["Too many requests received from the client".to_string()],
             ),
+            ApiGenericResponse::MultipartError(e) => {
+                ApiResponse::errors(ApiResponseKind::MultipartError, "multipart_error", vec![e])
+            }
         }
     }
 }
@@ -254,6 +260,13 @@ impl From<axum::extract::rejection::BytesRejection> for ApiGenericResponse {
 impl From<bb8_redis::bb8::RunError<redis::RedisError>> for ApiGenericResponse {
     fn from(value: bb8_redis::bb8::RunError<redis::RedisError>) -> Self {
         Self::DbError(value.to_string())
+    }
+}
+
+#[cfg(feature = "back")]
+impl From<axum::extract::multipart::MultipartError> for ApiGenericResponse {
+    fn from(value: axum::extract::multipart::MultipartError) -> Self {
+        Self::MultipartError(value.to_string())
     }
 }
 

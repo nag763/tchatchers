@@ -13,3 +13,5 @@ docker*
 **/*.key
 .env
 **/*.env
+**/static
+static

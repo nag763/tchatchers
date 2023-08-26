@@ -3,8 +3,8 @@ use std::rc::Rc;
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::common::AppButton;
-use crate::components::common::FileAttacher;
 use crate::components::common::Form;
+use crate::components::common::FormFile;
 use crate::components::common::FormFreeSection;
 use crate::components::common::FormInput;
 use crate::components::common::FormSelect;
@@ -23,6 +23,7 @@ use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::UpdatableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
 use validator::Validate;
+use web_sys::FormData;
 use web_sys::HtmlInputElement;
 use yew::function_component;
 use yew::use_context;
@@ -33,19 +34,15 @@ use yew_agent::Bridged;
 use yew_agent::Dispatched;
 use yew_router::scope_ext::RouterScopeExt;
 
-use super::common::I18N;
 use super::modal::ModalContent;
 
 #[function_component(SettingsHOC)]
 pub fn feed_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().expect("Context defined at startup");
-
     html! { <Settings context={client_context} /> }
 }
 
 pub enum Msg {
-    UploadNewPfp(Option<js_sys::ArrayBuffer>),
-    PfpUpdated(AttrValue),
     SubmitForm,
     ErrorFromServer(ApiResponse),
     LocalError(AttrValue),
@@ -62,7 +59,7 @@ pub struct Props {
 pub struct Settings {
     name: NodeRef,
     locale_id: NodeRef,
-    pfp: Option<String>,
+    new_pfp: NodeRef,
     wait_for_api: bool,
     server_error: Option<AttrValue>,
     ok_msg: Option<AttrValue>,
@@ -89,12 +86,12 @@ impl Component for Settings {
         Self {
             name: NodeRef::default(),
             locale_id: NodeRef::default(),
-            pfp: context_ref.user.as_ref().unwrap().pfp.clone(),
             user_context: context_ref.clone(),
             wait_for_api: false,
             server_error: None,
             ok_msg: None,
             producer: ModalBus::bridge(Rc::new(cb)),
+            new_pfp: NodeRef::default(),
         }
     }
 
@@ -104,9 +101,11 @@ impl Component for Settings {
                 self.wait_for_api = true;
                 self.ok_msg = None;
                 self.server_error = None;
-                if let (Some(name), Some(locale_id)) = (
+                self.new_pfp.cast::<HtmlInputElement>().unwrap();
+                if let (Some(name), Some(locale_id), Some(new_pfp)) = (
                     self.name.cast::<HtmlInputElement>(),
                     self.locale_id.cast::<HtmlInputElement>(),
+                    self.new_pfp.cast::<HtmlInputElement>(),
                 ) {
                     if name.check_validity() {
                         let Ok(locale_id) = locale_id.value().parse() else {
@@ -117,8 +116,20 @@ impl Component for Settings {
                             id: self.user_context.user.as_ref().unwrap().id,
                             locale_id,
                             name: name.value(),
-                            pfp: self.pfp.clone(),
                         };
+                        let form_data = FormData::new().unwrap();
+                        let bytes = postcard::to_stdvec(&payload).unwrap();
+                        form_data
+                            .append_with_str("payload", std::str::from_utf8(&bytes).unwrap())
+                            .unwrap();
+                        if let Some(files) = new_pfp.files() {
+                            if let Some(file) = &files.get(0) {
+                                form_data
+                                    .append_with_blob_and_filename("file", file, &new_pfp.value())
+                                    .unwrap();
+                            }
+                        }
+
                         if let Err(e) = payload.validate() {
                             let message: ValidationErrorMessage = e.into();
                             ctx.link()
@@ -126,7 +137,7 @@ impl Component for Settings {
                         } else {
                             let bearer = ctx.props().context.bearer.clone();
                             let mut req = Requester::put("/api/user");
-                            req.bearer(bearer.clone()).postcard_body(payload);
+                            req.bearer(bearer.clone()).multipart_body(form_data);
                             let link = ctx.link().clone();
                             self.wait_for_api = true;
                             wasm_bindgen_futures::spawn_local(async move {
@@ -158,23 +169,6 @@ impl Component for Settings {
                 }
                 false
             }
-            Msg::UploadNewPfp(pfp) => {
-                self.wait_for_api = true;
-                let mut req = Requester::post("/api/pfp");
-                req.body(pfp);
-                let link = ctx.link().clone();
-                wasm_bindgen_futures::spawn_local(async move {
-                    let resp = req.send().await;
-                    if resp.ok() {
-                        link.send_message(Msg::PfpUpdated(resp.text().await.unwrap().into()));
-                    } else {
-                        link.send_message(Msg::ErrorFromServer(
-                            postcard::from_bytes(&resp.binary().await.unwrap()).unwrap(),
-                        ));
-                    }
-                });
-                true
-            }
             Msg::ErrorFromServer(resp) => {
                 self.wait_for_api = false;
                 self.ok_msg = None;
@@ -183,11 +177,6 @@ impl Component for Settings {
                     &resp.text.unwrap_or("A server error has been met".into()),
                 );
                 self.server_error = Some(err.into());
-                true
-            }
-            Msg::PfpUpdated(pfp_path) => {
-                self.wait_for_api = false;
-                self.pfp = Some(pfp_path.to_string());
                 true
             }
             Msg::ProfileUpdated(app_context) => {
@@ -200,6 +189,9 @@ impl Component for Settings {
                     label: "profile_updated".into(),
                     default: "Your profile has been updated with success".into(),
                 });
+                if let Some(new_pfp) = self.new_pfp.cast::<HtmlInputElement>() {
+                    new_pfp.set_value("");
+                }
                 self.ok_msg = Some(
                     translation
                         .get_or_default(
@@ -254,39 +246,13 @@ impl Component for Settings {
             let link = ctx.link().clone();
             Callback::from(move |_: ()| link.send_message(Msg::ConfirmDeletion))
         };
-        let on_file_attached = {
-            let link = ctx.link().clone();
-            Callback::from(move |file_path: Option<js_sys::ArrayBuffer>| {
-                link.send_message(Msg::UploadNewPfp(file_path));
-            })
-        };
         html! {
 
             <Form label="settings" {translation} default="Settings" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.server_error} form_ok={&self.ok_msg}>
                   <FormInput label={"your_login_field"} {translation} default={"Your login"} value={user.login.clone()} disabled=true />
                   <FormInput label={"your_name_field"} {translation} default={"Your name"} value={user.name.clone()} minlength="3" maxlength="16" attr_ref={&self.name} />
                   <FormSelect label={"your_locale_field"} default={"Your locale"} {translation} attr_ref={&self.locale_id} default_value={AttrValue::from(user.locale_id.to_string())} values={KeyedList::from(Locale::get_keyed_list())} />
-                  <FormFreeSection>
-                    <div class="md:flex md:items-center mb-6">
-                        <div class="md:w-1/3">
-                        <label class="common-form-label" for="inline-full-name">
-                        <I18N label={"your_pfp_field"} default={"Your profile picture"} {translation}/>
-                        </label>
-                        </div>
-                        <div class="md:w-2/3 flex justify-center items-center space-x-4 mt-2 dark:text-gray-200">
-                            <span class="dark:text-gray-300">
-                                if let Some(v) = &user.pfp {
-                                    <><img class="h-10 w-10 rounded-full" src={v.clone()} /></>
-                                } else if self.pfp.is_some() {
-                                    <I18N label={"new_pfp_ready"} default={"Your new profile picture is ready to be uploaded"} {translation}/>
-                                } else {
-                                    <I18N label={"no_pfp"} default={"You don't have any profile picture so far"} {translation}/>
-                                }
-                            </span>
-                            <FileAttacher disabled=false accept={Some(AttrValue::from(".png,.webp,.jpg,.jpg"))} {on_file_attached}/>
-                        </div>
-                    </div>
-                  </FormFreeSection>
+                  <FormFile label={"your_pfp_field"} default={"Your profile picture"} {translation} attr_ref={&self.new_pfp} current_path={user.pfp.clone()} accept={"image/*"}/>
                   <FormFreeSection>
                     <div class="flex items-center">
                     <div class="w-1/3"></div>

@@ -20,7 +20,7 @@ serde = { version = "1.0.183", features = ["rc"], default-features = false }
 sqlx = { version = "0.7", optional = true ,  features = ["runtime-async-std-native-tls", "postgres", "chrono", "uuid"] }
 uuid = { version = "1.4.1", features = ["v4", "serde"], default-features = false }
 validator = { version = "0.16.1", features = ["derive"], default-features = false }
-axum = { version = "0.6.20", optional = true , default-features = false }
+axum = { version = "0.6.20", features = ["multipart"], optional = true , default-features = false }
 regex = { default-features = false, version = "1.9.3" }
 lazy_static = "1.4.0"
 derive_more = { features = ["display"], default-features = false, version = "0.99.17" }

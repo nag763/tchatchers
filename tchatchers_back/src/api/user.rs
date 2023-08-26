@@ -9,6 +9,7 @@ use crate::extractor::Postcard;
 use crate::extractor::ValidPostcard;
 use crate::AppState;
 use crate::REFRESH_TOKEN_PATH;
+use axum::extract::Multipart;
 use axum::extract::State;
 use axum::{extract::Path, http::StatusCode, response::IntoResponse};
 use axum_extra::extract::cookie::Cookie;
@@ -21,7 +22,12 @@ use tchatchers_core::report::Report;
 use tchatchers_core::serializable_token::SerializableToken;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::{AuthenticableUser, InsertableUser, UpdatableUser, User};
+use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
+use tokio::task::JoinSet;
 use tokio::time::{sleep, Duration};
+use uuid::Uuid;
+use validator::Validate;
 
 /// Creates a user.
 ///
@@ -235,15 +241,45 @@ pub async fn validate(_: JwtUserExtractor) -> impl IntoResponse {
 pub async fn update_user(
     JwtUserExtractor(jwt): JwtUserExtractor,
     State(state): State<AppState>,
-    ValidPostcard(user): ValidPostcard<UpdatableUser>,
-) -> impl IntoResponse {
-    if jwt.user_id == user.id {
-        user.update(&state.pg_pool).await?;
-
-        Ok((StatusCode::OK, "User updated with success"))
-    } else {
-        Err(ApiGenericResponse::UnsifficentPriviledges)
+    mut data: Multipart,
+) -> Result<impl IntoResponse, impl IntoResponse> {
+    let payload = data.next_field().await?;
+    let Some(payload) = payload else {
+        return Err(ApiGenericResponse::SerializationError("Multipart request with no field".into()));
+    };
+    let payload_bytes = payload.bytes().await?;
+    let user: UpdatableUser = postcard::from_bytes(&payload_bytes)?;
+    user.validate()?;
+    let mut tasks: JoinSet<Result<(), ApiGenericResponse>> = JoinSet::new();
+    if jwt.user_id != user.id {
+        return Err(ApiGenericResponse::UnsifficentPriviledges);
     }
+    tasks.spawn({
+        let user = user.clone();
+        let pool = state.pg_pool.clone();
+        async move {
+            user.update(&pool).await?;
+            Ok(())
+        }
+    });
+    if let Some(file) = data.next_field().await.unwrap_or(None) {
+        if let Some(_file_name) = file.file_name() {
+            let bytes = file.bytes().await?;
+            tasks.spawn(async move {
+                let file_name = Uuid::new_v4().to_string();
+                let rel_file_path = format!("./static/{}", file_name);
+                let served_file_path: String = format!("/static/{}", file_name);
+                let mut file = File::create(&rel_file_path).await?;
+                file.write_all(&bytes).await?;
+                UpdatableUser::set_pfp(user.id, &served_file_path, &state.pg_pool).await?;
+                Ok(())
+            });
+        }
+    }
+    while let Some(task) = tasks.join_next().await {
+        task.unwrap()?;
+    }
+    Ok((StatusCode::OK, "User updated with success"))
 }
 
 /// Deletes a user from the database.
