@@ -3,7 +3,7 @@ lto = true
 codegen-units = 1
 
 [workspace]
-
+resolver = "2"
 members = [
     "tchatchers_core",
     "tchatchers_back",

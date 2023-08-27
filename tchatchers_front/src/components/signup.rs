@@ -78,7 +78,7 @@ impl Component for SignUp {
                     self.password.cast::<HtmlInputElement>(),
                     self.password_confirmation.cast::<HtmlInputElement>(),
                 ) {
-                    let inputs = vec![&login, &name, &password];
+                    let inputs = [&login, &name, &password];
                     if inputs.iter().all(|i| i.check_validity()) {
                         let locale = ctx
                             .props()

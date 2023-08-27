@@ -75,7 +75,7 @@ impl Component for SignIn {
                     self.password.cast::<HtmlInputElement>(),
                     self.remember_me.cast::<HtmlInputElement>(),
                 ) {
-                    let inputs = vec![&login, &password];
+                    let inputs = [&login, &password];
                     if inputs.iter().all(|i| i.check_validity()) {
                         self.wait_for_api = true;
                         let payload = AuthenticableUser {
