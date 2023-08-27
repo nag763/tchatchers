@@ -35,7 +35,9 @@ impl FromRequestParts<AppState> for JwtUserExtractor {
         parts: &mut Parts,
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        let Ok(TypedHeader(Authorization(jwt))) =  TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, state).await else {
+        let Ok(TypedHeader(Authorization(jwt))) =
+            TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, state).await
+        else {
             return Err(ApiGenericResponse::AuthenticationRequired);
         };
         match AuthorizationToken::decode(jwt.token(), &state.jwt_secret) {

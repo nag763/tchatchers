@@ -257,12 +257,14 @@ impl WsMessageContent {
         let mut uuid_to_delete: Vec<Uuid> = Vec::new();
 
         for room in room_names {
-            let Ok(uuid) : Result<Vec<(Uuid, )>, sqlx::Error> =  sqlx::query_as("SELECT uuid FROM MESSAGE WHERE room=$1 OFFSET 100")
-                .bind(room)
-                .fetch_all(&mut *tx)
-                .await else {
-                    failed_records += 1;
-                    continue;
+            let Ok(uuid): Result<Vec<(Uuid,)>, sqlx::Error> =
+                sqlx::query_as("SELECT uuid FROM MESSAGE WHERE room=$1 OFFSET 100")
+                    .bind(room)
+                    .fetch_all(&mut *tx)
+                    .await
+            else {
+                failed_records += 1;
+                continue;
             };
             uuid_to_delete.append(&mut uuid.iter().map(|u| u.0).collect());
         }

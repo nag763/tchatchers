@@ -109,7 +109,9 @@ impl Component for Settings {
                 ) {
                     if name.check_validity() {
                         let Ok(locale_id) = locale_id.value().parse() else {
-                            ctx.link().send_message(Msg::LocalError("The given locale isn't valid".into()));
+                            ctx.link().send_message(Msg::LocalError(
+                                "The given locale isn't valid".into(),
+                            ));
                             return true;
                         };
                         let payload = UpdatableUser {
