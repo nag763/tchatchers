@@ -67,7 +67,7 @@ impl From<redis::RedisError> for CliError {
 
 impl<E> From<RunError<E>> for CliError {
     fn from(_value: RunError<E>) -> Self {
-        Self::new("Redis pool erorr".into(), ErrorKind::RedisError)
+        Self::new("Redis pool error".into(), ErrorKind::RedisError)
     }
 }
 
