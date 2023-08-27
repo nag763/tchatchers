@@ -4,6 +4,7 @@ use std::{
 };
 
 use bb8::RunError;
+use redis::RedisError;
 
 /// Common errors returned during the runtime.
 ///
@@ -65,9 +66,9 @@ impl From<redis::RedisError> for CliError {
     }
 }
 
-impl<E> From<RunError<E>> for CliError {
-    fn from(_value: RunError<E>) -> Self {
-        Self::new("Redis pool error".into(), ErrorKind::RedisError)
+impl From<RunError<RedisError>> for CliError {
+    fn from(value: RunError<RedisError>) -> Self {
+        Self::new(value.to_string(), ErrorKind::RedisError)
     }
 }
 
