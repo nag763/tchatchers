@@ -17,7 +17,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"]}
 axum-extra = { version = "0.7.7", features = ["cookie"] }
 tracing = { default-features = false, version = "0.1.37" }
 validator = { version = "0.16.1"}
-serde = { default-features = false, version = "1.0.183" }
+serde = { default-features = false, version = "1.0.188" }
 sqlx = {features = ["uuid", "postgres"], version = "0.7" }
 tower = { default-features = false, version = "0.4.13" }
 bb8-redis = "0.13.1"
