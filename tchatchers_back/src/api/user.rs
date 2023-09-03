@@ -82,8 +82,8 @@ pub async fn authenticate(
     ValidPostcard(authenticable_user): ValidPostcard<AuthenticableUser>,
 ) -> impl IntoResponse {
     let Some(user) = authenticable_user.authenticate(&state.pg_pool).await? else {
-        sleep(Duration::from_secs(3)).await;
-        return Err(ApiGenericResponse::BadCredentials);
+            sleep(Duration::from_secs(3)).await;
+            return Err(ApiGenericResponse::BadCredentials);
     };
     if user.is_authorized {
         let refresh_token = {
@@ -138,13 +138,12 @@ pub async fn reauthenticate(
 ) -> impl IntoResponse {
     // Attempt to retrieve the refresh token from the cookie jar.
     let Some(cookie) = cookie_jar.get(REFRESH_TOKEN_PATH) else {
-        return Err(ApiGenericResponse::AuthenticationExpired);
+        return Err(ApiGenericResponse::AuthenticationExpired)
     };
 
     // Decode the refresh token and verify that it is legitimate.
-    let Ok(refresh_token) = RefreshToken::decode(cookie.value(), &state.refresh_token_secret)
-    else {
-        return Err(ApiGenericResponse::AuthenticationRequired);
+    let Ok(refresh_token) = RefreshToken::decode(cookie.value(), &state.refresh_token_secret) else {
+        return Err(ApiGenericResponse::AuthenticationRequired)
     };
 
     // Refresh the token.
@@ -164,7 +163,7 @@ pub async fn reauthenticate(
 
     // Retrieve the user corresponding to the refresh token's user ID from the database.
     let Some(user) = User::find_by_id(refresh_token.user_id, &state.pg_pool).await? else {
-        return Err(ApiGenericResponse::AccountNotFound);
+        return Err(ApiGenericResponse::AccountNotFound)
     };
 
     // Verify that the user's account is authorized.
@@ -246,9 +245,7 @@ pub async fn update_user(
 ) -> Result<impl IntoResponse, impl IntoResponse> {
     let payload = data.next_field().await?;
     let Some(payload) = payload else {
-        return Err(ApiGenericResponse::SerializationError(
-            "Multipart request with no field".into(),
-        ));
+        return Err(ApiGenericResponse::SerializationError("Multipart request with no field".into()));
     };
     let payload_bytes = payload.bytes().await?;
     let user: UpdatableUser = postcard::from_bytes(&payload_bytes)?;
@@ -343,7 +340,7 @@ pub async fn whoami(
     JwtUserExtractor(jwt): JwtUserExtractor,
     state: State<AppState>,
 ) -> Result<Postcard<PartialUser>, ApiGenericResponse> {
-    let Some(user) = User::find_by_id(jwt.user_id, &state.pg_pool).await? else {
+    let Some(user) = User::find_by_id(jwt.user_id, &state.pg_pool).await? else  {
         return Err(ApiGenericResponse::UserNotFound);
     };
     if !user.is_authorized {

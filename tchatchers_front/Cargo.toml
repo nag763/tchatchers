@@ -16,10 +16,10 @@ yew = { version = "0.20.0", features = ["csr"] }
 yew-agent = "0.2.0"
 yew-router = "0.17.0"
 tchatchers_core = { path = "../tchatchers_core", features = ["front"] }
-chrono = { version = "0.4.26", features = ["serde"] }
+chrono = { version = "0.4.28", features = ["serde"] }
 js-sys = "0.3.64"
 uuid = { version = "1.4.1", features = ["v4"] }
 validator = "0.16.1"
-async-recursion = "1.0.4"
-postcard = { version = "1.0.6", features = ["use-std"], default-features = false }
+async-recursion = "1.0.5"
+postcard = { version = "1.0.7", features = ["use-std"], default-features = false }
 derive_more = "0.99.17"
