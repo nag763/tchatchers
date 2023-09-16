@@ -16,7 +16,7 @@ yew = { version = "0.20.0", features = ["csr"] }
 yew-agent = "0.2.0"
 yew-router = "0.17.0"
 tchatchers_core = { path = "../tchatchers_core", features = ["front"] }
-chrono = { version = "0.4.28", features = ["serde"] }
+chrono = { version = "0.4.31", features = ["serde"] }
 js-sys = "0.3.64"
 uuid = { version = "1.4.1", features = ["v4"] }
 validator = "0.16.1"
