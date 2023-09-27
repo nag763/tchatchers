@@ -40,6 +40,8 @@ pub enum ErrorKind {
     UnreachableError,
     /// Error linked with acquiring or performing operations on redis pool.
     RedisError,
+    /// Client input error.
+    CliInputError
 }
 
 impl From<sqlx::Error> for CliError {
@@ -83,5 +85,11 @@ impl std::process::Termination for CliError {
 impl From<CliError> for ExitCode {
     fn from(value: CliError) -> Self {
         value.report()
+    }
+}
+
+impl From<dialoguer::Error> for CliError {
+    fn from(value: dialoguer::Error) -> Self {
+        Self::new(value.to_string(), ErrorKind::CliInputError)
     }
 }

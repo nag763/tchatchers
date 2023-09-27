@@ -14,7 +14,7 @@ futures-util = { version = "0.3.28" }
 uuid = { version = "1.4.1", default-features = false }
 tower-http = { version = "0.4.4", features = ["fs", "trace", "util", "request-id", "sensitive-headers", "timeout"], default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"]}
-axum-extra = { version = "0.7.7", features = ["cookie"] }
+axum-extra = { version = "0.8.0", features = ["cookie"] }
 tracing = { default-features = false, version = "0.1.37" }
 validator = { version = "0.16.1"}
 serde = { default-features = false, version = "1.0.188" }
