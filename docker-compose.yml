@@ -89,8 +89,10 @@ services:
       - .env:/home/usr/tct/.env
     links:
       - postgres:${POSTGRES_HOST:-pg.tchatche.rs}
+      - redis:${REDIS_HOST:-redis.tchatche.rs}
     depends_on:
       - postgres
+      - redis
     build: 
       context: ./ 
       dockerfile: Dockerfile_tct

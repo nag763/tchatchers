@@ -41,7 +41,7 @@ pub enum ErrorKind {
     /// Error linked with acquiring or performing operations on redis pool.
     RedisError,
     /// Client input error.
-    CliInputError
+    CliInputError,
 }
 
 impl From<sqlx::Error> for CliError {
