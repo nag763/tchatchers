@@ -21,5 +21,5 @@ js-sys = "0.3.64"
 uuid = { version = "1.4.1", features = ["v4"] }
 validator = "0.16.1"
 async-recursion = "1.0.5"
-postcard = { version = "1.0.7", features = ["use-std"], default-features = false }
+postcard = { version = "1.0.8", features = ["use-std"], default-features = false }
 derive_more = "0.99.17"
