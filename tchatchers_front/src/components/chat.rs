@@ -122,7 +122,9 @@ struct UserChatProperties {
 fn user_chat(user_chat_properties: &UserChatProperties) -> Html {
     html! {
         <div class={classes!("chat-component", user_chat_properties.is_user.then_some("reversed-chat-component"), user_chat_properties.display_pfp.then_some("mt-3"))} >
-            <ProfilePicture pfp={user_chat_properties.pfp.clone()} author={user_chat_properties.author.clone()} display_pfp={user_chat_properties.display_pfp} author_id={user_chat_properties.author_id} is_self={user_chat_properties.is_user}/>
+            if !user_chat_properties.is_user {
+                <ProfilePicture pfp={user_chat_properties.pfp.clone()} author={user_chat_properties.author.clone()} display_pfp={user_chat_properties.display_pfp} author_id={user_chat_properties.author_id} is_self={user_chat_properties.is_user}/>
+            }
             <Message uuid={user_chat_properties.uuid} reception_status={user_chat_properties.reception_status} content={user_chat_properties.content.clone()} is_user={user_chat_properties.is_user} timestamp={user_chat_properties.timestamp} />
         </div>
     }
@@ -154,12 +156,13 @@ impl Component for Chat {
         let current_user_id = ctx.props().user.id;
         while let Some(current_element) = std::mem::replace(&mut next_element_opt, iterator.next())
         {
-            let display_pfp = match next_element_opt {
-                Some(next_element) => next_element.author.id != current_element.author.id,
-                // Chat list is built in reverse order, so last built element is actually the first message,
-                // so we display the pfp for the first message
-                _ => true,
-            };
+            let display_pfp = (current_user_id != current_element.author.id)
+                && match next_element_opt {
+                    Some(next_element) => next_element.author.id != current_element.author.id,
+                    // Chat list is built in reverse order, so last built element is actually the first message,
+                    // so we display the pfp for the first message
+                    _ => true,
+                };
             html_content.push(html! { <UserChat uuid={current_element.uuid} pfp={current_element.author.pfp.clone().unwrap_or_else(|| DEFAULT_PFP.into())} reception_status={current_element.reception_status} content={current_element.content.clone()} author_id={current_element.author.id} author={current_element.author.name.clone()} is_user={current_element.author.id == current_user_id} timestamp={current_element.timestamp + user_offset} {display_pfp}/> });
         }
         html_content.into_iter().collect::<Html>()
