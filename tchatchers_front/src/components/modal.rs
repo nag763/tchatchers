@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::rc::Rc;
 use wasm_bindgen::{prelude::Closure, JsCast};
 use web_sys::{Element, EventTarget, MouseEvent};
-use yew::{html, Component, Context, Html};
+use yew::{classes, html, Component, Context, Html};
 use yew_agent::{Bridge, Bridged};
 
 const MODAL_ID: &str = "modal";
@@ -118,14 +118,9 @@ impl Component for Modal {
             .set_onclick(Some(closure.as_ref().unchecked_ref()));
         closure.forget();
 
-        let should_bounce: &str = match self.stop_bounce {
-            Some(_) => "animate-bounce",
-            None => "",
-        };
-
         html! {
                 <div id={MODAL_ID} hidden={!self.visible} class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-auto">
-                    <div class={format!("{} relative rounded-lg shadow bg-slate-200 dark:bg-gray-700 border-4 border-slate-300 dark:border-gray-800 mx-2 md:mx-0 ", should_bounce)}>
+                    <div class={classes!("default-modal", self.stop_bounce.as_ref().map(|_| "animate-bounce"))}>
                         <div class="flex justify-between items-start p-4 rounded-t border-b border-slate-400 dark:border-gray-600">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 {&self.modal_content.title}

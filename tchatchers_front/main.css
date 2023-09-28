@@ -57,4 +57,8 @@
     .default-pop-up-icon {
         @apply inline-flex flex-shrink-0 justify-center items-center w-8 h-8 rounded-lg;
     }
+
+    .default-modal {
+        @apply relative rounded-lg shadow bg-slate-200 dark:bg-gray-700 border-4 border-slate-300 dark:border-gray-800 mx-2 md:mx-0;
+    }
 }
