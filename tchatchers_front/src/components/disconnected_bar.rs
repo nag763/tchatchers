@@ -48,7 +48,7 @@ impl Component for DisconnectedBar {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let translation = &ctx.props().translation;
         html! {
-            <div class="col-span-6">
+            <div class="col-span-6 mb-6">
                 if ctx.props().called_back {
                     <TryReconnect {translation} try_reconnect={ctx.props().try_reconnect.clone()} />
                 } else {
