@@ -5,11 +5,12 @@ use std::rc::Rc;
 use crate::{services::toast_bus::ToastBus, utils::client_context::ClientContext};
 use gloo_timers::callback::Timeout;
 use serde::{Deserialize, Serialize};
-use yew::{function_component, html, use_context, Component, Context, Html, Properties, classes};
+use yew::{classes, function_component, html, use_context, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
 
 const SUCCESS_ICON : &str = "M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z";
 const ERR_ICON : &str = "M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z";
+const COOLDOWN_TIMING: u32 = 2_500u32;
 
 #[function_component(ToastHOC)]
 pub fn sign_up_hoc() -> Html {
@@ -27,7 +28,8 @@ pub struct Alert {
 pub enum Msg {
     NewToast(Alert),
     Hide,
-    StopBounce,
+    FadeIn,
+    StartFadingOut,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -41,6 +43,7 @@ pub struct Toast {
     visible: bool,
     cooldown: Option<Timeout>,
     stop_bounce: Option<Timeout>,
+    fadeout: Option<Timeout>,
     _producer: Box<dyn Bridge<ToastBus>>,
 }
 
@@ -59,6 +62,7 @@ impl Component for Toast {
             visible: false,
             cooldown: None,
             stop_bounce: None,
+            fadeout: None,
             _producer: ToastBus::bridge(Rc::new(cb)),
         }
     }
@@ -75,18 +79,27 @@ impl Component for Toast {
                 self.visible = true;
                 self.cooldown = Some({
                     let link = ctx.link().clone();
-                    Timeout::new(3_000, move || link.send_message(Msg::Hide))
+                    Timeout::new(COOLDOWN_TIMING, move || link.send_message(Msg::Hide))
                 });
                 self.stop_bounce = Some({
                     let link = ctx.link().clone();
-                    Timeout::new(500, move || link.send_message(Msg::StopBounce))
+                    Timeout::new(500, move || link.send_message(Msg::FadeIn))
                 });
+                self.fadeout = Some({
+                    let link = ctx.link().clone();
+                    Timeout::new(COOLDOWN_TIMING - 900, move || {
+                        link.send_message(Msg::StartFadingOut)
+                    })
+                })
             }
             Msg::Hide => {
                 self.visible = false;
             }
-            Msg::StopBounce => {
+            Msg::FadeIn => {
                 self.stop_bounce = None;
+            }
+            Msg::StartFadingOut => {
+                self.fadeout = None;
             }
         }
         true
@@ -94,19 +107,19 @@ impl Component for Toast {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <div class={classes!("default-pop-up", self.stop_bounce.as_ref().map(|_| "animate-bounce"))} hidden={!self.visible}>
-                <div id="toast-success" class="flex items-center p-4 mb-4 w-full max-w-xs text-gray-500 bg-white border-2 rounded-lg shadow dark:text-gray-400 dark:bg-zinc-900 dark:border-zinc-700" role="alert">
-                    <div class={classes!("default-pop-up-icon", if self.is_success { "bg-green-100 dark:bg-green-800" } else { "bg-red-100 dark:bg-red-800" })}>
+            <div class={classes!("default-pop-up", self.stop_bounce.as_ref().map(|_| "animate-fade-in"), self.fadeout.is_none().then_some("animate-fade-out"))} hidden={!self.visible}>
+            <div id="toast-success" class="flex items-center p-4 mb-4 w-full max-w-xs text-gray-500 border-2 rounded-lg shadow dark:text-gray-400 dark:bg-zinc-900 dark:border-zinc-700" role="alert">
+                    <div class={classes!("default-pop-up-icon", if self.is_success { "bg-green-200 dark:bg-green-800" } else { "bg-red-200 dark:bg-red-800" })}>
                         <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path 
-                                fill-rule="evenodd" 
+                            <path
+                                fill-rule="evenodd"
                                 d={if self.is_success { SUCCESS_ICON } else { ERR_ICON }} clip-rule="evenodd">
                             </path>
                         </svg>
                         <span class="sr-only">{"Error icon"}</span>
                     </div>
                     <div class="ml-3 text-sm font-normal mr-2">{self.msg.as_str()}</div>
-                    <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 focus:ring-zinc-800 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-zinc-800 dark:hover:bg-gray-700 ml-4" data-dismiss-target="#toast-success" aria-label="Close" onclick={ctx.link().callback(|_| Msg::Hide)}>
+                    <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-slate-150 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 focus:ring-zinc-800 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-zinc-800 dark:hover:bg-gray-700 ml-4" data-dismiss-target="#toast-success" aria-label="Close" onclick={ctx.link().callback(|_| Msg::Hide)}>
                         <span class="sr-only">{"Close"}</span>
                         <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
                     </button>

@@ -6,6 +6,20 @@ module.exports = {
 		'tahoma': ['Tahoma', 'ui-serif', 'sans-serif']
 	},
     extend: {
+		animation: {
+			'fade-out': 'fadeOut 1S ease-in-out',
+			'fade-in': 'fadeIn 0.5s ease-in-out'
+		},
+		keyframes: {
+			fadeOut: {
+				'0%':  { opacity: 1 },
+				'100%': { opacity: 0 }
+			},
+			fadeIn : {
+				'0%':  { opacity: 0 },
+				'100%': { opacity: 1 }
+			}
+		},
 		gridTemplateRows: {
 			'12': 'repeat(12, minmax(0, 1fr))',
 		},
