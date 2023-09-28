@@ -49,4 +49,12 @@
     .common-form-label {
         @apply antialiased block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4;
     }
+
+    .default-pop-up {
+        @apply z-50 absolute right-3 bottom-5 md:bottom-10 md:right-10;
+    }
+
+    .default-pop-up-icon {
+        @apply inline-flex flex-shrink-0 justify-center items-center w-8 h-8 rounded-lg;
+    }
 }

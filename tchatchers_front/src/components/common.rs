@@ -254,7 +254,7 @@ pub fn form_checkbox(props: &FormCheckboxProperties) -> Html {
         <div class="md:w-1/3"/>
         <div class="md:w-2/3">
             <div class="flex  items-center mr-4 space-x-2">
-                <input type="checkbox" class="w-4 h-4 accent-purple-600 dark:accent-zinc-700" ref={&props.attr_ref} />
+                <input type="checkbox" class="w-4 h-4 accent-purple-600 bg-zinc-600 dark:bg-zinc-600 dark:accent-zinc-700" ref={&props.attr_ref} />
                 <label class="text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-keep-me-signed-in">
                 <I18N label={&props.label} {translation} default={&props.default}/>
                 </label>
