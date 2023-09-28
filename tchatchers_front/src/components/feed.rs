@@ -226,7 +226,7 @@ impl Component for Feed {
         let link = ctx.link().clone();
         html! {
             <div class="grid grid-rows-11 h-full dark:bg-zinc-800">
-                <div class="row-span-10 overflow-auto flex flex-col-reverse" >
+                <div class="row-span-10 overflow-auto flex flex-col-reverse mt-4" >
                     <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={self.user_context.user.as_ref().unwrap().clone()} />
                 </div>
                 <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center block">

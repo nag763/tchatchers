@@ -322,8 +322,8 @@ pub fn form(props: &FormProperties) -> Html {
     let translation = &props.translation;
     html! {
         <div class="flex items-center justify-center h-full dark:bg-zinc-800">
-            <form class="w-full max-w-sm lg:max-w-md xl:max-w-lg border-2 dark:border-zinc-700 px-6 py-6  lg:py-14" {onsubmit} action="javascript:void(0);">
-            <h2 class="text-xl mb-10 text-center text-gray-500 dark:text-gray-200 font-bold"><I18N label={&props.label} {translation} default={&props.default} />
+            <form class="w-full max-w-sm lg:max-w-md xl:max-w-lg border-2 border-slate-300 dark:border-zinc-600 px-6 py-6  lg:py-14 rounded-md" {onsubmit} action="javascript:void(0);">
+            <h2 class="text-xl mb-10 text-center text-gray-600 dark:text-gray-200 font-bold"><I18N label={&props.label} {translation} default={&props.default} />
             </h2>
             { for props.children.iter() }
             if let Some(error) = &props.form_error {
@@ -337,6 +337,26 @@ pub fn form(props: &FormProperties) -> Html {
                 </small>
             }
             </form>
+        </div>
+    }
+}
+
+#[function_component(Loading)]
+pub fn loading() -> Html {
+    html! {
+        <div class="flex flex-col items-center align-middle justify-center h-screen text-2xl sm:text-8xl text-center text-slate-600 dark:text-gray-200 dark:bg-zinc-800">
+            <img src="/favicon.ico" class="w-1/3 animate-pulse"/>
+        </div>
+    }
+}
+
+#[function_component(NotFound)]
+pub fn not_found() -> Html {
+    html! {
+        <div class="flex items-center justify-center h-full text-2xl sm:text-8xl text-center text-slate-600 dark:text-gray-200 dark:bg-zinc-800">
+        {"404 ( ˘︹˘ )"}
+            <br/>
+        {"This page doesn't exist"}
         </div>
     }
 }

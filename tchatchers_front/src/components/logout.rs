@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use crate::components::common::Loading;
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::router::Route;
@@ -14,7 +15,7 @@ use yew_router::prelude::use_navigator;
 #[function_component(LogOut)]
 pub fn log_out_hoc() -> Html {
     html! {
-        <Suspense fallback={html!{<div class="dark:bg-zinc-800"></div>}}>
+        <Suspense fallback={html!{<Loading/>}}>
             <LogOutFuture/>
         </Suspense>
     }

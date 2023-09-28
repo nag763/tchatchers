@@ -28,7 +28,7 @@ module.exports = {
 				'span-11': 'span 11 / span 11',
 				'span-4': 'span 4 / span 4',
 			}
-		},
+		}
   },
   plugins: [],
 }

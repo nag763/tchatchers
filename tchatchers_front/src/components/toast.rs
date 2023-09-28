@@ -108,7 +108,7 @@ impl Component for Toast {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <div class={classes!("default-pop-up", self.stop_bounce.as_ref().map(|_| "animate-fade-in"), self.fadeout.is_none().then_some("animate-fade-out"))} hidden={!self.visible}>
-            <div id="toast-success" class="flex items-center p-4 mb-4 w-full max-w-xs text-gray-500 border-2 rounded-lg shadow dark:text-gray-400 dark:bg-zinc-900 dark:border-zinc-700" role="alert">
+               <div id="toast-success" class="flex items-center p-4 mb-4 w-full max-w-xs text-gray-500 border-2 rounded-lg shadow dark:text-gray-400 dark:bg-zinc-900 border-gray-400 dark:border-zinc-700" role="alert">
                     <div class={classes!("default-pop-up-icon", if self.is_success { "bg-green-200 dark:bg-green-800" } else { "bg-red-200 dark:bg-red-800" })}>
                         <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path

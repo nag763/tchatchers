@@ -10,7 +10,6 @@ pub mod join_room;
 pub mod logout;
 pub mod modal;
 pub mod navbar;
-pub mod not_found;
 pub mod right_menu;
 pub mod settings;
 pub mod signin;
@@ -20,12 +19,13 @@ pub mod type_bar;
 
 pub mod prelude {
     pub use super::auth_guard::AuthGuard;
+    pub use super::common::Loading;
+    pub use super::common::NotFound;
     pub use super::feed::FeedHOC;
     pub use super::join_room::JoinRoomHOC;
     pub use super::logout::LogOut;
     pub use super::modal::Modal;
     pub use super::navbar::NavbarHOC;
-    pub use super::not_found::NotFound;
     pub use super::right_menu::RightMenu;
     pub use super::settings::SettingsHOC;
     pub use super::signin::SignInHOC;

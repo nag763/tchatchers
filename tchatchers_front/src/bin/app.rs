@@ -104,11 +104,9 @@ fn contextual_app() -> HtmlResult {
 #[function_component(App)]
 fn app() -> Html {
     html! {
-        <>
-            <Suspense fallback={html!{ <div class="dark:text-white">{"Loading ..."}</div>}}>
-                <ContextualApp/>
-            </Suspense>
-        </>
+        <Suspense fallback={html!{<Loading/>}}>
+            <ContextualApp/>
+        </Suspense>
     }
 }
 

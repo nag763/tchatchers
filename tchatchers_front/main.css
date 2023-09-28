@@ -35,11 +35,11 @@
     }
     
     .common-button {
-        @apply antialiased bg-zinc-800 dark:bg-gray-500 enabled:hover:bg-zinc-900 dark:enabled:hover:bg-gray-600 focus:outline-none text-white font-bold py-2 px-4 rounded;
+        @apply antialiased enabled:hover:bg-slate-200 dark:enabled:hover:bg-zinc-700 focus:outline-none text-gray-700 dark:text-white font-bold p-0.5 sm:p-1 md:p-2 rounded border md:border-2 border-gray-700 dark:border-zinc-700 rounded-xl;
     }
 
     .common-input {
-        @apply antialiased bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500;
+        @apply antialiased bg-gray-200 dark:bg-zinc-800 appearance-none border-2 border-gray-200 dark:border-zinc-700 rounded w-full py-2 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:bg-gray-100 dark:focus:bg-zinc-800 focus:border-zinc-500 focus:invalid:border-red-500 visited:invalid:border-red-500;
     }
 
     .common-form-section {
@@ -47,7 +47,7 @@
     }
 
     .common-form-label {
-        @apply antialiased block text-gray-500 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4;
+        @apply antialiased block text-gray-600 dark:text-gray-200 font-bold md:text-right mb-1 md:mb-0 pr-4;
     }
 
     .default-pop-up {
