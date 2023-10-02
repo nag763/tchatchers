@@ -2,7 +2,7 @@
 [![tchatchers-stars](https://img.shields.io/github/stars/nag763/tchatchers?style=social)](https://github.com/nag763/tchatchers/stargazers)
 [![tchatchers-license](https://img.shields.io/github/license/nag763/tchatchers)](https://raw.githubusercontent.com/nag763/tchatchers/main/LICENSE.MD)
 [![github-issues](https://img.shields.io/github/issues/nag763/tchatchers)](https://github.com/nag763/tchatchers/issues)
-[![instance-health](https://img.shields.io/website?down_color=red&down_message=down&label=public%20instance&up_color=green&up_message=up&url=https%3A%2F%2Ftchatche.rs)](https://tchatche.rs)
+[![instance-health](https://img.shields.io/website?down_color=red&down_message=down&label=public%20instance&up_color=green&up_message=up&url=https%3A%2F%2Ftchatche.xyz)](https://tchatche.xyz)
 
 <p align="center"><img height="300" src="https://raw.githubusercontent.com/nag763/tchatchers/main/.github/gh_logo.png"></img></p>
 
@@ -24,7 +24,9 @@
 
 ## How to access the application
 
-The application is deployed on https://tchatche.rs and should be compatible with any modern navigator.
+The application is deployed on https://tchatche.xyz and should be compatible with any modern navigator.
+
+It was formerly on tchatche.rs but the domain name renewal fee was too expensive.
 
 ## About
 
@@ -66,11 +68,11 @@ Follow [this guide](./SETUP.md).
 
 The rustdoc can be found for each subproject at :
 
-- tchatchers_core : [here](https://tchatche.rs/doc/tchatchers_core/) 
-- tchatchers_back : [here](https://tchatche.rs/doc/tchatchers_back/)
-- tchatchers_front : [here](https://tchatche.rs/doc/tchatchers_front/)
-- tchatchers_async : [here](https://tchatche.rs/doc/tchatchers_async/)
-- tct (tchatchers_cli_tool): [here](https://tchatche.rs/doc/tct/)
+- tchatchers_core : [here](https://tchatche.xyz/doc/tchatchers_core/) 
+- tchatchers_back : [here](https://tchatche.xyz/doc/tchatchers_back/)
+- tchatchers_front : [here](https://tchatche.xyz/doc/tchatchers_front/)
+- tchatchers_async : [here](https://tchatche.xyz/doc/tchatchers_async/)
+- tct (tchatchers_cli_tool): [here](https://tchatche.xyz/doc/tct/)
 
 ## Technologies used
 
