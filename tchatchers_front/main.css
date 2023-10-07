@@ -35,7 +35,7 @@
     }
     
     .common-button {
-        @apply antialiased enabled:hover:bg-slate-200 dark:enabled:hover:bg-zinc-700 focus:outline-none text-gray-700 dark:text-white font-bold p-0.5 sm:p-1 md:p-2 rounded border md:border-2 border-gray-700 dark:border-zinc-700 rounded-xl;
+        @apply antialiased enabled:hover:bg-slate-200 dark:enabled:hover:bg-zinc-700 focus:outline-none text-gray-700 dark:text-white font-bold px-2 rounded border md:border-2 border-gray-700 dark:border-zinc-700 rounded-xl;
     }
 
     .common-input {

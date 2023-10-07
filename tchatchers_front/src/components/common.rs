@@ -38,6 +38,7 @@ pub fn waiting_for_response(props: &WaitingForResponseProperties) -> Html {
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct FormButtonProperties {
+    #[prop_or_default]
     pub callback: Option<Callback<()>>,
     #[prop_or_default]
     pub is_modal_opener: bool,
@@ -120,15 +121,15 @@ pub fn file_attacher(props: &FormFileProperties) -> Html {
     let trigger = use_force_update();
     let is_a_file_uploaded = {
         let attr_ref = props.attr_ref.cast::<HtmlInputElement>();
-        use_memo(
+        use_memo(attr_ref,
             |attr_ref| {
                 if let Some(attr_ref) = attr_ref {
                     attr_ref.value().ne("")
                 } else {
                     false
                 }
-            },
-            attr_ref,
+            }
+            
         )
     };
 

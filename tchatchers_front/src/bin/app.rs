@@ -41,6 +41,7 @@ fn contextual_app() -> HtmlResult {
         tchatchers_front::utils::language::get_navigator_languages();
 
     let locale = use_memo(
+        (*user).clone(),
         |user| {
             if let Some(user) = user {
                 Locale::find_by_id(user.locale_id)
@@ -49,30 +50,29 @@ fn contextual_app() -> HtmlResult {
             } else {
                 None
             }
-        },
-        (*user).clone(),
+        }
     );
 
     let translation = use_memo(
+        (*locale).clone(),
         |locale| {
             if let Some(locale) = locale {
                 locale.clone().translation_map
             } else {
                 Locale::get_default_locale().translation_map
             }
-        },
-        (*locale).clone(),
+        }
     );
 
     let navlink = use_memo(
+        (*user).clone(),
         |user| {
             if let Some(user) = user {
                 Navlink::get_visibility_for_profile(Some(user.profile))
             } else {
                 Navlink::get_visibility_for_profile(None)
             }
-        },
-        (*user).clone(),
+        }
     );
 
     let context = Rc::new(ClientContext {
