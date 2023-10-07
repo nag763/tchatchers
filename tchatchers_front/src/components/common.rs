@@ -121,16 +121,13 @@ pub fn file_attacher(props: &FormFileProperties) -> Html {
     let trigger = use_force_update();
     let is_a_file_uploaded = {
         let attr_ref = props.attr_ref.cast::<HtmlInputElement>();
-        use_memo(attr_ref,
-            |attr_ref| {
-                if let Some(attr_ref) = attr_ref {
-                    attr_ref.value().ne("")
-                } else {
-                    false
-                }
+        use_memo(attr_ref, |attr_ref| {
+            if let Some(attr_ref) = attr_ref {
+                attr_ref.value().ne("")
+            } else {
+                false
             }
-            
-        )
+        })
     };
 
     let svg_path = match *is_a_file_uploaded {

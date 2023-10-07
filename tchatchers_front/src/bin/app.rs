@@ -40,40 +40,31 @@ fn contextual_app() -> HtmlResult {
     let navigator_language: Option<Vec<String>> =
         tchatchers_front::utils::language::get_navigator_languages();
 
-    let locale = use_memo(
-        (*user).clone(),
-        |user| {
-            if let Some(user) = user {
-                Locale::find_by_id(user.locale_id)
-            } else if let Some(navigator_language) = navigator_language {
-                Locale::get_for_web_names(navigator_language)
-            } else {
-                None
-            }
+    let locale = use_memo((*user).clone(), |user| {
+        if let Some(user) = user {
+            Locale::find_by_id(user.locale_id)
+        } else if let Some(navigator_language) = navigator_language {
+            Locale::get_for_web_names(navigator_language)
+        } else {
+            None
         }
-    );
+    });
 
-    let translation = use_memo(
-        (*locale).clone(),
-        |locale| {
-            if let Some(locale) = locale {
-                locale.clone().translation_map
-            } else {
-                Locale::get_default_locale().translation_map
-            }
+    let translation = use_memo((*locale).clone(), |locale| {
+        if let Some(locale) = locale {
+            locale.clone().translation_map
+        } else {
+            Locale::get_default_locale().translation_map
         }
-    );
+    });
 
-    let navlink = use_memo(
-        (*user).clone(),
-        |user| {
-            if let Some(user) = user {
-                Navlink::get_visibility_for_profile(Some(user.profile))
-            } else {
-                Navlink::get_visibility_for_profile(None)
-            }
+    let navlink = use_memo((*user).clone(), |user| {
+        if let Some(user) = user {
+            Navlink::get_visibility_for_profile(Some(user.profile))
+        } else {
+            Navlink::get_visibility_for_profile(None)
         }
-    );
+    });
 
     let context = Rc::new(ClientContext {
         user,
