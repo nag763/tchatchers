@@ -6,14 +6,14 @@
 
 <p align="center"><img height="300" src="https://raw.githubusercontent.com/nag763/tchatchers/main/.github/gh_logo.png"></img></p>
 
-<h2 align="center">tchatche.rs</h2>
+<h2 align="center">tchatchers</h2>
 <h4 align="center">A blazing fast chat application built with Axum and yew.rs :rocket:</h4>
 
 <p align="center"><img src="https://raw.githubusercontent.com/nag763/tchatchers/main/.github/app_screens.png"></img></p>
 
 ## TL;DR
 
-* :speech_balloon: tchatche.rs is a realtime chat application built with yew.rs (frontend) and axum (backend) frameworks.
+* :speech_balloon: tchatchers is a realtime chat application built with yew.rs (frontend) and axum (backend) frameworks.
 * :heavy_check_mark: Easy to use, only requires authentication informations to be used.
 * :rocket: Blazing fast, completely built on Rust.
 * :moon: Supports browser's dark mode.
@@ -26,11 +26,11 @@
 
 The application is deployed on https://tchatche.xyz and should be compatible with any modern navigator.
 
-It was formerly on tchatche.rs but the domain name renewal fee was too expensive.
+It was formerly on tchatchers but the domain name renewal fee was too expensive.
 
 ## About
 
-tchatche.rs is an application used to help clients to communicate between each others. It is built with yew.rs and axum server in order to provide blazing fast responses and strong API.
+tchatchers is an application used to help clients to communicate between each others. It is built with yew.rs and axum server in order to provide blazing fast responses and strong API.
 
 The main application's usage is to create rooms to talk between people being connected to the application. You like football ? Try the football room. You like philosophy ? Try the philosophy one.
 
