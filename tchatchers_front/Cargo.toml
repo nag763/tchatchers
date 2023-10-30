@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-futures = "0.3.28"
+futures = "0.3.29"
 gloo-console = "0.3.0"
 gloo-net = "0.4.0"
 gloo-timers = "0.3.0"
-serde = { version = "1.0.189", features = ["derive"] }
+serde = { version = "1.0.190", features = ["derive"] }
 wasm-bindgen = "0.2.87"
 wasm-bindgen-futures = "0.4.37"
 web-sys = { version = "0.3.64", features = ["HtmlDocument", "FileReader", "Event", "Navigator", "FormData"] }
@@ -18,7 +18,7 @@ yew-router = "0.18.0"
 tchatchers_core = { path = "../tchatchers_core", features = ["front"] }
 chrono = { version = "0.4.31", features = ["serde"] }
 js-sys = "0.3.64"
-uuid = { version = "1.4.1", features = ["v4"] }
+uuid = { version = "1.5.0", features = ["v4"] }
 validator = "0.16.1"
 async-recursion = "1.0.5"
 postcard = { version = "1.0.8", features = ["use-std"], default-features = false }
