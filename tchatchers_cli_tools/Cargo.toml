@@ -13,7 +13,7 @@ sqlx = { version = "0.7", features = ["macros"], default-features = false }
 derive_more = { features = ["from", "constructor", "error"], default-features = false, version = "0.99.17" }
 tokio = { version = "1.33.0", features = ["macros", "rt-multi-thread"], default-features = false }
 dotenv = "0.15.0"
-which = "4.4.2"
+which = "5.0.0"
 validator = "0.16.1"
 log = "0.4.20"
 env_logger = { version = "0.10.0" }

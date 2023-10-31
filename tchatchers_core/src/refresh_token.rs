@@ -108,11 +108,11 @@ impl RefreshToken {
         cookie.set_path("/");
         cookie.set_name(REFRESH_TOKEN_PATH);
         match self.session_only {
-            true => cookie.set_expires(cookie::Expiration::Session),
+            true => cookie.set_expires(None),
             false => {
                 let now = time::OffsetDateTime::UNIX_EPOCH;
                 let expiration = now + time::Duration::seconds(self.exp);
-                cookie.set_expires(cookie::Expiration::DateTime(expiration))
+                cookie.set_expires(expiration)
             }
         }
         cookie.set_secure(true);
