@@ -153,11 +153,19 @@ impl Component for SignUp {
         }
     }
 
+    fn rendered(&mut self, _ctx: &Context<Self>, first_render: bool) {
+        if first_render {
+            if let Some(login) = self.login.cast::<HtmlInputElement>() {
+                let _ = login.focus();
+            }
+        }
+    }
+
     fn view(&self, ctx: &Context<Self>) -> Html {
         let translation = &ctx.props().client_context.translation;
         html! {
-            <Form label="sign_up" {translation} default="Sign upp" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.server_error}>
-            <FormInput label={"login"} {translation} default={"Login"} minlength="3" maxlength="32" attr_ref={&self.login} required=true />
+            <Form label="sign_up" {translation} default="Sign up" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.server_error}>
+            <FormInput label={"login"} autofocus=true {translation} default={"Login"} minlength="3" maxlength="32" attr_ref={&self.login} required=true />
             <FormInput label={"name_field"} {translation} default={"Name"} minlength="3" maxlength="16" attr_ref={&self.name} required=true />
             <FormInput label={"password_field"} {translation} default={"Password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password} required=true />
             <FormInput label={"confirm_password"} {translation} default={"Confirm your password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password_confirmation} required=true />

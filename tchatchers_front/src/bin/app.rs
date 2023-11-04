@@ -80,13 +80,13 @@ fn contextual_app() -> HtmlResult {
             <ContextProvider<Rc<ClientContext>> context={context}>
                 <div class="h-screen grid grid-rows-12">
                     <NavbarHOC/>
-                    <ToastHOC />
-                        <Modal />
                     <div class="row-span-11 overflow-y-auto">
                         <Switch<Route> render={switch} />
                     </div>
                 </div>
                 <RightMenu />
+                <ToastHOC />
+                <Modal />
             </ContextProvider<Rc<ClientContext>>>
         </BrowserRouter>
     })

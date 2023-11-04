@@ -70,11 +70,19 @@ impl Component for JoinRoom {
         true
     }
 
+    fn rendered(&mut self, _ctx: &Context<Self>, first_render: bool) {
+        if first_render {
+            if let Some(room_name) = self.room_name.cast::<HtmlInputElement>() {
+                let _ = room_name.focus();
+            }
+        }
+    }
+
     fn view(&self, ctx: &Context<Self>) -> Html {
         let translation = &ctx.props().user_context.translation;
         html! {
             <Form label="join_a_room_title" {translation} default="Join a room" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.verification_error} >
-                <FormInput label={"room_name"} {translation} default={"Room name"} minlength="1" attr_ref={&self.room_name} required=true />
+                <FormInput label={"room_name"} autofocus=true {translation} default={"Room name"} minlength="1" attr_ref={&self.room_name} required=true />
                 <FormButton label={"join_room"} default={"Join"} {translation} />
             </Form>
         }

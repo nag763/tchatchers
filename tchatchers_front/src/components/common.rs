@@ -183,6 +183,8 @@ pub struct FormInputProperties {
     pub disabled: bool,
     #[prop_or_default]
     pub value: AttrValue,
+    #[prop_or_default]
+    pub autofocus: bool,
 }
 
 #[function_component(FormInput)]
@@ -196,7 +198,7 @@ pub fn form_input(props: &FormInputProperties) -> Html {
             </label>
             </div>
                 <div class="md:w-2/3">
-                <input class="common-input" type={&props.input_type} required={props.required} minlength={&props.minlength} maxlength={&props.maxlength} ref={&props.attr_ref} disabled={props.disabled} value={&props.value} />
+                <input autofocus={props.autofocus} class="common-input" type={&props.input_type} required={props.required} minlength={&props.minlength} maxlength={&props.maxlength} ref={&props.attr_ref} disabled={props.disabled} value={&props.value} />
             </div>
         </div>
     }

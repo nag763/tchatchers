@@ -45,10 +45,3 @@ pub fn switch(route: Route) -> Html {
         Route::NotFound => html! { <NotFound />},
     }
 }
-
-impl Route {
-    /// Returns whether a route requires the user to be authenticated or not.
-    pub fn requires_auth(&self) -> bool {
-        matches!(self, Route::Room { room: _ } | Route::Settings)
-    }
-}

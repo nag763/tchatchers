@@ -128,6 +128,7 @@ impl Component for SignIn {
                 self.server_error = Some(err.into());
                 self.wait_for_api = false;
                 if let Some(password) = self.password.cast::<HtmlInputElement>() {
+                    password.focus().unwrap();
                     password.set_value("");
                 }
                 true
@@ -153,12 +154,20 @@ impl Component for SignIn {
         }
     }
 
+    fn rendered(&mut self, _ctx: &Context<Self>, first_render: bool) {
+        if first_render {
+            if let Some(login) = self.login.cast::<HtmlInputElement>() {
+                let _ = login.focus();
+            }
+        }
+    }
+
     fn view(&self, ctx: &Context<Self>) -> Html {
         let translation = &ctx.props().client_context.translation;
         html! {
             <Form label="sign_in" {translation} default="Sign in" onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} form_error={&self.server_error}>
-                <FormInput label={"login"} {translation} default={"Login"} minlength="3" attr_ref={&self.login} required=true />
-                <FormInput label={"password_field"} {translation} required=true  default={"Password"} minlength="4" input_type="password" attr_ref={&self.password} />
+                <FormInput label={"login"} {translation} default={"Login"} minlength="3" attr_ref={&self.login} required=true autofocus=true />
+                <FormInput label={"password_field"} {translation} required=true default={"Password"} minlength="4" input_type="password" attr_ref={&self.password} />
                 <FormCheckbox label={"keep_me_signed_in"} {translation} default={"Remember me"} attr_ref={&self.remember_me}/>
                 <FormFreeSection>
                     if self.wait_for_api {
