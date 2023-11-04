@@ -66,7 +66,7 @@ impl Component for TypeBar {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <div class="col-span-6 mb-6">
+            <div class="col-span-6">
                 <form onsubmit={ctx.link().callback(|_| Msg::SubmitForm)} action="javascript:void(0);">
                         <input autofocus=true class="shadow appearance-none border dark:border-zinc-800 rounded-xl px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline focus:border-zinc-900 w-full h-10 disabled:bg-gray-100 dark:disabled:bg-zinc-700 bg-gray-300 dark:bg-zinc-700 dark:text-gray-200 dark:carret-indigo-500" type="text" placeholder={ctx.props().translation.as_ref().clone().get_or_default("type_msg_here", "Type a message here")} minlength="2" maxlength="127" ref={self.input_ref.clone()} />
                         <button type="submit" hidden=true></button>

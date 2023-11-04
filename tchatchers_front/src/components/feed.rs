@@ -225,11 +225,11 @@ impl Component for Feed {
         let tx = self.ws.tx.clone();
         let link = ctx.link().clone();
         html! {
-            <div class="grid grid-rows-11 h-full dark:bg-zinc-800">
-                <div class="row-span-10 overflow-auto flex flex-col-reverse mt-4" >
+            <div class="grid grid-rows-11 auto-rows-fr h-full dark:bg-zinc-800">
+                <div class="row-span-10 overflow-auto flex flex-col-reverse max-h-full mt-4" >
                     <Chat messages={self.received_messages.clone()} room={ctx.props().room.clone()} user={self.user_context.user.as_ref().unwrap().clone()} />
                 </div>
-                <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center block">
+                <div class="row-span-1 grid grid-cols-6 px-5 gap-4 justify-center content-center block ">
                     if self.is_connected {
                         <TypeBar {translation} pass_message_to_ws={move |message| tx.clone().try_send(message).unwrap()} user={self.user_context.user.as_ref().unwrap().clone()} room={ctx.props().room.clone()} />
                     } else {
