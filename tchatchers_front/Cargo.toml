@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-futures = "0.3.29"
 gloo-console = "0.3.0"
 gloo-net = "0.4.0"
 gloo-timers = "0.3.0"
@@ -16,6 +15,10 @@ yew = { version = "0.21.0", features = ["csr"] }
 yew-agent = "0.2.0"
 yew-router = "0.18.0"
 tchatchers_core = { path = "../tchatchers_core", features = ["front"] }
+modal_service = { path = "services/modal_service" }
+toast_service = { path = "services/toast_service" }
+rmenu_service = { path = "services/rmenu_service" }
+chat_service = { path = "services/chat_service" }
 chrono = { version = "0.4.31", features = ["serde"] }
 js-sys = "0.3.65"
 uuid = { version = "1.5.0", features = ["v4"] }
@@ -23,4 +26,3 @@ validator = "0.16.1"
 async-recursion = "1.0.5"
 postcard = { version = "1.0.8", features = ["use-std"], default-features = false }
 derive_more = "0.99.17"
-serde_json = "1.0.108"

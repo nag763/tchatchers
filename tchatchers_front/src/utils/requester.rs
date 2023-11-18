@@ -8,7 +8,7 @@ use wasm_bindgen::JsValue;
 use yew::{UseStateHandle, UseStateSetter};
 use yew_agent::Dispatched;
 
-use crate::{components::toast::Alert, services::toast_bus::ToastBus};
+use toast_service::{Alert, ToastBus};
 
 const UNAUTHORIZED: u16 = 401u16;
 const TOO_MANY_REQUESTS: u16 = 429u16;

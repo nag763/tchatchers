@@ -1,6 +1,7 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use chrono::{DateTime, Datelike, Duration, Timelike, Utc};
+use rmenu_service::{MessageRMenuProps, ProfileRMenuProps, RMenuBus, RMenuKind, RMenusBusEvents};
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::ws_message::{WsMessageContent, WsReceptionStatus};
 use uuid::Uuid;
@@ -9,11 +10,6 @@ use yew::{
     classes, function_component, html, use_state, AttrValue, Component, Context, Html, Properties,
 };
 use yew_agent::Dispatched;
-
-use crate::components::right_menu::message_rmenu::MessageRMenuProps;
-use crate::components::right_menu::profile_rmenu::ProfileRMenuProps;
-use crate::components::right_menu::RMenuKind;
-use crate::services::rmenu_bus::{RMenuBus, RMenusBusEvents};
 
 const DEFAULT_PFP: &str = "/assets/no_pfp.webp";
 

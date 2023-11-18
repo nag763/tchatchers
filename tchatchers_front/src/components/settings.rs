@@ -9,19 +9,19 @@ use crate::components::common::FormFreeSection;
 use crate::components::common::FormInput;
 use crate::components::common::FormSelect;
 use crate::components::common::WaitingForResponse;
-use crate::components::toast::Alert;
 use crate::router::Route;
-use crate::services::modal_bus::ModalBus;
-use crate::services::modal_bus::ModalBusContent;
-use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::keyed_list::KeyedList;
 use crate::utils::requester::Requester;
+use modal_service::ModalBus;
+use modal_service::ModalBusContent;
+use modal_service::ModalContent;
 use tchatchers_core::api_response::ApiResponse;
 use tchatchers_core::locale::Locale;
 use tchatchers_core::user::PartialUser;
 use tchatchers_core::user::UpdatableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
+use toast_service::{Alert, ToastBus};
 use validator::Validate;
 use web_sys::FormData;
 use web_sys::HtmlInputElement;
@@ -33,8 +33,6 @@ use yew_agent::Bridge;
 use yew_agent::Bridged;
 use yew_agent::Dispatched;
 use yew_router::scope_ext::RouterScopeExt;
-
-use super::modal::ModalContent;
 
 #[function_component(SettingsHOC)]
 pub fn feed_hoc() -> Html {

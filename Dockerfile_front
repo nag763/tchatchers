@@ -26,6 +26,8 @@ COPY --from=asset_builder /home/usr/front /usr/tchatchers/front
 
 COPY ./tchatchers_core ../tchatchers_core
 
+COPY ./tchatchers_front/services ./services
+
 COPY ./tchatchers_front/favicon.ico ./favicon.ico
 
 COPY ./tchatchers_front/assets/no_pfp.webp ./assets/no_pfp.webp

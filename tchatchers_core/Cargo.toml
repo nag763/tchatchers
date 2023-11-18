@@ -13,7 +13,7 @@ async = ["dep:sqlx", "dep:redis", "dep:bb8-redis"]
 [dependencies]
 chrono = { version = "0.4.31", features = ["clock", "serde"], default-features = false }
 derivative = "2.2.0"
-jsonwebtoken = { default-features = false, version = "9.1.0" }
+jsonwebtoken = { default-features = false, version = "8.3.0" }
 rand = { default-features = false, version = "0.8.5" }
 rust-argon2 = { version = "2", optional = true, default-features = false }
 serde = { version = "1.0.192", features = ["rc"], default-features = false }

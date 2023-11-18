@@ -1,8 +1,7 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use crate::services::modal_bus::{ModalBus, ModalBusContent};
 use gloo_timers::callback::Timeout;
-use serde::{Deserialize, Serialize};
+use modal_service::{ModalBus, ModalBusContent, ModalContent};
 use std::rc::Rc;
 use wasm_bindgen::{prelude::Closure, JsCast};
 use web_sys::{Element, EventTarget, MouseEvent};
@@ -11,14 +10,6 @@ use yew_agent::{Bridge, Bridged};
 
 const MODAL_ID: &str = "modal";
 pub const MODAL_OPENER_CLASS: &str = "modal-opener";
-
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub struct ModalContent {
-    pub title: String,
-    pub msg: String,
-    pub decline_text: Option<String>,
-    pub accept_text: Option<String>,
-}
 
 pub enum Msg {
     CloseSelf(Option<ModalBusContent>),

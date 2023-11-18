@@ -8,6 +8,10 @@ members = [
     "tchatchers_core",
     "tchatchers_back",
     "tchatchers_front",
+    "tchatchers_front/services/modal_service",
+    "tchatchers_front/services/toast_service",
+    "tchatchers_front/services/rmenu_service",
+    "tchatchers_front/services/chat_service",
     "tchatchers_cli_tools",
     "tchatchers_async",
 ]

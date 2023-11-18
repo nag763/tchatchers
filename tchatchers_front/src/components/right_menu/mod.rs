@@ -7,18 +7,14 @@ pub mod profile_rmenu;
 use std::rc::Rc;
 
 use js_sys::Function;
-use serde::{Deserialize, Serialize};
 use wasm_bindgen::{prelude::Closure, JsCast};
 use yew::{html, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged, Dispatched};
 use yew_router::scope_ext::{LocationHandle, RouterScopeExt};
 
-use crate::services::rmenu_bus::{RMenuBus, RMenusBusEvents};
+use rmenu_service::*;
 
-use self::{
-    message_rmenu::{MessageRMenu, MessageRMenuProps},
-    profile_rmenu::{ProfileRMenu, ProfileRMenuProps},
-};
+use self::{message_rmenu::MessageRMenu, profile_rmenu::ProfileRMenu};
 
 const JS_EVENTS_TO_CANCEL: [&str; 2] = ["click", "contextmenu"];
 
@@ -32,12 +28,6 @@ fn close_context_menu_function() -> Function {
     let js_value = closure.into_js_value();
 
     js_value.unchecked_into::<Function>()
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub enum RMenuKind {
-    MessageRMenu(MessageRMenuProps),
-    ProfileRMenu(ProfileRMenuProps),
 }
 
 #[derive(Properties, PartialEq, Clone)]

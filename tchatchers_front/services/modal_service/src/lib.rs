@@ -1,20 +1,34 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use crate::components::toast::Alert;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use yew_agent::{HandlerId, Public, Worker, WorkerLink};
 
-pub struct ToastBus {
-    link: WorkerLink<ToastBus>,
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct ModalContent {
+    pub title: String,
+    pub msg: String,
+    pub decline_text: Option<String>,
+    pub accept_text: Option<String>,
+}
+
+pub struct ModalBus {
+    link: WorkerLink<ModalBus>,
     subscribers: HashSet<HandlerId>,
 }
 
-impl Worker for ToastBus {
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ModalBusContent {
+    PopModal(ModalContent),
+    Outcome(bool),
+}
+
+impl Worker for ModalBus {
     type Reach = Public<Self>;
     type Message = ();
-    type Input = Alert;
-    type Output = Alert;
+    type Input = ModalBusContent;
+    type Output = ModalBusContent;
 
     fn create(link: WorkerLink<Self>) -> Self {
         Self {
@@ -40,6 +54,6 @@ impl Worker for ToastBus {
     }
 
     fn name_of_resource() -> &'static str {
-        "toast_worker.js"
+        "modal_service.js"
     }
 }

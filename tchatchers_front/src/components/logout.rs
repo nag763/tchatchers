@@ -4,9 +4,10 @@ use crate::components::common::Loading;
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::router::Route;
-use crate::services::toast_bus::ToastBus;
+
+use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
-use crate::{components::toast::Alert, utils::client_context::ClientContext};
+use toast_service::{Alert, ToastBus};
 use yew::suspense::use_future;
 use yew::{function_component, html, use_context, Html, HtmlResult, Suspense};
 use yew_agent::Dispatched;

@@ -563,6 +563,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "chat_service"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "gloo-console 0.3.0",
+ "gloo-net 0.4.0",
+ "js-sys",
+ "serde_json",
+ "tchatchers_core",
+ "wasm-bindgen-futures",
+ "web-sys",
+ "yew-agent",
+]
+
+[[package]]
 name = "chrono"
 version = "0.4.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1872,9 +1887,9 @@ dependencies = [
 
 [[package]]
 name = "jsonwebtoken"
-version = "9.1.0"
+version = "8.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "155c4d7e39ad04c172c5e3a99c434ea3b4a7ba7960b38ecd562b270b097cce09"
+checksum = "6971da4d9c3aa03c3d8f3ff0f4155b534aad021292003895a469716b2a230378"
 dependencies = [
  "base64",
  "ring",
@@ -2025,6 +2040,14 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "modal_service"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "yew-agent",
 ]
 
 [[package]]
@@ -2571,16 +2594,27 @@ checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 
 [[package]]
 name = "ring"
-version = "0.17.5"
+version = "0.16.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb0205304757e5d899b9c2e448b867ffd03ae7f988002e47cd24954391394d0b"
+checksum = "3053cf52e236a3ed746dfc745aa9cacf1b791d846bdaf412f60a8d7d6e17c8fc"
 dependencies = [
  "cc",
- "getrandom",
  "libc",
- "spin 0.9.8",
+ "once_cell",
+ "spin 0.5.2",
  "untrusted",
- "windows-sys 0.48.0",
+ "web-sys",
+ "winapi",
+]
+
+[[package]]
+name = "rmenu_service"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "uuid",
+ "yew 0.21.0",
+ "yew-agent",
 ]
 
 [[package]]
@@ -3258,17 +3292,19 @@ name = "tchatchers_front"
 version = "0.1.0"
 dependencies = [
  "async-recursion",
+ "chat_service",
  "chrono",
  "derive_more",
- "futures",
  "gloo-console 0.3.0",
  "gloo-net 0.4.0",
  "gloo-timers 0.3.0",
  "js-sys",
+ "modal_service",
  "postcard",
+ "rmenu_service",
  "serde",
- "serde_json",
  "tchatchers_core",
+ "toast_service",
  "uuid",
  "validator",
  "wasm-bindgen",
@@ -3395,6 +3431,14 @@ name = "tinyvec_macros"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
+
+[[package]]
+name = "toast_service"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "yew-agent",
+]
 
 [[package]]
 name = "tokio"
@@ -3684,9 +3728,9 @@ checksum = "f28467d3e1d3c6586d8f25fa243f544f5800fec42d97032474e17222c2b75cfa"
 
 [[package]]
 name = "untrusted"
-version = "0.9.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
+checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
 
 [[package]]
 name = "url"

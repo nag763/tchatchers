@@ -3,15 +3,14 @@ use std::rc::Rc;
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::common::{Form, FormButton, FormFreeSection, FormInput, WaitingForResponse};
-use crate::components::toast::Alert;
 use crate::router::Route;
-use crate::services::toast_bus::ToastBus;
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
 use tchatchers_core::api_response::ApiResponse;
 use tchatchers_core::locale::Locale;
 use tchatchers_core::user::InsertableUser;
 use tchatchers_core::validation_error_message::ValidationErrorMessage;
+use toast_service::{Alert, ToastBus};
 use validator::Validate;
 use web_sys::HtmlInputElement;
 use yew::{

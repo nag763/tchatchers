@@ -1,22 +1,16 @@
 use std::rc::Rc;
 
-use serde::{Deserialize, Serialize};
+use rmenu_service::MessageRMenuProps;
 use tchatchers_core::{api_response::ApiResponse, profile::Profile, ws_message::WsMessage};
-use uuid::Uuid;
-use yew::{function_component, html, use_context, Html, Properties};
+use yew::{function_component, html, use_context, Html};
 use yew_agent::Dispatched;
 
 use crate::{
-    components::{common::I18N, toast::Alert},
-    services::{chat_bus::ChatBus, toast_bus::ToastBus},
+    components::common::I18N,
     utils::{client_context::ClientContext, requester::Requester},
 };
-
-#[derive(Properties, PartialEq, Serialize, Deserialize, Debug, Clone)]
-pub struct MessageRMenuProps {
-    pub message_id: Uuid,
-    pub is_self: bool,
-}
+use chat_service::bus::ChatBus;
+use toast_service::{Alert, ToastBus};
 
 #[function_component(MessageRMenu)]
 pub fn message_rmenu(props: &MessageRMenuProps) -> Html {

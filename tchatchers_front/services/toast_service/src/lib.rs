@@ -1,20 +1,27 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use tchatchers_core::ws_message::WsMessage;
 use yew_agent::{HandlerId, Public, Worker, WorkerLink};
 
-pub struct ChatBus {
-    link: WorkerLink<ChatBus>,
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Alert {
+    pub is_success: bool,
+    pub label: String,
+    pub default: String,
+}
+
+pub struct ToastBus {
+    link: WorkerLink<ToastBus>,
     subscribers: HashSet<HandlerId>,
 }
 
-impl Worker for ChatBus {
-    type Message = ();
-    type Input = WsMessage;
-    type Output = WsMessage;
+impl Worker for ToastBus {
     type Reach = Public<Self>;
+    type Message = ();
+    type Input = Alert;
+    type Output = Alert;
 
     fn create(link: WorkerLink<Self>) -> Self {
         Self {
@@ -27,7 +34,7 @@ impl Worker for ChatBus {
 
     fn handle_input(&mut self, msg: Self::Input, _id: HandlerId) {
         for sub in self.subscribers.iter() {
-            self.link.respond(*sub, msg.clone())
+            self.link.respond(*sub, msg.clone());
         }
     }
 
@@ -40,6 +47,6 @@ impl Worker for ChatBus {
     }
 
     fn name_of_resource() -> &'static str {
-        "chat_worker.js"
+        "toast_service.js"
     }
 }

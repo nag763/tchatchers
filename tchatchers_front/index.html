@@ -10,10 +10,10 @@
 	<meta="keywords" content="WASM, Rust, Open-source, Axum, Websockets"/>
 	<meta name="author" content="LABEYE Loïc"/>
 	<link data-trunk rel="rust" href="Cargo.toml" data-wasm-opt="z" data-bin="app" data-type="main" />
-	<link data-trunk rel="rust" href="Cargo.toml" data-bin="toast_worker" data-type="worker">
-	<link data-trunk rel="rust" href="Cargo.toml" data-bin="modal_worker" data-type="worker">
-	<link data-trunk rel="rust" href="Cargo.toml" data-bin="chat_worker" data-type="worker">
-	<link data-trunk rel="rust" href="Cargo.toml" data-bin="rmenu_worker" data-type="worker">
+	<link data-trunk rel="rust" href="./services/toast_service/Cargo.toml" data-bin="toast_service" data-type="worker">
+	<link data-trunk rel="rust" href="./services/modal_service/Cargo.toml" data-bin="modal_service" data-type="worker">
+	<link data-trunk rel="rust" href="./services/chat_service/Cargo.toml" data-bin="chat_service" data-type="worker">
+	<link data-trunk rel="rust" href="./services/rmenu_service/Cargo.toml" data-bin="rmenu_service" data-type="worker">
 	<link data-trunk rel="copy-dir" href="assets"/>
 	<link data-trunk rel="copy-file" href="favicon.ico"/>
     </head>

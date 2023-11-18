@@ -1,28 +1,20 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+use tchatchers_core::ws_message::WsMessage;
 use yew_agent::{HandlerId, Public, Worker, WorkerLink};
 
-use crate::components::right_menu::RMenuKind;
-
-pub struct RMenuBus {
-    link: WorkerLink<RMenuBus>,
+pub struct ChatBus {
+    link: WorkerLink<ChatBus>,
     subscribers: HashSet<HandlerId>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum RMenusBusEvents {
-    OpenRMenu(i32, i32, RMenuKind),
-    CloseRMenu,
-}
-
-impl Worker for RMenuBus {
-    type Reach = Public<Self>;
+impl Worker for ChatBus {
     type Message = ();
-    type Input = RMenusBusEvents;
-    type Output = RMenusBusEvents;
+    type Input = WsMessage;
+    type Output = WsMessage;
+    type Reach = Public<Self>;
 
     fn create(link: WorkerLink<Self>) -> Self {
         Self {
@@ -35,7 +27,7 @@ impl Worker for RMenuBus {
 
     fn handle_input(&mut self, msg: Self::Input, _id: HandlerId) {
         for sub in self.subscribers.iter() {
-            self.link.respond(*sub, msg.clone());
+            self.link.respond(*sub, msg.clone())
         }
     }
 
@@ -48,6 +40,6 @@ impl Worker for RMenuBus {
     }
 
     fn name_of_resource() -> &'static str {
-        "rmenu_worker.js"
+        "chat_service.js"
     }
 }

@@ -1,20 +1,16 @@
 use std::rc::Rc;
 
-use serde::{Deserialize, Serialize};
+use rmenu_service::ProfileRMenuProps;
 use tchatchers_core::{api_response::ApiResponse, profile::Profile};
-use yew::{function_component, html, use_context, Html, Properties};
+use yew::{function_component, html, use_context, Html};
+
+use toast_service::{Alert, ToastBus};
 use yew_agent::Dispatched;
 
 use crate::{
-    components::{common::I18N, toast::Alert},
-    services::toast_bus::ToastBus,
+    components::common::I18N,
     utils::{client_context::ClientContext, requester::Requester},
 };
-
-#[derive(Properties, PartialEq, Serialize, Deserialize, Debug, Clone)]
-pub struct ProfileRMenuProps {
-    pub user_id: i32,
-}
 
 #[function_component(ProfileRMenu)]
 pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {

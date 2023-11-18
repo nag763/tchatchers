@@ -1,13 +1,14 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use crate::services::chat_bus::ChatBus;
 use futures::{channel::mpsc::Sender, SinkExt, StreamExt};
 use gloo_console::{debug, error};
 use gloo_net::websocket::{futures::WebSocket, Message, WebSocketError};
 use tchatchers_core::ws_message::WsMessage;
 use wasm_bindgen_futures::spawn_local;
 use yew_agent::Dispatched;
+
+use crate::bus::ChatBus;
 
 #[derive(Clone, Debug)]
 pub struct WebsocketService {

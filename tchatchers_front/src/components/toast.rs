@@ -2,9 +2,9 @@ use std::rc::Rc;
 
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
-use crate::{services::toast_bus::ToastBus, utils::client_context::ClientContext};
+use crate::utils::client_context::ClientContext;
 use gloo_timers::callback::Timeout;
-use serde::{Deserialize, Serialize};
+use toast_service::{Alert, ToastBus};
 use yew::{classes, function_component, html, use_context, Component, Context, Html, Properties};
 use yew_agent::{Bridge, Bridged};
 
@@ -16,13 +16,6 @@ const COOLDOWN_TIMING: u32 = 2_500u32;
 pub fn sign_up_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().expect("No app context");
     html! { <Toast client_context={(*client_context).clone()}/> }
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct Alert {
-    pub is_success: bool,
-    pub label: String,
-    pub default: String,
 }
 
 pub enum Msg {
@@ -118,7 +111,8 @@ impl Component for Toast {
                         </svg>
                         <span class="sr-only">{"Error icon"}</span>
                     </div>
-                    <div class="ml-3 text-sm font-normal mr-2">{self.msg.as_str()}</div>
+                    <div class="ml-3 text-sm
+                     font-normal mr-2">{self.msg.as_str()}</div>
                     <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-slate-150 text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 focus:ring-zinc-800 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-zinc-800 dark:hover:bg-gray-700 ml-4" data-dismiss-target="#toast-success" aria-label="Close" onclick={ctx.link().callback(|_| Msg::Hide)}>
                         <span class="sr-only">{"Close"}</span>
                         <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>

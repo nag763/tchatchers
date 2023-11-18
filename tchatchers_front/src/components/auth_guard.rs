@@ -4,11 +4,9 @@ use yew::{function_component, html, use_context, BaseComponent, Html};
 use yew_agent::Dispatched;
 use yew_router::prelude::use_navigator;
 
-use crate::{
-    components::toast::Alert, router::Route, services::toast_bus::ToastBus,
-    utils::client_context::ClientContext,
-};
+use crate::{router::Route, utils::client_context::ClientContext};
 
+use toast_service::{Alert, ToastBus};
 #[function_component(AuthGuard)]
 pub fn auth_guard<T>(props: &<T as yew::BaseComponent>::Properties) -> Html
 where

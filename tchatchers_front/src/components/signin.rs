@@ -5,13 +5,13 @@ use std::rc::Rc;
 use crate::components::common::{
     Form, FormButton, FormCheckbox, FormFreeSection, FormInput, WaitingForResponse,
 };
-use crate::components::toast::Alert;
 use crate::router::Route;
-use crate::services::toast_bus::ToastBus;
+
 use crate::utils::client_context::ClientContext;
 use crate::utils::requester::Requester;
 use tchatchers_core::api_response::{ApiGenericResponse, ApiResponse};
 use tchatchers_core::user::{AuthenticableUser, PartialUser};
+use toast_service::{Alert, ToastBus};
 use web_sys::HtmlInputElement;
 use yew::{
     function_component, html, use_context, AttrValue, Component, Context, Html, NodeRef, Properties,

@@ -1,27 +1,45 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use crate::components::modal::ModalContent;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+use uuid::Uuid;
+use yew::Properties;
 use yew_agent::{HandlerId, Public, Worker, WorkerLink};
 
-pub struct ModalBus {
-    link: WorkerLink<ModalBus>,
+#[derive(Properties, PartialEq, Serialize, Deserialize, Debug, Clone)]
+pub struct ProfileRMenuProps {
+    pub user_id: i32,
+}
+
+#[derive(Properties, PartialEq, Serialize, Deserialize, Debug, Clone)]
+pub struct MessageRMenuProps {
+    pub message_id: Uuid,
+    pub is_self: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum RMenuKind {
+    MessageRMenu(MessageRMenuProps),
+    ProfileRMenu(ProfileRMenuProps),
+}
+
+pub struct RMenuBus {
+    link: WorkerLink<RMenuBus>,
     subscribers: HashSet<HandlerId>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum ModalBusContent {
-    PopModal(ModalContent),
-    Outcome(bool),
+pub enum RMenusBusEvents {
+    OpenRMenu(i32, i32, RMenuKind),
+    CloseRMenu,
 }
 
-impl Worker for ModalBus {
+impl Worker for RMenuBus {
     type Reach = Public<Self>;
     type Message = ();
-    type Input = ModalBusContent;
-    type Output = ModalBusContent;
+    type Input = RMenusBusEvents;
+    type Output = RMenusBusEvents;
 
     fn create(link: WorkerLink<Self>) -> Self {
         Self {
@@ -47,6 +65,6 @@ impl Worker for ModalBus {
     }
 
     fn name_of_resource() -> &'static str {
-        "modal_worker.js"
+        "rmenu_service.js"
     }
 }
