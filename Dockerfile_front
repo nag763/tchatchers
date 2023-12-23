@@ -38,15 +38,11 @@ RUN cargo install trunk
 
 RUN trunk build --release
 
-FROM node as compressor
+FROM ubuntu as compressor
 
 WORKDIR /usr/tchatchers/dist
 
 COPY --from=src_builder /usr/tchatchers/front/dist /usr/tchatchers/dist
-
-RUN npm install -g uglify-js
-
-RUN for i in ./*.js; do uglifyjs $i --in-situ; done
 
 RUN gzip -r ./*
 
