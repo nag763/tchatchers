@@ -18,7 +18,7 @@ RUN mkdir assets
 
 RUN bash install_assets.sh
 
-FROM rust:1.73 as src_builder
+FROM rust:1.74.1 as src_builder
 
 WORKDIR /usr/tchatchers/front
 
