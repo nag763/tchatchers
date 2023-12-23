@@ -6,12 +6,14 @@
 use crate::AppState;
 use axum::{
     async_trait,
-    body::{Bytes, HttpBody},
+    body::{Body, Bytes},
     extract::{FromRequest, FromRequestParts},
-    headers::{authorization::Bearer, Authorization},
     http::{header, request::Parts, HeaderMap, HeaderValue, Request},
     response::IntoResponse,
-    BoxError, TypedHeader,
+};
+use axum_extra::{
+    headers::{authorization::Bearer, Authorization},
+    TypedHeader,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use tchatchers_core::{
@@ -124,16 +126,16 @@ fn postcard_content_type(headers: &HeaderMap) -> bool {
 pub struct Postcard<T>(pub T);
 
 #[async_trait]
-impl<B, T> FromRequest<AppState, B> for Postcard<T>
+impl<T> FromRequest<AppState> for Postcard<T>
 where
-    B: 'static + Send + HttpBody,
-    B::Data: Send,
-    B::Error: Into<BoxError>,
     T: Sized + DeserializeOwned,
 {
     type Rejection = ApiGenericResponse;
 
-    async fn from_request(req: Request<B>, state: &AppState) -> Result<Self, Self::Rejection> {
+    async fn from_request(
+        req: axum::http::Request<Body>,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
         if !postcard_content_type(req.headers()) {
             return Err(ApiGenericResponse::ContentTypeError);
         }
@@ -148,16 +150,13 @@ where
     T: Validate;
 
 #[async_trait]
-impl<B, T> FromRequest<AppState, B> for ValidPostcard<T>
+impl<T> FromRequest<AppState> for ValidPostcard<T>
 where
-    B: 'static + Send + HttpBody,
-    B::Data: Send,
-    B::Error: Into<BoxError>,
     T: Sized + DeserializeOwned + Validate,
 {
     type Rejection = ApiGenericResponse;
 
-    async fn from_request(req: Request<B>, state: &AppState) -> Result<Self, Self::Rejection> {
+    async fn from_request(req: Request<Body>, state: &AppState) -> Result<Self, Self::Rejection> {
         let entity: Postcard<T> = Postcard::from_request(req, state).await?;
         entity.0.validate()?;
         Ok(ValidPostcard(entity.0))

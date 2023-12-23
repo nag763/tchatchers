@@ -27,8 +27,8 @@ use axum::{
 use bb8_redis::bb8;
 use bb8_redis::RedisConnectionManager;
 use sqlx::postgres::PgPool;
+use std::future::IntoFuture;
 use std::iter::once;
-use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::join;
@@ -151,19 +151,17 @@ async fn main() -> anyhow::Result<()> {
         .layer(TimeoutLayer::new(Duration::from_secs(10)));
 
     // run it with hyper
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .with_graceful_shutdown(async {
-            let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate()).unwrap();
-            let mut sigkill = tokio::signal::unix::signal(SignalKind::interrupt()).unwrap();
-            tokio::select! {
-                _ = tokio::signal::ctrl_c() => {},
-                _ = sigterm.recv() => {},
-                _ = sigkill.recv() => {},
-            }
-            println!("Shutting down...");
-        })
-        .await?;
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
+
+    let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate()).unwrap();
+    let mut sigkill = tokio::signal::unix::signal(SignalKind::interrupt()).unwrap();
+
+    tokio::select! {
+        _ = axum::serve(listener, app.into_make_service()).into_future() => {},
+        _ = sigterm.recv() => {},
+        _ = sigkill.recv() => {},
+    };
+
+    println!("Shutting down...");
     Ok(())
 }

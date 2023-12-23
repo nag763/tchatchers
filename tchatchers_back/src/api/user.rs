@@ -213,8 +213,7 @@ pub async fn logout(
         }
     }
 
-    let mut cookie = Cookie::named(REFRESH_TOKEN_PATH);
-    cookie.set_path("/");
+    let cookie = Cookie::build(REFRESH_TOKEN_PATH).path("/");
     let new_jar = cookie_jar.remove(cookie);
     Ok((StatusCode::OK, new_jar).into_response())
 }
