@@ -7,7 +7,8 @@ port = 3000
 open = false
 
 [[proxy]]
-backend = "ws://localhost:8080/ws/test"
+rewrite = "/ws/"
+backend = "ws://localhost:8080/ws/"
 ws = true
 
 [[proxy]]
