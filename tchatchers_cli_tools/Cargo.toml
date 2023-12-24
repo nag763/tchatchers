@@ -11,7 +11,7 @@ clap = { version = "4.4.11", features = ["derive", "std"]}
 dialoguer = { features = ["password"], default-features = false, version = "0.11.0" }
 sqlx = { version = "0.7", features = ["macros"], default-features = false }
 derive_more = { features = ["from", "constructor", "error"], default-features = false, version = "0.99.17" }
-tokio = { version = "1.35.1", features = ["macros", "rt-multi-thread"], default-features = false }
+tokio = { version = "1.35.1", features = ["macros", "rt-multi-thread", "signal"], default-features = false }
 dotenv = "0.15.0"
 which = "5.0.0"
 validator = "0.16.1"

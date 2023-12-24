@@ -16,8 +16,9 @@ use std::process::{ExitCode, Termination};
 
 use actions::{env::EnvAction, message::MessageAction, room::RoomAction};
 use args::{message::MessageArgAction, CliArgs};
-use clap::Parser;
+use clap::{CommandFactory, Parser};
 use errors::CliError;
+use tokio::signal::unix::SignalKind;
 
 use crate::actions::{queue::QueueArgAction, report::ReportAction, user::UserAction};
 
@@ -48,8 +49,32 @@ async fn run_main() -> Result<(), CliError> {
         None => dotenv::dotenv().ok(),
         Some(v) => dotenv::from_filename(v).ok(),
     };
-
-    match args.entity {
+    let Some(entity) = args.entity else {
+        if args.docker_service {
+            let sleep = tokio::time::sleep(std::time::Duration::MAX);
+            let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate()).unwrap();
+            let mut sigkill = tokio::signal::unix::signal(SignalKind::interrupt()).unwrap();
+            println!("Starting as a looping service...\nIf you wanted to run the CLI, use --help for further usage details.");
+            tokio::select! {
+                _ = sleep => {
+                    info!("Max sleep duration reached");
+                },
+                _ = tokio::signal::ctrl_c() => {
+                    info!("CTRL + C received");
+                },
+                _ = sigterm.recv() => {
+                    info!("SIGTERM received");
+                },
+                _ = sigkill.recv() => {
+                    info!("SIGKILL received");
+                },
+            }
+        } else {
+            let _ = CliArgs::command().print_help();
+        }
+        return Ok(());
+    };
+    match entity {
         args::CliEntityArg::User { action } => match action {
             args::user::UserArgAction::Create => {
                 info!("Creating new user...");

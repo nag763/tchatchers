@@ -47,11 +47,16 @@ pub mod queue;
 )]
 pub struct CliArgs {
     #[clap(subcommand)]
-    pub entity: CliEntityArg,
+    pub entity: Option<CliEntityArg>,
     #[command(flatten)]
     pub verbose: clap_verbosity_flag::Verbosity,
     #[clap(long, short, value_hint = clap::ValueHint::FilePath, required=false, global=true, help="Precise a .env file.")]
     pub env: Option<std::path::PathBuf>,
+    #[clap(
+        long,
+        help = "If the flag is passed, this will start as a sleeping service unless an argument is passed."
+    )]
+    pub docker_service: bool,
 }
 
 #[derive(clap::Subcommand, Debug, Clone)]

@@ -86,6 +86,7 @@ services:
       - "443:443"
   cli :
     image: nag763/tchatchers_tct:latest
+    command: ["--docker-service"]
     volumes:
       - .env:/home/usr/tct/.env
     links:

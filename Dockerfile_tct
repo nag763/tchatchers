@@ -12,12 +12,15 @@ FROM alpine:latest
 
 WORKDIR /home/usr/tct/
 
-COPY --from=builder /usr/local/cargo/bin/tct /home/usr/tct/tct
+COPY --from=builder /usr/local/cargo/bin/tct /usr/local/sbin/tct
 
 RUN adduser -D runner && chown -R runner ./
 
-RUN chmod 111 /home/usr/tct/tct
+RUN chmod 111 /usr/local/sbin/tct
 
 USER runner
 
+RUN ln -s /usr/local/sbin/tct /home/usr/tct/tct
+
 ENTRYPOINT ["./tct"]
+CMD ["./tct"]
