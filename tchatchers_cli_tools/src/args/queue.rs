@@ -41,7 +41,7 @@ pub enum QueueArg {
         #[clap(name = "queue")]
         queue: Option<AsyncQueue>,
         /// The maximum number of elements to display in the report.
-        #[clap(name = "limit", short = 'l', long = "limit")]
-        limit: Option<i64>,
+        #[clap(name = "number", short = 'n', long = "number", help="Number of events to show")]
+        number: Option<i64>,
     },
 }

@@ -156,12 +156,12 @@ async fn run_main() -> Result<(), CliError> {
                 info!("Deleting events from queue {}...", queue);
                 QueueArgAction::delete_events(queue, events).await?
             }
-            args::queue::QueueArg::Report { queue, limit } => {
+            args::queue::QueueArg::Report { queue, number } => {
                 info!(
-                    "Getting report for queue {:?} with limit {:?}...",
-                    queue, limit
+                    "Getting report for queue {:?} with number {:?}...",
+                    queue, number
                 );
-                QueueArgAction::get_queue_report(queue, limit).await?
+                QueueArgAction::get_queue_report(queue, number).await?
             }
         },
     }
