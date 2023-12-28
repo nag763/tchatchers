@@ -13,7 +13,7 @@ use sqlx::PgPool;
 pub mod async_payload;
 pub mod processor;
 
-use crate::ws_message::WsMessageContent;
+use crate::{user::PartialUser, ws_message::WsMessageContent};
 
 use self::async_payload::AsyncPayload;
 
@@ -29,6 +29,7 @@ pub enum AsyncMessage {
     MessageSeen(uuid::Uuid),
     PersistMessage(WsMessageContent),
     CleanRoom(String),
+    ClearUserData(PartialUser),
 }
 
 /// Represents a queue report containing information about the latest executed processes for a queue.
@@ -75,6 +76,7 @@ pub enum AsyncQueue {
     MessagesSeen = 2,
     PersistMessage = 3,
     CleanRoom = 4,
+    ClearUserData = 5,
 }
 
 impl AsyncQueue {
@@ -190,6 +192,7 @@ impl AsyncMessage {
             AsyncMessage::MessageSeen(_) => AsyncQueue::MessagesSeen,
             AsyncMessage::PersistMessage(_) => AsyncQueue::PersistMessage,
             AsyncMessage::CleanRoom(_) => AsyncQueue::CleanRoom,
+            AsyncMessage::ClearUserData(_) => AsyncQueue::ClearUserData,
         }
     }
 

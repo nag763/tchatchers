@@ -291,6 +291,16 @@ pub async fn delete_user(
     JwtUserExtractor(jwt): JwtUserExtractor,
     State(state): State<AppState>,
 ) -> Result<impl IntoResponse, ApiGenericResponse> {
+    let Some(user) = PartialUser::find_by_id(jwt.user_id, &state.pg_pool).await? else {
+        return Err(ApiGenericResponse::UserNotFound);
+    };
+    std::mem::drop(tokio::spawn(async move {
+        let mut redis_conn = state.async_pool.get().await?;
+        AsyncMessage::ClearUserData(user)
+            .spawn(&mut redis_conn)
+            .await;
+        anyhow::Ok(())
+    }));
     User::delete_one(jwt.user_id, &state.pg_pool).await?;
     Ok(StatusCode::OK)
 }

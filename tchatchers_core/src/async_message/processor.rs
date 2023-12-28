@@ -14,7 +14,10 @@ use std::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::{user::User, ws_message::WsMessageContent};
+use crate::{
+    user::{PartialUser, User},
+    ws_message::WsMessageContent,
+};
 
 use super::{async_payload::AsyncPayload, AsyncMessage, AsyncOperationPGType, AsyncQueue};
 
@@ -120,6 +123,20 @@ async fn clean_rooms(payloads: &Vec<AsyncPayload>, pool: &PgPool) -> Result<(), 
 
     WsMessageContent::clean_rooms(entities_to_delete, pool).await
 }
+async fn clear_user_data(payloads: &Vec<AsyncPayload>, pool: &PgPool) -> Result<(), sqlx::Error> {
+    let mut entities_to_clear: HashSet<&PartialUser> = HashSet::with_capacity(payloads.capacity());
+
+    for payload in payloads {
+        let AsyncMessage::ClearUserData(entity) = &payload.entity else {
+            warn!("Entity {:?} isn't matching the expected format", payload.id);
+            continue;
+        };
+
+        entities_to_clear.insert(entity);
+    }
+
+    PartialUser::clear_data(entities_to_clear, pool).await
+}
 
 /// Returns the appropriate processor for the given queue.
 ///
@@ -142,6 +159,7 @@ fn get_processor<'a>(
         AsyncQueue::MessagesSeen => return Box::pin(messages_seen(payloads, pool)),
         AsyncQueue::PersistMessage => return Box::pin(persist_messages(payloads, pool)),
         AsyncQueue::CleanRoom => return Box::pin(clean_rooms(payloads, pool)),
+        AsyncQueue::ClearUserData => return Box::pin(clear_user_data(payloads, pool)),
     }
 }
 

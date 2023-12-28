@@ -6,12 +6,15 @@
 //! The user is declined under different structs so that only the revelant data
 //! is shared between processed and components.
 
+use std::path::Path;
+
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use crate::async_message::{AsyncOperationPGType, AsyncQueue};
 use crate::common::RE_LIMITED_CHARS;
 use crate::profile::Profile;
 use chrono::DateTime;
 use chrono::Utc;
+use derive_more::Display;
 #[cfg(any(feature = "back", feature = "cli"))]
 use rand::Rng;
 use regex::Regex;
@@ -245,12 +248,21 @@ impl User {
 /// It is containing limited data, which is convenient and secure during
 /// exchanges. Thus, this is the struct used in JWT.
 #[derive(
-    Debug, Clone, serde::Serialize, serde::Deserialize, derivative::Derivative, PartialEq, Eq, Hash,
+    Debug,
+    Clone,
+    serde::Serialize,
+    serde::Deserialize,
+    derivative::Derivative,
+    PartialEq,
+    Eq,
+    Hash,
+    Display,
 )]
 #[cfg_attr(
     any(feature = "back", feature = "cli", feature = "async"),
     derive(FromRow)
 )]
+#[display(fmt = "[{id}::{login}] {name} ({profile})")]
 #[serde(rename_all = "camelCase")]
 #[derivative(Default)]
 pub struct PartialUser {
@@ -296,7 +308,7 @@ impl From<User> for PartialUser {
     }
 }
 
-#[cfg(feature = "cli")]
+#[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 impl PartialUser {
     /// Find a user by ID in the database.
     ///
@@ -339,6 +351,69 @@ impl PartialUser {
             .bind(name)
             .fetch_all(pool)
             .await
+    }
+
+    pub(crate) async fn clear_data(
+        entities_to_clear: std::collections::HashSet<&PartialUser>,
+        pool: &sqlx::Pool<sqlx::Postgres>,
+    ) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
+
+        let mut file_removers: tokio::task::JoinSet<tokio::io::Result<()>> =
+            tokio::task::JoinSet::new();
+
+        for entity in entities_to_clear {
+            if let Some(pfp) = &entity.pfp {
+                let path = Path::new(&pfp);
+                if let Some(filename) = path.file_name() {
+                    let file_path = format!("./static/{}", filename.to_str().unwrap());
+                    debug!(
+                        "[{}] File path to delete is {file_path}",
+                        AsyncQueue::ClearUserData
+                    );
+                    file_removers.spawn(tokio::fs::remove_file(file_path));
+                }
+            }
+        }
+
+        let total = file_removers.len();
+        let mut err = 0usize;
+
+        while let Some(handle) = file_removers.join_next().await {
+            let res = handle;
+            if let Ok(res) = res {
+                if let Err(e) = res {
+                    error!(
+                        "[{}] Error while attempting to delete the file : {e}",
+                        AsyncQueue::ClearUserData
+                    );
+                    err += 1;
+                }
+            } else {
+                error!(
+                    "[{}] Error met while accessing the async process's results",
+                    AsyncQueue::ClearUserData
+                );
+                err += 1;
+            }
+        }
+
+        sqlx::query(
+            "
+        INSERT INTO PROCESS_REPORT(process_id, successfull_records, failed_records) 
+        SELECT $1, $2, $3 
+        FROM tmp_user_update
+        ",
+        )
+        .bind(AsyncQueue::ClearUserData as i32)
+        .bind((total - err) as i64)
+        .bind(err as i64)
+        .execute(&mut *tx)
+        .await?;
+
+        tx.commit().await?;
+
+        Ok(())
     }
 }
 

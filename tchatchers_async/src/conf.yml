@@ -14,3 +14,7 @@
   queue: CleanRoom
   interval: 30
   description: "Clean the rooms with more than 100 messages"
+- clear_user_data:
+  queue: ClearUserData
+  interval: 60
+  description: "Clear user data once he is deleted"

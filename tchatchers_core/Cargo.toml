@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-back = ["dep:sqlx", "dep:rust-argon2", "dep:axum", "dep:axum-extra", "dep:cookie", "dep:redis", "dep:bb8-redis"]
+back = ["dep:sqlx", "dep:rust-argon2", "dep:axum", "dep:axum-extra", "dep:cookie", "dep:redis", "dep:bb8-redis", "dep:tokio"]
 front = ["uuid/js"]
-cli = ["dep:sqlx", "dep:rust-argon2", "dep:clap", "dep:redis", "dep:bb8-redis"]
-async = ["dep:sqlx", "dep:redis", "dep:bb8-redis"]
+cli = ["dep:sqlx", "dep:rust-argon2", "dep:clap", "dep:redis", "dep:bb8-redis", "dep:tokio"]
+async = ["dep:sqlx", "dep:redis", "dep:bb8-redis", "dep:tokio"]
 
 
 [dependencies]
@@ -34,3 +34,4 @@ serde_yaml = "0.9.29"
 postcard = { version = "1.0.8", features = ["use-std"], default-features = false }
 bb8-redis = { version = "0.14.0", optional = true }
 serde_json = "1.0.108"
+tokio = { version = "1.35.1", features = ["fs"], optional=true }
