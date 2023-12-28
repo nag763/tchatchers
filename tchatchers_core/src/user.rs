@@ -6,8 +6,6 @@
 //! The user is declined under different structs so that only the revelant data
 //! is shared between processed and components.
 
-use std::path::Path;
-
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use crate::async_message::{AsyncOperationPGType, AsyncQueue};
 use crate::common::RE_LIMITED_CHARS;
@@ -364,12 +362,12 @@ impl PartialUser {
 
         for entity in entities_to_clear {
             if let Some(pfp) = &entity.pfp {
-                let path = Path::new(&pfp);
+                let path = std::path::Path::new(&pfp);
                 if let Some(filename) = path.file_name() {
                     let file_path = format!("./static/{}", filename.to_str().unwrap());
                     debug!(
                         "[{}] File path to delete is {file_path}",
-                        AsyncQueue::ClearUserData
+                        AsyncQueue::RemoveUserData
                     );
                     file_removers.spawn(tokio::fs::remove_file(file_path));
                 }
@@ -385,14 +383,14 @@ impl PartialUser {
                 if let Err(e) = res {
                     error!(
                         "[{}] Error while attempting to delete the file : {e}",
-                        AsyncQueue::ClearUserData
+                        AsyncQueue::RemoveUserData
                     );
                     err += 1;
                 }
             } else {
                 error!(
                     "[{}] Error met while accessing the async process's results",
-                    AsyncQueue::ClearUserData
+                    AsyncQueue::RemoveUserData
                 );
                 err += 1;
             }
@@ -400,12 +398,10 @@ impl PartialUser {
 
         sqlx::query(
             "
-        INSERT INTO PROCESS_REPORT(process_id, successfull_records, failed_records) 
-        SELECT $1, $2, $3 
-        FROM tmp_user_update
+        INSERT INTO PROCESS_REPORT(process_id, successfull_records, failed_records) VALUES ($1, $2, $3)
         ",
         )
-        .bind(AsyncQueue::ClearUserData as i32)
+        .bind(AsyncQueue::RemoveUserData as i32)
         .bind((total - err) as i64)
         .bind(err as i64)
         .execute(&mut *tx)

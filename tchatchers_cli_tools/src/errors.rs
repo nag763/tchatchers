@@ -42,6 +42,8 @@ pub enum ErrorKind {
     RedisError,
     /// Client input error.
     CliInputError,
+    /// Generic error.
+    GenericError,
 }
 
 impl From<sqlx::Error> for CliError {

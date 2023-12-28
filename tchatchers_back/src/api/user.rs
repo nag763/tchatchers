@@ -256,6 +256,9 @@ pub async fn update_user(
     if jwt.user_id != user.id {
         return Err(ApiGenericResponse::UnsifficentPriviledges);
     }
+    let Some(former_user) = PartialUser::find_by_id(jwt.user_id, &state.pg_pool).await? else {
+        return Err(ApiGenericResponse::UserNotFound);
+    };
     tasks.spawn({
         let user = user.clone();
         let pool = state.pg_pool.clone();
@@ -274,8 +277,21 @@ pub async fn update_user(
                 let mut file = File::create(&rel_file_path).await?;
                 file.write_all(&bytes).await?;
                 UpdatableUser::set_pfp(user.id, &served_file_path, &state.pg_pool).await?;
+                println!("Ok through");
                 Ok(())
             });
+
+            if former_user.pfp.is_some() {
+                tasks.spawn(async move {
+                    let mut redis_conn = state.async_pool.get().await?;
+                    AsyncMessage::RemoveUserData(former_user)
+                        .spawn(&mut redis_conn)
+                        .await;
+                    Ok(())
+                });
+            } else {
+                std::mem::drop(former_user);
+            }
         }
     }
     while let Some(task) = tasks.join_next().await {
@@ -296,7 +312,7 @@ pub async fn delete_user(
     };
     std::mem::drop(tokio::spawn(async move {
         let mut redis_conn = state.async_pool.get().await?;
-        AsyncMessage::ClearUserData(user)
+        AsyncMessage::RemoveUserData(user)
             .spawn(&mut redis_conn)
             .await;
         anyhow::Ok(())

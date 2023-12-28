@@ -29,7 +29,7 @@ pub enum AsyncMessage {
     MessageSeen(uuid::Uuid),
     PersistMessage(WsMessageContent),
     CleanRoom(String),
-    ClearUserData(PartialUser),
+    RemoveUserData(PartialUser),
 }
 
 /// Represents a queue report containing information about the latest executed processes for a queue.
@@ -76,7 +76,7 @@ pub enum AsyncQueue {
     MessagesSeen = 2,
     PersistMessage = 3,
     CleanRoom = 4,
-    ClearUserData = 5,
+    RemoveUserData = 5,
 }
 
 impl AsyncQueue {
@@ -170,6 +170,7 @@ impl AsyncQueue {
             Self::MessagesSeen,
             Self::PersistMessage,
             Self::CleanRoom,
+            Self::RemoveUserData,
         ]
         .iter()
         .cloned()
@@ -192,7 +193,7 @@ impl AsyncMessage {
             AsyncMessage::MessageSeen(_) => AsyncQueue::MessagesSeen,
             AsyncMessage::PersistMessage(_) => AsyncQueue::PersistMessage,
             AsyncMessage::CleanRoom(_) => AsyncQueue::CleanRoom,
-            AsyncMessage::ClearUserData(_) => AsyncQueue::ClearUserData,
+            AsyncMessage::RemoveUserData(_) => AsyncQueue::RemoveUserData,
         }
     }
 

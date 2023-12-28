@@ -4,7 +4,7 @@ use tchatchers_core::{
 };
 use tokio::task::JoinSet;
 
-use crate::errors::CliError;
+use crate::errors::{CliError, ErrorKind};
 
 /// A struct representing actions related to queue management.
 pub struct QueueArgAction;
@@ -135,7 +135,9 @@ impl QueueArgAction {
         if let Some(events) = queue.read_events_with_timeout(&mut redis_conn).await? {
             let events_number = events.len();
             println!("[{queue}] {events_number} events found");
-            let _ = process(queue, events, &pg_pool, &mut redis_conn).await;
+            if let Err(err) = process(queue, events, &pg_pool, &mut redis_conn).await {
+                return Err(CliError::new(err.to_string(), ErrorKind::GenericError));
+            }
             println!("[{queue}] Events processed with success");
         } else {
             println!("[{queue}] No event founds to process");

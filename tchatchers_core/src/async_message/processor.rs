@@ -127,14 +127,13 @@ async fn clear_user_data(payloads: &Vec<AsyncPayload>, pool: &PgPool) -> Result<
     let mut entities_to_clear: HashSet<&PartialUser> = HashSet::with_capacity(payloads.capacity());
 
     for payload in payloads {
-        let AsyncMessage::ClearUserData(entity) = &payload.entity else {
+        let AsyncMessage::RemoveUserData(entity) = &payload.entity else {
             warn!("Entity {:?} isn't matching the expected format", payload.id);
             continue;
         };
 
         entities_to_clear.insert(entity);
     }
-
     PartialUser::clear_data(entities_to_clear, pool).await
 }
 
@@ -159,7 +158,7 @@ fn get_processor<'a>(
         AsyncQueue::MessagesSeen => return Box::pin(messages_seen(payloads, pool)),
         AsyncQueue::PersistMessage => return Box::pin(persist_messages(payloads, pool)),
         AsyncQueue::CleanRoom => return Box::pin(clean_rooms(payloads, pool)),
-        AsyncQueue::ClearUserData => return Box::pin(clear_user_data(payloads, pool)),
+        AsyncQueue::RemoveUserData => return Box::pin(clear_user_data(payloads, pool)),
     }
 }
 
@@ -186,6 +185,7 @@ pub async fn process(
     processor.await?;
     info!("[{queue}] {number_of_messages} messages passed");
     let id_list: Vec<String> = messages.into_iter().filter_map(|li| li.id).collect();
+    debug!("[{queue}] Deleting old messages...");
     let number_of_id_deleted = queue.delete(id_list, redis_conn).await?;
     if number_of_id_deleted != number_of_messages {
         warn!("[{queue}] The number of ID deleted from the queue doesn't match the number of initial elements : Messages ({number_of_messages}) ; Deleted ({number_of_id_deleted})");
