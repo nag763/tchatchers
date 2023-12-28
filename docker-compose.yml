@@ -59,6 +59,8 @@ services:
     build: 
       context: ./ 
       dockerfile: Dockerfile_async
+    volumes:
+      - static:/home/usr/async/static
   doc:
     image: nag763/tchatchers_doc:latest
     build: 
@@ -89,6 +91,7 @@ services:
     command: ["--docker-service"]
     volumes:
       - .env:/home/usr/tct/.env
+      - static:/home/usr/tct/static
     links:
       - postgres:${POSTGRES_HOST:-pg.tchatche.rs}
       - redis:${REDIS_HOST:-redis.tchatche.rs}
