@@ -57,21 +57,6 @@ impl Requester {
         }
     }
 
-    pub fn patch(endpoint: &str) -> Self {
-        Self {
-            method: Some(Method::PATCH),
-            endpoint: Some(String::from(endpoint)),
-            ..Self::default()
-        }
-    }
-
-    pub fn body(&mut self, body: Option<impl Into<JsValue>>) -> &mut Self {
-        if let Some(val) = body {
-            self.payload = Some(val.into());
-        }
-        self
-    }
-
     pub fn postcard_body<U: serde::Serialize>(&mut self, body: U) -> &mut Self {
         let bytes = postcard::to_stdvec(&body).unwrap();
         let array = Uint8Array::from(&bytes[..]);
@@ -89,11 +74,6 @@ impl Requester {
     pub fn bearer(&mut self, bearer: UseStateHandle<Option<String>>) -> &mut Self {
         self.bearer_setter = Some(bearer.setter());
         self.bearer_value = bearer.as_ref().cloned();
-        self
-    }
-
-    pub fn bearer_value(&mut self, bearer: String) -> &mut Self {
-        self.bearer_value = Some(bearer);
         self
     }
 

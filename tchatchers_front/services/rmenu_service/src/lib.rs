@@ -67,4 +67,5 @@ impl Worker for RMenuBus {
     fn name_of_resource() -> &'static str {
         "rmenu_service.js"
     }
+
 }

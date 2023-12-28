@@ -41,7 +41,6 @@ pub enum Msg {
     SubmitForm,
     LoggedIn(PartialUser),
     ErrorFromServer(ApiResponse),
-    LocalError(AttrValue),
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -142,14 +141,6 @@ impl Component for SignIn {
                 });
                 ctx.link().navigator().unwrap().push(&Route::JoinRoom);
                 false
-            }
-            Msg::LocalError(s) => {
-                self.server_error = Some(s);
-                self.wait_for_api = false;
-                if let Some(password) = self.password.cast::<HtmlInputElement>() {
-                    password.set_value("");
-                }
-                true
             }
         }
     }

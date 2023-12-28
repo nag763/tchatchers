@@ -3,7 +3,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use yew_agent::{HandlerId, Public, Worker, WorkerLink};
+use yew_agent::{HandlerId, Public, Worker, WorkerLink, PublicWorker};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Alert {
@@ -49,4 +49,9 @@ impl Worker for ToastBus {
     fn name_of_resource() -> &'static str {
         "toast_service.js"
     }
+
+}
+#[wasm_bindgen::prelude::wasm_bindgen]
+pub fn init_worker() {
+    ToastBus::register();
 }
