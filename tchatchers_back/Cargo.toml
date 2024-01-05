@@ -5,7 +5,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = { version = "0.7.2", features = ["ws", "http1", "multipart"], default-features = false }
+axum = { version = "0.7.3", features = ["ws", "http1", "multipart"], default-features = false }
 tokio = { version = "1.35", features = ["full"], default-features = false }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 sqlx-core = { version = "0.7", default-features=false }
@@ -14,14 +14,14 @@ futures-util = { version = "0.3.30" }
 uuid = { version = "1.6.1", default-features = false }
 tower-http = { version = "0.5.0", features = ["fs", "trace", "util", "request-id", "sensitive-headers", "timeout"], default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"]}
-axum-extra = { version = "0.9.0", features = ["cookie", "typed-header"] }
+axum-extra = { version = "0.9.1", features = ["cookie", "typed-header"] }
 tracing = { default-features = false, version = "0.1.40" }
 validator = { version = "0.16.1"}
-serde = { default-features = false, version = "1.0.193" }
+serde = { default-features = false, version = "1.0.194" }
 sqlx = {features = ["uuid", "postgres"], version = "0.7" }
 tower = { default-features = false, version = "0.4.13" }
 bb8-redis = "0.14.0"
 postcard = { version = "1.0.8", default-features = false, features = ["use-std"] }
 mime = "0.3.17"
-anyhow = "1.0.77"
-serde_json = "1.0.108"
+anyhow = "1.0.79"
+serde_json = "1.0.111"
