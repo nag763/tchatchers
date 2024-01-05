@@ -13,3 +13,9 @@ SSL_CERTIFICATE_PATH={{ssl_certificate_path_v}}
 SSL_CERTIFICATE_KEY={{ssl_certificate_key_v}}
 SSL_DHPARAM_PATH={{ssl_dhparam_path_v}}
 {% endif %}
+MAILS_ENABLED={{mails_enabled}}
+{% if let (Some(mails_relay), Some(mails_username), Some(mails_password)) = (mails_relay.as_ref(), mails_username.as_ref(), mails_password.as_ref()) %}
+MAIL_RELAY={{mails_relay}}
+MAIL_USERNAME={{mails_username}}
+MAIL_PASSWORD={{mails_password}}
+{% endif %}

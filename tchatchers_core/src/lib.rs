@@ -7,6 +7,8 @@ pub mod async_message;
 pub mod authorization_token;
 pub(crate) mod common;
 pub mod locale;
+#[cfg(feature = "mail")]
+pub mod mail;
 #[cfg(feature = "front")]
 pub mod navlink;
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]

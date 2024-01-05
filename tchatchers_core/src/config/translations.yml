@@ -70,7 +70,11 @@ translations:
       validation_error: The request you sent is invalid, some validation errors have been met.
       content_type_missing_or_not_accepted: The content type is either missing or not accepted.
       io_error: An error happened while reading or writing the content.
-      max_conns_reached: The number of maximum simultaneous connections has been reached
+      max_conns_reached: Le nombre maximum de connexions simultanées a été atteint.
+      max_conns_reached: The number of maximum simultaneous connections has been reached.
+      mailing_error: An issue has been met while attempting to send a mail to your address.
+      your_email: Your email
+      similar_mail_exists: A user with a similar mail already exists. If you think it is you, use the forgotten password functionnality.
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR
@@ -140,7 +144,6 @@ translations:
       serialization_error: La requête est mal formée car le format de sérialisation n'est pas celui attendu.
       validation_error: La requête que vous avez envoyée est invalide, certaines erreurs de validation ont été rencontrées.
       content_type_missing_or_not_accepted: Le type de contenu est manquant ou non accepté.
-      max_conns_reached: Le nombre maximum de connexions simultanées a été atteint
   - id: 3
     long_name: English (UK)
     short_name: en-UK

@@ -1,0 +1,5 @@
+- &welcome:
+  from: Admin <admin@tchatche.xyz>
+  subject: mail_welcome_user_subject
+  body_plain: mail_welcome_user_plain
+  associated_mail: WelcomeMail

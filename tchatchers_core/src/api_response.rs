@@ -31,14 +31,19 @@ pub enum ApiResponseKind {
     RedisError,
     TooManyRequests,
     MultipartError,
+    MailingError,
+    CreationMailSent,
+    SimilarMailExists,
 }
 
 #[cfg(feature = "back")]
 impl From<ApiResponseKind> for StatusCode {
     fn from(value: ApiResponseKind) -> StatusCode {
         match value {
-            ApiResponseKind::SimilarLoginExists => StatusCode::CONFLICT,
-            ApiResponseKind::UserCreated => StatusCode::CREATED,
+            ApiResponseKind::SimilarLoginExists | ApiResponseKind::SimilarMailExists => {
+                StatusCode::CONFLICT
+            }
+            ApiResponseKind::UserCreated | ApiResponseKind::CreationMailSent => StatusCode::CREATED,
             ApiResponseKind::MessageReported
             | ApiResponseKind::MessageDeleted
             | ApiResponseKind::UserReported
@@ -61,9 +66,10 @@ impl From<ApiResponseKind> for StatusCode {
                 StatusCode::FORBIDDEN
             }
             ApiResponseKind::TooManyRequests => StatusCode::TOO_MANY_REQUESTS,
-            ApiResponseKind::DbError | ApiResponseKind::IoError | ApiResponseKind::RedisError => {
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
+            ApiResponseKind::MailingError
+            | ApiResponseKind::DbError
+            | ApiResponseKind::IoError
+            | ApiResponseKind::RedisError => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }
@@ -135,6 +141,9 @@ pub enum ApiGenericResponse {
     IoError(String),
     TooManyRequests,
     MultipartError(String),
+    MailingError,
+    CreationMailSent,
+    SimilarEmailExists,
 }
 
 impl From<ApiGenericResponse> for ApiResponse {
@@ -230,6 +239,15 @@ impl From<ApiGenericResponse> for ApiResponse {
             ApiGenericResponse::MultipartError(e) => {
                 ApiResponse::errors(ApiResponseKind::MultipartError, "multipart_error", vec![e])
             }
+            ApiGenericResponse::MailingError => {
+                ApiResponse::new(ApiResponseKind::MailingError, "mailing_error")
+            }
+            ApiGenericResponse::CreationMailSent => {
+                ApiResponse::new(ApiResponseKind::CreationMailSent, "creation_mail_sent")
+            }
+            ApiGenericResponse::SimilarEmailExists => {
+                ApiResponse::new(ApiResponseKind::SimilarMailExists, "similar_mail_exists")
+            }
         }
     }
 }
@@ -316,5 +334,12 @@ impl From<ValidationErrors> for ApiGenericResponse {
         }
         let errors = validation_errors.iter().map(|v| v.to_string()).collect();
         ApiGenericResponse::ValidationError(errors)
+    }
+}
+
+#[cfg(feature = "mail")]
+impl From<lettre::error::Error> for ApiGenericResponse {
+    fn from(_value: lettre::error::Error) -> Self {
+        Self::MailingError
     }
 }

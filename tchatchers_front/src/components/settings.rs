@@ -63,6 +63,7 @@ pub struct Settings {
     ok_msg: Option<AttrValue>,
     producer: Box<dyn Bridge<ModalBus>>,
     user_context: ClientContext,
+    user_email: NodeRef,
 }
 
 impl Component for Settings {
@@ -90,6 +91,7 @@ impl Component for Settings {
             ok_msg: None,
             producer: ModalBus::bridge(Rc::new(cb)),
             new_pfp: NodeRef::default(),
+            user_email: NodeRef::default(),
         }
     }
 
@@ -100,22 +102,29 @@ impl Component for Settings {
                 self.ok_msg = None;
                 self.server_error = None;
                 self.new_pfp.cast::<HtmlInputElement>().unwrap();
-                if let (Some(name), Some(locale_id), Some(new_pfp)) = (
+                if let (Some(name), Some(locale_id), Some(email), Some(new_pfp)) = (
                     self.name.cast::<HtmlInputElement>(),
                     self.locale_id.cast::<HtmlInputElement>(),
+                    self.user_email.cast::<HtmlInputElement>(),
                     self.new_pfp.cast::<HtmlInputElement>(),
                 ) {
-                    if name.check_validity() {
+                    if email.check_validity() && name.check_validity() {
                         let Ok(locale_id) = locale_id.value().parse() else {
                             ctx.link().send_message(Msg::LocalError(
                                 "The given locale isn't valid".into(),
                             ));
                             return true;
                         };
+                        let email = if !email.value().is_empty() {
+                            Some(email.value())
+                        } else {
+                            None
+                        };
                         let payload = UpdatableUser {
                             id: self.user_context.user.as_ref().unwrap().id,
                             locale_id,
                             name: name.value(),
+                            email,
                         };
                         let form_data = FormData::new().unwrap();
                         let bytes = postcard::to_stdvec(&payload).unwrap();
@@ -253,6 +262,7 @@ impl Component for Settings {
                   <FormInput label={"your_name_field"} {translation} default={"Your name"} value={user.name.clone()} minlength="3" maxlength="16" attr_ref={&self.name} />
                   <FormSelect label={"your_locale_field"} default={"Your locale"} {translation} attr_ref={&self.locale_id} default_value={AttrValue::from(user.locale_id.to_string())} values={KeyedList::from(Locale::get_keyed_list())} />
                   <FormFile label={"your_pfp_field"} default={"Your profile picture"} {translation} attr_ref={&self.new_pfp} current_path={user.pfp.clone()} accept={"image/*"}/>
+                  <FormInput label={"your_email"} {translation} default={"Your email"} input_type="email" attr_ref={&self.user_email} value={user.email.clone().unwrap_or_default()} required=false />
                   <FormFreeSection>
                     <div class="flex items-center">
                     <div class="w-1/3"></div>

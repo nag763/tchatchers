@@ -35,6 +35,10 @@ struct EnvTemplate {
     ssl_certificate_key: Option<String>,
     ssl_certificate_path: Option<String>,
     ssl_dhparam_path: Option<String>,
+    mails_enabled: bool,
+    mails_relay: Option<String>,
+    mails_username: Option<String>,
+    mails_password: Option<String>,
 }
 
 /// This struct provides functionality to interact with environment variables.
@@ -45,7 +49,7 @@ const ERROR_EMOJI: &str = "\u{0058}";
 const WARNING_EMOJI: &str = "\u{26A0}";
 
 /// A constant array of tuples representing the environment variables that should be checked, along with their error types.
-const ENV_VARS_TO_CHECK: [(&str, EnvironmentCheckErrorTypes); 13] = [
+const ENV_VARS_TO_CHECK: [(&str, EnvironmentCheckErrorTypes); 17] = [
     ("DATABASE_URL", EnvironmentCheckErrorTypes::Warning),
     ("POSTGRES_DB", EnvironmentCheckErrorTypes::Error),
     ("POSTGRES_USER", EnvironmentCheckErrorTypes::Error),
@@ -59,6 +63,10 @@ const ENV_VARS_TO_CHECK: [(&str, EnvironmentCheckErrorTypes); 13] = [
     ("SSL_CERTIFICATE_PATH", EnvironmentCheckErrorTypes::Warning),
     ("SSL_CERTIFICATE_KEY", EnvironmentCheckErrorTypes::Warning),
     ("SSL_DHPARAM_PATH", EnvironmentCheckErrorTypes::Warning),
+    ("MAILS_ENABLED", EnvironmentCheckErrorTypes::Error),
+    ("MAIL_RELAY", EnvironmentCheckErrorTypes::Warning),
+    ("MAIL_USERNAME", EnvironmentCheckErrorTypes::Warning),
+    ("MAIL_PASSWORD", EnvironmentCheckErrorTypes::Warning),
 ];
 
 /// A constant array of program names to check if they exist in the PATH.
@@ -187,6 +195,41 @@ impl EnvAction {
             )}
         };
 
+        let (mails_enabled, mails_relay, mails_username, mails_password) = {
+            let mails_enabled = Confirm::new()
+                .with_prompt("* Do you want to enable mails logic ?")
+                .default(false)
+                .interact()?;
+            if !mails_enabled {
+                (false, None, None, None)
+            } else {
+                (
+                    true,
+                    Some(
+                        Input::new()
+                            .with_prompt(
+                                "* What is the name relay (check with your mail provider) ?",
+                            )
+                            .interact()?,
+                    ),
+                    Some(
+                        Input::new()
+                            .with_prompt(
+                                "* What is the name relay (check with your mail provider) ?",
+                            )
+                            .interact()?,
+                    ),
+                    Some(
+                        Input::new()
+                            .with_prompt(
+                                "* What is the name relay (check with your mail provider) ?",
+                            )
+                            .interact()?,
+                    ),
+                )
+            }
+        };
+
         output_stream.write_all(
             EnvTemplate {
                 postgres_host,
@@ -201,6 +244,10 @@ impl EnvAction {
                 ssl_dhparam_path,
                 redis_host,
                 redis_port,
+                mails_enabled,
+                mails_relay,
+                mails_username,
+                mails_password,
             }
             .render()?
             .as_bytes(),

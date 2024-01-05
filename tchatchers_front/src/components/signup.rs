@@ -55,6 +55,7 @@ pub struct SignUp {
     password: NodeRef,
     name: NodeRef,
     password_confirmation: NodeRef,
+    user_email: NodeRef,
     wait_for_api: bool,
     server_error: Option<AttrValue>,
 }
@@ -71,11 +72,18 @@ impl Component for SignUp {
         match msg {
             Msg::SubmitForm => {
                 self.server_error = None;
-                if let (Some(login), Some(name), Some(password), Some(password_confirmation)) = (
+                if let (
+                    Some(login),
+                    Some(name),
+                    Some(password),
+                    Some(password_confirmation),
+                    Some(email),
+                ) = (
                     self.login.cast::<HtmlInputElement>(),
                     self.name.cast::<HtmlInputElement>(),
                     self.password.cast::<HtmlInputElement>(),
                     self.password_confirmation.cast::<HtmlInputElement>(),
+                    self.user_email.cast::<HtmlInputElement>(),
                 ) {
                     let inputs = [&login, &name, &password];
                     if inputs.iter().all(|i| i.check_validity()) {
@@ -89,10 +97,16 @@ impl Component for SignUp {
                             .id;
                         let link = ctx.link().clone();
                         self.wait_for_api = true;
+                        let email = if !email.value().is_empty() {
+                            Some(email.value())
+                        } else {
+                            None
+                        };
                         let payload = InsertableUser {
                             login: login.value(),
                             name: name.value(),
                             password: password.value(),
+                            email,
                             locale,
                         };
                         if let Err(e) = payload.validate() {
@@ -117,10 +131,17 @@ impl Component for SignUp {
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
                                 if resp.ok() {
+                                    let resp: ApiResponse =
+                                        postcard::from_bytes(&resp.binary().await.unwrap())
+                                            .unwrap();
                                     ToastBus::dispatcher().send(Alert {
                                         is_success: true,
-                                        label: "success_on_user_creation".into(),
-                                        default: "User created with success".into(),
+                                        label: resp.label,
+                                        default: if let Some(text) = resp.text {
+                                            text
+                                        } else {
+                                            "User created with success".into()
+                                        },
                                     });
                                     link.navigator().unwrap().push(&Route::SignIn);
                                 } else {
@@ -168,6 +189,8 @@ impl Component for SignUp {
             <FormInput label={"name_field"} {translation} default={"Name"} minlength="3" maxlength="16" attr_ref={&self.name} required=true />
             <FormInput label={"password_field"} {translation} default={"Password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password} required=true />
             <FormInput label={"confirm_password"} {translation} default={"Confirm your password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password_confirmation} required=true />
+            <FormInput label={"your_email"} {translation} default={"Your email"} input_type="email" attr_ref={&self.user_email} required=false />
+
             <FormFreeSection>
                 if self.wait_for_api {
                     <WaitingForResponse {translation} />

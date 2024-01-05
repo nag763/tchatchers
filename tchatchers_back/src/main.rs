@@ -67,6 +67,8 @@ pub struct AppState {
     session_pool: bb8::Pool<RedisConnectionManager>,
     /// Redis async pool.
     async_pool: bb8::Pool<RedisConnectionManager>,
+    // Global variable to indicate whether mails are enabled or not.
+    mails_enabled: bool,
 }
 
 #[tokio::main]
@@ -80,6 +82,10 @@ async fn main() -> anyhow::Result<()> {
         .init();
 
     let jwt_secret = std::env::var("JWT_SECRET").expect("No jwt secret has been defined");
+    let mails_enabled: bool = std::env::var("MAILS_ENABLED")
+        .expect("No email enabled configuration passed")
+        .parse()
+        .unwrap();
     let refresh_token_secret = std::env::var("REFRESH_TOKEN_SECRET")
         .expect("No refresh token signature key has been defined");
     let (pg_pool, session_pool, async_pool) = join!(
@@ -101,6 +107,7 @@ async fn main() -> anyhow::Result<()> {
         pg_pool,
         session_pool,
         async_pool,
+        mails_enabled,
     };
 
     let app = Router::new()

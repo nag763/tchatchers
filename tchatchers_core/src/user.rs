@@ -72,6 +72,8 @@ pub struct User {
         sqlx(rename = "profile_id")
     )]
     pub profile: Profile,
+    /// The user's email.
+    pub email: Option<String>,
 }
 
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
@@ -104,6 +106,38 @@ impl User {
         Ok(row.0)
     }
 
+    /// Look up whether a login exists in the database.
+    ///
+    /// # Arguments
+    ///
+    /// - login : The login to look up.
+    pub async fn email_exists(email: &str, pool: &PgPool) -> Result<bool, sqlx::Error> {
+        let row: (bool,) = sqlx::query_as("SELECT COUNT(id)!=0 FROM CHATTER WHERE email=$1")
+            .bind(email)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+
+    /// Look up whether a login exists in the database.
+    ///
+    /// # Arguments
+    ///
+    /// - login : The login to look up.
+    pub async fn email_exists_except_self(
+        email: &str,
+        id: i32,
+        pool: &PgPool,
+    ) -> Result<bool, sqlx::Error> {
+        let row: (bool,) =
+            sqlx::query_as("SELECT COUNT(id)!=0 FROM CHATTER WHERE email=$1 AND id != $2")
+                .bind(email)
+                .bind(id)
+                .fetch_one(pool)
+                .await?;
+        Ok(row.0)
+    }
+
     /// Delete the user from the database.
     ///
     /// The check on whether the executer can delete the user has to be done server side.
@@ -132,6 +166,22 @@ impl User {
     pub async fn delete_login(login: &str, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
         sqlx::query("DELETE FROM CHATTER WHERE login=$1")
             .bind(login)
+            .execute(pool)
+            .await
+    }
+
+    /// Delete the user from the database.
+    ///
+    /// The check on whether the executer can delete the user has to be done server side.
+    /// This won't check the legitimity of the operation.
+    ///
+    /// # Arguments
+    ///
+    /// - email : the user's email to delete.
+    /// - pool : The PG connection pool.
+    pub async fn delete_mail(email: &str, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query("DELETE FROM CHATTER WHERE email=$1")
+            .bind(email)
             .execute(pool)
             .await
     }
@@ -172,6 +222,18 @@ impl User {
         sqlx::query("UPDATE CHATTER SET is_authorized=$1 WHERE login=$2")
             .bind(is_authorized)
             .bind(login)
+            .execute(pool)
+            .await
+    }
+
+    pub async fn update_activation_status_from_mail(
+        email: &str,
+        is_authorized: bool,
+        pool: &PgPool,
+    ) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query("UPDATE CHATTER SET is_authorized=$1 WHERE email=$2")
+            .bind(is_authorized)
+            .bind(email)
             .execute(pool)
             .await
     }
@@ -287,6 +349,8 @@ pub struct PartialUser {
     // The profile of the user.
     #[cfg_attr(any(feature = "back", feature = "cli"), sqlx(rename = "profile_id"))]
     pub profile: Profile,
+    // User's email
+    pub email: Option<String>,
 }
 
 impl From<User> for PartialUser {
@@ -302,6 +366,7 @@ impl From<User> for PartialUser {
             created_at: user.created_at,
             last_update: user.last_update,
             last_logon: user.last_logon,
+            email: user.email,
         }
     }
 }
@@ -333,6 +398,20 @@ impl PartialUser {
     pub async fn find_by_login(login: &str, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
         sqlx::query_as("SELECT * FROM CHATTER WHERE login=$1")
             .bind(login)
+            .fetch_optional(pool)
+            .await
+    }
+
+    /// Find a user from his email.
+    ///
+    /// This is an exact match look up.
+    ///
+    /// # Arguments
+    ///
+    /// - email : the user email.
+    pub async fn find_by_email(email: &str, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
+        sqlx::query_as("SELECT * FROM CHATTER WHERE email=$1")
+            .bind(email)
             .fetch_optional(pool)
             .await
     }
@@ -449,6 +528,9 @@ pub struct InsertableUser {
         regex(path = "RE_LIMITED_CHARS", code = "limited_chars")
     )]
     pub name: String,
+    /// The user's email.
+    #[validate(email)]
+    pub email: Option<String>,
     /// The user's locale
     #[validate(range(min = 1))]
     pub locale: i32,
@@ -465,13 +547,16 @@ impl InsertableUser {
         let salt: [u8; 32] = rand::thread_rng().gen();
         let config = argon2::Config::rfc9106_low_mem();
         let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
-        sqlx::query("INSERT INTO CHATTER(login, password, name, locale_id) VALUES ($1,$2,$3,$4)")
-            .bind(&self.login)
-            .bind(&hash)
-            .bind(&self.name)
-            .bind(self.locale)
-            .execute(pool)
-            .await
+        sqlx::query(
+            "INSERT INTO CHATTER(login, password, name, locale_id, email) VALUES ($1,$2,$3,$4,$5)",
+        )
+        .bind(&self.login)
+        .bind(&hash)
+        .bind(&self.name)
+        .bind(self.locale)
+        .bind(&self.email)
+        .execute(pool)
+        .await
     }
 
     /// Inserts the user in the database along his profile.
@@ -489,13 +574,16 @@ impl InsertableUser {
         let salt: [u8; 32] = rand::thread_rng().gen();
         let config = argon2::Config::rfc9106_low_mem();
         let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
-        sqlx::query("INSERT INTO CHATTER(login, password, name, profile_id) VALUES ($1,$2,$3,$4)")
-            .bind(&self.login)
-            .bind(&hash)
-            .bind(&self.name)
-            .bind(profile)
-            .execute(pool)
-            .await
+        sqlx::query(
+            "INSERT INTO CHATTER(login, password, name, profile_id, email) VALUES ($1,$2,$3,$4,$5)",
+        )
+        .bind(&self.login)
+        .bind(&hash)
+        .bind(&self.name)
+        .bind(profile)
+        .bind(&self.email)
+        .execute(pool)
+        .await
     }
 }
 
@@ -510,6 +598,8 @@ pub struct UpdatableUser {
     )]
     pub name: String,
     pub locale_id: i32,
+    #[validate(email)]
+    pub email: Option<String>,
 }
 
 #[cfg(feature = "back")]
@@ -520,9 +610,10 @@ impl UpdatableUser {
     ///
     /// - pool : The connection pool.
     pub async fn update(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
-        sqlx::query("UPDATE CHATTER SET name=$1, locale_id=$2 WHERE id=$3")
+        sqlx::query("UPDATE CHATTER SET name=$1, locale_id=$2, email=$3 WHERE id=$4")
             .bind(&self.name)
             .bind(self.locale_id)
+            .bind(&self.email)
             .bind(self.id)
             .execute(pool)
             .await

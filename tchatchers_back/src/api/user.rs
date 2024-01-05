@@ -17,6 +17,8 @@ use axum_extra::extract::CookieJar;
 use tchatchers_core::api_response::ApiGenericResponse;
 use tchatchers_core::async_message::AsyncMessage;
 use tchatchers_core::authorization_token::AuthorizationToken;
+use tchatchers_core::mail::mail::Mail;
+use tchatchers_core::mail::template::WelcomeMailContent;
 use tchatchers_core::refresh_token::RefreshToken;
 use tchatchers_core::report::Report;
 use tchatchers_core::serializable_token::SerializableToken;
@@ -45,8 +47,30 @@ pub async fn create_user(
         return Err(ApiGenericResponse::SimilarLoginExists);
     }
 
+    if let Some(mail) = &new_user.email {
+        if User::email_exists(mail, &state.pg_pool).await? {
+            return Err(ApiGenericResponse::SimilarEmailExists);
+        }
+    }
+
     new_user.insert(&state.pg_pool).await?;
-    Ok(ApiGenericResponse::UserCreated)
+    if state.mails_enabled {
+        if let Some(email) = new_user.email {
+            if let Some(mail) = Mail::new(
+                email,
+                WelcomeMailContent {
+                    name: new_user.name,
+                },
+            ) {
+                mail.send()
+                    .await
+                    .map_err(|_e| ApiGenericResponse::MailingError)?;
+            }
+        }
+        Ok(ApiGenericResponse::CreationMailSent)
+    } else {
+        Ok(ApiGenericResponse::UserCreated)
+    }
 }
 
 /// Check whether a login exists or not.
@@ -252,6 +276,13 @@ pub async fn update_user(
     let payload_bytes = payload.bytes().await?;
     let user: UpdatableUser = postcard::from_bytes(&payload_bytes)?;
     user.validate()?;
+
+    if let Some(mail) = &user.email {
+        if User::email_exists_except_self(mail, user.id, &state.pg_pool).await? {
+            return Err(ApiGenericResponse::SimilarEmailExists);
+        }
+    }
+
     let mut tasks: JoinSet<Result<(), ApiGenericResponse>> = JoinSet::new();
     if jwt.user_id != user.id {
         return Err(ApiGenericResponse::UnsifficentPriviledges);

@@ -28,6 +28,7 @@ impl UserAction {
         let result = match user_identifier {
             UserIdentifier::Id { value } => User::delete_one(value, &pool).await?,
             UserIdentifier::Login { value } => User::delete_login(&value, &pool).await?,
+            UserIdentifier::Email { value } => User::delete_mail(&value, &pool).await?,
         };
         if result.rows_affected() == 1 {
             println!("The user has been deleted with success.");
@@ -58,6 +59,9 @@ impl UserAction {
             }
             UserIdentifier::Login { value } => {
                 User::update_activation_status_from_login(&value, is_authorized, &pool).await?
+            }
+            UserIdentifier::Email { value } => {
+                User::update_activation_status_from_mail(&value, is_authorized, &pool).await?
             }
         };
         if result.rows_affected() == 1 {
@@ -90,6 +94,11 @@ impl UserAction {
                 .filter_map(Some)
                 .collect::<Vec<PartialUser>>(),
             UserSearch::Login { value } => PartialUser::find_by_login(&value, &pool)
+                .await?
+                .into_iter()
+                .filter_map(Some)
+                .collect::<Vec<PartialUser>>(),
+            UserSearch::Email { value } => PartialUser::find_by_email(&value, &pool)
                 .await?
                 .into_iter()
                 .filter_map(Some)
@@ -145,6 +154,13 @@ impl UserAction {
             )
             .interact()?;
 
+        // Prompt the user to enter the user mail.
+        let user_email = Confirm::new()
+            .with_prompt("Do you want to associate a mail address ?")
+            .default(false)
+            .interact()?
+            .then_some(Input::new().with_prompt("User's email").interact_text()?);
+
         // Prompt the user to select the user profile.
         let profiles = Profile::options();
         let profile_index = Select::new()
@@ -159,6 +175,7 @@ impl UserAction {
             login: user_login,
             password,
             name: user_name,
+            email: user_email,
             locale: Locale::get_default_locale().id,
         };
 

@@ -38,6 +38,7 @@ impl Display for ValidationErrorMessage {
             ),
             "limited_chars" => write!(f, "The {} doesn't respect the scope of chars allowed.\nOnly letters, numbers, dashes and underscores are allowed.", self.field),
             "security_constraints_not_matched" => write!(f, "The {} doesn't match the security constraints.\nIt is required to have at least one uppercase character, one lowercase character and one number in the {}.", self.field, self.field),
+            "mail_format_incorrect" => write!(f, "The email is not in a correct format"),
             _ => write!(f, "An error happened druing the validation of the form"),
         }
     }
