@@ -8,6 +8,7 @@
 
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use crate::async_message::{AsyncOperationPGType, AsyncQueue};
+use crate::authorization_status::AuthorizationStatus;
 use crate::common::RE_LIMITED_CHARS;
 use crate::profile::Profile;
 use chrono::DateTime;
@@ -51,7 +52,11 @@ pub struct User {
     /// Whether the user is authorized to connect to the different services.
     ///
     /// If set to false, the user shouldn't be allowed to connect to the apps.
-    pub is_authorized: bool,
+    #[cfg_attr(
+        any(feature = "back", feature = "cli", feature = "async"),
+        sqlx(rename = "authorization_status_id")
+    )]
+    pub authorization_status: AuthorizationStatus,
     /// The name of the user, should be displayed on front end services.
     pub name: String,
     /// The profile picture of the user.
@@ -78,6 +83,14 @@ pub struct User {
 
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 impl User {
+    pub fn is_authorized(&self) -> bool {
+        if self.email.is_some() {
+            self.authorization_status.is_authorized()
+        } else {
+            !self.authorization_status.is_deactivated()
+        }
+    }
+
     /// Find a user by ID in the database.
     ///
     /// This shouldn't be used to identify users.
@@ -112,7 +125,7 @@ impl User {
     ///
     /// - login : The login to look up.
     pub async fn email_exists(email: &str, pool: &PgPool) -> Result<bool, sqlx::Error> {
-        let row: (bool,) = sqlx::query_as("SELECT COUNT(id)!=0 FROM CHATTER WHERE email=$1")
+        let row: (bool,) = sqlx::query_as("SELECT COUNT(id)!=0 FROM CHATTER WHERE email ilike $1")
             .bind(email)
             .fetch_one(pool)
             .await?;
@@ -130,7 +143,7 @@ impl User {
         pool: &PgPool,
     ) -> Result<bool, sqlx::Error> {
         let row: (bool,) =
-            sqlx::query_as("SELECT COUNT(id)!=0 FROM CHATTER WHERE email=$1 AND id != $2")
+            sqlx::query_as("SELECT COUNT(id)!=0 FROM CHATTER WHERE email ilike $1 AND id != $2")
                 .bind(email)
                 .bind(id)
                 .fetch_one(pool)
@@ -180,7 +193,7 @@ impl User {
     /// - email : the user's email to delete.
     /// - pool : The PG connection pool.
     pub async fn delete_mail(email: &str, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
-        sqlx::query("DELETE FROM CHATTER WHERE email=$1")
+        sqlx::query("DELETE FROM CHATTER WHERE email ilike $1")
             .bind(email)
             .execute(pool)
             .await
@@ -196,11 +209,11 @@ impl User {
     /// - is_authorized : the new activation status.
     pub async fn update_activation_status(
         id: i32,
-        is_authorized: bool,
+        authorization_status: AuthorizationStatus,
         pool: &PgPool,
     ) -> Result<PgQueryResult, sqlx::Error> {
-        sqlx::query("UPDATE CHATTER SET is_authorized=$1 WHERE id=$2")
-            .bind(is_authorized)
+        sqlx::query("UPDATE CHATTER SET authorization_status_id=$1 WHERE id=$2")
+            .bind(authorization_status)
             .bind(id)
             .execute(pool)
             .await
@@ -216,11 +229,11 @@ impl User {
     /// - is_authorized : the new activation status.
     pub async fn update_activation_status_from_login(
         login: &str,
-        is_authorized: bool,
+        authorization_status: AuthorizationStatus,
         pool: &PgPool,
     ) -> Result<PgQueryResult, sqlx::Error> {
-        sqlx::query("UPDATE CHATTER SET is_authorized=$1 WHERE login=$2")
-            .bind(is_authorized)
+        sqlx::query("UPDATE CHATTER SET authorization_status=$1 WHERE login=$2")
+            .bind(authorization_status)
             .bind(login)
             .execute(pool)
             .await
@@ -231,7 +244,7 @@ impl User {
         is_authorized: bool,
         pool: &PgPool,
     ) -> Result<PgQueryResult, sqlx::Error> {
-        sqlx::query("UPDATE CHATTER SET is_authorized=$1 WHERE email=$2")
+        sqlx::query("UPDATE CHATTER SET is_authorized=$1 WHERE email ilike $2")
             .bind(is_authorized)
             .bind(email)
             .execute(pool)
@@ -335,7 +348,11 @@ pub struct PartialUser {
     /// Profile picture of the user.
     pub pfp: Option<String>,
     /// Whether the user is authorized or not.
-    pub is_authorized: bool,
+    #[cfg_attr(
+        any(feature = "back", feature = "cli", feature = "async"),
+        sqlx(rename = "authorization_status_id")
+    )]
+    pub authorization_status: AuthorizationStatus,
     /// Timestamp when the user got created.
     #[derivative(Default(value = "chrono::offset::Utc::now()"))]
     pub created_at: DateTime<Utc>,
@@ -362,7 +379,7 @@ impl From<User> for PartialUser {
             pfp: user.pfp,
             locale_id: user.locale_id,
             profile: user.profile,
-            is_authorized: user.is_authorized,
+            authorization_status: user.authorization_status,
             created_at: user.created_at,
             last_update: user.last_update,
             last_logon: user.last_logon,
@@ -410,7 +427,7 @@ impl PartialUser {
     ///
     /// - email : the user email.
     pub async fn find_by_email(email: &str, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
-        sqlx::query_as("SELECT * FROM CHATTER WHERE email=$1")
+        sqlx::query_as("SELECT * FROM CHATTER WHERE email ilike $1")
             .bind(email)
             .fetch_optional(pool)
             .await

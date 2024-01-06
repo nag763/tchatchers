@@ -4,6 +4,7 @@ use crate::{
 };
 use dialoguer::{Confirm, Input, Password, Select};
 use tchatchers_core::{
+    authorization_status::AuthorizationStatus,
     locale::Locale,
     profile::Profile,
     user::{InsertableUser, PartialUser, User},
@@ -52,13 +53,19 @@ impl UserAction {
         user_identifier: UserIdentifier,
         is_authorized: bool,
     ) -> Result<(), CliError> {
+        let authorization_status = if is_authorized {
+            AuthorizationStatus::AuthorizedByAdmin
+        } else {
+            AuthorizationStatus::Deactivated
+        };
         let pool = tchatchers_core::pool::get_pg_pool().await?;
         let result = match user_identifier {
             UserIdentifier::Id { value } => {
-                User::update_activation_status(value, is_authorized, &pool).await?
+                User::update_activation_status(value, authorization_status, &pool).await?
             }
             UserIdentifier::Login { value } => {
-                User::update_activation_status_from_login(&value, is_authorized, &pool).await?
+                User::update_activation_status_from_login(&value, authorization_status, &pool)
+                    .await?
             }
             UserIdentifier::Email { value } => {
                 User::update_activation_status_from_mail(&value, is_authorized, &pool).await?

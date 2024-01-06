@@ -34,6 +34,7 @@ pub enum ApiResponseKind {
     MailingError,
     CreationMailSent,
     SimilarMailExists,
+    AccountUnverified,
 }
 
 #[cfg(feature = "back")]
@@ -59,9 +60,9 @@ impl From<ApiResponseKind> for StatusCode {
             | ApiResponseKind::ContentTypeError
             | ApiResponseKind::SerializationError
             | ApiResponseKind::MultipartError => StatusCode::BAD_REQUEST,
-            ApiResponseKind::AuthenticationRequired | ApiResponseKind::AuthenticationExpired => {
-                StatusCode::UNAUTHORIZED
-            }
+            ApiResponseKind::AuthenticationRequired
+            | ApiResponseKind::AuthenticationExpired
+            | ApiResponseKind::AccountUnverified => StatusCode::UNAUTHORIZED,
             ApiResponseKind::UnsifficentPriviledges | ApiResponseKind::AccessRevoked => {
                 StatusCode::FORBIDDEN
             }
@@ -144,6 +145,7 @@ pub enum ApiGenericResponse {
     MailingError,
     CreationMailSent,
     SimilarEmailExists,
+    AccountUnverified,
 }
 
 impl From<ApiGenericResponse> for ApiResponse {
@@ -247,6 +249,9 @@ impl From<ApiGenericResponse> for ApiResponse {
             }
             ApiGenericResponse::SimilarEmailExists => {
                 ApiResponse::new(ApiResponseKind::SimilarMailExists, "similar_mail_exists")
+            }
+            ApiGenericResponse::AccountUnverified => {
+                ApiResponse::new(ApiResponseKind::AccountUnverified, "account_unverified")
             }
         }
     }

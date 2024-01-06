@@ -2,8 +2,10 @@
 //! the client and the server applications.
 
 pub mod api_response;
+
 #[cfg(any(feature = "back", feature = "async", feature = "cli"))]
 pub mod async_message;
+pub mod authorization_status;
 pub mod authorization_token;
 pub(crate) mod common;
 pub mod locale;

@@ -67,7 +67,7 @@ impl Component for Toast {
                     .props()
                     .client_context
                     .translation
-                    .get_or_default(&alert.label, "Message unknown");
+                    .get_or_default(&alert.label, &alert.default);
                 self.is_success = alert.is_success;
                 self.visible = true;
                 self.cooldown = Some({

@@ -134,6 +134,11 @@ impl Component for SignUp {
                                     let resp: ApiResponse =
                                         postcard::from_bytes(&resp.binary().await.unwrap())
                                             .unwrap();
+                                    gloo_console::log!("Resp label : ", &resp.label);
+                                    gloo_console::log!(
+                                        "Resp label : ",
+                                        &resp.text.clone().unwrap()
+                                    );
                                     ToastBus::dispatcher().send(Alert {
                                         is_success: true,
                                         label: resp.label,

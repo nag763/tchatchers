@@ -75,6 +75,8 @@ translations:
       mailing_error: An issue has been met while attempting to send a mail to your address.
       your_email: Your email
       similar_mail_exists: A user with a similar mail already exists. If you think it is you, use the forgotten password functionnality.
+      creation_mail_sent: A mail for your account validation has been set. Check it before attempting to log in.
+      account_unverified: Your account hasn't been verified, please check your mails (including spams) to verify it. 
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR

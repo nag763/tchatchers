@@ -16,6 +16,7 @@ use axum_extra::extract::cookie::Cookie;
 use axum_extra::extract::CookieJar;
 use tchatchers_core::api_response::ApiGenericResponse;
 use tchatchers_core::async_message::AsyncMessage;
+use tchatchers_core::authorization_status::AuthorizationStatus;
 use tchatchers_core::authorization_token::AuthorizationToken;
 use tchatchers_core::mail::template::WelcomeMailContent;
 use tchatchers_core::mail::Mail;
@@ -69,8 +70,10 @@ pub async fn create_user(
                     .await
                     .map_err(|_e| ApiGenericResponse::MailingError)?;
             }
+            Ok(ApiGenericResponse::CreationMailSent)
+        } else {
+            Ok(ApiGenericResponse::UserCreated)
         }
-        Ok(ApiGenericResponse::CreationMailSent)
     } else {
         Ok(ApiGenericResponse::UserCreated)
     }
@@ -112,7 +115,8 @@ pub async fn authenticate(
         sleep(Duration::from_secs(3)).await;
         return Err(ApiGenericResponse::BadCredentials);
     };
-    if user.is_authorized {
+    println!("User is authorized ? {:?}", user.authorization_status);
+    if user.is_authorized() {
         let refresh_token = {
             let mut redis_conn = state.session_pool.get().await?;
 
@@ -133,8 +137,10 @@ pub async fn authenticate(
             refresh_token.store_in_jar(&state.refresh_token_secret, cookie_jar)?,
             jwt.encode(&state.jwt_secret)?,
         ))
-    } else {
+    } else if user.authorization_status.is_deactivated() {
         Err(ApiGenericResponse::AccessRevoked)
+    } else {
+        Err(ApiGenericResponse::AccountUnverified)
     }
 }
 
@@ -195,7 +201,7 @@ pub async fn reauthenticate(
     };
 
     // Verify that the user's account is authorized.
-    if !user.is_authorized {
+    if !user.is_authorized() {
         return Err(ApiGenericResponse::AccessRevoked);
     }
 
@@ -363,7 +369,8 @@ pub async fn revoke_user(
     ModeratorExtractor(_): ModeratorExtractor,
     State(state): State<AppState>,
 ) -> Result<impl IntoResponse, ApiGenericResponse> {
-    User::update_activation_status(user_id, false, &state.pg_pool).await?;
+    User::update_activation_status(user_id, AuthorizationStatus::Deactivated, &state.pg_pool)
+        .await?;
     Ok(ApiGenericResponse::RevokedUser)
 }
 
@@ -405,7 +412,7 @@ pub async fn whoami(
     let Some(user) = User::find_by_id(jwt.user_id, &state.pg_pool).await? else {
         return Err(ApiGenericResponse::UserNotFound);
     };
-    if !user.is_authorized {
+    if !user.is_authorized() {
         return Err(ApiGenericResponse::AccessRevoked);
     }
     Ok(Postcard(user.into()))
