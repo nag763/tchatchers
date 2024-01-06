@@ -1,0 +1,61 @@
+body {
+    background-color: #f7f7f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.email-container {
+    justify-content: normal;
+    align-items: start;
+    max-width: 600px;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-align: normal;
+}
+
+.email-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.email-content {
+    font-size: 16px;
+    color: #4a4a4a;
+    margin-bottom: 20px;
+}
+
+.button-container {
+    text-align: center; /* Center content horizontally */
+}
+
+.email-button {
+    display: inline-block;
+    text-decoration: none;
+    color: #4a4a4a;
+    line-height: 2.5;
+    cursor: pointer;
+    padding: 5px 10px; /* Adjust the padding for the desired button size */
+    font-weight: bold;
+    border: 2px solid #4a4a4a;
+    transition: background-color 0.3s;
+    border-radius: 0.5rem;
+}
+
+.email-button:hover {
+    background-color: #f0f0f0;
+}
+
+/* Additional Section Styles */
+.additional-section {
+    margin-top: 20px;
+    border-top: 2px solid #000000; /* Black separator */
+    padding-top: 20px;
+    font-size: 14px; /* Smaller font size */
+    color: #666666; /* Grayed text color */
+}

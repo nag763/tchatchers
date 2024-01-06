@@ -40,7 +40,12 @@ where
 {
     fn from(value: Mail<T>) -> Self {
         Message::builder()
-            .from(value.configured_mail.from.parse().unwrap())
+            .from(
+                std::env::var(value.configured_mail.from)
+                    .expect("Couldn't find sender")
+                    .parse()
+                    .unwrap(),
+            )
             .to(value.to.parse().unwrap())
             .subject(value.configured_mail.subject)
             .multipart(

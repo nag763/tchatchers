@@ -17,8 +17,8 @@ use axum_extra::extract::CookieJar;
 use tchatchers_core::api_response::ApiGenericResponse;
 use tchatchers_core::async_message::AsyncMessage;
 use tchatchers_core::authorization_token::AuthorizationToken;
-use tchatchers_core::mail::mail::Mail;
 use tchatchers_core::mail::template::WelcomeMailContent;
+use tchatchers_core::mail::Mail;
 use tchatchers_core::refresh_token::RefreshToken;
 use tchatchers_core::report::Report;
 use tchatchers_core::serializable_token::SerializableToken;
@@ -60,6 +60,9 @@ pub async fn create_user(
                 email,
                 WelcomeMailContent {
                     name: new_user.name,
+                    app_uri: state.app_uri,
+                    mail_support_sender: state.mail_support_sender,
+                    mail_gdpr_sender: state.mail_gdpr_sender,
                 },
             ) {
                 mail.send()

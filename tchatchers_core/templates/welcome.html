@@ -1,3 +1,32 @@
-<h1>Hello {{name}} and welcome</h1>
+<!DOCTYPE html>
+<html lang="en">
 
-<p>This is the first template</p>
+<head>
+    <title>Welcome to Tchatchers</title>
+    <style>
+{% include "mail_styles.css" %}
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <h1 class="email-title">Welcome to tchatchers {{name}} !</h1>
+        <p class="email-content">
+            Thank you for creating an account with tchatchers ! We're excited to have you on board. Before you can start chatting, a few steps remain to activate your account.
+        </p>
+        <p class="email-content">
+            To complete the activation process, click the button below:
+        </p>
+        <div class="button-container">
+            <a href="{{app_uri}}" class="email-button">Activate my account</a>
+        </div>
+        <!-- Additional Section -->
+        <div class="additional-section">
+            <p>If you no longer wish to activate your account or if you believe you received this email in error, please contact us at <a href="mailto:{{mail_support_sender}}">support@tchatche.xyz</a>.</p>
+            <p>If your account remains inactive for 30 days, it will be automatically deactivated for security purposes.</p>
+            <p>If you have any questions regarding your privacy, feel free to reach out to us at <a href="mailto:{{mail_gdpr_sender}}">{{mail_gdpr_sender}}</a>.</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -69,6 +69,10 @@ pub struct AppState {
     async_pool: bb8::Pool<RedisConnectionManager>,
     // Global variable to indicate whether mails are enabled or not.
     mails_enabled: bool,
+    // Application uri.
+    app_uri: String,
+    mail_support_sender: String,
+    mail_gdpr_sender: String,
 }
 
 #[tokio::main]
@@ -86,6 +90,17 @@ async fn main() -> anyhow::Result<()> {
         .expect("No email enabled configuration passed")
         .parse()
         .unwrap();
+    let (app_uri, mail_support_sender, mail_gdpr_sender) = if mails_enabled {
+        (
+            std::env::var("APP_URI")
+                .expect("The application URI is required in order to send mails."),
+            std::env::var("MAIL_SUPPORT_SENDER").expect("The mailbox for support is not defined."),
+            std::env::var("MAIL_GDPR_SENDER").expect("The mailbox for GDPR is not defined."),
+        )
+    } else {
+        (String::default(), String::default(), String::default())
+    };
+
     let refresh_token_secret = std::env::var("REFRESH_TOKEN_SECRET")
         .expect("No refresh token signature key has been defined");
     let (pg_pool, session_pool, async_pool) = join!(
@@ -108,6 +123,9 @@ async fn main() -> anyhow::Result<()> {
         session_pool,
         async_pool,
         mails_enabled,
+        app_uri,
+        mail_support_sender,
+        mail_gdpr_sender,
     };
 
     let app = Router::new()

@@ -1,5 +1,5 @@
 - &welcome:
-  from: Admin <admin@tchatche.xyz>
-  subject: mail_welcome_user_subject
-  body_plain: mail_welcome_user_plain
+  from: MAIL_NOREPLY_SENDER
+  subject: Welcome ! There are some steps remaining.
+  body_plain: Welcome ! Your account is ready to be activated.
   associated_mail: WelcomeMail
