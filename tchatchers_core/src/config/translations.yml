@@ -76,7 +76,10 @@ translations:
       your_email: Your email
       similar_mail_exists: A user with a similar mail already exists. If you think it is you, use the forgotten password functionnality.
       creation_mail_sent: A mail for your account validation has been set. Check it before attempting to log in.
-      account_unverified: Your account hasn't been verified, please check your mails (including spams) to verify it. 
+      account_unverified: Your account hasn't been verified, please check your mails (including spams) to verify it.
+      not_valid_anymore: The resource you are attempting to reach is not valid anymore.
+      verification_failed: It seeems like the verification failed or the link you are using has already been used.
+      verification_success: You have been verified with success, you will be redirected within few seconds to the main page.
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR

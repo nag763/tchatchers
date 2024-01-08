@@ -18,7 +18,8 @@
             To complete the activation process, click the button below:
         </p>
         <div class="button-container">
-            <a href="{{app_uri}}" class="email-button">Activate my account</a>
+            <input type="hidden" name="token" value="{{token}}"></input>
+            <a class="email-button" href="{{app_uri}}/verify/{{token}}">Activate my account</a>
         </div>
         <!-- Additional Section -->
         <div class="additional-section">

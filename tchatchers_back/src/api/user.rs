@@ -18,6 +18,8 @@ use tchatchers_core::api_response::ApiGenericResponse;
 use tchatchers_core::async_message::AsyncMessage;
 use tchatchers_core::authorization_status::AuthorizationStatus;
 use tchatchers_core::authorization_token::AuthorizationToken;
+use tchatchers_core::functional_token::FunctionalToken;
+use tchatchers_core::functional_token::FunctionalTokenType;
 use tchatchers_core::mail::template::WelcomeMailContent;
 use tchatchers_core::mail::Mail;
 use tchatchers_core::refresh_token::RefreshToken;
@@ -54,14 +56,16 @@ pub async fn create_user(
         }
     }
 
-    new_user.insert(&state.pg_pool).await?;
+    let user_id = new_user.insert(&state.pg_pool).await?;
     if state.mails_enabled {
         if let Some(email) = new_user.email {
+            let token = FunctionalToken::new(user_id, FunctionalTokenType::ValidatingMail);
             if let Some(mail) = Mail::new(
                 email,
                 WelcomeMailContent {
                     name: new_user.name,
                     app_uri: state.app_uri,
+                    token: token.encode(&state.jwt_secret)?,
                     mail_support_sender: state.mail_support_sender,
                     mail_gdpr_sender: state.mail_gdpr_sender,
                 },
@@ -69,6 +73,10 @@ pub async fn create_user(
                 mail.send()
                     .await
                     .map_err(|_e| ApiGenericResponse::MailingError)?;
+            }
+            {
+                let mut token_pool = state.token_pool.get().await?;
+                token.emit(&mut token_pool).await?;
             }
             Ok(ApiGenericResponse::CreationMailSent)
         } else {
@@ -115,7 +123,6 @@ pub async fn authenticate(
         sleep(Duration::from_secs(3)).await;
         return Err(ApiGenericResponse::BadCredentials);
     };
-    println!("User is authorized ? {:?}", user.authorization_status);
     if user.is_authorized() {
         let refresh_token = {
             let mut redis_conn = state.session_pool.get().await?;
@@ -317,7 +324,6 @@ pub async fn update_user(
                 let mut file = File::create(&rel_file_path).await?;
                 file.write_all(&bytes).await?;
                 UpdatableUser::set_pfp(user.id, &served_file_path, &state.pg_pool).await?;
-                println!("Ok through");
                 Ok(())
             });
 

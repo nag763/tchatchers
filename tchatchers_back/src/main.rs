@@ -50,6 +50,8 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use ws::ws_handler;
 use ws::WsRooms;
 
+use crate::api::verify::verify;
+
 const REFRESH_TOKEN_PATH: &str = "refresh_token";
 
 #[derive(Clone)]
@@ -67,6 +69,8 @@ pub struct AppState {
     session_pool: bb8::Pool<RedisConnectionManager>,
     /// Redis async pool.
     async_pool: bb8::Pool<RedisConnectionManager>,
+    /// Redis token pool.
+    token_pool: bb8::Pool<RedisConnectionManager>,
     // Global variable to indicate whether mails are enabled or not.
     mails_enabled: bool,
     // Application uri.
@@ -103,19 +107,22 @@ async fn main() -> anyhow::Result<()> {
 
     let refresh_token_secret = std::env::var("REFRESH_TOKEN_SECRET")
         .expect("No refresh token signature key has been defined");
-    let (pg_pool, session_pool, async_pool) = join!(
+    let (pg_pool, session_pool, async_pool, token_pool) = join!(
         tchatchers_core::pool::get_pg_pool(),
         tchatchers_core::pool::get_session_pool(),
-        tchatchers_core::pool::get_async_pool()
+        tchatchers_core::pool::get_async_pool(),
+        tchatchers_core::pool::get_token_pool()
     );
 
-    let (pg_pool, session_pool, async_pool) = (pg_pool?, session_pool?, async_pool?);
+    let (pg_pool, session_pool, async_pool, token_pool) =
+        (pg_pool?, session_pool?, async_pool?, token_pool?);
 
     sqlx::migrate!()
         .run(&pg_pool)
         .await
         .expect("Could not apply migrations on the database");
     let shared_state = AppState {
+        token_pool,
         refresh_token_secret,
         jwt_secret,
         txs: Arc::new(Mutex::new(WsRooms::default())),
@@ -145,6 +152,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/api/whoami", get(whoami))
         .route("/api/message/:message_id", delete(delete_message))
         .route("/api/message/:message_id/report", post(report_message))
+        .route("/api/verify", post(verify))
         .route("/ws/:room", get(ws_handler))
         .nest_service(
             "/static",

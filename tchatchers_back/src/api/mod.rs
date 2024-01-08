@@ -5,3 +5,4 @@
 
 pub(crate) mod message;
 pub(crate) mod user;
+pub(crate) mod verify;

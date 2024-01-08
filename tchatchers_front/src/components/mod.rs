@@ -16,11 +16,13 @@ pub mod signin;
 pub mod signup;
 pub mod toast;
 pub mod type_bar;
+pub mod verify;
 
 pub mod prelude {
     pub use super::auth_guard::AuthGuard;
     pub use super::common::Loading;
     pub use super::common::NotFound;
+    pub use super::common::VerificationFailed;
     pub use super::feed::FeedHOC;
     pub use super::join_room::JoinRoomHOC;
     pub use super::logout::LogOut;
@@ -31,4 +33,5 @@ pub mod prelude {
     pub use super::signin::SignInHOC;
     pub use super::signup::SignUp;
     pub use super::toast::Toast;
+    pub use super::verify::Verify;
 }

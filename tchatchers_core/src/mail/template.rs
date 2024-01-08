@@ -15,6 +15,7 @@ pub trait MailHtmlContent: askama::Template {
 pub struct WelcomeMailContent {
     pub name: String,
     pub app_uri: String,
+    pub token: String,
     pub mail_support_sender: String,
     pub mail_gdpr_sender: String,
 }

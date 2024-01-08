@@ -560,20 +560,21 @@ impl InsertableUser {
     ///
     /// - pool : The connection pool.
     #[cfg(feature = "back")]
-    pub async fn insert(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+    pub async fn insert(&self, pool: &PgPool) -> Result<i32, sqlx::Error> {
         let salt: [u8; 32] = rand::thread_rng().gen();
         let config = argon2::Config::rfc9106_low_mem();
         let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
-        sqlx::query(
-            "INSERT INTO CHATTER(login, password, name, locale_id, email) VALUES ($1,$2,$3,$4,$5)",
+        let (id, ) : (i32, )= sqlx::query_as(
+            "INSERT INTO CHATTER(login, password, name, locale_id, email) VALUES ($1,$2,$3,$4,$5) RETURNING id",
         )
         .bind(&self.login)
         .bind(&hash)
         .bind(&self.name)
         .bind(self.locale)
         .bind(&self.email)
-        .execute(pool)
-        .await
+        .fetch_one(pool)
+        .await?;
+        Ok(id)
     }
 
     /// Inserts the user in the database along his profile.

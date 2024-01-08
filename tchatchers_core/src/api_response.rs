@@ -35,6 +35,7 @@ pub enum ApiResponseKind {
     CreationMailSent,
     SimilarMailExists,
     AccountUnverified,
+    NotValidAnymore,
 }
 
 #[cfg(feature = "back")]
@@ -60,6 +61,7 @@ impl From<ApiResponseKind> for StatusCode {
             | ApiResponseKind::ContentTypeError
             | ApiResponseKind::SerializationError
             | ApiResponseKind::MultipartError => StatusCode::BAD_REQUEST,
+            ApiResponseKind::NotValidAnymore => StatusCode::NOT_ACCEPTABLE,
             ApiResponseKind::AuthenticationRequired
             | ApiResponseKind::AuthenticationExpired
             | ApiResponseKind::AccountUnverified => StatusCode::UNAUTHORIZED,
@@ -146,6 +148,7 @@ pub enum ApiGenericResponse {
     CreationMailSent,
     SimilarEmailExists,
     AccountUnverified,
+    NotValidAnymore,
 }
 
 impl From<ApiGenericResponse> for ApiResponse {
@@ -252,6 +255,9 @@ impl From<ApiGenericResponse> for ApiResponse {
             }
             ApiGenericResponse::AccountUnverified => {
                 ApiResponse::new(ApiResponseKind::AccountUnverified, "account_unverified")
+            }
+            ApiGenericResponse::NotValidAnymore => {
+                ApiResponse::new(ApiResponseKind::NotValidAnymore, "not_valid_anymore")
             }
         }
     }

@@ -8,6 +8,8 @@ pub mod async_message;
 pub mod authorization_status;
 pub mod authorization_token;
 pub(crate) mod common;
+#[cfg(any(feature = "back"))]
+pub mod functional_token;
 pub mod locale;
 #[cfg(feature = "mail")]
 pub mod mail;

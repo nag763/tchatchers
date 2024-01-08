@@ -1,8 +1,8 @@
-use std::borrow::Borrow;
-use std::rc::Rc;
-
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
+
+use std::borrow::Borrow;
+use std::rc::Rc;
 use tchatchers_core::locale::TranslationMap;
 use web_sys::MouseEvent;
 use web_sys::{HtmlInputElement, SubmitEvent};
@@ -12,7 +12,10 @@ use yew::{
     classes, function_component, html, use_force_update, use_memo, AttrValue, Callback, Children,
     Html, NodeRef, Properties,
 };
+use yew_router::prelude::Link;
 
+use crate::router::Route;
+use crate::utils::client_context::ClientContext;
 use crate::utils::keyed_list::KeyedList;
 
 use super::modal::MODAL_OPENER_CLASS;
@@ -357,6 +360,53 @@ pub fn not_found() -> Html {
         {"404 ( ˘︹˘ )"}
             <br/>
         {"This page doesn't exist"}
+        </div>
+    }
+}
+
+#[function_component(VerificationSucceeded)]
+pub fn verification_succeeded() -> Html {
+    let client_context = yew::use_context::<Rc<ClientContext>>().unwrap();
+    let navigator = yew_router::prelude::use_navigator().unwrap();
+
+    let translation = &client_context.translation;
+    {
+        let client_context = client_context.clone();
+        wasm_bindgen_futures::spawn_local(async move {
+            gloo_timers::future::TimeoutFuture::new(5_000).await;
+            if (*client_context.user).is_some() {
+                navigator.replace(&Route::JoinRoom);
+            } else {
+                navigator.replace(&Route::SignIn)
+            }
+        });
+    }
+
+    html! {
+        <div class="flex flex-col justify-evenly items-center content-evenly h-full  text-center text-slate-600 dark:text-gray-200 dark:bg-zinc-800 animate-fade-out-slow">
+            <p class="text-2xl sm:text-4xl lg:text-8xl w-4/5">{"ヾ(•＾▽＾•)"}</p>
+            <p class="text-xl sm:text-2xl lg:text-4xl w-4/5">
+                <I18N {translation} label={"verification_success"} default={"You have been verified with success, you will be redirected within few seconds to the main page."}></I18N>
+            </p>
+        </div>
+    }
+}
+
+#[function_component(VerificationFailed)]
+pub fn verification_failed() -> Html {
+    let translation = &yew::use_context::<Rc<ClientContext>>().unwrap().translation;
+    html! {
+        <div class="flex flex-col justify-evenly items-center content-evenly h-full  text-center text-slate-600 dark:text-gray-200 dark:bg-zinc-800">
+            <p class="text-2xl sm:text-4xl lg:text-8xl w-4/5 fade-out">{"( ˘︹˘ )"}</p>
+
+            <div class="text-xl sm:text-2xl lg:text-4xl w-4/5">
+                <p><I18N {translation} label={"verification_failed"} default={"It seeems like the verification failed or the link you are using has already been used."}></I18N></p>
+                <p class="hover:underline">
+                    <Link<Route> to={Route::Contact}>
+                        <I18N {translation} label={"reach_an_admin"} default={"If needed reach an admin by clicking on this."}></I18N>
+                    </Link<Route>>
+                </p>
+            </div>
         </div>
     }
 }

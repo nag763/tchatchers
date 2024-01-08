@@ -61,3 +61,12 @@ pub async fn get_async_pool() -> Result<Pool<RedisConnectionManager>, redis::Red
         bb8_redis::RedisConnectionManager::new(format!("redis://{redis_host}:{redis_port}/2"))?;
     bb8::Pool::builder().max_size(15).build(client).await
 }
+
+#[cfg(any(feature = "back", feature = "async", feature = "cli"))]
+pub async fn get_token_pool() -> Result<Pool<RedisConnectionManager>, redis::RedisError> {
+    let redis_host = std::env::var("REDIS_HOST").expect("No redis host defined in .env");
+    let redis_port = std::env::var("REDIS_PORT").expect("No redis port defined in .env");
+    let client =
+        bb8_redis::RedisConnectionManager::new(format!("redis://{redis_host}:{redis_port}/3"))?;
+    bb8::Pool::builder().max_size(15).build(client).await
+}
