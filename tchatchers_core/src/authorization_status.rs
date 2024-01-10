@@ -40,19 +40,16 @@ pub enum AuthorizationStatus {
 
 impl AuthorizationStatus {
     pub fn is_authorized(&self) -> bool {
-        match self {
+        matches!(
+            self,
             AuthorizationStatus::Verified
-            | AuthorizationStatus::AuthorizedByAdmin
-            | AuthorizationStatus::UnverifiedAuthorized => true,
-            _ => false,
-        }
+                | AuthorizationStatus::AuthorizedByAdmin
+                | AuthorizationStatus::UnverifiedAuthorized
+        )
     }
 
     pub fn is_deactivated(&self) -> bool {
-        match self {
-            AuthorizationStatus::Deactivated => true,
-            _ => false,
-        }
+        matches!(self, AuthorizationStatus::Deactivated)
     }
 
     /// Returns an iterator over all the variants of the Profile enum.

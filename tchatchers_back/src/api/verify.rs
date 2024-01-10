@@ -26,5 +26,5 @@ pub async fn verify(
         }
     };
     verification_token.consume(&mut token_pool).await?;
-    return Ok(StatusCode::OK);
+    Ok(StatusCode::OK)
 }
