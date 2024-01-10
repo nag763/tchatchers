@@ -1,3 +1,15 @@
+- &contact:
+  id: 5
+  href: /contact
+  label: contact_menu
+  default_translation: Contact
+  visibility: []
+- &gdpr_and_privacy_notice:
+  id: 5
+  href: /gdpr
+  label: gdpr_menu
+  default_translation: GDPR and Privacy Notice
+  visibility: []
 - &sign_up:
   id: 4
   href: /signin

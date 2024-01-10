@@ -41,6 +41,8 @@ pub enum Route {
     VerificationSucceeded,
     #[at("/contact")]
     Contact,
+    #[at("/gdpr")]
+    GDPR,
 }
 
 /// Function used to switch the main component's view.
@@ -56,6 +58,7 @@ pub fn switch(route: Route) -> Html {
         Route::VerificationFailed => html! { <VerificationFailed/> },
         Route::VerificationSucceeded => html! {<VerificationSucceeded />},
         Route::Contact => todo!(),
+        Route::GDPR => todo!(),
         Route::Verify { token } => {
             html! {         <Suspense fallback={html!{<Loading/>}}><Verify {token} /></Suspense> }
         }
