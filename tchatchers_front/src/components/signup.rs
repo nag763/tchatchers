@@ -194,7 +194,7 @@ impl Component for SignUp {
             <FormInput label={"name_field"} {translation} default={"Name"} minlength="3" maxlength="16" attr_ref={&self.name} required=true />
             <FormInput label={"password_field"} {translation} default={"Password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password} required=true />
             <FormInput label={"confirm_password"} {translation} default={"Confirm your password"} input_type="password" minlength="8" maxlength="128" attr_ref={&self.password_confirmation} required=true />
-            <FormInput label={"your_email"} {translation} default={"Your email"} input_type="email" attr_ref={&self.user_email} required=false />
+            <FormInput tooltip_label_default={("email_not_required".to_string(), "It is not required to have an email to access the application. However, your account may be deleted within a shorter scope of time and without you being made aware.".to_string())} label={"your_email"} {translation} default={"Your email"} input_type="email" attr_ref={&self.user_email} required=false />
 
             <FormFreeSection>
                 if self.wait_for_api {

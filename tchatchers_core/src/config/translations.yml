@@ -80,6 +80,7 @@ translations:
       not_valid_anymore: The resource you are attempting to reach is not valid anymore.
       verification_failed: It seeems like the verification failed or the link you are using has already been used.
       verification_success: You have been verified with success, you will be redirected within few seconds to the main page.
+      email_not_required: It is not required to have an email to access the application. However, your account may be deleted within a shorter scope of time and without you being made aware. 
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR

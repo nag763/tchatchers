@@ -188,17 +188,32 @@ pub struct FormInputProperties {
     pub value: AttrValue,
     #[prop_or_default]
     pub autofocus: bool,
+    #[prop_or_default]
+    pub tooltip_label_default: Option<(String, String)>,
 }
 
 #[function_component(FormInput)]
 pub fn form_input(props: &FormInputProperties) -> Html {
     let translation = &props.translation;
+    let help = if let Some((tooltip_label, tooltip_default)) = &props.tooltip_label_default {
+        Some(translation.get_or_default(tooltip_label, tooltip_default))
+    } else {
+        None
+    };
     html! {
-        <div class="md:flex md:items-center mb-6">
-            <div class="md:w-1/3">
-                <label class="common-form-label">
+        <div title={help} class="md:flex md:items-center mb-6">
+            <div  class={classes!("md:w-1/3", props.tooltip_label_default.is_some().then_some("flex md:flex-row-reverse"))}>
+
+            <label class="common-form-label">
                 <I18N label={&props.label} {translation} default={&props.default}/>
             </label>
+            if props.tooltip_label_default.is_some() {
+                <svg width="28" height="28" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="common-form-label">
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9 9C9 5.49997 14.5 5.5 14.5 9C14.5 11.5 12 10.9999 12 13.9999" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 18.01L12.01 17.9989" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            }
             </div>
                 <div class="md:w-2/3">
                 <input autofocus={props.autofocus} class="common-input" type={&props.input_type} required={props.required} minlength={&props.minlength} maxlength={&props.maxlength} ref={&props.attr_ref} disabled={props.disabled} value={&props.value} />

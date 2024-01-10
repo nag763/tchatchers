@@ -1,4 +1,4 @@
-use yew::{function_component, html, suspense::use_future, AttrValue, HtmlResult, Properties};
+use yew::{function_component, suspense::use_future, AttrValue, Html, HtmlResult, Properties};
 
 use crate::{router::Route, utils::requester::Requester};
 
@@ -20,5 +20,5 @@ pub fn verify(props: &VerifyProperties) -> HtmlResult {
         Route::VerificationFailed
     };
     navigator.replace(&route);
-    Ok(html! { <></> })
+    Ok(Html::default())
 }
