@@ -7,10 +7,10 @@ edition = "2021"
 gloo-console = "0.3.0"
 gloo-net = "0.5.0"
 gloo-timers = "0.3.0"
-serde = { version = "1.0.194", features = ["derive"] }
-wasm-bindgen = "0.2.89"
-wasm-bindgen-futures = "0.4.39"
-web-sys = { version = "0.3.66", features = ["HtmlDocument", "FileReader", "Event", "Navigator", "FormData"] }
+serde = { version = "1.0.195", features = ["derive"] }
+wasm-bindgen = "0.2.90"
+wasm-bindgen-futures = "0.4.40"
+web-sys = { version = "0.3.67", features = ["HtmlDocument", "FileReader", "Event", "Navigator", "FormData"] }
 yew = { version = "0.21.0", features = ["csr"] }
 yew-agent = "0.2.0"
 yew-router = "0.18.0"
@@ -20,8 +20,8 @@ toast_service = { path = "services/toast_service" }
 rmenu_service = { path = "services/rmenu_service" }
 chat_service = { path = "services/chat_service" }
 chrono = { version = "0.4.31", features = ["serde"] }
-js-sys = "0.3.66"
-uuid = { version = "1.6.1", features = ["v4"] }
+js-sys = "0.3.67"
+uuid = { version = "1.7.0", features = ["v4"] }
 validator = "0.16.1"
 async-recursion = "1.0.5"
 postcard = { version = "1.0.8", features = ["use-std"], default-features = false }

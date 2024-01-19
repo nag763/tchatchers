@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 tchatchers_core = { path = "../tchatchers_core", features = ["cli"] }
-clap = { version = "4.4.13", features = ["derive", "std"]}
+clap = { version = "4.4.18", features = ["derive", "std"]}
 dialoguer = { features = ["password"], default-features = false, version = "0.11.0" }
 sqlx = { version = "0.7", features = ["macros"], default-features = false }
 derive_more = { features = ["from", "constructor", "error"], default-features = false, version = "0.99.17" }
@@ -16,8 +16,8 @@ dotenv = "0.15.0"
 which = "5.0.0"
 validator = "0.16.1"
 log = "0.4.20"
-env_logger = { version = "0.10.1" }
+env_logger = { version = "0.10.2" }
 askama = { default-features = false, version = "0.12.1" }
-clap-verbosity-flag = "2.1.1"
+clap-verbosity-flag = "2.1.2"
 redis = "0.24.0"
 bb8 = "0.8.1"
