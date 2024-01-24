@@ -1,5 +1,5 @@
 - &contact:
-  id: 5
+  id: 6
   href: /contact
   label: contact_menu
   default_translation: Contact

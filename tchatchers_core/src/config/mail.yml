@@ -1,5 +1,6 @@
 - &welcome:
   from: MAIL_NOREPLY_SENDER
-  subject: Welcome ! There are some steps remaining.
+  subject: welcome_mail_subject
+  subject_default: Welcome ! There are some steps remaining.
   body_plain: Welcome ! Your account is ready to be activated.
   associated_mail: WelcomeMail

@@ -20,6 +20,7 @@ use tchatchers_core::authorization_status::AuthorizationStatus;
 use tchatchers_core::authorization_token::AuthorizationToken;
 use tchatchers_core::functional_token::FunctionalToken;
 use tchatchers_core::functional_token::FunctionalTokenType;
+use tchatchers_core::locale::Locale;
 use tchatchers_core::mail::template::WelcomeMailContent;
 use tchatchers_core::mail::Mail;
 use tchatchers_core::refresh_token::RefreshToken;
@@ -68,11 +69,15 @@ pub async fn create_user(
                     token: token.encode(&state.jwt_secret)?,
                     mail_support_sender: state.mail_support_sender,
                     mail_gdpr_sender: state.mail_gdpr_sender,
+                    translation_map: Locale::find_by_id(new_user.locale)
+                        .unwrap_or_default()
+                        .translation_map,
                 },
             ) {
-                mail.send()
-                    .await
-                    .map_err(|_e| ApiGenericResponse::MailingError)?;
+                mail.send().await.map_err(|e| {
+                    eprintln!("E : {e}");
+                    ApiGenericResponse::MailingError
+                })?;
             }
             {
                 let mut token_pool = state.token_pool.get().await?;

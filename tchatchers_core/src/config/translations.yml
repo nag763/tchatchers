@@ -83,6 +83,13 @@ translations:
       email_not_required: It is not required to have an email to access the application. However, your account may be deleted within a shorter scope of time and without you being made aware. 
       contact_menu: Contact
       gdpr_menu: GDPR and Privacy Notice
+      welcome_mail_welcome: Welcome on tchatchers
+      welcome_mail_intro: Thank you for creating an account with tchatchers ! We're excited to have you on board. Before you can start chatting, a few steps remain to activate your account.
+      welcome_mail_complete_process: To complete the activation process, click the button below
+      welcome_mail_activate_account: Activate my account
+      welcome_mail_abort_process: If you no longer wish to activate your account or if you believe you received this email in error, please contact us at 
+      welcome_mail_warning_inactivity: If your account remains inactive for 30 days, it will be automatically deactivated for security purposes.
+      welcome_mail_privacy_contact: If you have any questions regarding your privacy, feel free to reach out to us at 
   - id: 2
     long_name: Français (FR)
     short_name: fr-FR

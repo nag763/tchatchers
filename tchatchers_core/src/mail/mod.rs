@@ -25,6 +25,7 @@ pub enum PossibleConfiguredMail {
 pub struct ConfiguredMail {
     from: String,
     subject: String,
+    subject_default: String,
     body_plain: String,
     associated_mail: PossibleConfiguredMail,
 }
@@ -49,7 +50,10 @@ where
                     .unwrap(),
             )
             .to(value.to.parse().unwrap())
-            .subject(value.configured_mail.subject)
+            .subject(value.content_html.translate_or_default(
+                &value.configured_mail.subject,
+                &value.configured_mail.subject_default,
+            ))
             .multipart(
                 MultiPart::alternative()
                     .singlepart(

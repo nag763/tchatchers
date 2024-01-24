@@ -67,6 +67,12 @@ pub struct Locale {
     pub translation_map: TranslationMap,
 }
 
+impl Default for Locale {
+    fn default() -> Self {
+        Self::get_default_locale()
+    }
+}
+
 impl Locale {
     /// Initializes the HashMap of locales.
     fn init_cell() -> HashMap<i32, Locale> {

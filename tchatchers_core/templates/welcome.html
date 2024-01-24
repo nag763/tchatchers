@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Welcome to Tchatchers</title>
+    <title>{{translation_map.get_or_default("welcome_mail_welcome", "Welcome on tchatchers")}} </title>
     <style>
 {% include "mail_styles.css" %}
     </style>
@@ -10,22 +10,22 @@
 
 <body>
     <div class="email-container">
-        <h1 class="email-title">Welcome to tchatchers {{name}} !</h1>
+        <h1 class="email-title">{{translation_map.get_or_default("welcome_mail_welcome", "Welcome on tchatchers")}} {{name}} !</h1>
         <p class="email-content">
-            Thank you for creating an account with tchatchers ! We're excited to have you on board. Before you can start chatting, a few steps remain to activate your account.
+            {{translation_map.get_or_default("welcome_mail_intro", "Thank you for creating an account with tchatchers ! We're excited to have you on board. Before you can start chatting, a few steps remain to activate your account.")}}
         </p>
         <p class="email-content">
-            To complete the activation process, click the button below:
+            {{translation_map.get_or_default("welcome_mail_complete_process", "To complete the activation process, click the button below")}}
         </p>
         <div class="button-container">
             <input type="hidden" name="token" value="{{token}}"></input>
-            <a class="email-button" href="{{app_uri}}/verify/{{token}}">Activate my account</a>
+            <a class="email-button" href="{{app_uri}}/verify/{{token}}">{{translation_map.get_or_default("welcome_mail_activate_account", "Activate my account")}}</a>
         </div>
         <!-- Additional Section -->
         <div class="additional-section">
-            <p>If you no longer wish to activate your account or if you believe you received this email in error, please contact us at <a href="mailto:{{mail_support_sender}}">support@tchatche.xyz</a>.</p>
-            <p>If your account remains inactive for 30 days, it will be automatically deactivated for security purposes.</p>
-            <p>If you have any questions regarding your privacy, feel free to reach out to us at <a href="mailto:{{mail_gdpr_sender}}">{{mail_gdpr_sender}}</a>.</p>
+            <p>{{translation_map.get_or_default("welcome_mail_abort_process", "If you no longer wish to activate your account or if you believe you received this email in error, please contact us at ")}}<a href="mailto:{{mail_support_sender}}">{{mail_support_sender}}</a>.</p>
+            <p>{{translation_map.get_or_default("welcome_mail_warning_inactivity", "If your account remains inactive for 30 days, it will be automatically deactivated for security purposes.")}}</p>
+            <p>{{translation_map.get_or_default("welcome_mail_privacy_contact", "If you have any questions regarding your privacy, feel free to reach out to us at")}} <a href="mailto:{{mail_gdpr_sender}}">{{mail_gdpr_sender}}</a>.</p>
         </div>
     </div>
 </body>
