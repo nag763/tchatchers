@@ -22,31 +22,33 @@ FROM rust:1.76.0 as src_builder
 
 WORKDIR /usr/tchatchers/front
 
-COPY --from=asset_builder /home/usr/front /usr/tchatchers/front
+COPY --from=asset_builder /home/usr/front /usr/tchatchers/front/tchatchers_front
 
-COPY ./tchatchers_core ../tchatchers_core
+COPY ./tchatchers_core ./tchatchers_core
 
-COPY ./tchatchers_front/services ./services
+COPY ./tchatchers_front/services ./tchatchers_front/services
 
-COPY ./tchatchers_front/favicon.ico ./favicon.ico
+COPY ./tchatchers_front/favicon.ico ./tchatchers_front/favicon.ico
 
-COPY ./tchatchers_front/assets/no_pfp.webp ./assets/no_pfp.webp
+COPY ./tchatchers_front/assets/no_pfp.webp ./tchatchers_front/assets/no_pfp.webp
+
+RUN printf "\n[profile.release]\nlto = true\ncodegen-units = 1\nstrip = true\npanic = \"abort\"\nopt-level = \"z\"\n" >> tchatchers_front/Cargo.toml
 
 RUN rustup target add wasm32-unknown-unknown
 
 RUN cargo install trunk
 
-RUN trunk build --release
+RUN trunk build --release tchatchers_front/index.html
 
 FROM ubuntu as compressor
 
 WORKDIR /usr/tchatchers/dist
 
-COPY --from=src_builder /usr/tchatchers/front/dist /usr/tchatchers/dist
+COPY --from=src_builder /usr/tchatchers/front/tchatchers_front/dist /usr/tchatchers/dist
 
 RUN gzip -r ./*
 
-FROM nginx:alpine
+FROM nginx:alpine-slim
 
 WORKDIR /usr/share/nginx/html
 

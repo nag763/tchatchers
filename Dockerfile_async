@@ -4,9 +4,11 @@ WORKDIR /home/usr/async/
 
 COPY ./ ./
 
-RUN apk add libressl-dev musl-dev
+RUN apk add libressl-dev musl-dev upx
 
-RUN cargo install --path ./tchatchers_async/ --profile release-opt
+RUN cargo install --path ./tchatchers_async/
+
+RUN upx --best --lzma /usr/local/cargo/bin/tchatchers_async
 
 FROM alpine:latest
 

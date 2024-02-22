@@ -4,9 +4,11 @@ WORKDIR /home/usr/tct/
 
 COPY ./  ./
 
-RUN apk add libressl-dev musl-dev
+RUN apk add libressl-dev musl-dev upx
 
-RUN cargo install --path ./tchatchers_cli_tools/ --profile release-opt
+RUN cargo install --path ./tchatchers_cli_tools/ 
+
+RUN upx --best --lzma /usr/local/cargo/bin/tct
 
 FROM alpine:latest
 

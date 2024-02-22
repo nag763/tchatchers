@@ -4,9 +4,11 @@ WORKDIR /home/usr/back/
 
 COPY ./ ./
 
-RUN apk add libressl-dev musl-dev
+RUN apk add libressl-dev musl-dev upx
 
-RUN cargo install --path ./tchatchers_back --profile release-opt
+RUN cargo install --path ./tchatchers_back
+
+RUN upx --best --lzma /usr/local/cargo/bin/tchatchers_back
 
 FROM alpine:latest
 
