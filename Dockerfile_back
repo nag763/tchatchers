@@ -6,7 +6,7 @@ COPY ./ ./
 
 RUN apk add libressl-dev musl-dev
 
-RUN cargo install --path ./tchatchers_back
+RUN cargo install --path ./tchatchers_back --profile release-opt
 
 FROM alpine:latest
 
