@@ -21,7 +21,6 @@ sqlx = { version = "0.7", optional = true ,  features = ["runtime-async-std-nati
 uuid = { version = "1.7.0", features = ["v4", "serde"], default-features = false }
 validator = { version = "0.16.1", features = ["derive"], default-features = false }
 axum = { version = "0.7.4", features = ["multipart"], optional = true , default-features = false }
-regex = { default-features = false, version = "1.10.3" }
 lazy_static = "1.4.0"
 derive_more = { features = ["display"], default-features = false, version = "0.99.17" }
 log = "0.4.20"

@@ -3436,7 +3436,6 @@ dependencies = [
  "postcard",
  "rand",
  "redis",
- "regex",
  "rust-argon2",
  "serde",
  "serde_json",

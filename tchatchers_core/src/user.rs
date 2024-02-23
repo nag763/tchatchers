@@ -8,14 +8,13 @@
 
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use crate::async_message::{AsyncOperationPGType, AsyncQueue};
-use crate::common::RE_LIMITED_CHARS;
 use crate::profile::Profile;
+use crate::common::limited_chars_checker;
 use chrono::DateTime;
 use chrono::Utc;
 use derive_more::Display;
 #[cfg(any(feature = "back", feature = "cli"))]
 use rand::Rng;
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use sqlx::postgres::PgQueryResult;
@@ -25,12 +24,6 @@ use sqlx::FromRow;
 use sqlx::PgPool;
 use validator::Validate;
 use validator::ValidationError;
-
-lazy_static! {
-    static ref RE_ONE_LOWERCASE_CHAR: Regex = Regex::new(r"[a-z]+").unwrap();
-    static ref RE_ONE_NUMBER: Regex = Regex::new(r"[0-9]+").unwrap();
-    static ref RE_ONE_UPPERCASE_CHAR: Regex = Regex::new(r"[A-Z]+").unwrap();
-}
 
 /// The in base structure, which should never be shared between components and
 /// apps.
@@ -414,14 +407,28 @@ impl PartialUser {
 }
 
 fn password_strengh(password: &str) -> Result<(), ValidationError> {
-    if !RE_ONE_LOWERCASE_CHAR.is_match(password)
-        || !RE_ONE_UPPERCASE_CHAR.is_match(password)
-        || !RE_ONE_NUMBER.is_match(password)
-    {
-        Err(ValidationError::new("security_constraints_not_matched"))
-    } else {
-        Ok(())
+    let (mut lowercase_letter_flag, mut uppercase_letter_flag, mut number_letter_flag) = (false, false, false);
+    for c in password.chars() {
+        let flag_changed = 'flag_changed: {
+            if !lowercase_letter_flag {
+                lowercase_letter_flag = c.is_ascii_lowercase();
+                break 'flag_changed true;
+            }
+            if !uppercase_letter_flag {
+                uppercase_letter_flag = c.is_ascii_uppercase();
+                break 'flag_changed true;
+            }
+            if !number_letter_flag {
+                number_letter_flag = matches!(c, '1'..='9');
+                break 'flag_changed true;
+            }
+            false
+        };
+        if flag_changed && lowercase_letter_flag && uppercase_letter_flag && number_letter_flag {
+            return Ok(())
+        }
     }
+    Err(ValidationError::new("security_constraints_not_matched"))
 }
 
 /// Structure used only to create new DB entities.
@@ -431,7 +438,10 @@ pub struct InsertableUser {
     /// The user log in.
     #[validate(
         length(min = 3, max = 32),
-        regex(path = "RE_LIMITED_CHARS", code = "limited_chars")
+        custom(
+            function = "limited_chars_checker",
+            code = "limited_chars"
+        )
     )]
     pub login: String,
     /// The user password, should be raw prior being insert.
@@ -446,7 +456,10 @@ pub struct InsertableUser {
     /// The name of the user.
     #[validate(
         length(min = 3, max = 16),
-        regex(path = "RE_LIMITED_CHARS", code = "limited_chars")
+        custom(
+            function = "limited_chars_checker",
+            code = "limited_chars"
+        )
     )]
     pub name: String,
     /// The user's locale
@@ -506,7 +519,10 @@ pub struct UpdatableUser {
     pub id: i32,
     #[validate(
         length(min = 3, max = 16),
-        regex(path = "RE_LIMITED_CHARS", code = "limited_chars")
+        custom(
+            function = "limited_chars_checker",
+            code = "limited_chars"
+        )
     )]
     pub name: String,
     pub locale_id: i32,
