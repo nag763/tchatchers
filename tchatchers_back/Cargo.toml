@@ -24,4 +24,3 @@ bb8-redis = "0.14.0"
 postcard = { version = "1.0.8", default-features = false, features = ["use-std"] }
 mime = "0.3.17"
 anyhow = "1.0.79"
-serde_json = "1.0.113"
