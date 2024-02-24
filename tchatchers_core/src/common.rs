@@ -10,7 +10,7 @@ lazy_static! {
 
 pub(crate) fn limited_chars_checker(room_name: &str) -> Result<(), validator::ValidationError> {
     for c in room_name.chars() {
-        if !matches!(c.to_ascii_lowercase(), 'a'..='z' | '1'..='9') {
+        if !matches!(c.to_ascii_lowercase(), 'a'..='z' | '1'..='9' | '_') {
             return Err(validator::ValidationError::new("limited_chars"));
         }
     }
