@@ -296,12 +296,6 @@ impl From<postcard::Error> for ApiGenericResponse {
     }
 }
 
-impl From<serde_json::Error> for ApiGenericResponse {
-    fn from(value: serde_json::Error) -> Self {
-        Self::SerializationError(value.to_string())
-    }
-}
-
 impl From<ValidationErrors> for ApiGenericResponse {
     fn from(value: ValidationErrors) -> Self {
         let mut validation_errors: Vec<ValidationErrorMessage> = vec![];
