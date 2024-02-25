@@ -102,7 +102,7 @@ impl ApiResponse {
 #[cfg(feature = "back")]
 impl IntoResponse for ApiResponse {
     fn into_response(self) -> Response {
-        let payload = postcard::to_stdvec(&self).unwrap();
+        let payload = bincode::serialize(&self).unwrap();
         let code: StatusCode = self.kind.into();
         (code, payload).into_response()
     }
@@ -290,8 +290,8 @@ impl From<redis::RedisError> for ApiGenericResponse {
     }
 }
 
-impl From<postcard::Error> for ApiGenericResponse {
-    fn from(value: postcard::Error) -> Self {
+impl From<bincode::Error> for ApiGenericResponse {
+    fn from(value: bincode::Error) -> Self {
         Self::SerializationError(value.to_string())
     }
 }

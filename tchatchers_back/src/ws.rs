@@ -99,19 +99,18 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
     let mut recv_task: tokio::task::JoinHandle<Result<(), ApiGenericResponse>> =
         tokio::spawn(async move {
             while let Some(Ok(Message::Binary(text))) = receiver.next().await {
-                if let Ok(msg) = postcard::from_bytes(&text) {
+                if let Ok(msg) = bincode::deserialize(&text) {
                     match msg {
                         WsMessage::Close => break,
                         WsMessage::Ping => {
-                            let _ = tx.send(postcard::to_stdvec(&WsMessage::Pong)?);
+                            let _ = tx.send(bincode::serialize(&WsMessage::Pong)?);
                         }
                         WsMessage::Pong | WsMessage::ClientKeepAlive => continue,
                         WsMessage::Send(mut ws_message) => {
                             let redis_pool = state.async_pool.clone();
                             ws_message.reception_status = WsReceptionStatus::Sent;
-                            let _ = tx.send(postcard::to_stdvec(&WsMessage::Receive(
-                                ws_message.clone(),
-                            ))?);
+                            let _ = tx
+                                .send(bincode::serialize(&WsMessage::Receive(ws_message.clone()))?);
                             tokio::spawn(async move {
                                 let (pool1, pool2) =
                                     (&mut redis_pool.get().await?, &mut redis_pool.get().await?);
@@ -125,13 +124,13 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                         WsMessage::RetrieveMessages(session_id) => {
                             let messages: Vec<WsMessageContent> =
                                 WsMessageContent::query_all_for_room(&room, &state.pg_pool).await?;
-                            let _ = tx.send(postcard::to_stdvec(&WsMessage::MessagesRetrieved {
+                            let _ = tx.send(bincode::serialize(&WsMessage::MessagesRetrieved {
                                 messages,
                                 session_id,
                             })?);
                         }
                         WsMessage::Seen(messages) => {
-                            let _ = tx.send(postcard::to_stdvec(&WsMessage::MessagesSeen(
+                            let _ = tx.send(bincode::serialize(&WsMessage::MessagesSeen(
                                 messages.clone(),
                             ))?);
                             let redis_pool = state.async_pool.clone();

@@ -84,7 +84,7 @@ impl Component for SignIn {
                             session_only: !remember_me.checked(),
                         };
                         let mut req = Requester::post("/api/authenticate");
-                        req.postcard_body(payload);
+                        req.bincode_body(payload);
                         let link = ctx.link().clone();
                         let bearer = ctx.props().client_context.bearer.clone();
                         wasm_bindgen_futures::spawn_local(async move {
@@ -96,7 +96,7 @@ impl Component for SignIn {
                                 let resp = req.bearer(bearer).send().await;
                                 if resp.ok() {
                                     let user: PartialUser =
-                                        postcard::from_bytes(&resp.binary().await.unwrap())
+                                        bincode::deserialize(&resp.binary().await.unwrap())
                                             .unwrap();
                                     link.send_message(Msg::LoggedIn(user));
                                 } else {
@@ -106,13 +106,13 @@ impl Component for SignIn {
                                         ))
                                     }
                                     link.send_message(Msg::ErrorFromServer(
-                                        postcard::from_bytes(&resp.binary().await.unwrap())
+                                        bincode::deserialize(&resp.binary().await.unwrap())
                                             .unwrap(),
                                     ));
                                 }
                             } else {
                                 link.send_message(Msg::ErrorFromServer(
-                                    postcard::from_bytes(&resp.binary().await.unwrap()).unwrap(),
+                                    bincode::deserialize(&resp.binary().await.unwrap()).unwrap(),
                                 ));
                             }
                         });

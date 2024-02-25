@@ -596,11 +596,11 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 name = "chat_service"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "futures",
  "gloo-console 0.3.0",
  "gloo-net 0.5.0",
  "js-sys",
- "postcard",
  "tchatchers_core",
  "wasm-bindgen-futures",
  "web-sys",
@@ -671,12 +671,6 @@ name = "clap_lex"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "98cc8fbded0c607b7ba9dd60cd98df59af97e84d24e49c8557331cfc26d301ce"
-
-[[package]]
-name = "cobs"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67ba02a97a2bd10f4b59b25c7973101c79642302776489e030cd13cdab09ed15"
 
 [[package]]
 name = "colorchoice"
@@ -918,12 +912,6 @@ checksum = "11157ac094ffbdde99aa67b23417ebdd801842852b500e395a45a9c0aac03e4a"
 dependencies = [
  "serde",
 ]
-
-[[package]]
-name = "embedded-io"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef1a6892d9eef45c8fa6b9e0086428a2cca8491aca8f787c534a3d6d0bcb3ced"
 
 [[package]]
 name = "encode_unicode"
@@ -2532,17 +2520,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "postcard"
-version = "1.0.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a55c51ee6c0db07e68448e336cf8ea4131a620edefebf9893e759b2d793420f8"
-dependencies = [
- "cobs",
- "embedded-io",
- "serde",
-]
-
-[[package]]
 name = "powerfmt"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3397,10 +3374,10 @@ dependencies = [
  "axum",
  "axum-extra",
  "bb8-redis",
+ "bincode",
  "dotenv",
  "futures-util",
  "mime",
- "postcard",
  "serde",
  "sqlx",
  "sqlx-core",
@@ -3421,6 +3398,7 @@ dependencies = [
  "axum",
  "axum-extra",
  "bb8-redis",
+ "bincode",
  "chrono",
  "clap",
  "cookie",
@@ -3429,7 +3407,6 @@ dependencies = [
  "jsonwebtoken",
  "lazy_static",
  "log",
- "postcard",
  "rand",
  "redis",
  "rust-argon2",
@@ -3447,6 +3424,7 @@ name = "tchatchers_front"
 version = "0.1.0"
 dependencies = [
  "async-recursion",
+ "bincode",
  "chat_service",
  "chrono",
  "derive_more",
@@ -3455,7 +3433,6 @@ dependencies = [
  "gloo-timers 0.3.0",
  "js-sys",
  "modal_service",
- "postcard",
  "rmenu_service",
  "serde",
  "tchatchers_core",

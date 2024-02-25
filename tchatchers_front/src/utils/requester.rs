@@ -18,7 +18,7 @@ pub struct Requester {
     endpoint: Option<String>,
     method: Option<Method>,
     payload: Option<JsValue>,
-    is_postcard: bool,
+    is_bincode: bool,
     is_multipart: bool,
     bearer_value: Option<String>,
     bearer_setter: Option<UseStateSetter<Option<String>>>,
@@ -72,11 +72,11 @@ impl Requester {
         self
     }
 
-    pub fn postcard_body<U: serde::Serialize>(&mut self, body: U) -> &mut Self {
-        let bytes = postcard::to_stdvec(&body).unwrap();
+    pub fn bincode_body<U: serde::Serialize>(&mut self, body: U) -> &mut Self {
+        let bytes = bincode::serialize(&body).unwrap();
         let array = Uint8Array::from(&bytes[..]);
         self.payload = Some(array.into());
-        self.is_postcard = true;
+        self.is_bincode = true;
         self
     }
 
@@ -110,8 +110,8 @@ impl Requester {
             if let Some(bearer) = &self.bearer_value {
                 builder = builder.header("Authorization", &format!("Bearer {bearer}"));
             }
-            if self.is_postcard {
-                builder = builder.header("Content-Type", "application/postcard");
+            if self.is_bincode {
+                builder = builder.header("Content-Type", "application/bincode");
             }
             let req: Request = if let Some(payload) = &self.payload {
                 builder.body(payload).unwrap()

@@ -27,7 +27,7 @@ fn contextual_app() -> HtmlResult {
             let resp = req.bearer_setter(bearer_setter).send().await;
             if resp.ok() {
                 let user: PartialUser =
-                    postcard::from_bytes(&resp.binary().await.unwrap()).unwrap();
+                    bincode::deserialize(&resp.binary().await.unwrap()).unwrap();
                 Some(user)
             } else {
                 None
