@@ -3402,6 +3402,7 @@ dependencies = [
  "mime",
  "postcard",
  "serde",
+ "serde_json",
  "sqlx",
  "sqlx-core",
  "tchatchers_core",

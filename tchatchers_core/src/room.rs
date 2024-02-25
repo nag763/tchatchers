@@ -6,7 +6,7 @@
 //! They are persisted within redis as "room_name=redis_key", so that any user
 //! that reconnects retieve the messages sent before he joined.
 
-use validator::{Validate};
+use validator::Validate;
 use crate::common::limited_chars_checker;
 
 #[derive(Debug, Validate)]
