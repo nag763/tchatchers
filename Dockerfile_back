@@ -1,29 +1,29 @@
-FROM rust:1.76.0-alpine as builder
+FROM rust:1.76.0 as builder
 
 WORKDIR /home/usr/back/
 
 COPY ./ ./
 
-RUN apk add libressl-dev musl-dev upx
+#RUN apt install upx
 
 RUN cargo install --path ./tchatchers_back
 
-RUN upx --best --lzma /usr/local/cargo/bin/tchatchers_back
+#RUN upx --best --lzma /usr/local/cargo/bin/tchatchers_back
 
-FROM alpine:latest
+FROM ubuntu:latest
 
 WORKDIR /home/usr/back/
 
 COPY --from=builder /usr/local/cargo/bin/tchatchers_back /home/usr/back/tchatchers_back
 
-RUN adduser -D runner && chown -R runner ./
+#RUN adduser -D runner && chown -R runner ./
 
 RUN mkdir static
 
-RUN chown -R runner static
+#RUN chown -R runner static
 
 RUN chmod 111 /home/usr/back/tchatchers_back
 
-USER runner
+#USER runner
 
 CMD RUST_LOG=tower_http=info ./tchatchers_back

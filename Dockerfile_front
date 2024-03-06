@@ -56,4 +56,6 @@ COPY --from=compressor /usr/tchatchers/dist /usr/share/nginx/html
 
 COPY .git/refs/heads/main /usr/share/nginx/html/.rev
 
+COPY ./nginx.conf /etc/nginx/nginx.conf
+
 EXPOSE 80
