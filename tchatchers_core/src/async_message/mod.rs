@@ -93,7 +93,7 @@ impl AsyncQueue {
     pub async fn delete(
         &self,
         list: Vec<String>,
-        conn: &mut redis::aio::Connection,
+        conn: &mut redis::aio::MultiplexedConnection,
     ) -> Result<usize, redis::RedisError> {
         debug!("[{self}] IDs to delete: {list:#?}");
         conn.xdel(self.to_string(), &list).await
@@ -113,7 +113,7 @@ impl AsyncQueue {
     /// The number of events cleared from the queue.
     pub async fn clear_with_timeout(
         &self,
-        conn: &mut redis::aio::Connection,
+        conn: &mut redis::aio::MultiplexedConnection,
     ) -> Result<usize, redis::RedisError> {
         let events = self.read_events_with_timeout(conn).await?;
         if let Some(events) = events {
@@ -139,7 +139,7 @@ impl AsyncQueue {
     /// A vector of `AsyncPayload` instances representing the events read from the queue, or `None` if no events are found.
     pub async fn read_events_with_timeout(
         &self,
-        conn: &mut redis::aio::Connection,
+        conn: &mut redis::aio::MultiplexedConnection,
     ) -> Result<Option<Vec<AsyncPayload>>, redis::RedisError> {
         AsyncPayload::read_events(&self.to_string(), &NOT_BLOCKING_OPTIONS, conn).await
     }
@@ -158,7 +158,7 @@ impl AsyncQueue {
     /// A vector of `AsyncPayload` instances representing the events read from the queue, or `None` if no events are found.
     pub async fn read_events(
         &self,
-        conn: &mut redis::aio::Connection,
+        conn: &mut redis::aio::MultiplexedConnection,
     ) -> Result<Option<Vec<AsyncPayload>>, redis::RedisError> {
         AsyncPayload::read_events(&self.to_string(), &DEFAULT_EVENT_OPTIONS, conn).await
     }
@@ -204,7 +204,7 @@ impl AsyncMessage {
     /// # Arguments
     ///
     /// * `conn` - A mutable reference to the Redis connection for queue operations.
-    pub async fn spawn(self, conn: &mut redis::aio::Connection) {
+    pub async fn spawn(self, conn: &mut redis::aio::MultiplexedConnection) {
         let queue_name = self.get_queue().to_string();
         let _id = AsyncPayload::new(&queue_name, self)
             .spawn(queue_name.as_str(), conn)

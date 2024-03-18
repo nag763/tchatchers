@@ -129,7 +129,7 @@ impl AsyncPayload {
     pub(crate) async fn spawn(
         self,
         queue_name: &str,
-        conn: &mut redis::aio::Connection,
+        conn: &mut redis::aio::MultiplexedConnection,
     ) -> Result<String, RedisError> {
         let redis_payload: [(String, Vec<u8>); 2] = self.into();
         let event_id: String = conn.xadd(queue_name, "*", &redis_payload).await?;
@@ -151,7 +151,7 @@ impl AsyncPayload {
     pub(crate) async fn read_events(
         queue_name: &str,
         options: &StreamReadOptions,
-        conn: &mut redis::aio::Connection,
+        conn: &mut redis::aio::MultiplexedConnection,
     ) -> Result<Option<Vec<Self>>, redis::RedisError> {
         let stream_events: Option<StreamReadReply> =
             conn.xread_options(&[queue_name], &["0"], options).await?;

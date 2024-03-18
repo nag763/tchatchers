@@ -27,10 +27,10 @@ log = "0.4.21"
 axum-extra = { version = "0.9", features = ["cookie"], optional = true }
 time = { default-features = false, version = "0.3.34" }
 cookie = { version = "0.18.0", optional = true }
-redis = { version = "0.24.0", optional = true, features = ["streams", "aio", "tokio-comp"], default-features = false }
+redis = { version = "0.25.2", optional = true, features = ["streams", "aio", "tokio-comp"], default-features = false }
 clap = { version = "4.5.3", features = ["derive", "std"], optional = true}
-serde_yaml = "0.9.32"
+serde_yaml = "0.9.33"
 postcard = { version = "1.0.8", features = ["use-std"], default-features = false }
-bb8-redis = { version = "0.14.0", optional = true }
+bb8-redis = { version = "0.15.0", optional = true }
 serde_json = "1.0.114"
 tokio = { version = "1.36.0", features = ["fs"], optional=true }

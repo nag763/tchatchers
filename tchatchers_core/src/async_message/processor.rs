@@ -178,7 +178,7 @@ pub async fn process(
     queue: AsyncQueue,
     messages: Vec<AsyncPayload>,
     pg_pool: &PgPool,
-    redis_conn: &mut redis::aio::Connection,
+    redis_conn: &mut redis::aio::MultiplexedConnection,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let number_of_messages = messages.len();
     let processor = get_processor(queue, &messages, pg_pool);

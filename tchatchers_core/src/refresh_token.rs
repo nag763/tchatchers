@@ -131,7 +131,7 @@ impl RefreshToken {
     /// Returns a boolean indicating whether the Redis command executed successfully.
     pub async fn set_as_head_token(
         &self,
-        con: &mut redis::aio::Connection,
+        con: &mut redis::aio::MultiplexedConnection,
     ) -> Result<bool, redis::RedisError> {
         let mut default_hasher = DefaultHasher::default();
 
@@ -158,7 +158,7 @@ impl RefreshToken {
     /// Returns a boolean indicating whether this token is the head token for its family in Redis.
     pub async fn is_head_token(
         &self,
-        con: &mut redis::aio::Connection,
+        con: &mut redis::aio::MultiplexedConnection,
     ) -> Result<bool, redis::RedisError> {
         let mut default_hasher = DefaultHasher::default();
         self.hash(&mut default_hasher);
@@ -178,7 +178,7 @@ impl RefreshToken {
     /// Returns a boolean indicating whether the Redis command executed successfully.
     pub async fn revoke_family(
         &self,
-        con: &mut redis::aio::Connection,
+        con: &mut redis::aio::MultiplexedConnection,
     ) -> Result<bool, redis::RedisError> {
         // Execute a Redis `DEL` command to delete this token family.
         // Returns a boolean indicating whether the Redis command executed successfully.

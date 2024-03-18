@@ -20,7 +20,7 @@ validator = { version = "0.17.0"}
 serde = { default-features = false, version = "1.0.197" }
 sqlx = {features = ["uuid", "postgres"], version = "0.7" }
 tower = { default-features = false, version = "0.4.13" }
-bb8-redis = "0.14.0"
+bb8-redis = { version = "0.15.0" }
 postcard = { version = "1.0.8", default-features = false, features = ["use-std"] }
 mime = "0.3.17"
 anyhow = "1.0.81"
