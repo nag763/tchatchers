@@ -8,8 +8,8 @@
 
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use crate::async_message::{AsyncOperationPGType, AsyncQueue};
-use crate::profile::Profile;
 use crate::common::limited_chars_checker;
+use crate::profile::Profile;
 use chrono::DateTime;
 use chrono::Utc;
 use derive_more::Display;
@@ -407,7 +407,8 @@ impl PartialUser {
 }
 
 fn password_strengh(password: &str) -> Result<(), ValidationError> {
-    let (mut lowercase_letter_flag, mut uppercase_letter_flag, mut number_letter_flag) = (false, false, false);
+    let (mut lowercase_letter_flag, mut uppercase_letter_flag, mut number_letter_flag) =
+        (false, false, false);
     for c in password.chars() {
         let flag_changed = 'flag_changed: {
             if !lowercase_letter_flag {
@@ -425,7 +426,7 @@ fn password_strengh(password: &str) -> Result<(), ValidationError> {
             false
         };
         if flag_changed && lowercase_letter_flag && uppercase_letter_flag && number_letter_flag {
-            return Ok(())
+            return Ok(());
         }
     }
     Err(ValidationError::new("security_constraints_not_matched"))
@@ -438,10 +439,7 @@ pub struct InsertableUser {
     /// The user log in.
     #[validate(
         length(min = 3, max = 32),
-        custom(
-            function = "limited_chars_checker",
-            code = "limited_chars"
-        )
+        custom(function = "limited_chars_checker", code = "limited_chars")
     )]
     pub login: String,
     /// The user password, should be raw prior being insert.
@@ -456,10 +454,7 @@ pub struct InsertableUser {
     /// The name of the user.
     #[validate(
         length(min = 3, max = 16),
-        custom(
-            function = "limited_chars_checker",
-            code = "limited_chars"
-        )
+        custom(function = "limited_chars_checker", code = "limited_chars")
     )]
     pub name: String,
     /// The user's locale
@@ -519,10 +514,7 @@ pub struct UpdatableUser {
     pub id: i32,
     #[validate(
         length(min = 3, max = 16),
-        custom(
-            function = "limited_chars_checker",
-            code = "limited_chars"
-        )
+        custom(function = "limited_chars_checker", code = "limited_chars")
     )]
     pub name: String,
     pub locale_id: i32,

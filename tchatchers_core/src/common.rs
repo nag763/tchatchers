@@ -2,11 +2,11 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 lazy_static! {
-    pub static ref REFRESH_TOKEN_EXPIRACY_TIME: chrono::Duration = chrono::Duration::weeks(1);
+    pub static ref REFRESH_TOKEN_EXPIRACY_TIME: chrono::Duration =
+        chrono::Duration::try_weeks(1).unwrap();
     pub static ref AUTHORIZATION_TOKEN_EXPIRACY_TIME: chrono::Duration =
-        chrono::Duration::minutes(15);
+        chrono::Duration::try_minutes(15).unwrap();
 }
-
 
 pub(crate) fn limited_chars_checker(room_name: &str) -> Result<(), validator::ValidationError> {
     for c in room_name.chars() {

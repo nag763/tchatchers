@@ -148,7 +148,8 @@ impl Component for Chat {
         let mut next_element_opt = iterator.next();
         let mut html_content: Vec<Html> = Vec::with_capacity(ctx.props().messages.len());
         let user_offset =
-            Duration::minutes(-(js_sys::Date::new_0().get_timezone_offset().round() as i64));
+            Duration::try_minutes(-(js_sys::Date::new_0().get_timezone_offset().round() as i64))
+                .unwrap();
         let current_user_id = ctx.props().user.id;
         while let Some(current_element) = std::mem::replace(&mut next_element_opt, iterator.next())
         {

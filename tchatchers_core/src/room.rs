@@ -6,17 +6,14 @@
 //! They are persisted within redis as "room_name=redis_key", so that any user
 //! that reconnects retieve the messages sent before he joined.
 
-use validator::Validate;
 use crate::common::limited_chars_checker;
+use validator::Validate;
 
 #[derive(Debug, Validate)]
 pub struct RoomNameValidator {
     #[validate(
         length(min = 1, max = 128),
-        custom(
-            function = "limited_chars_checker",
-            code = "limited_chars"
-        )
+        custom(function = "limited_chars_checker", code = "limited_chars")
     )]
     name: String,
 }
