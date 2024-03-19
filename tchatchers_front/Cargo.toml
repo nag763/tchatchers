@@ -21,7 +21,7 @@ rmenu_service = { path = "services/rmenu_service" }
 chat_service = { path = "services/chat_service" }
 chrono = { version = "0.4.35", features = ["serde"] }
 js-sys = "0.3.69"
-uuid = { version = "1.7.0", features = ["v4"] }
+uuid = { version = "1.8.0", features = ["v4"] }
 validator = "0.17.0"
 async-recursion = "1.1.0"
 postcard = { version = "1.0.8", features = ["use-std"], default-features = false }

@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 serde = { version = "1.0.197", features = ["derive"] }
-uuid = { version = "1.7.0", features = ["serde"] }
+uuid = { version = "1.8.0", features = ["serde"] }
 yew = "0.21.0"
 yew-agent = "0.2.0"

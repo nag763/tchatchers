@@ -18,7 +18,7 @@ rand = { default-features = false, version = "0.8.5" }
 rust-argon2 = { version = "2", optional = true, default-features = false }
 serde = { version = "1.0.197", features = ["rc"], default-features = false }
 sqlx = { version = "0.7", optional = true ,  features = ["runtime-async-std-native-tls", "postgres", "chrono", "uuid"] }
-uuid = { version = "1.7.0", features = ["v4", "serde"], default-features = false }
+uuid = { version = "1.8.0", features = ["v4", "serde"], default-features = false }
 validator = { version = "0.17.0", features = ["derive"], default-features = false }
 axum = { version = "0.7.4", features = ["multipart"], optional = true , default-features = false }
 lazy_static = "1.4.0"

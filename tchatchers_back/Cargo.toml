@@ -10,7 +10,7 @@ tokio = { version = "1.36", features = ["full"], default-features = false }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 dotenv = "0.15.0"
 futures-util = { version = "0.3.30" }
-uuid = { version = "1.7.0", default-features = false }
+uuid = { version = "1.8.0", default-features = false }
 tower-http = { version = "0.5.2", features = ["fs", "trace", "util", "request-id", "sensitive-headers", "timeout"], default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"]}
 axum-extra = { version = "0.9.2", features = ["cookie", "typed-header"] }
