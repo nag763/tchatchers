@@ -8,7 +8,6 @@ edition = "2021"
 axum = { version = "0.7.4", features = ["ws", "http1", "multipart"], default-features = false }
 tokio = { version = "1.36", features = ["full"], default-features = false }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
-sqlx-core = { version = "0.7", default-features=false }
 dotenv = "0.15.0"
 futures-util = { version = "0.3.30" }
 uuid = { version = "1.7.0", default-features = false }
