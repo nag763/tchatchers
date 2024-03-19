@@ -107,16 +107,17 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                         }
                         WsMessage::Pong | WsMessage::ClientKeepAlive => continue,
                         WsMessage::Send(mut ws_message) => {
-                            let redis_pool = state.async_pool.clone();
                             ws_message.reception_status = WsReceptionStatus::Sent;
+                            let redis_conn = state.async_pool.clone();
                             let _ = tx
                                 .send(serde_json::to_vec(&WsMessage::Receive(ws_message.clone()))?);
                             tokio::spawn(async move {
-                                let (pool1, pool2) =
-                                    (&mut redis_pool.get().await?, &mut redis_pool.get().await?);
+                                let (mut pool1, mut pool2) =
+                                    (redis_conn.clone(), redis_conn.clone());
                                 join!(
-                                    AsyncMessage::CleanRoom(ws_message.clone().room).spawn(pool1),
-                                    AsyncMessage::PersistMessage(ws_message).spawn(pool2)
+                                    AsyncMessage::CleanRoom(ws_message.clone().room)
+                                        .spawn(&mut pool1),
+                                    AsyncMessage::PersistMessage(ws_message).spawn(&mut pool2)
                                 );
                                 anyhow::Ok(())
                             });
@@ -135,12 +136,11 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                             ))?);
                             let redis_pool = state.async_pool.clone();
                             for message in messages.into_iter() {
-                                let redis_pool = redis_pool.clone();
+                                let mut redis_pool = redis_pool.clone();
                                 std::mem::drop(tokio::task::spawn(async move {
-                                    let mut redis_conn = redis_pool.get().await?;
                                     AsyncMessage::spawn(
                                         AsyncMessage::MessageSeen(message),
-                                        &mut redis_conn,
+                                        &mut redis_pool,
                                     )
                                     .await;
                                     anyhow::Ok(())

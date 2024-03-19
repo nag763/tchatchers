@@ -257,8 +257,8 @@ impl From<axum::extract::rejection::BytesRejection> for ApiGenericResponse {
 }
 
 #[cfg(feature = "back")]
-impl From<bb8_redis::bb8::RunError<redis::RedisError>> for ApiGenericResponse {
-    fn from(value: bb8_redis::bb8::RunError<redis::RedisError>) -> Self {
+impl From<redis::RedisError> for ApiGenericResponse {
+    fn from(value: redis::RedisError) -> Self {
         Self::DbError(value.to_string())
     }
 }
@@ -280,13 +280,6 @@ impl From<std::io::Error> for ApiGenericResponse {
 impl From<jsonwebtoken::errors::Error> for ApiGenericResponse {
     fn from(value: jsonwebtoken::errors::Error) -> Self {
         Self::SerializationError(value.to_string())
-    }
-}
-
-#[cfg(feature = "back")]
-impl From<redis::RedisError> for ApiGenericResponse {
-    fn from(value: redis::RedisError) -> Self {
-        Self::RedisError(value.to_string())
     }
 }
 

@@ -47,7 +47,7 @@ async fn main() -> anyhow::Result<()> {
     // Process each queue in separate tasks
     for config in queues_config {
         let queue_name = config.queue;
-        let redis_conn = redis_conn.clone();
+        let mut redis_conn = redis_conn.clone();
         let pg_pool = pg_pool.clone();
 
         // Spawn a new task for processing the queue
@@ -65,9 +65,8 @@ async fn main() -> anyhow::Result<()> {
                 trace!("[{}] Ticking clock", queue_name);
                 interval.tick().await;
                 debug!("[{}] Waiting to process events", queue_name);
-                let conn = &mut redis_conn.get().await?;
                 // Read events from the queue
-                if let Some(events) = queue_name.read_events(conn).await? {
+                if let Some(events) = queue_name.read_events(&mut redis_conn).await? {
                     let events_number = events.len();
                     debug!(
                         "[{}] {} Events found and starting to be processed",
@@ -75,13 +74,7 @@ async fn main() -> anyhow::Result<()> {
                     );
 
                     // Process the events
-                    let _ = process(
-                        queue_name,
-                        events,
-                        &pg_pool,
-                        &mut redis_conn.get().await.unwrap(),
-                    )
-                    .await;
+                    let _ = process(queue_name, events, &pg_pool, &mut redis_conn).await;
                 }
 
                 info!(

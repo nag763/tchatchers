@@ -24,8 +24,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use bb8_redis::bb8;
-use bb8_redis::RedisConnectionManager;
+use redis::aio::MultiplexedConnection;
 use sqlx::postgres::PgPool;
 use std::future::IntoFuture;
 use std::iter::once;
@@ -64,9 +63,9 @@ pub struct AppState {
     /// The Postgres pool.
     pg_pool: PgPool,
     /// Redis session pool.
-    session_pool: bb8::Pool<RedisConnectionManager>,
+    session_pool: MultiplexedConnection,
     /// Redis async pool.
-    async_pool: bb8::Pool<RedisConnectionManager>,
+    async_pool: MultiplexedConnection,
 }
 
 #[tokio::main]

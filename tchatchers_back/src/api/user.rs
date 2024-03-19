@@ -86,15 +86,13 @@ pub async fn authenticate(
         return Err(ApiGenericResponse::BadCredentials);
     };
     if user.is_authorized {
+        let mut redis_conn = state.session_pool;
         let refresh_token = {
-            let mut redis_conn = state.session_pool.get().await?;
-
             let token = RefreshToken::new(user.id, authenticable_user.session_only);
             token.set_as_head_token(&mut redis_conn).await?;
             token
         };
         std::mem::drop(tokio::spawn(async move {
-            let mut redis_conn = state.async_pool.get().await?;
             AsyncMessage::LoggedUser(user.id)
                 .spawn(&mut redis_conn)
                 .await;
@@ -147,20 +145,14 @@ pub async fn reauthenticate(
         return Err(ApiGenericResponse::AuthenticationRequired);
     };
 
+    let mut redis_conn = state.session_pool;
     // Refresh the token.
-    let refreshed_token = {
-        // Get a Redis connection from the Redis connection pool.
-        let mut redis_conn = state.session_pool.get().await?;
-
-        if !refresh_token.is_head_token(&mut redis_conn).await? {
-            refresh_token.revoke_family(&mut redis_conn).await?;
-            return Err(ApiGenericResponse::AuthenticationExpired);
-        } else {
-            let refreshed_token = refresh_token.renew();
-            refreshed_token.set_as_head_token(&mut redis_conn).await?;
-            refreshed_token
-        }
-    };
+    if !refresh_token.is_head_token(&mut redis_conn).await? {
+        refresh_token.revoke_family(&mut redis_conn).await?;
+        return Err(ApiGenericResponse::AuthenticationExpired);
+    }
+    let refreshed_token = refresh_token.renew();
+    refreshed_token.set_as_head_token(&mut redis_conn).await?;
 
     // Retrieve the user corresponding to the refresh token's user ID from the database.
     let Some(user) = User::find_by_id(refresh_token.user_id, &state.pg_pool).await? else {
@@ -174,7 +166,7 @@ pub async fn reauthenticate(
 
     // Queue the information that user reauthenticated.
     std::mem::drop(tokio::spawn(async move {
-        let mut redis_conn = state.async_pool.get().await?;
+        let mut redis_conn = state.async_pool;
         AsyncMessage::LoggedUser(user.id)
             .spawn(&mut redis_conn)
             .await;
@@ -207,8 +199,7 @@ pub async fn logout(
         if let Ok(refresh_token) = RefreshToken::decode(cookie.value(), &state.refresh_token_secret)
         {
             // Get a Redis connection from the Redis connection pool.
-            let mut redis_conn = state.session_pool.get().await?;
-
+            let mut redis_conn = state.session_pool;
             refresh_token.revoke_family(&mut redis_conn).await?;
         }
     }
@@ -283,7 +274,7 @@ pub async fn update_user(
 
             if former_user.pfp.is_some() {
                 tasks.spawn(async move {
-                    let mut redis_conn = state.async_pool.get().await?;
+                    let mut redis_conn = state.async_pool;
                     AsyncMessage::RemoveUserData(former_user)
                         .spawn(&mut redis_conn)
                         .await;
@@ -311,7 +302,7 @@ pub async fn delete_user(
         return Err(ApiGenericResponse::UserNotFound);
     };
     std::mem::drop(tokio::spawn(async move {
-        let mut redis_conn = state.async_pool.get().await?;
+        let mut redis_conn = state.async_pool;
         AsyncMessage::RemoveUserData(user)
             .spawn(&mut redis_conn)
             .await;

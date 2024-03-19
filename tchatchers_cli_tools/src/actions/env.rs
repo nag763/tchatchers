@@ -277,14 +277,8 @@ impl EnvAction {
 
         let (pg_conn, session_conn, queue_conn) = tokio::join!(
             async { tchatchers_core::pool::get_pg_pool().await },
-            async {
-                let pool = tchatchers_core::pool::get_session_pool().await?;
-                pool.get_owned().await
-            },
-            async {
-                let pool = tchatchers_core::pool::get_async_pool().await?;
-                pool.get_owned().await
-            }
+            async { tchatchers_core::pool::get_session_pool().await },
+            async { tchatchers_core::pool::get_async_pool().await }
         );
         let (pg_conn, session_conn, queue_conn) = (
             {
