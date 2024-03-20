@@ -62,6 +62,14 @@ pub enum WsMessage {
     Seen(Vec<Uuid>),
     /// Deletes a message
     Delete(Uuid),
+    /// Sends an authentication request.
+    Authenticate(String),
+    /// Indicates that the user is attempting to access an access to a WS requiring authentication.
+    AuthenticationRequired,
+    /// Authentication has been validated by backend.
+    AuthenticationValidated,
+    /// Authentication is expired.
+    AuthenticationExpired,
 }
 
 #[derive(

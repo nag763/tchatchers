@@ -19,7 +19,9 @@ use futures_util::{join, SinkExt, StreamExt};
 use tchatchers_core::{
     api_response::ApiGenericResponse,
     async_message::AsyncMessage,
+    authorization_token::AuthorizationToken,
     room::RoomNameValidator,
+    serializable_token::SerializableToken,
     ws_message::{WsMessage, WsMessageContent, WsReceptionStatus},
 };
 use tokio::sync::broadcast;
@@ -100,6 +102,7 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
     // This task will receive messages from client and send them to broadcast subscribers.
     let mut recv_task: tokio::task::JoinHandle<Result<(), ApiGenericResponse>> =
         tokio::spawn(async move {
+            let mut is_authenticated = false;
             while let Some(Ok(Message::Binary(text))) = receiver.next().await {
                 if let Ok(msg) = serde_json::from_slice(&text) {
                     match msg {
@@ -109,6 +112,11 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                         }
                         WsMessage::Pong | WsMessage::ClientKeepAlive => continue,
                         WsMessage::Send(mut ws_message) => {
+                            if !is_authenticated {
+                                let _ = private_tx
+                                    .send(serde_json::to_vec(&WsMessage::AuthenticationRequired)?);
+                                break;
+                            }
                             ws_message.reception_status = WsReceptionStatus::Sent;
                             let redis_conn = state.async_pool.clone();
                             let _ = shared_tx
@@ -125,6 +133,11 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                             });
                         }
                         WsMessage::RetrieveMessages(session_id) => {
+                            if !is_authenticated {
+                                let _ = private_tx
+                                    .send(serde_json::to_vec(&WsMessage::AuthenticationRequired)?);
+                                break;
+                            }
                             let messages: Vec<WsMessageContent> =
                                 WsMessageContent::query_all_for_room(&room, &state.pg_pool).await?;
                             let _ = private_tx.send(serde_json::to_vec(
@@ -135,6 +148,11 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                             )?);
                         }
                         WsMessage::Seen(messages) => {
+                            if !is_authenticated {
+                                let _ = private_tx
+                                    .send(serde_json::to_vec(&WsMessage::AuthenticationRequired)?);
+                                break;
+                            }
                             let _ = shared_tx.send(serde_json::to_vec(&WsMessage::MessagesSeen(
                                 messages.clone(),
                             ))?);
@@ -149,6 +167,18 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                                     .await;
                                     anyhow::Ok(())
                                 }));
+                            }
+                        }
+                        WsMessage::Authenticate(bearer) => {
+                            if let Ok(_token) =
+                                AuthorizationToken::decode(&bearer, &state.jwt_secret)
+                            {
+                                is_authenticated = true;
+                                let _ = private_tx
+                                    .send(serde_json::to_vec(&WsMessage::AuthenticationValidated)?);
+                            } else {
+                                let _ = private_tx
+                                    .send(serde_json::to_vec(&WsMessage::AuthenticationExpired)?);
                             }
                         }
                         _ => {}

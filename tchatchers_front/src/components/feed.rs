@@ -42,6 +42,7 @@ pub enum Msg {
     CheckWsState,
     TryReconnect,
     CutWs,
+    Authenticate,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -168,16 +169,7 @@ impl Component for Feed {
                     WsMessage::Pong => {
                         self.is_connected = true;
 
-                        if self.received_messages.is_empty() {
-                            let msg = WsMessage::RetrieveMessages(self.session_id);
-                            self.ws.tx.clone().try_send(msg).unwrap();
-                            self.ws_keep_alive = {
-                                let tx = self.ws.tx.clone();
-                                Some(Interval::new(30_000, move || {
-                                    tx.clone().try_send(WsMessage::ClientKeepAlive).unwrap()
-                                }))
-                            }
-                        }
+                        ctx.link().send_message(Msg::Authenticate);
                     }
                     WsMessage::MessagesSeen(msgs_uuid) => {
                         for msg in self.received_messages.iter_mut() {
@@ -189,6 +181,32 @@ impl Component for Feed {
                     WsMessage::Delete(msg_uuid) => {
                         self.ws.tx.clone().try_send(*message).unwrap();
                         self.received_messages.retain(|msg| msg_uuid != msg.uuid);
+                    }
+                    WsMessage::AuthenticationRequired => ctx.link().send_message(Msg::Authenticate),
+                    WsMessage::AuthenticationValidated => {
+                        if self.received_messages.is_empty() {
+                            let msg = WsMessage::RetrieveMessages(self.session_id);
+                            self.ws.tx.clone().try_send(msg).unwrap();
+                            self.ws_keep_alive = {
+                                let tx = self.ws.tx.clone();
+                                Some(Interval::new(30_000, move || {
+                                    tx.clone().try_send(WsMessage::ClientKeepAlive).unwrap()
+                                }))
+                            }
+                        }
+                    }
+                    WsMessage::AuthenticationExpired => {
+                        let mut req = Requester::get("/api/validate");
+                        req.bearer(self.bearer.clone());
+                        let link = ctx.link().clone();
+                        wasm_bindgen_futures::spawn_local(async move {
+                            let resp = req.send().await;
+                            if resp.status() == 401 {
+                                link.navigator().unwrap().push(&Route::SignIn);
+                            } else {
+                                link.send_message(Msg::Authenticate);
+                            }
+                        });
                     }
                     _ => {
                         self.is_connected = true;
@@ -215,6 +233,16 @@ impl Component for Feed {
                     ws.close().await;
                 });
                 true
+            }
+            Msg::Authenticate => {
+                if let Some(bearer) = self.bearer.as_ref().cloned() {
+                    self.ws
+                        .tx
+                        .clone()
+                        .try_send(WsMessage::Authenticate(bearer))
+                        .unwrap();
+                }
+                false
             }
         }
     }
