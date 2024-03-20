@@ -41,7 +41,7 @@ impl WebsocketService {
         spawn_local(async move {
             while let Some(s) = in_rx.next().await {
                 write
-                    .send(Message::Bytes(postcard::to_stdvec(&s).unwrap()))
+                    .send(Message::Bytes(serde_json::to_vec(&s).unwrap()))
                     .await
                     .unwrap();
             }
@@ -51,12 +51,12 @@ impl WebsocketService {
             while let Some(msg) = read.next().await {
                 match msg {
                     Ok(Message::Text(data)) => {
-                        if let Ok(msg) = postcard::from_bytes(data.as_bytes()) {
+                        if let Ok(msg) = serde_json::from_slice(data.as_bytes()) {
                             event_bus.send(msg);
                         }
                     }
                     Ok(Message::Bytes(b)) => {
-                        if let Ok(msg) = postcard::from_bytes(&b) {
+                        if let Ok(msg) = serde_json::from_slice(&b) {
                             event_bus.send(msg);
                         }
                     }
