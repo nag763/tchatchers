@@ -73,7 +73,7 @@ pub async fn ws_handler(
 /// - user : The connected user's infos.
 async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
     let (mut sender, mut receiver) = socket.split();
-    let tx = {
+    let shared_tx = {
         let mut rooms = state.txs.lock().await;
         match rooms.get(&room) {
             Some(v) => v.clone(),
@@ -84,10 +84,12 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
             }
         }
     };
-    let mut rx = tx.subscribe();
+    let mut shared_rx: broadcast::Receiver<Vec<u8>> = shared_tx.subscribe();
+    let (private_tx, mut private_rx) = broadcast::channel(2);
 
     let mut send_task = tokio::spawn(async move {
-        while let Ok(msg) = rx.recv().await {
+        while let Ok(msg) = tokio::select! {v = private_rx.recv() => v, v = shared_rx.recv() => v }
+        {
             // In any websocket error, break loop.
             if sender.send(Message::Binary(msg)).await.is_err() {
                 break;
@@ -103,13 +105,13 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                     match msg {
                         WsMessage::Close => break,
                         WsMessage::Ping => {
-                            let _ = tx.send(serde_json::to_vec(&WsMessage::Pong)?);
+                            let _ = private_tx.send(serde_json::to_vec(&WsMessage::Pong)?);
                         }
                         WsMessage::Pong | WsMessage::ClientKeepAlive => continue,
                         WsMessage::Send(mut ws_message) => {
                             ws_message.reception_status = WsReceptionStatus::Sent;
                             let redis_conn = state.async_pool.clone();
-                            let _ = tx
+                            let _ = shared_tx
                                 .send(serde_json::to_vec(&WsMessage::Receive(ws_message.clone()))?);
                             tokio::spawn(async move {
                                 let (mut pool1, mut pool2) =
@@ -125,13 +127,15 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
                         WsMessage::RetrieveMessages(session_id) => {
                             let messages: Vec<WsMessageContent> =
                                 WsMessageContent::query_all_for_room(&room, &state.pg_pool).await?;
-                            let _ = tx.send(serde_json::to_vec(&WsMessage::MessagesRetrieved {
-                                messages,
-                                session_id,
-                            })?);
+                            let _ = private_tx.send(serde_json::to_vec(
+                                &WsMessage::MessagesRetrieved {
+                                    messages,
+                                    session_id,
+                                },
+                            )?);
                         }
                         WsMessage::Seen(messages) => {
-                            let _ = tx.send(serde_json::to_vec(&WsMessage::MessagesSeen(
+                            let _ = shared_tx.send(serde_json::to_vec(&WsMessage::MessagesSeen(
                                 messages.clone(),
                             ))?);
                             let redis_pool = state.async_pool.clone();
