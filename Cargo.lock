@@ -3463,6 +3463,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "sqlx",
+ "tchatchers_macro",
  "time",
  "tokio",
  "uuid",
@@ -3496,6 +3497,15 @@ dependencies = [
  "yew 0.21.0",
  "yew-agent",
  "yew-router",
+]
+
+[[package]]
+name = "tchatchers_macro"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.53",
 ]
 
 [[package]]

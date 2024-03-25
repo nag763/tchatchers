@@ -26,6 +26,8 @@ COPY --from=asset_builder /home/usr/front /usr/tchatchers/front/tchatchers_front
 
 COPY ./tchatchers_core ./tchatchers_core
 
+COPY ./tchatchers_macro ./tchatchers_macro
+
 COPY ./tchatchers_front/services ./tchatchers_front/services
 
 COPY ./tchatchers_front/favicon.ico ./tchatchers_front/favicon.ico

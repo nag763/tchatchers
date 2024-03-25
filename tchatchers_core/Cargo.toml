@@ -33,3 +33,4 @@ serde_yaml = "0.9.33"
 postcard = { version = "1.0.8", features = ["use-std"], default-features = false }
 serde_json = "1.0.114"
 tokio = { version = "1.36.0", features = ["fs"], optional=true }
+tchatchers_macro = { path = "../tchatchers_macro"} 

@@ -16,6 +16,6 @@ members = [
     "tchatchers_front/services/rmenu_service",
     "tchatchers_front/services/chat_service",
     "tchatchers_cli_tools",
-    "tchatchers_async",
+    "tchatchers_async", "tchatchers_macro",
 ]
 
