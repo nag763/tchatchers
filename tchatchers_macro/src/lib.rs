@@ -2,7 +2,6 @@
 //!
 //! This module contains procedural macros for internal use.
 
-
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
