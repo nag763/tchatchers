@@ -1,7 +1,6 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
-use async_recursion::async_recursion;
 use gloo_net::http::{Method, Request, RequestBuilder, Response};
 use js_sys::Uint8Array;
 use wasm_bindgen::JsValue;
@@ -102,7 +101,6 @@ impl Requester {
         self
     }
 
-    #[async_recursion(?Send)]
     pub async fn send(&mut self) -> Response {
         if let (Some(method), Some(endpoint)) = (&self.method, &self.endpoint) {
             let mut builder = RequestBuilder::new(endpoint);
@@ -121,12 +119,14 @@ impl Requester {
 
             let resp = req.send().await.unwrap();
             if resp.status() == UNAUTHORIZED && endpoint != "/api/authenticate" {
-                let reauth = Self {
-                    endpoint: Some("/api/authenticate".into()),
-                    method: Some(Method::PATCH),
-                    ..Self::default()
-                }
-                .send()
+                let reauth = Box::pin(
+                    Self {
+                        endpoint: Some("/api/authenticate".into()),
+                        method: Some(Method::PATCH),
+                        ..Self::default()
+                    }
+                    .send(),
+                )
                 .await;
                 if reauth.ok() {
                     let new_token = reauth.text().await.unwrap();
@@ -134,7 +134,7 @@ impl Requester {
                         bearer_setter.set(Some(new_token.clone()));
                     }
                     self.bearer_value = Some(new_token);
-                    self.send().await
+                    Box::pin(self.send()).await
                 } else {
                     resp
                 }
