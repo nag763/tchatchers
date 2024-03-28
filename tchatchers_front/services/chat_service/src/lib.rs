@@ -32,7 +32,7 @@ pub async fn websocket_reactor(mut scope: ReactorScope<WebSocketReactorControl, 
         };
         let Ok(websocket) = WebSocket::open(&address) else {
             gloo_console::error!("An error has been met while trying to open WS connection");
-            let _ = sender.send(WsMessage::Close);
+            std::mem::drop(sender.send(WsMessage::Close));
             return;
         };
 

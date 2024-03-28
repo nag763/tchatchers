@@ -572,7 +572,7 @@ dependencies = [
  "tchatchers_core",
  "tokio",
  "wasm-bindgen-futures",
- "yew-agent 0.3.0",
+ "yew-agent 0.3.0 (git+https://github.com/yewstack/yew.git)",
 ]
 
 [[package]]
@@ -2150,8 +2150,9 @@ dependencies = [
 name = "modal_service"
 version = "0.1.0"
 dependencies = [
+ "gloo-console 0.3.0",
  "serde",
- "yew-agent 0.2.0",
+ "yew-agent 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2735,7 +2736,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "uuid",
- "yew 0.21.0",
+ "yew 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "yew-agent 0.2.0",
 ]
 
@@ -3437,9 +3438,9 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
- "yew 0.21.0",
+ "yew 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "yew-agent 0.2.0",
- "yew-agent 0.3.0",
+ "yew-agent 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "yew-router",
 ]
 
@@ -4289,7 +4290,31 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
- "yew-macro 0.21.0",
+ "yew-macro 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "yew"
+version = "0.21.0"
+source = "git+https://github.com/yewstack/yew.git#e9739fc9ce4944ba93c77a32072551ab771a2cda"
+dependencies = [
+ "console_error_panic_hook",
+ "futures",
+ "gloo 0.10.0",
+ "implicit-clone 0.4.9",
+ "indexmap 2.2.6",
+ "js-sys",
+ "prokio",
+ "rustversion",
+ "serde",
+ "slab",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+ "yew-macro 0.21.0 (git+https://github.com/yewstack/yew.git)",
 ]
 
 [[package]]
@@ -4312,8 +4337,21 @@ dependencies = [
  "gloo-worker 0.4.0",
  "serde",
  "wasm-bindgen",
- "yew 0.21.0",
- "yew-agent-macro",
+ "yew 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "yew-agent-macro 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "yew-agent"
+version = "0.3.0"
+source = "git+https://github.com/yewstack/yew.git#e9739fc9ce4944ba93c77a32072551ab771a2cda"
+dependencies = [
+ "futures",
+ "gloo-worker 0.4.0",
+ "serde",
+ "wasm-bindgen",
+ "yew 0.21.0 (git+https://github.com/yewstack/yew.git)",
+ "yew-agent-macro 0.2.0 (git+https://github.com/yewstack/yew.git)",
 ]
 
 [[package]]
@@ -4321,6 +4359,16 @@ name = "yew-agent-macro"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ad00f6c9436d25c9225ed0fd8eea27e6d2886c1387bf934afdf91e9131b8b77"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.55",
+]
+
+[[package]]
+name = "yew-agent-macro"
+version = "0.2.0"
+source = "git+https://github.com/yewstack/yew.git#e9739fc9ce4944ba93c77a32072551ab771a2cda"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4358,6 +4406,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "yew-macro"
+version = "0.21.0"
+source = "git+https://github.com/yewstack/yew.git#e9739fc9ce4944ba93c77a32072551ab771a2cda"
+dependencies = [
+ "once_cell",
+ "prettyplease 0.2.17",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.55",
+]
+
+[[package]]
 name = "yew-router"
 version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4372,7 +4433,7 @@ dependencies = [
  "urlencoding",
  "wasm-bindgen",
  "web-sys",
- "yew 0.21.0",
+ "yew 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "yew-router-macro",
 ]
 

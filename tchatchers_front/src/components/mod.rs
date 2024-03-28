@@ -24,7 +24,7 @@ pub mod prelude {
     pub use super::feed::FeedHOC;
     pub use super::join_room::JoinRoomHOC;
     pub use super::logout::LogOut;
-    pub use super::modal::Modal;
+    pub use super::modal::ModalHOC;
     pub use super::navbar::NavbarHOC;
     pub use super::right_menu::RightMenu;
     pub use super::settings::SettingsHOC;

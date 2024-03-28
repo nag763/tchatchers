@@ -29,15 +29,17 @@ use yew::function_component;
 use yew::use_context;
 use yew::AttrValue;
 use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
-use yew_agent::Bridge;
-use yew_agent::Bridged;
 use yew_agent::Dispatched;
+use yew_agent_latest::worker::use_worker_subscription;
+use yew_agent_latest::worker::UseWorkerSubscriptionHandle;
 use yew_router::scope_ext::RouterScopeExt;
 
 #[function_component(SettingsHOC)]
 pub fn feed_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().expect("Context defined at startup");
-    html! { <Settings context={client_context} /> }
+    let bridge = use_worker_subscription::<ModalBus>();
+
+    html! { <Settings context={client_context} {bridge} /> }
 }
 
 pub enum Msg {
@@ -52,6 +54,7 @@ pub enum Msg {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     context: Rc<ClientContext>,
+    bridge: UseWorkerSubscriptionHandle<ModalBus>,
 }
 
 pub struct Settings {
@@ -61,7 +64,6 @@ pub struct Settings {
     wait_for_api: bool,
     server_error: Option<AttrValue>,
     ok_msg: Option<AttrValue>,
-    producer: Box<dyn Bridge<ModalBus>>,
     user_context: ClientContext,
 }
 
@@ -70,15 +72,6 @@ impl Component for Settings {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let cb = {
-            let link = ctx.link().clone();
-            move |mc| {
-                if let ModalBusContent::Outcome(true) = mc {
-                    link.send_message(Msg::DeletionConfirmed)
-                }
-            }
-        };
-
         let context_ref = ctx.props().context.as_ref();
 
         Self {
@@ -88,8 +81,22 @@ impl Component for Settings {
             wait_for_api: false,
             server_error: None,
             ok_msg: None,
-            producer: ModalBus::bridge(Rc::new(cb)),
             new_pfp: NodeRef::default(),
+        }
+    }
+
+    fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
+        if old_props.bridge.len() < ctx.props().bridge.len() {
+            let Some(last_msg) = ctx.props().bridge.last().cloned() else {
+                panic!("Unreachable");
+            };
+            let last_msg: ModalBusContent = (*last_msg).clone();
+            if let ModalBusContent::Outcome(true) = last_msg {
+                ctx.link().send_message(Msg::DeletionConfirmed);
+            }
+            true
+        } else {
+            false
         }
     }
 
@@ -211,7 +218,7 @@ impl Component for Settings {
                     decline_text: Some(translation.get_or_default("modal_delete_profile_no", "I changed, my mind, don't delete my account")),
                     accept_text: Some(translation.get_or_default("modal_delete_profile_yes", "Understood, farewell")),
                 };
-                self.producer.send(ModalBusContent::PopModal(mc));
+                ctx.props().bridge.send(ModalBusContent::PopModal(mc));
                 false
             }
             Msg::DeletionConfirmed => {

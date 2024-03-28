@@ -2,14 +2,23 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use gloo_timers::callback::Timeout;
 use modal_service::{ModalBus, ModalBusContent, ModalContent};
-use std::rc::Rc;
 use wasm_bindgen::{prelude::Closure, JsCast};
 use web_sys::{Element, EventTarget, MouseEvent};
-use yew::{classes, html, Component, Context, Html};
-use yew_agent::{Bridge, Bridged};
+use yew::{classes, function_component, html, Component, Context, Html, Properties};
+use yew_agent_latest::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
 
 const MODAL_ID: &str = "modal";
 pub const MODAL_OPENER_CLASS: &str = "modal-opener";
+
+#[derive(Properties, PartialEq)]
+pub struct ModalHOCProps;
+
+#[function_component(ModalHOC)]
+pub fn modal_hoc(_props: &ModalHOCProps) -> Html {
+    let bridge = use_worker_subscription::<ModalBus>();
+
+    html! { <Modal {bridge} /> }
+}
 
 pub enum Msg {
     CloseSelf(Option<ModalBusContent>),
@@ -17,31 +26,41 @@ pub enum Msg {
     StopBounce,
 }
 
+#[derive(Properties, PartialEq)]
+pub struct ModalProperties {
+    bridge: UseWorkerSubscriptionHandle<ModalBus>,
+}
+
 pub struct Modal {
     modal_content: ModalContent,
     visible: bool,
-    producer: Box<dyn Bridge<ModalBus>>,
     stop_bounce: Option<Timeout>,
 }
 
 impl Component for Modal {
     type Message = Msg;
-    type Properties = ();
+    type Properties = ModalProperties;
 
-    fn create(ctx: &Context<Self>) -> Self {
-        let cb = {
-            let link = ctx.link().clone();
-            move |mc| {
-                if let ModalBusContent::PopModal(mbc) = mc {
-                    link.send_message(Msg::PopModal(mbc))
-                }
-            }
-        };
+    fn create(_ctx: &Context<Self>) -> Self {
         Self {
             modal_content: ModalContent::default(),
             visible: false,
-            producer: ModalBus::bridge(Rc::new(cb)),
             stop_bounce: None,
+        }
+    }
+
+    fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
+        if old_props.bridge.len() < ctx.props().bridge.len() {
+            let Some(last_msg) = ctx.props().bridge.last().cloned() else {
+                panic!("Unreachable");
+            };
+            let last_msg = (*last_msg).clone();
+            if let ModalBusContent::PopModal(mc) = last_msg {
+                ctx.link().send_message(Msg::PopModal(mc));
+            }
+            true
+        } else {
+            false
         }
     }
 
@@ -49,7 +68,7 @@ impl Component for Modal {
         match msg {
             Msg::CloseSelf(mbc) => {
                 if let Some(mbc) = mbc {
-                    self.producer.send(mbc);
+                    ctx.props().bridge.send(mbc);
                 }
                 self.visible = false;
                 true
