@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use yew::{function_component, html, use_context, BaseComponent, Html};
-use yew_agent::Dispatched;
+use yew_agent::worker::use_worker_subscription;
 use yew_router::prelude::use_navigator;
 
 use crate::{router::Route, utils::client_context::ClientContext};
@@ -15,12 +15,13 @@ where
 {
     let client_context = use_context::<Rc<ClientContext>>().expect("No app context");
     let navigator = use_navigator().unwrap();
+    let toaster = use_worker_subscription::<ToastBus>();
 
     if client_context.user.is_some() {
         html! { <T ..props.clone() /> }
     } else {
         navigator.replace(&Route::SignIn);
-        ToastBus::dispatcher().send(Alert {
+        toaster.send(Alert {
             is_success: false,
             label: "anon_guard".into(),
             default: "Please authenticate prior accessing the app functionnalities".into(),

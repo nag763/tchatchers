@@ -58,6 +58,10 @@ pub enum WsMessage {
     /// Inform that there is an error on the incoming message.
     #[cfg(feature = "front")]
     ErrorOnMessage(String),
+    #[cfg(feature = "front")]
+    SerializationError,
+    #[cfg(feature = "front")]
+    ReactorExited,
     /// Inform that one has seen the messages.
     Seen(Vec<Uuid>),
     /// Deletes a message

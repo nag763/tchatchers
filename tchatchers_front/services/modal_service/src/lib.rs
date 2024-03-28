@@ -3,7 +3,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use yew_agent::{HandlerId, Public, Worker, WorkerLink};
+use yew_agent::worker::{HandlerId, Worker, WorkerScope};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct ModalContent {
@@ -14,7 +14,6 @@ pub struct ModalContent {
 }
 
 pub struct ModalBus {
-    link: WorkerLink<ModalBus>,
     subscribers: HashSet<HandlerId>,
 }
 
@@ -25,35 +24,30 @@ pub enum ModalBusContent {
 }
 
 impl Worker for ModalBus {
-    type Reach = Public<Self>;
     type Message = ();
     type Input = ModalBusContent;
     type Output = ModalBusContent;
 
-    fn create(link: WorkerLink<Self>) -> Self {
+    fn create(_scope: &WorkerScope<Self>) -> Self {
         Self {
-            link,
             subscribers: HashSet::new(),
         }
     }
 
-    fn update(&mut self, _msg: Self::Message) {}
-
-    fn handle_input(&mut self, msg: Self::Input, _id: HandlerId) {
+    fn received(&mut self, scope: &WorkerScope<Self>, msg: Self::Input, _id: HandlerId) {
+        scope.respond(_id, msg.clone());
         for sub in self.subscribers.iter() {
-            self.link.respond(*sub, msg.clone());
+            scope.respond(*sub, msg.clone());
         }
     }
 
-    fn connected(&mut self, id: HandlerId) {
+    fn connected(&mut self, _scope: &WorkerScope<Self>, id: HandlerId) {
         self.subscribers.insert(id);
     }
 
-    fn disconnected(&mut self, id: HandlerId) {
-        self.subscribers.remove(&id);
+    fn disconnected(&mut self, _scope: &WorkerScope<Self>, _id: HandlerId) {
+        // self.subscribers.remove(&id);
     }
 
-    fn name_of_resource() -> &'static str {
-        "modal_service.js"
-    }
+    fn update(&mut self, _scope: &WorkerScope<Self>, _msg: Self::Message) {}
 }

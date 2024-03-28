@@ -12,7 +12,7 @@ wasm-bindgen = "0.2.92"
 wasm-bindgen-futures = "0.4.42"
 web-sys = { version = "0.3.69", features = ["HtmlDocument", "FileReader", "Event", "Navigator", "FormData"] }
 yew = { version = "0.21.0", features = ["csr"] }
-yew-agent = "0.2.0"
+yew-agent = "0.3.0"
 yew-router = "0.18.0"
 tchatchers_core = { path = "../tchatchers_core", features = ["front"] }
 modal_service = { path = "services/modal_service" }

@@ -1,6 +1,6 @@
 use modal_service::ModalBus;
-use yew_agent::PublicWorker;
+use yew_agent::Registrable;
 
 fn main() {
-    ModalBus::register();
+    ModalBus::registrar().register();
 }

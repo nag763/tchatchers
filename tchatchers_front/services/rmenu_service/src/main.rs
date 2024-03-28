@@ -1,6 +1,6 @@
 use rmenu_service::RMenuBus;
-use yew_agent::PublicWorker;
+use yew_agent::Registrable;
 
 fn main() {
-    RMenuBus::register();
+    RMenuBus::registrar().register();
 }

@@ -3,13 +3,13 @@ use std::rc::Rc;
 use rmenu_service::MessageRMenuProps;
 use tchatchers_core::{api_response::ApiResponse, profile::Profile, ws_message::WsMessage};
 use yew::{function_component, html, use_context, Html};
-use yew_agent::Dispatched;
+use yew_agent::{reactor::use_reactor_subscription, worker::use_worker_subscription};
 
 use crate::{
     components::common::I18N,
     utils::{client_context::ClientContext, requester::Requester},
 };
-use chat_service::bus::ChatBus;
+use chat_service::{ChatReactor, WebSocketReactorControl};
 use toast_service::{Alert, ToastBus};
 
 #[function_component(MessageRMenu)]
@@ -22,11 +22,16 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
 
     let delete_message_li = {
         let bearer = bearer.clone();
+
         let delete_message_id = {
+            let reactor = use_reactor_subscription::<ChatReactor>();
+            let toaster = use_worker_subscription::<ToastBus>();
             let props = props.clone();
             move |_| {
                 let mut req = Requester::delete(&format!("/api/message/{}", props.message_id));
                 req.bearer(bearer.clone());
+                let reactor = reactor.clone();
+                let toaster = toaster.clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     let res = req.send().await;
                     let api_resp: ApiResponse =
@@ -34,13 +39,15 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
                     let label = api_resp.label;
                     let default: String = api_resp.text.unwrap_or("Unknown response".into());
                     let is_success = res.ok();
-                    ToastBus::dispatcher().send(Alert {
+                    toaster.send(Alert {
                         is_success,
                         label,
                         default,
                     });
                     if is_success {
-                        ChatBus::dispatcher().send(WsMessage::Delete(props.message_id));
+                        reactor.send(WebSocketReactorControl::Send(WsMessage::Delete(
+                            props.message_id,
+                        )));
                     }
                 })
             }
@@ -54,9 +61,11 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
     let report_message_li = {
         let report_message_id = {
             let props = props.clone();
+            let toaster = use_worker_subscription::<ToastBus>();
             move |_| {
                 let mut req = Requester::post(&format!("/api/message/{}/report", props.message_id));
                 req.bearer(bearer.clone());
+                let toaster = toaster.clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     let res = req.send().await;
                     let api_resp: ApiResponse =
@@ -64,7 +73,7 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
                     let label = api_resp.label;
                     let default: String = api_resp.text.unwrap_or("Unknown response".into());
                     let is_success = res.ok();
-                    ToastBus::dispatcher().send(Alert {
+                    toaster.send(Alert {
                         is_success,
                         label,
                         default,

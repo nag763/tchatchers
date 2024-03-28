@@ -6,16 +6,17 @@ use crate::utils::client_context::ClientContext;
 use gloo_timers::callback::Timeout;
 use toast_service::{Alert, ToastBus};
 use yew::{classes, function_component, html, use_context, Component, Context, Html, Properties};
-use yew_agent::{Bridge, Bridged};
+use yew_agent::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
 
 const SUCCESS_ICON : &str = "M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z";
 const ERR_ICON : &str = "M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z";
 const COOLDOWN_TIMING: u32 = 2_500u32;
 
 #[function_component(ToastHOC)]
-pub fn sign_up_hoc() -> Html {
+pub fn toast_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().expect("No app context");
-    html! { <Toast client_context={(*client_context).clone()}/> }
+    let toaster = use_worker_subscription::<ToastBus>();
+    html! { <Toast client_context={(*client_context).clone()} {toaster}/> }
 }
 
 pub enum Msg {
@@ -28,6 +29,7 @@ pub enum Msg {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     client_context: ClientContext,
+    toaster: UseWorkerSubscriptionHandle<ToastBus>,
 }
 
 pub struct Toast {
@@ -37,18 +39,13 @@ pub struct Toast {
     cooldown: Option<Timeout>,
     stop_bounce: Option<Timeout>,
     fadeout: Option<Timeout>,
-    _producer: Box<dyn Bridge<ToastBus>>,
 }
 
 impl Component for Toast {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(ctx: &Context<Self>) -> Self {
-        let cb = {
-            let link = ctx.link().clone();
-            move |e| link.send_message(Msg::NewToast(e))
-        };
+    fn create(_ctx: &Context<Self>) -> Self {
         Self {
             msg: String::default(),
             is_success: false,
@@ -56,7 +53,20 @@ impl Component for Toast {
             cooldown: None,
             stop_bounce: None,
             fadeout: None,
-            _producer: ToastBus::bridge(Rc::new(cb)),
+        }
+    }
+
+    fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
+        if old_props.toaster.len() < ctx.props().toaster.len() {
+            let Some(last_msg) = ctx.props().toaster.last().cloned() else {
+                panic!("Unreachable");
+            };
+            let last_msg = (*last_msg).clone();
+            ctx.link().send_message(Msg::NewToast(last_msg));
+
+            true
+        } else {
+            false
         }
     }
 
