@@ -9,7 +9,7 @@ use web_sys::MouseEvent;
 use yew::{
     classes, function_component, html, use_state, AttrValue, Component, Context, Html, Properties,
 };
-use yew_agent::Dispatched;
+use yew_agent_latest::worker::use_worker_subscription;
 
 const DEFAULT_PFP: &str = "/assets/no_pfp.webp";
 
@@ -29,12 +29,14 @@ fn profile_picture(profile_picture_properties: &ProfilePictureProperties) -> Htm
     let user_id = profile_picture_properties.author_id;
     let is_self = profile_picture_properties.is_self;
 
+    let bridge = use_worker_subscription::<RMenuBus>();
+
     html! {
         <div class={classes!(String::from("flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"), (!profile_picture_properties.display_pfp).then_some("invisible"))} title={profile_picture_properties.author.clone()} oncontextmenu={move |me: MouseEvent|
             {
                 if !is_self {
                     me.prevent_default();
-                    RMenuBus::dispatcher().send(RMenusBusEvents::OpenRMenu(me.client_x(), me.client_y(), RMenuKind::ProfileRMenu(ProfileRMenuProps{ user_id })));
+                    bridge.send(RMenusBusEvents::OpenRMenu(me.client_x(), me.client_y(), RMenuKind::ProfileRMenu(ProfileRMenuProps{ user_id })));
                 }
             }}>
             <img class="h-10 w-10 rounded-full" src={profile_picture_properties.pfp.clone()} alt="No img"/>
@@ -76,13 +78,15 @@ fn message(message_properties: &MessageProperties) -> Html {
     let is_self = message_properties.is_user;
 
     let hide_timestamp = use_state(|| true);
+
+    let bridge = use_worker_subscription::<RMenuBus>();
     html! {
         <div id={message_id.to_string()} class={classes!("flex", (!message_properties.is_user).then_some("flex-row-reverse"))}>
             <small hidden={*hide_timestamp} class="dark:text-white mx-2">{&title}</small>
             <p {title} class={classes!(if message_properties.is_user { "message-user" } else { "message-other" } )} onclick={move |_me| hide_timestamp.set(!*hide_timestamp)} oncontextmenu={move |me: MouseEvent|
                 {
                     me.prevent_default();
-                    RMenuBus::dispatcher().send(RMenusBusEvents::OpenRMenu(me.client_x(), me.client_y(), RMenuKind::MessageRMenu(MessageRMenuProps{ message_id, is_self })));
+                    bridge.send(RMenusBusEvents::OpenRMenu(me.client_x(), me.client_y(), RMenuKind::MessageRMenu(MessageRMenuProps{ message_id, is_self })));
                 }}
             >
                 {message_properties.content.as_str()}

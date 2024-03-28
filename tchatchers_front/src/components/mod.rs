@@ -26,7 +26,7 @@ pub mod prelude {
     pub use super::logout::LogOut;
     pub use super::modal::ModalHOC;
     pub use super::navbar::NavbarHOC;
-    pub use super::right_menu::RightMenu;
+    pub use super::right_menu::RightMenuHOC;
     pub use super::settings::SettingsHOC;
     pub use super::signin::SignInHOC;
     pub use super::signup::SignUp;

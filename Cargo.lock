@@ -2737,7 +2737,7 @@ dependencies = [
  "serde",
  "uuid",
  "yew 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "yew-agent 0.2.0",
+ "yew-agent 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

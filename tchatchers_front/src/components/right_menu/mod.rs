@@ -4,12 +4,10 @@
 pub mod message_rmenu;
 pub mod profile_rmenu;
 
-use std::rc::Rc;
-
 use js_sys::Function;
 use wasm_bindgen::{prelude::Closure, JsCast};
-use yew::{html, Component, Context, Html, Properties};
-use yew_agent::{Bridge, Bridged, Dispatched};
+use yew::{function_component, html, Component, Context, Html, Properties};
+use yew_agent_latest::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
 use yew_router::scope_ext::{LocationHandle, RouterScopeExt};
 
 use rmenu_service::*;
@@ -18,10 +16,11 @@ use self::{message_rmenu::MessageRMenu, profile_rmenu::ProfileRMenu};
 
 const JS_EVENTS_TO_CANCEL: [&str; 2] = ["click", "contextmenu"];
 
-fn close_context_menu_function() -> Function {
-    let closure: Box<dyn FnMut(_)> = Box::new(move |_: web_sys::MouseEvent| {
-        RMenuBus::dispatcher().send(RMenusBusEvents::CloseRMenu)
-    });
+fn close_context_menu_function(
+    bridge: UseWorkerSubscriptionHandle<rmenu_service::RMenuBus>,
+) -> Function {
+    let closure: Box<dyn FnMut(_)> =
+        Box::new(move |_: web_sys::MouseEvent| bridge.send(RMenusBusEvents::CloseRMenu));
 
     let closure = Closure::wrap(closure);
 
@@ -31,7 +30,19 @@ fn close_context_menu_function() -> Function {
 }
 
 #[derive(Properties, PartialEq, Clone)]
-pub struct Props {}
+pub struct RightMenuHOCProps;
+
+#[function_component(RightMenuHOC)]
+pub fn rmenu_hoc(_props: &RightMenuHOCProps) -> Html {
+    let bridge = use_worker_subscription::<RMenuBus>();
+
+    html! { <RightMenu {bridge} /> }
+}
+
+#[derive(Properties, PartialEq, Clone)]
+pub struct Props {
+    bridge: UseWorkerSubscriptionHandle<RMenuBus>,
+}
 
 pub enum Msg {
     HandleBusMessage(RMenusBusEvents),
@@ -42,7 +53,6 @@ pub struct RightMenu {
     visible: bool,
     pos_x: i32,
     pos_y: i32,
-    _producer: Box<dyn Bridge<RMenuBus>>,
     close_events: Vec<Function>,
     _location_handle: LocationHandle,
     content: Html,
@@ -54,12 +64,6 @@ impl Component for RightMenu {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let cb = {
-            let link = ctx.link().clone();
-            move |mc| {
-                link.send_message(Msg::HandleBusMessage(mc));
-            }
-        };
         let listener = ctx
             .link()
             .add_location_listener(
@@ -69,7 +73,6 @@ impl Component for RightMenu {
             .unwrap();
         Self {
             visible: false,
-            _producer: RMenuBus::bridge(Rc::new(cb)),
             pos_x: 0,
             pos_y: 0,
             close_events: Vec::new(),
@@ -79,7 +82,21 @@ impl Component for RightMenu {
         }
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
+        if old_props.bridge.len() < ctx.props().bridge.len() {
+            let Some(last_msg) = ctx.props().bridge.last().cloned() else {
+                panic!("Unreachable");
+            };
+            let last_msg = (*last_msg).clone();
+            ctx.link().send_message(Msg::HandleBusMessage(last_msg));
+
+            true
+        } else {
+            false
+        }
+    }
+
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         let clear_events = || {
             if !self.close_events.is_empty() {
                 let window = web_sys::window().unwrap();
@@ -104,8 +121,9 @@ impl Component for RightMenu {
                     let window = web_sys::window().unwrap();
                     let document = window.document().unwrap();
                     let body = document.body().unwrap();
+                    let bridge = &ctx.props().bridge;
 
-                    let close_event = close_context_menu_function();
+                    let close_event = close_context_menu_function(bridge.clone());
 
                     for event in JS_EVENTS_TO_CANCEL {
                         body.add_event_listener_with_callback(event, &close_event)
