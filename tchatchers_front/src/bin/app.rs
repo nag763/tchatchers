@@ -18,7 +18,7 @@ use tchatchers_front::utils::client_context::ClientContext;
 use tchatchers_front::utils::requester::Requester;
 use yew::prelude::*;
 use yew::suspense::use_future;
-use yew_agent_latest::{reactor::ReactorProvider, worker::WorkerProvider, Bincode};
+use yew_agent::{reactor::ReactorProvider, worker::WorkerProvider, Bincode};
 use yew_router::prelude::*;
 
 #[function_component(ContextualApp)]

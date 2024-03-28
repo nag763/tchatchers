@@ -9,7 +9,7 @@ use web_sys::MouseEvent;
 use yew::{
     classes, function_component, html, use_state, AttrValue, Component, Context, Html, Properties,
 };
-use yew_agent_latest::worker::use_worker_subscription;
+use yew_agent::worker::use_worker_subscription;
 
 const DEFAULT_PFP: &str = "/assets/no_pfp.webp";
 

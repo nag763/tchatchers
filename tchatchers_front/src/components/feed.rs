@@ -20,8 +20,8 @@ use yew::{
     function_component, html, use_context, AttrValue, Component, Context, Html, Properties,
     UseStateHandle,
 };
-use yew_agent_latest::reactor::{use_reactor_subscription, UseReactorSubscriptionHandle};
-use yew_agent_latest::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
+use yew_agent::reactor::{use_reactor_subscription, UseReactorSubscriptionHandle};
+use yew_agent::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
 use yew_router::scope_ext::RouterScopeExt;
 
 #[derive(Properties, PartialEq, Clone)]

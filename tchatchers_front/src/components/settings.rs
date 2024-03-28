@@ -29,8 +29,8 @@ use yew::function_component;
 use yew::use_context;
 use yew::AttrValue;
 use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
-use yew_agent_latest::worker::use_worker_subscription;
-use yew_agent_latest::worker::UseWorkerSubscriptionHandle;
+use yew_agent::worker::use_worker_subscription;
+use yew_agent::worker::UseWorkerSubscriptionHandle;
 use yew_router::scope_ext::RouterScopeExt;
 
 #[function_component(SettingsHOC)]

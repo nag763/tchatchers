@@ -5,7 +5,7 @@ use tchatchers_core::{api_response::ApiResponse, profile::Profile};
 use yew::{function_component, html, use_context, Html};
 
 use toast_service::{Alert, ToastBus};
-use yew_agent_latest::worker::use_worker_subscription;
+use yew_agent::worker::use_worker_subscription;
 
 use crate::{
     components::common::I18N,

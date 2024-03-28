@@ -7,7 +7,7 @@ pub mod profile_rmenu;
 use js_sys::Function;
 use wasm_bindgen::{prelude::Closure, JsCast};
 use yew::{function_component, html, Component, Context, Html, Properties};
-use yew_agent_latest::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
+use yew_agent::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
 use yew_router::scope_ext::{LocationHandle, RouterScopeExt};
 
 use rmenu_service::*;

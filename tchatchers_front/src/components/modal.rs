@@ -5,7 +5,7 @@ use modal_service::{ModalBus, ModalBusContent, ModalContent};
 use wasm_bindgen::{prelude::Closure, JsCast};
 use web_sys::{Element, EventTarget, MouseEvent};
 use yew::{classes, function_component, html, Component, Context, Html, Properties};
-use yew_agent_latest::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
+use yew_agent::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
 
 const MODAL_ID: &str = "modal";
 pub const MODAL_OPENER_CLASS: &str = "modal-opener";

@@ -8,7 +8,7 @@ use wasm_bindgen::JsValue;
 use yew::{UseStateHandle, UseStateSetter};
 
 use toast_service::{Alert, ToastBus};
-use yew_agent_latest::Spawnable;
+use yew_agent::Spawnable;
 
 const UNAUTHORIZED: u16 = 401u16;
 const TOO_MANY_REQUESTS: u16 = 429u16;

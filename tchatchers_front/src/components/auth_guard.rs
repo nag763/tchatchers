@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use yew::{function_component, html, use_context, BaseComponent, Html};
-use yew_agent_latest::worker::use_worker_subscription;
+use yew_agent::worker::use_worker_subscription;
 use yew_router::prelude::use_navigator;
 
 use crate::{router::Route, utils::client_context::ClientContext};

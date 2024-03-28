@@ -10,7 +10,7 @@ use crate::utils::requester::Requester;
 use toast_service::{Alert, ToastBus};
 use yew::suspense::use_future;
 use yew::{function_component, html, use_context, Html, HtmlResult, Suspense};
-use yew_agent_latest::worker::use_worker_subscription;
+use yew_agent::worker::use_worker_subscription;
 use yew_router::prelude::use_navigator;
 
 #[function_component(LogOut)]

@@ -16,7 +16,7 @@ use web_sys::HtmlInputElement;
 use yew::{
     function_component, html, use_context, AttrValue, Component, Context, Html, NodeRef, Properties,
 };
-use yew_agent_latest::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
+use yew_agent::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
 use yew_router::prelude::use_navigator;
 use yew_router::scope_ext::RouterScopeExt;
 

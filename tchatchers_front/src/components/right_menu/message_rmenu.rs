@@ -3,7 +3,7 @@ use std::rc::Rc;
 use rmenu_service::MessageRMenuProps;
 use tchatchers_core::{api_response::ApiResponse, profile::Profile, ws_message::WsMessage};
 use yew::{function_component, html, use_context, Html};
-use yew_agent_latest::{reactor::use_reactor_subscription, worker::use_worker_subscription};
+use yew_agent::{reactor::use_reactor_subscription, worker::use_worker_subscription};
 
 use crate::{
     components::common::I18N,

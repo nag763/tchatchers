@@ -1587,23 +1587,6 @@ dependencies = [
 
 [[package]]
 name = "gloo-worker"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09110b5555bcafe508cee0fb94308af9aac7a85f980d3c88b270d117c6c6911d"
-dependencies = [
- "anymap2",
- "bincode",
- "gloo-console 0.2.3",
- "gloo-utils 0.1.7",
- "js-sys",
- "serde",
- "slab",
- "wasm-bindgen",
- "web-sys",
-]
-
-[[package]]
-name = "gloo-worker"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13471584da78061a28306d1359dd0178d8d6fc1c7c80e5e35d27260346e0516a"
@@ -1652,12 +1635,6 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.12.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
-
-[[package]]
-name = "hashbrown"
 version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
@@ -1672,7 +1649,7 @@ version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e8094feaf31ff591f651a2664fb9cfd92bba7a60ce3197265e9482ebe753c8f7"
 dependencies = [
- "hashbrown 0.14.3",
+ "hashbrown",
 ]
 
 [[package]]
@@ -1898,21 +1875,12 @@ dependencies = [
 
 [[package]]
 name = "implicit-clone"
-version = "0.3.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfd6201e7c30ccb24773cac7efa6fec1e06189d414b7439ce756a481c8bfbf53"
-dependencies = [
- "indexmap 1.9.3",
-]
-
-[[package]]
-name = "implicit-clone"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8a9aa791c7b5a71b636b7a68207fdebf171ddfc593d9c8506ec4cbc527b6a84"
 dependencies = [
  "implicit-clone-derive",
- "indexmap 2.2.6",
+ "indexmap",
 ]
 
 [[package]]
@@ -1927,22 +1895,12 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.9.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd070e393353796e801d209ad339e89596eb4c8d430d18ede6a1cced8fafbd99"
-dependencies = [
- "autocfg",
- "hashbrown 0.12.3",
-]
-
-[[package]]
-name = "indexmap"
 version = "2.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "168fb715dda47215e360912c096649d23d58bf392ac62f73919e831745e40f26"
 dependencies = [
  "equivalent",
- "hashbrown 0.14.3",
+ "hashbrown",
 ]
 
 [[package]]
@@ -2526,16 +2484,6 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
 name = "prettyplease"
-version = "0.1.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c8646e95016a7a6c4adea95bafa8a16baab64b583356217f2c85db4a39d9a86"
-dependencies = [
- "proc-macro2",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "prettyplease"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8d3928fb5db768cb86f891ff014f0144589297e3c6a1aba6ed7cecfdace270c7"
@@ -2946,7 +2894,7 @@ version = "0.9.34+deprecated"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
 dependencies = [
- "indexmap 2.2.6",
+ "indexmap",
  "itoa",
  "ryu",
  "serde",
@@ -3117,7 +3065,7 @@ dependencies = [
  "futures-util",
  "hashlink",
  "hex",
- "indexmap 2.2.6",
+ "indexmap",
  "log",
  "memchr",
  "native-tls",
@@ -3439,7 +3387,6 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
  "yew 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "yew-agent 0.2.0",
  "yew-agent 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "yew-router",
 ]
@@ -3648,7 +3595,7 @@ version = "0.19.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b5bb770da30e5cbfde35a2d7b9b8a2c4b8ef89548a7a6aeab5c9a576e3e7421"
 dependencies = [
- "indexmap 2.2.6",
+ "indexmap",
  "toml_datetime",
  "winnow",
 ]
@@ -4245,31 +4192,6 @@ checksum = "d135d17ab770252ad95e9a872d365cf3090e3be864a34ab46f48555993efc904"
 
 [[package]]
 name = "yew"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5dbecfe44343b70cc2932c3eb445425969ae21754a8ab3a0966981c1cf7af1cc"
-dependencies = [
- "console_error_panic_hook",
- "futures",
- "gloo 0.8.1",
- "implicit-clone 0.3.9",
- "indexmap 1.9.3",
- "js-sys",
- "prokio",
- "rustversion",
- "serde",
- "slab",
- "thiserror",
- "tokio",
- "tracing",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
- "yew-macro 0.20.0",
-]
-
-[[package]]
-name = "yew"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f1a03f255c70c7aa3e9c62e15292f142ede0564123543c1cc0c7a4f31660cac"
@@ -4277,8 +4199,8 @@ dependencies = [
  "console_error_panic_hook",
  "futures",
  "gloo 0.10.0",
- "implicit-clone 0.4.9",
- "indexmap 2.2.6",
+ "implicit-clone",
+ "indexmap",
  "js-sys",
  "prokio",
  "rustversion",
@@ -4301,8 +4223,8 @@ dependencies = [
  "console_error_panic_hook",
  "futures",
  "gloo 0.10.0",
- "implicit-clone 0.4.9",
- "indexmap 2.2.6",
+ "implicit-clone",
+ "indexmap",
  "js-sys",
  "prokio",
  "rustversion",
@@ -4315,16 +4237,6 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
  "yew-macro 0.21.0 (git+https://github.com/yewstack/yew.git)",
-]
-
-[[package]]
-name = "yew-agent"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b06f7c5ed97fff22816bb00d3d82ebc0fc1119d7bbb9e07e62c0d2853f51920a"
-dependencies = [
- "gloo-worker 0.1.2",
- "yew 0.20.0",
 ]
 
 [[package]]
@@ -4377,28 +4289,13 @@ dependencies = [
 
 [[package]]
 name = "yew-macro"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b64c253c1d401f1ea868ca9988db63958cfa15a69f739101f338d6f05eea8301"
-dependencies = [
- "boolinator",
- "once_cell",
- "prettyplease 0.1.25",
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "yew-macro"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "02fd8ca5166d69e59f796500a2ce432ff751edecbbb308ca59fd3fe4d0343de2"
 dependencies = [
  "boolinator",
  "once_cell",
- "prettyplease 0.2.17",
+ "prettyplease",
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -4411,7 +4308,7 @@ version = "0.21.0"
 source = "git+https://github.com/yewstack/yew.git#e9739fc9ce4944ba93c77a32072551ab771a2cda"
 dependencies = [
  "once_cell",
- "prettyplease 0.2.17",
+ "prettyplease",
  "proc-macro-error",
  "proc-macro2",
  "quote",
