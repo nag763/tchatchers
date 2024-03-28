@@ -8,12 +8,14 @@ use tchatchers_core::navlink::Navlink;
 use tchatchers_core::user::PartialUser;
 use tchatchers_front::components::prelude::*;
 
+use chat_service::ChatReactor;
 use tchatchers_front::components::toast::ToastHOC;
 use tchatchers_front::router::{switch, Route};
 use tchatchers_front::utils::client_context::ClientContext;
 use tchatchers_front::utils::requester::Requester;
 use yew::prelude::*;
 use yew::suspense::use_future;
+use yew_agent_latest::reactor::ReactorProvider;
 use yew_router::prelude::*;
 
 #[function_component(ContextualApp)]
@@ -77,6 +79,7 @@ fn contextual_app() -> HtmlResult {
 
     Ok(html! {
         <BrowserRouter>
+            <ReactorProvider<ChatReactor> path="/chat_service.js">
             <ContextProvider<Rc<ClientContext>> context={context}>
                 <div class="h-screen grid grid-rows-12">
                     <NavbarHOC/>
@@ -88,6 +91,7 @@ fn contextual_app() -> HtmlResult {
                 <ToastHOC />
                 <Modal />
             </ContextProvider<Rc<ClientContext>>>
+            </ReactorProvider<ChatReactor>>
         </BrowserRouter>
     })
 }

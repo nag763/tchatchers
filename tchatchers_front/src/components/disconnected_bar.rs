@@ -4,24 +4,22 @@ use std::rc::Rc;
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 use crate::components::common::{WaitingForResponse, I18N};
 use tchatchers_core::locale::TranslationMap;
-use yew::{function_component, html, Callback, Component, Context, Html, Properties};
+use yew::{function_component, html, Component, Context, Html, Properties};
 
 #[derive(Properties, PartialEq)]
 pub struct TryReconnectProps {
-    try_reconnect: Callback<()>,
     translation: Rc<TranslationMap>,
 }
 
 #[function_component(TryReconnect)]
 pub fn try_reconnect(props: &TryReconnectProps) -> Html {
-    let onclick_event = props.try_reconnect.clone();
     let translation = &props.translation;
     html! {
         <div class="flex items-center justify-center gap-2 lg:gap-12 dark:text-gray-200">
             <span>
             <I18N  label={"you_are_disconnected"} default={"You are disconnected"} {translation} />
             </span>
-            <button class="common-button" onclick={move |_| onclick_event.emit(())} >
+            <button class="common-button" onclick={move |_| {let _ = web_sys::window().unwrap().location().reload();}} >
             <I18N  label={"try_reconnect"} default={"Reconnect"} {translation} />
             </button>
         </div>
@@ -31,7 +29,6 @@ pub fn try_reconnect(props: &TryReconnectProps) -> Html {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub called_back: bool,
-    pub try_reconnect: Callback<()>,
     pub translation: Rc<TranslationMap>,
 }
 
@@ -50,7 +47,7 @@ impl Component for DisconnectedBar {
         html! {
             <div class="col-span-6 mb-6">
                 if ctx.props().called_back {
-                    <TryReconnect {translation} try_reconnect={ctx.props().try_reconnect.clone()} />
+                    <TryReconnect {translation} />
                 } else {
                     <WaitingForResponse {translation} />
                 }

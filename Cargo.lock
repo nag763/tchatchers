@@ -347,15 +347,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "atomic-polyfill"
-version = "1.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cf2bce30dfe09ef0bfaef228b9d414faaf7e563035494d7fe092dba54b300f4"
-dependencies = [
- "critical-section",
-]
-
-[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -576,13 +567,12 @@ dependencies = [
  "futures",
  "gloo-console 0.3.0",
  "gloo-net 0.5.0",
- "js-sys",
- "postcard",
+ "serde",
  "serde_json",
  "tchatchers_core",
+ "tokio",
  "wasm-bindgen-futures",
- "web-sys",
- "yew-agent",
+ "yew-agent 0.3.0",
 ]
 
 [[package]]
@@ -776,12 +766,6 @@ name = "crc-catalog"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19d374276b40fb8bbdee95aef7c7fa6b5316ec764510eb64b8dd0e2ed0d7e7f5"
-
-[[package]]
-name = "critical-section"
-version = "1.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7059fff8937831a9ae6f0fe4d658ffabf58f2ca96aa9dec1c889f936f705f216"
 
 [[package]]
 name = "crossbeam-queue"
@@ -1667,15 +1651,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hash32"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0c35f58762feb77d74ebe43bdbc3210f09be9fe6742234d573bacc26ed92b67"
-dependencies = [
- "byteorder",
-]
-
-[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1722,20 +1697,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "54b4a22553d4242c49fddb9ba998a99962b5cc6f22cb5a3482bec22522403ce4"
 dependencies = [
  "http 1.1.0",
-]
-
-[[package]]
-name = "heapless"
-version = "0.7.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cdc6457c0eb62c71aac4bc17216026d8410337c4126773b9c5daba343f17964f"
-dependencies = [
- "atomic-polyfill",
- "hash32",
- "rustc_version",
- "serde",
- "spin 0.9.8",
- "stable_deref_trait",
 ]
 
 [[package]]
@@ -2190,7 +2151,7 @@ name = "modal_service"
 version = "0.1.0"
 dependencies = [
  "serde",
- "yew-agent",
+ "yew-agent 0.2.0",
 ]
 
 [[package]]
@@ -2547,7 +2508,6 @@ checksum = "a55c51ee6c0db07e68448e336cf8ea4131a620edefebf9893e759b2d793420f8"
 dependencies = [
  "cobs",
  "embedded-io",
- "heapless",
  "serde",
 ]
 
@@ -2776,7 +2736,7 @@ dependencies = [
  "serde",
  "uuid",
  "yew 0.21.0",
- "yew-agent",
+ "yew-agent 0.2.0",
 ]
 
 [[package]]
@@ -3323,12 +3283,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "stable_deref_trait"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
-
-[[package]]
 name = "stringprep"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3484,7 +3438,8 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
  "yew 0.21.0",
- "yew-agent",
+ "yew-agent 0.2.0",
+ "yew-agent 0.3.0",
  "yew-router",
 ]
 
@@ -3610,7 +3565,7 @@ name = "toast_service"
 version = "0.1.0"
 dependencies = [
  "serde",
- "yew-agent",
+ "yew-agent 0.2.0",
 ]
 
 [[package]]
@@ -4345,6 +4300,31 @@ checksum = "b06f7c5ed97fff22816bb00d3d82ebc0fc1119d7bbb9e07e62c0d2853f51920a"
 dependencies = [
  "gloo-worker 0.1.2",
  "yew 0.20.0",
+]
+
+[[package]]
+name = "yew-agent"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e27eaca61ea9d0e1a6589dce592283b0e62ced527d8a8b28447957295d588f5"
+dependencies = [
+ "futures",
+ "gloo-worker 0.4.0",
+ "serde",
+ "wasm-bindgen",
+ "yew 0.21.0",
+ "yew-agent-macro",
+]
+
+[[package]]
+name = "yew-agent-macro"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ad00f6c9436d25c9225ed0fd8eea27e6d2886c1387bf934afdf91e9131b8b77"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.55",
 ]
 
 [[package]]
