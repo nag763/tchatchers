@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 axum = { version = "0.7.5", features = ["ws", "http1", "multipart"], default-features = false }
-tokio = { version = "1.36", features = ["full"], default-features = false }
+tokio = { version = "1.37", features = ["full"], default-features = false }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 dotenv = "0.15.0"
 futures-util = { version = "0.3.30" }
@@ -22,5 +22,5 @@ tower = { default-features = false, version = "0.4.13" }
 postcard = { version = "1.0.8", default-features = false, features = ["use-std"] }
 mime = "0.3.17"
 anyhow = "1.0.81"
-serde_json = "1.0.114"
+serde_json = "1.0.115"
 redis = { version = "0.25.2", features = ["aio", "tokio-comp"], default-features = false }
