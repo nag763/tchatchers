@@ -2,8 +2,8 @@
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
 use toast_service::ToastBus;
-use yew_agent::PublicWorker;
+use yew_agent::Registrable;
 
 fn main() {
-    ToastBus::register();
+    ToastBus::registrar().register();
 }

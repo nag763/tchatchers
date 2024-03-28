@@ -16,25 +16,26 @@ use web_sys::HtmlInputElement;
 use yew::{
     function_component, html, use_context, AttrValue, Component, Context, Html, NodeRef, Properties,
 };
-use yew_agent::Dispatched;
+use yew_agent_latest::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
 use yew_router::prelude::use_navigator;
 use yew_router::scope_ext::RouterScopeExt;
 
 #[function_component(SignUpHOC)]
 pub fn sign_up_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().expect("No app context");
+    let toaster = use_worker_subscription::<ToastBus>();
     {
         let navigator = use_navigator().unwrap();
         if client_context.user.is_some() {
             navigator.replace(&Route::JoinRoom);
-            ToastBus::dispatcher().send(Alert {
+            toaster.send(Alert {
                 is_success: false,
                 label: "already_logged_in".into(),
                 default: "You are already logged in".into(),
             });
         }
     }
-    html! { <SignUp client_context={(*client_context).clone()}/> }
+    html! { <SignUp client_context={(*client_context).clone()} {toaster}/> }
 }
 
 pub enum Msg {
@@ -46,6 +47,7 @@ pub enum Msg {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     client_context: ClientContext,
+    toaster: UseWorkerSubscriptionHandle<ToastBus>,
 }
 
 #[derive(Default)]
@@ -114,10 +116,11 @@ impl Component for SignUp {
                         } else {
                             let mut req = Requester::post("/api/user");
                             req.postcard_body(payload);
+                            let toaster = ctx.props().clone().toaster;
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
                                 if resp.ok() {
-                                    ToastBus::dispatcher().send(Alert {
+                                    toaster.send(Alert {
                                         is_success: true,
                                         label: "success_on_user_creation".into(),
                                         default: "User created with success".into(),

@@ -10,7 +10,7 @@ use crate::utils::requester::Requester;
 use toast_service::{Alert, ToastBus};
 use yew::suspense::use_future;
 use yew::{function_component, html, use_context, Html, HtmlResult, Suspense};
-use yew_agent::Dispatched;
+use yew_agent_latest::worker::use_worker_subscription;
 use yew_router::prelude::use_navigator;
 
 #[function_component(LogOut)]
@@ -26,10 +26,11 @@ pub fn log_out_hoc() -> Html {
 pub fn log_out_future() -> HtmlResult {
     let client_context = use_context::<Rc<ClientContext>>().unwrap();
     let navigator = use_navigator().unwrap();
-    let _ = use_future(|| async {
+    let toaster = use_worker_subscription::<ToastBus>();
+    let _ = use_future(|| async move {
         let mut req = Requester::get("/api/logout");
         req.send().await;
-        ToastBus::dispatcher().send(Alert {
+        toaster.send(Alert {
             is_success: true,
             label: "logged_out".into(),
             default: "You logged out with success, see you !".into(),

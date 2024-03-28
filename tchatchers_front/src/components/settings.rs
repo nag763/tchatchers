@@ -29,7 +29,6 @@ use yew::function_component;
 use yew::use_context;
 use yew::AttrValue;
 use yew::{html, Callback, Component, Context, Html, NodeRef, Properties};
-use yew_agent::Dispatched;
 use yew_agent_latest::worker::use_worker_subscription;
 use yew_agent_latest::worker::UseWorkerSubscriptionHandle;
 use yew_router::scope_ext::RouterScopeExt;
@@ -38,8 +37,9 @@ use yew_router::scope_ext::RouterScopeExt;
 pub fn feed_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().expect("Context defined at startup");
     let bridge = use_worker_subscription::<ModalBus>();
+    let toaster = use_worker_subscription::<ToastBus>();
 
-    html! { <Settings context={client_context} {bridge} /> }
+    html! { <Settings context={client_context} {bridge} {toaster} /> }
 }
 
 pub enum Msg {
@@ -55,6 +55,7 @@ pub enum Msg {
 pub struct Props {
     context: Rc<ClientContext>,
     bridge: UseWorkerSubscriptionHandle<ModalBus>,
+    toaster: UseWorkerSubscriptionHandle<ToastBus>,
 }
 
 pub struct Settings {
@@ -191,7 +192,7 @@ impl Component for Settings {
                 let locale_id = app_context.locale_id;
                 self.user_context.user.set(Some(app_context));
                 let translation = Locale::find_by_id(locale_id).unwrap().translation_map;
-                ToastBus::dispatcher().send(Alert {
+                ctx.props().toaster.send(Alert {
                     is_success: true,
                     label: "profile_updated".into(),
                     default: "Your profile has been updated with success".into(),

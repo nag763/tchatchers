@@ -5,7 +5,7 @@ use tchatchers_core::{api_response::ApiResponse, profile::Profile};
 use yew::{function_component, html, use_context, Html};
 
 use toast_service::{Alert, ToastBus};
-use yew_agent::Dispatched;
+use yew_agent_latest::worker::use_worker_subscription;
 
 use crate::{
     components::common::I18N,
@@ -24,8 +24,10 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
         let bearer = bearer.clone();
         let revoke_user_id = {
             let props = props.clone();
+            let toaster = use_worker_subscription::<ToastBus>();
             move |_| {
                 let mut req = Requester::post(&format!("/api/user/revoke/{}", props.user_id));
+                let toaster = toaster.clone();
                 req.bearer(bearer.clone());
                 wasm_bindgen_futures::spawn_local(async move {
                     let res = req.send().await;
@@ -34,7 +36,7 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
                     let label = api_resp.label;
                     let default: String = api_resp.text.unwrap_or("Unknown response".into());
                     let is_success = res.ok();
-                    ToastBus::dispatcher().send(Alert {
+                    toaster.send(Alert {
                         is_success,
                         label,
                         default,
@@ -52,7 +54,9 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
     let report_user_li = {
         let report_user_id = {
             let props = props.clone();
+            let toaster = use_worker_subscription::<ToastBus>();
             move |_| {
+                let toaster = toaster.clone();
                 let mut req = Requester::post(&format!("/api/user/{}/report", props.user_id));
                 req.bearer(bearer.clone());
                 wasm_bindgen_futures::spawn_local(async move {
@@ -62,7 +66,7 @@ pub fn profile_rmenu(props: &ProfileRMenuProps) -> Html {
                     let label = api_resp.label;
                     let default: String = api_resp.text.unwrap_or("Unknown response".into());
                     let is_success = res.ok();
-                    ToastBus::dispatcher().send(Alert {
+                    toaster.send(Alert {
                         is_success,
                         label,
                         default,

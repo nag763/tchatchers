@@ -20,8 +20,8 @@ use yew::{
     function_component, html, use_context, AttrValue, Component, Context, Html, Properties,
     UseStateHandle,
 };
-use yew_agent::Dispatched;
 use yew_agent_latest::reactor::{use_reactor_subscription, UseReactorSubscriptionHandle};
+use yew_agent_latest::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
 use yew_router::scope_ext::RouterScopeExt;
 
 #[derive(Properties, PartialEq, Clone)]
@@ -35,7 +35,9 @@ pub fn feed_hoc(props: &FeedHOCProps) -> Html {
 
     let reactor = use_reactor_subscription::<ChatReactor>();
 
-    html! { <Feed room={props.room.clone()} {client_context}  {reactor} /> }
+    let toaster = use_worker_subscription::<ToastBus>();
+
+    html! { <Feed room={props.room.clone()} {client_context}  {toaster} {reactor} /> }
 }
 
 #[derive(Clone)]
@@ -50,6 +52,7 @@ pub struct Props {
     pub room: AttrValue,
     pub client_context: Rc<ClientContext>,
     pub reactor: UseReactorSubscriptionHandle<ChatReactor>,
+    pub toaster: UseWorkerSubscriptionHandle<ToastBus>,
 }
 
 pub struct Feed {
@@ -120,7 +123,7 @@ impl Component for Feed {
                             if let Err(_e) =
                                 RoomNameValidator::from(ctx.props().room.to_string()).validate()
                             {
-                                ToastBus::dispatcher().send(Alert {
+                                ctx.props().toaster.send(Alert {
                                         is_success: false,
                                         label: "room_name_incorrect".into(),
                                         default: "The room name you tried to join is not valid, please select one within this screen.".into(),

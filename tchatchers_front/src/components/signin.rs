@@ -16,25 +16,26 @@ use web_sys::HtmlInputElement;
 use yew::{
     function_component, html, use_context, AttrValue, Component, Context, Html, NodeRef, Properties,
 };
-use yew_agent::Dispatched;
+use yew_agent_latest::worker::{use_worker_subscription, UseWorkerSubscriptionHandle};
 use yew_router::prelude::use_navigator;
 use yew_router::scope_ext::RouterScopeExt;
 
 #[function_component(SignInHOC)]
 pub fn sign_in_hoc() -> Html {
     let client_context = use_context::<Rc<ClientContext>>().expect("No app context");
+    let toaster = use_worker_subscription::<ToastBus>();
     {
         let navigator = use_navigator().unwrap();
         if client_context.user.is_some() {
             navigator.replace(&Route::JoinRoom);
-            ToastBus::dispatcher().send(Alert {
+            toaster.send(Alert {
                 is_success: false,
                 label: "already_logged_in".into(),
                 default: "You are already logged in".into(),
             });
         }
     }
-    html! { <SignIn client_context={(*client_context).clone()}/> }
+    html! { <SignIn client_context={(*client_context).clone()} {toaster}/> }
 }
 
 pub enum Msg {
@@ -47,6 +48,7 @@ pub enum Msg {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     client_context: ClientContext,
+    toaster: UseWorkerSubscriptionHandle<ToastBus>,
 }
 
 #[derive(Default)]
@@ -135,7 +137,7 @@ impl Component for SignIn {
             }
             Msg::LoggedIn(new_context) => {
                 ctx.props().client_context.user.set(Some(new_context));
-                ToastBus::dispatcher().send(Alert {
+                ctx.props().toaster.send(Alert {
                     is_success: true,
                     label: "login_success".into(),
                     default: "You logged in with success".into(),

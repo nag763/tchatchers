@@ -6,9 +6,9 @@ use gloo_net::http::{Method, Request, RequestBuilder, Response};
 use js_sys::Uint8Array;
 use wasm_bindgen::JsValue;
 use yew::{UseStateHandle, UseStateSetter};
-use yew_agent::Dispatched;
 
 use toast_service::{Alert, ToastBus};
+use yew_agent_latest::Spawnable;
 
 const UNAUTHORIZED: u16 = 401u16;
 const TOO_MANY_REQUESTS: u16 = 429u16;
@@ -140,7 +140,7 @@ impl Requester {
                 }
             } else {
                 if resp.status() == TOO_MANY_REQUESTS {
-                    ToastBus::dispatcher().send(Alert {
+                    ToastBus::spawner().spawn("./toast_spawn.js").send(Alert {
                         is_success: true,
                         label: "max_conns_reached".into(),
                         default: "The number of maxium simulatenous connections has been reached"
