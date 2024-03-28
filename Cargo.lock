@@ -284,17 +284,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "async-recursion"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30c5ef0ede93efbf733c1a727f3b6b5a1060bbedd5600183e66f6e4be4af0ec5"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.55",
-]
-
-[[package]]
 name = "async-std"
 version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -354,9 +343,9 @@ checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 
 [[package]]
 name = "autocfg"
-version = "1.1.0"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
+checksum = "f1fdabc7756949593fe60f30ec81974b613357de856987752631dea1e3394c80"
 
 [[package]]
 name = "axum"
@@ -572,14 +561,14 @@ dependencies = [
  "tchatchers_core",
  "tokio",
  "wasm-bindgen-futures",
- "yew-agent 0.3.0 (git+https://github.com/yewstack/yew.git)",
+ "yew-agent",
 ]
 
 [[package]]
 name = "chrono"
-version = "0.4.35"
+version = "0.4.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8eaf5903dcbc0a39312feb77df2ff4c76387d591b9fc7b04a238dcf8bb62639a"
+checksum = "8a0d04d43504c61aa6c7531f1871dd0d418d91130162063b789da00fd7057a5e"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
@@ -1934,9 +1923,9 @@ dependencies = [
 
 [[package]]
 name = "itoa"
-version = "1.0.10"
+version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1a46d1a171d865aa5f83f92695765caa047a9b4cbae2cbf37dbd613a793fd4c"
+checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 
 [[package]]
 name = "js-sys"
@@ -2058,9 +2047,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.7.1"
+version = "2.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "523dc4f511e55ab87b694dc30d0f820d60906ef06413f93d4d7a1385599cc149"
+checksum = "6c8640c5d730cb13ebd907d8d04b52f55ac9a2eec55b440c8892f40d56c76c1d"
 
 [[package]]
 name = "mime"
@@ -2110,7 +2099,7 @@ version = "0.1.0"
 dependencies = [
  "gloo-console 0.3.0",
  "serde",
- "yew-agent 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "yew-agent",
 ]
 
 [[package]]
@@ -2281,9 +2270,9 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "openssl-sys"
-version = "0.9.101"
+version = "0.9.102"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dda2b0f344e78efc2facf7d195d098df0dd72151b26ab98da807afc26c198dff"
+checksum = "c597637d56fbc83893a35eb0dd04b2b8e7a50c91e64e9493e398b5df4fb45fa2"
 dependencies = [
  "cc",
  "libc",
@@ -2628,7 +2617,7 @@ dependencies = [
  "aho-corasick",
  "memchr",
  "regex-automata 0.4.6",
- "regex-syntax 0.8.2",
+ "regex-syntax 0.8.3",
 ]
 
 [[package]]
@@ -2648,7 +2637,7 @@ checksum = "86b83b8b9847f9bf95ef68afb0b8e6cdb80f498442f5179a29fad448fcc1eaea"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-syntax 0.8.2",
+ "regex-syntax 0.8.3",
 ]
 
 [[package]]
@@ -2659,9 +2648,9 @@ checksum = "f162c6dd7b008981e4d40210aca20b4bd0f9b60ca9271061b07f78537722f2e1"
 
 [[package]]
 name = "regex-syntax"
-version = "0.8.2"
+version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
+checksum = "adad44e29e4c806119491a7f06f03de4d1af22c3a680dd47f1e6e179439d1f56"
 
 [[package]]
 name = "ring"
@@ -2684,8 +2673,8 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "uuid",
- "yew 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "yew-agent 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "yew",
+ "yew-agent",
 ]
 
 [[package]]
@@ -2867,9 +2856,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.114"
+version = "1.0.115"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c5f09b1bd632ef549eaa9f60a1f8de742bdbc698e6cee2095fc84dde5f549ae0"
+checksum = "12dc5c46daa8e9fdf4f5e71b6cf9a53f2487da0e86e55808e2d35539666497dd"
 dependencies = [
  "itoa",
  "ryu",
@@ -3366,7 +3355,6 @@ dependencies = [
 name = "tchatchers_front"
 version = "0.1.0"
 dependencies = [
- "async-recursion",
  "chat_service",
  "chrono",
  "derive_more",
@@ -3386,8 +3374,8 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
- "yew 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "yew-agent 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "yew",
+ "yew-agent",
  "yew-router",
 ]
 
@@ -3513,14 +3501,14 @@ name = "toast_service"
 version = "0.1.0"
 dependencies = [
  "serde",
- "yew-agent 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "yew-agent",
 ]
 
 [[package]]
 name = "tokio"
-version = "1.36.0"
+version = "1.37.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61285f6515fa018fb2d1e46eb21223fff441ee8db5d0f1435e8ab4f5cdb80931"
+checksum = "1adbebffeca75fcfd058afa480fb6c0b81e165a0323f9c9d39c9697e37c46787"
 dependencies = [
  "backtrace",
  "bytes",
@@ -4212,31 +4200,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
- "yew-macro 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "yew"
-version = "0.21.0"
-source = "git+https://github.com/yewstack/yew.git#e9739fc9ce4944ba93c77a32072551ab771a2cda"
-dependencies = [
- "console_error_panic_hook",
- "futures",
- "gloo 0.10.0",
- "implicit-clone",
- "indexmap",
- "js-sys",
- "prokio",
- "rustversion",
- "serde",
- "slab",
- "thiserror",
- "tokio",
- "tracing",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
- "yew-macro 0.21.0 (git+https://github.com/yewstack/yew.git)",
+ "yew-macro",
 ]
 
 [[package]]
@@ -4249,21 +4213,8 @@ dependencies = [
  "gloo-worker 0.4.0",
  "serde",
  "wasm-bindgen",
- "yew 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "yew-agent-macro 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "yew-agent"
-version = "0.3.0"
-source = "git+https://github.com/yewstack/yew.git#e9739fc9ce4944ba93c77a32072551ab771a2cda"
-dependencies = [
- "futures",
- "gloo-worker 0.4.0",
- "serde",
- "wasm-bindgen",
- "yew 0.21.0 (git+https://github.com/yewstack/yew.git)",
- "yew-agent-macro 0.2.0 (git+https://github.com/yewstack/yew.git)",
+ "yew",
+ "yew-agent-macro",
 ]
 
 [[package]]
@@ -4278,35 +4229,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "yew-agent-macro"
-version = "0.2.0"
-source = "git+https://github.com/yewstack/yew.git#e9739fc9ce4944ba93c77a32072551ab771a2cda"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.55",
-]
-
-[[package]]
 name = "yew-macro"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "02fd8ca5166d69e59f796500a2ce432ff751edecbbb308ca59fd3fe4d0343de2"
 dependencies = [
  "boolinator",
- "once_cell",
- "prettyplease",
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 2.0.55",
-]
-
-[[package]]
-name = "yew-macro"
-version = "0.21.0"
-source = "git+https://github.com/yewstack/yew.git#e9739fc9ce4944ba93c77a32072551ab771a2cda"
-dependencies = [
  "once_cell",
  "prettyplease",
  "proc-macro-error",
@@ -4330,7 +4258,7 @@ dependencies = [
  "urlencoding",
  "wasm-bindgen",
  "web-sys",
- "yew 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "yew",
  "yew-router-macro",
 ]
 
