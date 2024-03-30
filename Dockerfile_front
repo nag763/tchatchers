@@ -1,46 +1,22 @@
-FROM node as asset_builder
-
-WORKDIR /home/usr/front
-
-COPY ./tchatchers_front/src ./src
-
-COPY ./tchatchers_front/Cargo.toml ./Cargo.toml
-
-COPY ./tchatchers_front/tailwind.config.js ./tailwind.config.js
-
-COPY ./tchatchers_front/main.css ./main.css
-
-COPY ./tchatchers_front/index.html ./index.html
-
-COPY ./tchatchers_front/install_assets.sh ./install_assets.sh
-
-RUN mkdir assets
-
-RUN bash install_assets.sh
-
 FROM rust:1.77 as src_builder
 
 WORKDIR /usr/tchatchers/front
 
-COPY --from=asset_builder /home/usr/front /usr/tchatchers/front/tchatchers_front
-
-COPY ./tchatchers_core ./tchatchers_core
-
-COPY ./tchatchers_macro ./tchatchers_macro
-
-COPY ./tchatchers_front/services ./tchatchers_front/services
-
-COPY ./tchatchers_front/favicon.ico ./tchatchers_front/favicon.ico
-
-COPY ./tchatchers_front/assets/no_pfp.webp ./tchatchers_front/assets/no_pfp.webp
-
-RUN printf "\n[profile.release]\nlto = true\ncodegen-units = 1\nstrip = true\npanic = \"abort\"\nopt-level = \"z\"\n" >> tchatchers_front/Cargo.toml
+RUN apt update
 
 RUN rustup target add wasm32-unknown-unknown
 
 RUN cargo install trunk
 
-RUN trunk build --release tchatchers_front/index.html
+COPY ./tchatchers_core ../tchatchers_core
+
+COPY ./tchatchers_macro ../tchatchers_macro
+
+COPY ./tchatchers_front ./
+
+RUN printf "\n[profile.release]\nlto = true\ncodegen-units = 1\nstrip = true\npanic = \"abort\"\nopt-level = \"z\"\n" >> ./Cargo.toml
+
+RUN trunk build --release
 
 FROM ubuntu as compressor
 
