@@ -11,12 +11,12 @@ async = ["dep:sqlx", "dep:redis", "dep:tokio"]
 
 
 [dependencies]
-chrono = { version = "0.4.37", features = ["clock", "serde"], default-features = false }
+chrono = { version = "0.4.38", features = ["clock", "serde"], default-features = false }
 derivative = "2.2.0"
 jsonwebtoken = { default-features = false, version = "8.3.0" }
 rand = { default-features = false, version = "0.8.5" }
 rust-argon2 = { version = "2", optional = true, default-features = false }
-serde = { version = "1.0.197", features = ["rc"], default-features = false }
+serde = { version = "1.0.199", features = ["rc"], default-features = false }
 sqlx = { version = "0.7", optional = true ,  features = ["runtime-async-std-native-tls", "postgres", "chrono", "uuid"] }
 uuid = { version = "1.8.0", features = ["v4", "serde"], default-features = false }
 validator = { version = "0.17.0", features = ["derive"], default-features = false }
@@ -25,12 +25,12 @@ lazy_static = "1.4.0"
 derive_more = { features = ["display"], default-features = false, version = "0.99.17" }
 log = "0.4.21"
 axum-extra = { version = "0.9", features = ["cookie"], optional = true }
-time = { default-features = false, version = "0.3.34" }
+time = { default-features = false, version = "0.3.36" }
 cookie = { version = "0.18.1", optional = true }
-redis = { version = "0.25.2", optional = true, features = ["streams", "aio", "tokio-comp"], default-features = false }
+redis = { version = "0.25.3", optional = true, features = ["streams", "aio", "tokio-comp"], default-features = false }
 clap = { version = "4.5.4", features = ["derive", "std"], optional = true}
 serde_yaml = "0.9.34"
 postcard = { version = "1.0.8", features = ["use-std"], default-features = false }
-serde_json = "1.0.115"
+serde_json = "1.0.116"
 tokio = { version = "1.37.0", features = ["fs"], optional=true }
 tchatchers_macro = { path = "../tchatchers_macro"} 
