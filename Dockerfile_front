@@ -1,4 +1,4 @@
-FROM rust:1.77.2 as src_builder
+FROM rust:1.78.0 as src_builder
 
 WORKDIR /usr/tchatchers/front
 
