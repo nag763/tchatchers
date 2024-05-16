@@ -21,12 +21,11 @@ pub enum WebSocketReactorControl {
 
 #[reactor(ChatReactor)]
 pub async fn websocket_reactor(mut scope: ReactorScope<WebSocketReactorControl, WsMessage>) {
-    gloo_console::log!("ChatReactor started");
+    gloo_console::debug!("ChatReactor started");
     let _ = scope.flush().await;
     let (mut sender, mut reader) = scope.split();
 
     if let Some(m) = reader.next().await {
-        gloo_console::log!("Reactor message received");
         let WebSocketReactorControl::Open(address) = m else {
             panic!("Opening message not received");
         };
@@ -102,15 +101,15 @@ pub async fn websocket_reactor(mut scope: ReactorScope<WebSocketReactorControl, 
 
         tokio::select! {
             _ = (&mut read_tsk) => {
-                gloo_console::log!("Read aborted");
+                gloo_console::debug!("Read aborted");
             },
             _ = (&mut write_tsk) => {
-                gloo_console::log!("Write aborted");
+                gloo_console::debug!("Write aborted");
             },
-            _ = (&mut scope_bridge_tsk) => gloo_console::log!("End of scope bridge")
+            _ = (&mut scope_bridge_tsk) => gloo_console::debug!("End of scope bridge")
         }
     } else {
-        gloo_console::log!("No message received, skipped");
+        gloo_console::debug!("No message received, skipped");
     }
-    gloo_console::log!("Exiting");
+    gloo_console::debug!("Exiting");
 }
