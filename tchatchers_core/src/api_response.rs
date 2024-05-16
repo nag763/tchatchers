@@ -88,7 +88,10 @@ pub enum ApiGenericResponse {
     ByteRejection(String),
     #[response(status=BAD_REQUEST, error("serialization_error"))]
     #[from_err(bincode::Error)]
-    #[cfg_attr(feature = "back", from_err(jsonwebtoken::errors::Error, serde_json::Error))]
+    #[cfg_attr(
+        feature = "back",
+        from_err(jsonwebtoken::errors::Error, serde_json::Error)
+    )]
     SerializationError(String),
     #[response(status=BAD_REQUEST, errors("validation_error"))]
     ValidationError(Vec<String>),

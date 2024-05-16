@@ -3,9 +3,9 @@
 // Copyright ⓒ 2022 LABEYE Loïc
 // This tool is distributed under the MIT License, check out [here](https://github.com/nag763/tchatchers/blob/main/LICENSE.MD).
 
+use crate::extractor::Bincode;
 use crate::extractor::JwtUserExtractor;
 use crate::extractor::ModeratorExtractor;
-use crate::extractor::Bincode;
 use crate::extractor::ValidBincode;
 use crate::AppState;
 use crate::REFRESH_TOKEN_PATH;
