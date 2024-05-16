@@ -38,7 +38,7 @@ RUN rustup target add wasm32-unknown-unknown
 
 RUN cargo install trunk
 
-RUN trunk build --release tchatchers_front/index.html
+RUN trunk build --release tchatchers_front/index.html --minify
 
 FROM ubuntu as compressor
 

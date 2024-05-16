@@ -38,7 +38,7 @@ impl ApiResponse {
 #[cfg(feature = "back")]
 impl IntoResponse for ApiResponse {
     fn into_response(self) -> Response {
-        let payload = postcard::to_stdvec(&self).unwrap();
+        let payload = bincode::serialize(&self).unwrap();
         let code: StatusCode = self.kind.into();
         (code, payload).into_response()
     }
@@ -87,8 +87,8 @@ pub enum ApiGenericResponse {
     #[cfg_attr(feature = "back", from_err(axum::extract::rejection::BytesRejection))]
     ByteRejection(String),
     #[response(status=BAD_REQUEST, error("serialization_error"))]
-    #[from_err(postcard::Error, serde_json::Error)]
-    #[cfg_attr(feature = "back", from_err(jsonwebtoken::errors::Error))]
+    #[from_err(bincode::Error)]
+    #[cfg_attr(feature = "back", from_err(jsonwebtoken::errors::Error, serde_json::Error))]
     SerializationError(String),
     #[response(status=BAD_REQUEST, errors("validation_error"))]
     ValidationError(Vec<String>),

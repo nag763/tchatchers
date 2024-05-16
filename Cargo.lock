@@ -628,12 +628,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "98cc8fbded0c607b7ba9dd60cd98df59af97e84d24e49c8557331cfc26d301ce"
 
 [[package]]
-name = "cobs"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67ba02a97a2bd10f4b59b25c7973101c79642302776489e030cd13cdab09ed15"
-
-[[package]]
 name = "colorchoice"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -908,12 +902,6 @@ checksum = "a47c1c47d2f5964e29c61246e81db715514cd532db6b5116a25ea3c03d6780a2"
 dependencies = [
  "serde",
 ]
-
-[[package]]
-name = "embedded-io"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef1a6892d9eef45c8fa6b9e0086428a2cca8491aca8f787c534a3d6d0bcb3ced"
 
 [[package]]
 name = "encode_unicode"
@@ -2452,17 +2440,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "postcard"
-version = "1.0.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a55c51ee6c0db07e68448e336cf8ea4131a620edefebf9893e759b2d793420f8"
-dependencies = [
- "cobs",
- "embedded-io",
- "serde",
-]
-
-[[package]]
 name = "powerfmt"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3310,10 +3287,10 @@ dependencies = [
  "anyhow",
  "axum",
  "axum-extra",
+ "bincode",
  "dotenv",
  "futures-util",
  "mime",
- "postcard",
  "redis",
  "serde",
  "serde_json",
@@ -3334,6 +3311,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "axum-extra",
+ "bincode",
  "chrono",
  "clap",
  "cookie",
@@ -3342,7 +3320,6 @@ dependencies = [
  "jsonwebtoken",
  "lazy_static",
  "log",
- "postcard",
  "rand",
  "redis",
  "rust-argon2",
@@ -3361,6 +3338,7 @@ dependencies = [
 name = "tchatchers_front"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "chat_service",
  "chrono",
  "derive_more",
@@ -3369,10 +3347,8 @@ dependencies = [
  "gloo-timers 0.3.0",
  "js-sys",
  "modal_service",
- "postcard",
  "rmenu_service",
  "serde",
- "serde_json",
  "tchatchers_core",
  "toast_service",
  "uuid",

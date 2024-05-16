@@ -5,8 +5,8 @@
 
 use crate::extractor::JwtUserExtractor;
 use crate::extractor::ModeratorExtractor;
-use crate::extractor::Postcard;
-use crate::extractor::ValidPostcard;
+use crate::extractor::Bincode;
+use crate::extractor::ValidBincode;
 use crate::AppState;
 use crate::REFRESH_TOKEN_PATH;
 use axum::extract::Multipart;
@@ -39,7 +39,7 @@ use validator::Validate;
 /// - state : The data shared across thread.
 pub async fn create_user(
     State(state): State<AppState>,
-    ValidPostcard(new_user): ValidPostcard<InsertableUser>,
+    ValidBincode(new_user): ValidBincode<InsertableUser>,
 ) -> impl IntoResponse {
     if User::login_exists(&new_user.login, &state.pg_pool).await? {
         return Err(ApiGenericResponse::SimilarLoginExists);
@@ -79,7 +79,7 @@ pub async fn login_exists(
 pub async fn authenticate(
     cookie_jar: CookieJar,
     State(state): State<AppState>,
-    ValidPostcard(authenticable_user): ValidPostcard<AuthenticableUser>,
+    ValidBincode(authenticable_user): ValidBincode<AuthenticableUser>,
 ) -> impl IntoResponse {
     let Some(user) = authenticable_user.authenticate(&state.pg_pool).await? else {
         sleep(Duration::from_secs(3)).await;
@@ -241,7 +241,7 @@ pub async fn update_user(
         ));
     };
     let payload_bytes = payload.bytes().await?;
-    let user: UpdatableUser = postcard::from_bytes(&payload_bytes)?;
+    let user: UpdatableUser = bincode::deserialize(&payload_bytes)?;
     user.validate()?;
     let mut tasks: JoinSet<Result<(), ApiGenericResponse>> = JoinSet::new();
     if jwt.user_id != user.id {
@@ -358,12 +358,12 @@ pub async fn report_user(
 pub async fn whoami(
     JwtUserExtractor(jwt): JwtUserExtractor,
     state: State<AppState>,
-) -> Result<Postcard<PartialUser>, ApiGenericResponse> {
+) -> Result<Bincode<PartialUser>, ApiGenericResponse> {
     let Some(user) = User::find_by_id(jwt.user_id, &state.pg_pool).await? else {
         return Err(ApiGenericResponse::UserNotFound);
     };
     if !user.is_authorized {
         return Err(ApiGenericResponse::AccessRevoked);
     }
-    Ok(Postcard(user.into()))
+    Ok(Bincode(user.into()))
 }

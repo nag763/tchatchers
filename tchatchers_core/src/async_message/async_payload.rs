@@ -48,8 +48,8 @@ pub enum AsyncPayloadParseErrorKind {
     TimestampNotCorrect,
 }
 
-impl From<postcard::Error> for AsyncPayloadParseError {
-    fn from(value: postcard::Error) -> Self {
+impl From<bincode::Error> for AsyncPayloadParseError {
+    fn from(value: bincode::Error) -> Self {
         Self {
             kind: AsyncPayloadParseErrorKind::UndeserializableValue,
             reason: value.to_string(),
@@ -87,7 +87,7 @@ impl TryFrom<(&str, &str, HashMap<String, redis::Value>)> for AsyncPayload {
         Ok(AsyncPayload {
             queue: queue.to_string(),
             id: Some(key.to_string()),
-            entity: postcard::from_bytes(&redis_entity)?,
+            entity: bincode::deserialize(&redis_entity)?,
             timestamp: chrono::DateTime::parse_from_rfc2822(&redis_timestamp)?.into(),
         })
     }
@@ -96,7 +96,7 @@ impl TryFrom<(&str, &str, HashMap<String, redis::Value>)> for AsyncPayload {
 impl From<AsyncPayload> for [(String, Vec<u8>); 2] {
     fn from(val: AsyncPayload) -> Self {
         [
-            ("val".into(), postcard::to_stdvec(&val.entity).unwrap()),
+            ("val".into(), bincode::serialize(&val.entity).unwrap()),
             (
                 "timestamp".into(),
                 chrono::Utc::now().to_rfc2822().as_bytes().into(),

@@ -35,7 +35,7 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
                 wasm_bindgen_futures::spawn_local(async move {
                     let res = req.send().await;
                     let api_resp: ApiResponse =
-                        postcard::from_bytes(&res.binary().await.unwrap()).unwrap();
+                        bincode::deserialize(&res.binary().await.unwrap()).unwrap();
                     let label = api_resp.label;
                     let default: String = api_resp.text.unwrap_or("Unknown response".into());
                     let is_success = res.ok();
@@ -69,7 +69,7 @@ pub fn message_rmenu(props: &MessageRMenuProps) -> Html {
                 wasm_bindgen_futures::spawn_local(async move {
                     let res = req.send().await;
                     let api_resp: ApiResponse =
-                        postcard::from_bytes(&res.binary().await.unwrap()).unwrap();
+                        bincode::deserialize(&res.binary().await.unwrap()).unwrap();
                     let label = api_resp.label;
                     let default: String = api_resp.text.unwrap_or("Unknown response".into());
                     let is_success = res.ok();

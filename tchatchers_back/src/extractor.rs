@@ -22,7 +22,7 @@ use tchatchers_core::{
 };
 use validator::Validate;
 
-static POSTCARD_CONTENT_TYPE: &str = "application/postcard";
+static BINCODE_CONTENT_TYPE: &str = "application/bincode";
 
 /// Extracts the JWT from the request.
 ///
@@ -95,7 +95,7 @@ impl FromRequestParts<AppState> for AdminExtractor {
     }
 }
 
-fn postcard_content_type(headers: &HeaderMap) -> bool {
+fn bincode_content_type(headers: &HeaderMap) -> bool {
     let content_type = if let Some(content_type) = headers.get(header::CONTENT_TYPE) {
         content_type
     } else {
@@ -114,19 +114,19 @@ fn postcard_content_type(headers: &HeaderMap) -> bool {
         return false;
     };
 
-    let is_postcard_content_type = mime.type_() == "application"
-        && (mime.subtype() == "postcard" || mime.suffix().map_or(false, |name| name == "postcard"));
+    let is_bincode_content_type = mime.type_() == "application"
+        && (mime.subtype() == "bincode" || mime.suffix().map_or(false, |name| name == "bincode"));
 
-    is_postcard_content_type
+    is_bincode_content_type
 }
 
 /// A validated JSON input.
 ///
 /// Mainly used to validate the data before processing it server side.
-pub struct Postcard<T>(pub T);
+pub struct Bincode<T>(pub T);
 
 #[async_trait]
-impl<T> FromRequest<AppState> for Postcard<T>
+impl<T> FromRequest<AppState> for Bincode<T>
 where
     T: Sized + DeserializeOwned,
 {
@@ -136,40 +136,40 @@ where
         req: axum::http::Request<Body>,
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        if !postcard_content_type(req.headers()) {
+        if !bincode_content_type(req.headers()) {
             return Err(ApiGenericResponse::ContentTypeError);
         }
         let b = Bytes::from_request(req, state).await?;
-        let entity = postcard::from_bytes(&b)?;
-        Ok(Postcard(entity))
+        let entity = bincode::deserialize(&b)?;
+        Ok(Bincode(entity))
     }
 }
 
-pub struct ValidPostcard<T>(pub T)
+pub struct ValidBincode<T>(pub T)
 where
     T: Validate;
 
 #[async_trait]
-impl<T> FromRequest<AppState> for ValidPostcard<T>
+impl<T> FromRequest<AppState> for ValidBincode<T>
 where
     T: Sized + DeserializeOwned + Validate,
 {
     type Rejection = ApiGenericResponse;
 
     async fn from_request(req: Request<Body>, state: &AppState) -> Result<Self, Self::Rejection> {
-        let entity: Postcard<T> = Postcard::from_request(req, state).await?;
+        let entity: Bincode<T> = Bincode::from_request(req, state).await?;
         entity.0.validate()?;
-        Ok(ValidPostcard(entity.0))
+        Ok(ValidBincode(entity.0))
     }
 }
 
-impl<T: Serialize> IntoResponse for Postcard<T> {
+impl<T: Serialize> IntoResponse for Bincode<T> {
     fn into_response(self) -> axum::response::Response {
-        match postcard::to_stdvec(&self.0) {
+        match bincode::serialize(&self.0) {
             Ok(v) => (
                 [(
                     header::CONTENT_TYPE,
-                    HeaderValue::from_static(POSTCARD_CONTENT_TYPE),
+                    HeaderValue::from_static(BINCODE_CONTENT_TYPE),
                 )],
                 v,
             )

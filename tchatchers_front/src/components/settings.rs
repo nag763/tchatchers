@@ -126,7 +126,7 @@ impl Component for Settings {
                             name: name.value(),
                         };
                         let form_data = FormData::new().unwrap();
-                        let bytes = postcard::to_stdvec(&payload).unwrap();
+                        let bytes = bincode::serialize(&payload).unwrap();
                         form_data
                             .append_with_str("payload", std::str::from_utf8(&bytes).unwrap())
                             .unwrap();
@@ -155,19 +155,19 @@ impl Component for Settings {
                                     let resp = req.bearer(bearer).send().await;
                                     if resp.ok() {
                                         let user: PartialUser =
-                                            postcard::from_bytes(&resp.binary().await.unwrap())
+                                            bincode::deserialize(&resp.binary().await.unwrap())
                                                 .unwrap();
 
                                         link.send_message(Msg::ProfileUpdated(user));
                                     } else {
                                         link.send_message(Msg::ErrorFromServer(
-                                            postcard::from_bytes(&resp.binary().await.unwrap())
+                                            bincode::deserialize(&resp.binary().await.unwrap())
                                                 .unwrap(),
                                         ));
                                     }
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
-                                        postcard::from_bytes(&resp.binary().await.unwrap())
+                                        bincode::deserialize(&resp.binary().await.unwrap())
                                             .unwrap(),
                                     ));
                                 }
@@ -232,7 +232,7 @@ impl Component for Settings {
                         link.navigator().unwrap().push(&Route::LogOut);
                     } else {
                         link.send_message(Msg::ErrorFromServer(
-                            postcard::from_bytes(&resp.binary().await.unwrap()).unwrap(),
+                            bincode::deserialize(&resp.binary().await.unwrap()).unwrap(),
                         ));
                     }
                 });

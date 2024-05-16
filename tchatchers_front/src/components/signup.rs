@@ -115,7 +115,7 @@ impl Component for SignUp {
                             ));
                         } else {
                             let mut req = Requester::post("/api/user");
-                            req.postcard_body(payload);
+                            req.bincode_body(payload);
                             let toaster = ctx.props().clone().toaster;
                             wasm_bindgen_futures::spawn_local(async move {
                                 let resp = req.send().await;
@@ -128,7 +128,7 @@ impl Component for SignUp {
                                     link.navigator().unwrap().push(&Route::SignIn);
                                 } else {
                                     link.send_message(Msg::ErrorFromServer(
-                                        postcard::from_bytes(&resp.binary().await.unwrap())
+                                        bincode::deserialize(&resp.binary().await.unwrap())
                                             .unwrap(),
                                     ));
                                 }
