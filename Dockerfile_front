@@ -36,7 +36,9 @@ RUN printf "\n[profile.release]\nlto = true\ncodegen-units = 1\nstrip = true\npa
 
 RUN rustup target add wasm32-unknown-unknown
 
-RUN cargo install trunk
+RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+RUN cargo binstall trunk -y
 
 RUN trunk build --release tchatchers_front/index.html --minify
 
