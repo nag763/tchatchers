@@ -22,7 +22,7 @@ uuid = { version = "1.8.0", features = ["v4", "serde"], default-features = false
 validator = { version = "0.17.0", features = ["derive"], default-features = false }
 axum = { version = "0.7.5", features = ["multipart"], optional = true , default-features = false }
 lazy_static = "1.4.0"
-derive_more = { features = ["display"], default-features = false, version = "0.99.17" }
+derive_more = { features = ["display"], default-features = false, version = "0.99.18" }
 log = "0.4.21"
 axum-extra = { version = "0.9", features = ["cookie"], optional = true }
 time = { default-features = false, version = "0.3.36" }
