@@ -16,7 +16,7 @@ RUN mkdir assets
 
 RUN npx tailwindcss@3.3.0 -i main.css -o assets/tailwind.css -c tailwind.config.js --minify
 
-FROM rust:1.78.0 as src_builder
+FROM rust:1.79.0 as src_builder
 
 WORKDIR /usr/tchatchers/front
 
