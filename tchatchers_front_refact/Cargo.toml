@@ -1,8 +1,0 @@
-[package]
-name = "tchatchers_front_refact"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-gloo-console = "0.3.0"
-leptos = "0.6.11"
