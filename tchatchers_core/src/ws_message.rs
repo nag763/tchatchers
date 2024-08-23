@@ -119,7 +119,7 @@ pub enum WsReceptionStatus {
     derive(sqlx::FromRow)
 )]
 #[serde(rename_all = "camelCase")]
-#[display(fmt = "[{room}:{uuid}]")]
+#[display("[{room}:{uuid}]")]
 pub struct WsMessageContent {
     /// The message identifier, must be unique.
     #[derivative(Default(value = "Uuid::new_v4()"))]

@@ -29,7 +29,7 @@ pub struct AsyncPayload {
 
 /// Represents an error that occurs during the parsing of an `AsyncPayload`.
 #[derive(Clone, derive_more::Display, Debug)]
-#[display(fmt = "[{kind}] {reason}")]
+#[display("[{kind}] {reason}")]
 pub struct AsyncPayloadParseError {
     /// The kind of parse error.
     kind: AsyncPayloadParseErrorKind,

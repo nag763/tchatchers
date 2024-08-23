@@ -253,7 +253,7 @@ impl User {
     any(feature = "back", feature = "cli", feature = "async"),
     derive(FromRow)
 )]
-#[display(fmt = "[{id}::{login}] {name} ({profile})")]
+#[display("{id}::{login}] {name} ({profile})")]
 #[serde(rename_all = "camelCase")]
 #[derivative(Default)]
 pub struct PartialUser {

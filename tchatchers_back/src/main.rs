@@ -17,6 +17,7 @@ use api::user::*;
 use axum::http::header::AUTHORIZATION;
 use axum::http::header::COOKIE;
 use axum::http::header::SEC_WEBSOCKET_PROTOCOL;
+use axum::http::HeaderName;
 use axum::routing::delete;
 use axum::routing::get_service;
 use axum::{
@@ -33,8 +34,8 @@ use std::time::Duration;
 use tokio::join;
 use tokio::signal::unix::SignalKind;
 use tokio::sync::Mutex;
-use tower::ServiceBuilder;
 use tower_http::request_id::MakeRequestUuid;
+use tower_http::request_id::SetRequestIdLayer;
 use tower_http::sensitive_headers::SetSensitiveRequestHeadersLayer;
 use tower_http::services::ServeDir;
 use tower_http::timeout::TimeoutLayer;
@@ -43,7 +44,6 @@ use tower_http::trace::DefaultOnRequest;
 use tower_http::trace::DefaultOnResponse;
 use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 use tower_http::LatencyUnit;
-use tower_http::ServiceBuilderExt;
 use tracing::Level;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use ws::ws_handler;
@@ -142,11 +142,10 @@ async fn main() -> anyhow::Result<()> {
         .layer(SetSensitiveRequestHeadersLayer::new(once(
             SEC_WEBSOCKET_PROTOCOL,
         )))
-        .layer(
-            ServiceBuilder::new()
-                .set_x_request_id(MakeRequestUuid)
-                .propagate_x_request_id(),
-        )
+        .layer(SetRequestIdLayer::new(
+            HeaderName::from_static("x-request-id"),
+            MakeRequestUuid,
+        ))
         .layer(TimeoutLayer::new(Duration::from_secs(10)));
 
     // run it with hyper

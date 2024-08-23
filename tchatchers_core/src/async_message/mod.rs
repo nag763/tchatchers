@@ -34,7 +34,7 @@ pub enum AsyncMessage {
 
 /// Represents a queue report containing information about the latest executed processes for a queue.
 #[derive(Debug, Clone, sqlx::FromRow, Display)]
-#[display(fmt = "[{process_id}#{id}] ({successfull_records}/{records_processed}) on {passed_at}")]
+#[display("[{process_id}#{id}] ({successfull_records}/{records_processed}) on {passed_at}")]
 pub struct QueueReport {
     pub id: i32,
     pub process_id: AsyncQueue,
