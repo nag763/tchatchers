@@ -75,6 +75,7 @@ args = ["-x", "r --bin tchatchers_async", "--watch", "tchatchers_async/src/"]
 command = "cargo-watch"
 workspace = false
 dependencies = ["start-db"]
+env = { "RUST_LOG" = "DEBUG" }
 
 [tasks.start-dev-front]
 cwd = "./tchatchers_front"

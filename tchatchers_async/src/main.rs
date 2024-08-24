@@ -66,7 +66,7 @@ async fn main() -> anyhow::Result<()> {
                 interval.tick().await;
                 debug!("[{}] Waiting to process events", queue_name);
                 // Read events from the queue
-                if let Some(events) = queue_name.read_events(&mut redis_conn).await? {
+                if let Some(events) = queue_name.read_events_with_timeout(&mut redis_conn).await? {
                     let events_number = events.len();
                     debug!(
                         "[{}] {} Events found and starting to be processed",
