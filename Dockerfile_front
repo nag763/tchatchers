@@ -18,6 +18,8 @@ RUN npx tailwindcss@3.3.0 -i main.css -o assets/tailwind.css -c tailwind.config.
 
 FROM rust:1.80.1 as src_builder
 
+RUN apt-get update; apt-get install clang -y
+
 WORKDIR /usr/tchatchers/front
 
 COPY --from=asset_builder /home/usr/front /usr/tchatchers/front/tchatchers_front

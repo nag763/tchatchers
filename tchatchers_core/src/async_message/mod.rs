@@ -96,7 +96,9 @@ impl AsyncQueue {
         conn: &mut redis::aio::MultiplexedConnection,
     ) -> Result<usize, redis::RedisError> {
         debug!("[{self}] IDs to delete: {list:#?}");
-        conn.xdel(self.to_string(), &list).await
+        let res = conn.xdel(self.to_string(), &list).await?;
+        debug!("[{self}] IDS deleted");
+        Ok(res)
     }
 
     /// Clears the queue by deleting all events.

@@ -7,7 +7,7 @@ edition = "2021"
 gloo-console = "0.3.0"
 gloo-net = "0.6.0"
 gloo-timers = "0.3.0"
-serde = { version = "1.0.208", features = ["derive"] }
+serde = { version = "1.0.209", features = ["derive"] }
 wasm-bindgen = "0.2.93"
 wasm-bindgen-futures = "0.4.43"
 web-sys = { version = "0.3.70", features = ["HtmlDocument", "FileReader", "Event", "Navigator", "FormData"] }
@@ -22,6 +22,6 @@ chat_service = { path = "services/chat_service" }
 chrono = { version = "0.4.38", features = ["serde"] }
 js-sys = "0.3.70"
 uuid = { version = "1.10.0", features = ["v4"] }
-validator = "0.17.0"
+validator = "0.18.1"
 derive_more = { version = "1.0.0", features = ["deref", "deref_mut", "from"] }
 bincode = "1.3.3"

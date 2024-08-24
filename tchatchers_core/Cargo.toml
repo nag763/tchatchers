@@ -13,13 +13,13 @@ async = ["dep:sqlx", "dep:redis", "dep:tokio"]
 [dependencies]
 chrono = { version = "0.4.38", features = ["clock", "serde"], default-features = false }
 derivative = "2.2.0"
-jsonwebtoken = { default-features = false, version = "8.3.0" }
+jsonwebtoken = { default-features = false, version = "9.3.0" }
 rand = { default-features = false, version = "0.8.5" }
 rust-argon2 = { version = "2", optional = true, default-features = false }
-serde = { version = "1.0.208", features = ["rc"], default-features = false }
+serde = { version = "1.0.209", features = ["rc"], default-features = false }
 sqlx = { version = "0.8", optional = true ,  features = ["runtime-async-std-native-tls", "postgres", "chrono", "uuid"] }
 uuid = { version = "1.10.0", features = ["v4", "serde"], default-features = false }
-validator = { version = "0.17.0", features = ["derive"], default-features = false }
+validator = { version = "0.18.1", features = ["derive"], default-features = false }
 axum = { version = "0.7.5", features = ["multipart"], optional = true , default-features = false }
 lazy_static = "1.5.0"
 derive_more = { features = ["display"], default-features = false, version = "1.0.0" }

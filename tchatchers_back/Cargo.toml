@@ -15,8 +15,8 @@ tower-http = { version = "0.5.2", features = ["fs", "trace", "util", "request-id
 tracing-subscriber = { version = "0.3", features = ["env-filter"]}
 axum-extra = { version = "0.9.3", features = ["cookie", "typed-header"] }
 tracing = { default-features = false, version = "0.1.40" }
-validator = { version = "0.17.0"}
-serde = { default-features = false, version = "1.0.208" }
+validator = { version = "0.18.1"}
+serde = { default-features = false, version = "1.0.209" }
 sqlx = {features = ["uuid", "postgres"], version = "0.8" }
 tower = { default-features = false, version = "0.5.0" }
 mime = "0.3.17"

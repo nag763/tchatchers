@@ -6,7 +6,7 @@ use std::{
 /// Common errors returned during the runtime.
 ///
 /// These errors are wrapped and then returned as a positive integer error.
-#[derive(Debug, Clone, PartialEq, Eq, From, Constructor, Error)]
+#[derive(Debug, Clone, PartialEq, Eq, From, Constructor)]
 pub struct CliError {
     /// The error message printed to the user.
     message: String,
