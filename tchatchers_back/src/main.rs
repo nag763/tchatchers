@@ -18,6 +18,7 @@ use axum::http::header::AUTHORIZATION;
 use axum::http::header::COOKIE;
 use axum::http::header::SEC_WEBSOCKET_PROTOCOL;
 use axum::http::HeaderName;
+use axum::http::HeaderValue;
 use axum::routing::delete;
 use axum::routing::get_service;
 use axum::{
@@ -27,6 +28,7 @@ use axum::{
 };
 use redis::aio::MultiplexedConnection;
 use sqlx::postgres::PgPool;
+use tower_http::set_header::SetResponseHeaderLayer;
 use std::future::IntoFuture;
 use std::iter::once;
 use std::sync::Arc;
@@ -126,6 +128,7 @@ async fn main() -> anyhow::Result<()> {
                 .handle_error(|_| async { (StatusCode::NOT_FOUND, "File not found") }),
         )
         .with_state(shared_state)
+        .layer(SetResponseHeaderLayer::overriding(HeaderName::from_static("x-rev-id"), HeaderValue::from_static(option_env!("GIT_REV").unwrap_or("unknown"))))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().include_headers(true))
@@ -148,7 +151,6 @@ async fn main() -> anyhow::Result<()> {
         ))
         .layer(TimeoutLayer::new(Duration::from_secs(10)));
 
-    // run it with hyper
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
 
     let mut sigterm = tokio::signal::unix::signal(SignalKind::terminate()).unwrap();
