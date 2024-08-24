@@ -145,7 +145,7 @@ impl AsyncQueue {
     ) -> Result<Option<Vec<AsyncPayload>>, redis::RedisError> {
         AsyncPayload::read_events(
             &self.to_string(),
-            &NOT_BLOCKING_OPTIONS.get_or_init(|| StreamReadOptions::default().block(1)),
+            NOT_BLOCKING_OPTIONS.get_or_init(|| StreamReadOptions::default().block(1)),
             conn,
         )
         .await
@@ -169,7 +169,7 @@ impl AsyncQueue {
     ) -> Result<Option<Vec<AsyncPayload>>, redis::RedisError> {
         AsyncPayload::read_events(
             &self.to_string(),
-            &DEFAULT_EVENT_OPTIONS.get_or_init(|| StreamReadOptions::default().block(0)),
+            DEFAULT_EVENT_OPTIONS.get_or_init(|| StreamReadOptions::default().block(0)),
             conn,
         )
         .await
