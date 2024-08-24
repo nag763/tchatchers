@@ -21,9 +21,6 @@ pub mod validation_error_message;
 pub mod ws_message;
 
 #[macro_use]
-extern crate lazy_static;
-
-#[macro_use]
 extern crate log;
 
 #[macro_use]

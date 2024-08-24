@@ -3317,7 +3317,6 @@ dependencies = [
  "derivative",
  "derive_more",
  "jsonwebtoken",
- "lazy_static",
  "log",
  "rand",
  "redis",

@@ -55,7 +55,7 @@ pub struct RefreshToken {
     pub user_id: i32,
     /// The expiration timestamp of the token, in seconds since the UNIX epoch.
     #[derivative(Default(
-        value = "(chrono::Utc::now() + *REFRESH_TOKEN_EXPIRACY_TIME).timestamp()"
+        value = "(chrono::Utc::now() + *REFRESH_TOKEN_EXPIRACY_TIME.get_or_init(|| chrono::Duration::try_minutes(15).unwrap())).timestamp()"
     ))]
     pub exp: i64,
     /// Whether the token should be limited to the current session only.
@@ -140,6 +140,7 @@ impl RefreshToken {
             self.token_family.to_string(),
             default_hasher.finish(),
             REFRESH_TOKEN_EXPIRACY_TIME
+                .get_or_init(|| chrono::Duration::try_minutes(15).unwrap())
                 .num_seconds()
                 .try_into()
                 .unwrap(),

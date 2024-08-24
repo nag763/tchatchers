@@ -30,7 +30,10 @@ impl From<User> for AuthorizationToken {
         AuthorizationToken {
             user_id: user.id,
             user_profile: user.profile,
-            exp: (chrono::Utc::now() + *AUTHORIZATION_TOKEN_EXPIRACY_TIME).timestamp(),
+            exp: (chrono::Utc::now()
+                + *AUTHORIZATION_TOKEN_EXPIRACY_TIME
+                    .get_or_init(|| chrono::Duration::try_weeks(1).unwrap()))
+            .timestamp(),
         }
     }
 }

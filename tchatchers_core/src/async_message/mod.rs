@@ -4,6 +4,8 @@
 //! The module also defines types for different types of asynchronous messages and queues,
 //! as well as utility functions for interacting with the Redis stream and PostgreSQL database.
 
+use std::sync::OnceLock;
+
 use chrono::Utc;
 use derive_more::Display;
 use redis::{streams::StreamReadOptions, AsyncCommands};
@@ -17,10 +19,8 @@ use crate::{user::PartialUser, ws_message::WsMessageContent};
 
 use self::async_payload::AsyncPayload;
 
-lazy_static! {
-    static ref DEFAULT_EVENT_OPTIONS: StreamReadOptions = StreamReadOptions::default().block(0);
-    static ref NOT_BLOCKING_OPTIONS: StreamReadOptions = StreamReadOptions::default().block(1);
-}
+const DEFAULT_EVENT_OPTIONS: OnceLock<StreamReadOptions> = OnceLock::new();
+const NOT_BLOCKING_OPTIONS: OnceLock<StreamReadOptions> = OnceLock::new();
 
 /// Represents different types of asynchronous messages.
 #[derive(Debug, Clone, Serialize, Deserialize, Display)]
@@ -143,7 +143,12 @@ impl AsyncQueue {
         &self,
         conn: &mut redis::aio::MultiplexedConnection,
     ) -> Result<Option<Vec<AsyncPayload>>, redis::RedisError> {
-        AsyncPayload::read_events(&self.to_string(), &NOT_BLOCKING_OPTIONS, conn).await
+        AsyncPayload::read_events(
+            &self.to_string(),
+            &NOT_BLOCKING_OPTIONS.get_or_init(|| StreamReadOptions::default().block(1)),
+            conn,
+        )
+        .await
     }
 
     /// Reads events from the queue.
@@ -162,7 +167,12 @@ impl AsyncQueue {
         &self,
         conn: &mut redis::aio::MultiplexedConnection,
     ) -> Result<Option<Vec<AsyncPayload>>, redis::RedisError> {
-        AsyncPayload::read_events(&self.to_string(), &DEFAULT_EVENT_OPTIONS, conn).await
+        AsyncPayload::read_events(
+            &self.to_string(),
+            &DEFAULT_EVENT_OPTIONS.get_or_init(|| StreamReadOptions::default().block(0)),
+            conn,
+        )
+        .await
     }
 
     /// Returns an iterator over all the async queue types.
