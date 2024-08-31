@@ -19,3 +19,4 @@ jobs:
         run: ls
       - name: Extra steps to have it working with github
         run: docker-compose build --parallel
+        working-directory: ./
