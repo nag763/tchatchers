@@ -93,7 +93,7 @@ The rustdoc can be found for each subproject at :
 
 ## Production project architecture
 
-![](https://raw.githubusercontent.com/nag763/tchatchers/main/.github/application_schema.jpg)
+![](https://raw.githubusercontent.com/nag763/tchatchers/main/.github/application_schema.png)
 
 The production architecture consists of several layers :
 * <u>The client</u>, who uses the application and interacts with the different ressources.
