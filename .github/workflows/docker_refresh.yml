@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Echo dockerhub login
-        run: echo ${{ secrets.MY_SECRET_TOKEN }}
+        run: echo ${{ secrets.DOCKERHUB_LOGIN }}
       - name: DockerHub login
         env:
           LOGIN: ${{ secrets.DOCKERHUB_LOGIN }}
