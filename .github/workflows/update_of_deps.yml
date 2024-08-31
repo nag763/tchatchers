@@ -1,0 +1,21 @@
+name: Deps update
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install binstall
+      run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+    - name: Install cargo-upgrade
+      run: cargo binstall cargo-edit
+    - name: Update deps
+      run: cargo upgrade
+    - name: Update of lockfile
+      run: cargo update
+
+
