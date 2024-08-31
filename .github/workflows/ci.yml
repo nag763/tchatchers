@@ -1,5 +1,5 @@
 
-name: Rust
+name: Codestyle and good practices check
 
 on:
   push:
