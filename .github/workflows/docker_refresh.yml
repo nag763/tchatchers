@@ -14,8 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: DockerHub login
+        env:
+          LOGIN: ${{ secrets.DOCKERHUB_LOGIN }}
+          PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+        run: docker login -u "$LOGIN" -p "$PASSWORD"
       - name: Install docker compose 
         run: sudo apt-get update; sudo apt-get install docker-compose -y
       - name: Build project
         run: docker-compose build --parallel
+        working-directory: ./
+      - name: Push image
+        run: docker-compose push
         working-directory: ./
