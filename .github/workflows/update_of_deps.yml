@@ -1,0 +1,31 @@
+name: Deps update
+
+on:
+  schedule: 
+    - cron: '46 14 * * 6' 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install binstall
+      run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+    - name: Install cargo-upgrade
+      run: cargo binstall cargo-edit -y
+    - name: Update deps
+      run: cargo upgrade
+    - name: Update of lockfile
+      run: cargo update
+    - name: setup git config
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+    - name: commit
+      run: |
+        # Stage the file, commit and push
+        git add .
+        git commit -m "[Actions] Upgrade deps"
+        git push
+
+
