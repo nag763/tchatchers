@@ -15,8 +15,8 @@ jobs:
     steps:
       - name: Install docker compose 
         run: sudo apt-get update; sudo apt-get install docker-compose -y
-      - name: Where am i
-        run: ls
-      - name: Extra steps to have it working with github
+      - name: Cat file
+        run: cat ./docker-compose.yml
+      - name: Build project
         run: docker-compose build --parallel
         working-directory: ./
