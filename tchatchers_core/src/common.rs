@@ -3,8 +3,8 @@
 
 use std::sync::OnceLock;
 
-pub const REFRESH_TOKEN_EXPIRACY_TIME: OnceLock<chrono::Duration> = OnceLock::new();
-pub const AUTHORIZATION_TOKEN_EXPIRACY_TIME: OnceLock<chrono::Duration> = OnceLock::new();
+pub(crate) static REFRESH_TOKEN_EXPIRACY_TIME: OnceLock<chrono::Duration> = OnceLock::new();
+pub(crate) static AUTHORIZATION_TOKEN_EXPIRACY_TIME: OnceLock<chrono::Duration> = OnceLock::new();
 
 pub(crate) fn limited_chars_checker(room_name: &str) -> Result<(), validator::ValidationError> {
     for c in room_name.chars() {

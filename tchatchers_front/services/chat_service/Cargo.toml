@@ -8,10 +8,10 @@ edition = "2021"
 [dependencies]
 futures = "0.3.30"
 gloo-console = "0.3.0"
-gloo-net = "0.5.0"
+gloo-net = "0.6.0"
 serde_json = "1.0.127"
 tchatchers_core = { version = "0.1.0", path = "../../../tchatchers_core", features = ["front"] }
 wasm-bindgen-futures = "0.4.43"
 yew-agent = "0.3.0"
-tokio = { version = "1.39.3", features = ["sync", "rt", "macros"] }
+tokio = { version = "1.40.0", features = ["sync", "rt", "macros"] }
 serde = { version = "1.0.209", features = ["derive"] }

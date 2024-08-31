@@ -19,8 +19,8 @@ use crate::{user::PartialUser, ws_message::WsMessageContent};
 
 use self::async_payload::AsyncPayload;
 
-const DEFAULT_EVENT_OPTIONS: OnceLock<StreamReadOptions> = OnceLock::new();
-const NOT_BLOCKING_OPTIONS: OnceLock<StreamReadOptions> = OnceLock::new();
+static DEFAULT_EVENT_OPTIONS: OnceLock<StreamReadOptions> = OnceLock::new();
+static NOT_BLOCKING_OPTIONS: OnceLock<StreamReadOptions> = OnceLock::new();
 
 /// Represents different types of asynchronous messages.
 #[derive(Debug, Clone, Serialize, Deserialize, Display)]

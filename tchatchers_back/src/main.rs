@@ -28,7 +28,6 @@ use axum::{
 };
 use redis::aio::MultiplexedConnection;
 use sqlx::postgres::PgPool;
-use tower_http::set_header::SetResponseHeaderLayer;
 use std::future::IntoFuture;
 use std::iter::once;
 use std::sync::Arc;
@@ -40,6 +39,7 @@ use tower_http::request_id::MakeRequestUuid;
 use tower_http::request_id::SetRequestIdLayer;
 use tower_http::sensitive_headers::SetSensitiveRequestHeadersLayer;
 use tower_http::services::ServeDir;
+use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::DefaultOnFailure;
 use tower_http::trace::DefaultOnRequest;
@@ -128,7 +128,10 @@ async fn main() -> anyhow::Result<()> {
                 .handle_error(|_| async { (StatusCode::NOT_FOUND, "File not found") }),
         )
         .with_state(shared_state)
-        .layer(SetResponseHeaderLayer::overriding(HeaderName::from_static("x-rev-id"), HeaderValue::from_static(option_env!("GIT_REV").unwrap_or("unknown"))))
+        .layer(SetResponseHeaderLayer::overriding(
+            HeaderName::from_static("x-rev-id"),
+            HeaderValue::from_static(option_env!("GIT_REV").unwrap_or("unknown")),
+        ))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().include_headers(true))
