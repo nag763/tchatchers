@@ -1,0 +1,24 @@
+name: Docker images build
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: DockerHub login
+        env:
+          LOGIN: ${{ secrets.DOCKERHUB_USERNAME }}
+          PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+        run: echo $PASSWORD | docker login -u $LOGIN --password-stdin
+      - name: Install docker compose 
+        run: sudo apt-get update; sudo apt-get install docker-compose -y
+      - name: Build project
+        run: docker-compose build --parallel
+        working-directory: ./
+      - name: Push image
+        run: docker-compose push
+        working-directory: ./
