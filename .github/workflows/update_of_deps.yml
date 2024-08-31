@@ -12,7 +12,7 @@ jobs:
     - name: Install binstall
       run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
     - name: Install cargo-upgrade
-      run: cargo binstall cargo-edit
+      run: cargo binstall cargo-edit -y
     - name: Update deps
       run: cargo upgrade
     - name: Update of lockfile
