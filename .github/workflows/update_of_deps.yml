@@ -1,8 +1,8 @@
 name: Deps update
 
 on:
-  push:
-    branches: [ "cron_updates" ]
+  schedule: 
+    - cron: '43 16 * * 6' 
 
 jobs:
   build:
@@ -17,8 +17,6 @@ jobs:
       run: cargo upgrade
     - name: Update of lockfile
       run: cargo update
-    - name: foo file
-      run: echo "foo" > foo
     - name: setup git config
       run: |
         git config user.name "GitHub Actions Bot"
