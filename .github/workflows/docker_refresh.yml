@@ -17,7 +17,7 @@ jobs:
       - name: Echo dockerhub login
         env:
           LOGIN: ${{ secrets.DOCKERHUB_LOGIN }}
-        run: echo $LOGIN
+        run: echo "$LOGIN"
       - name: DockerHub login
         env:
           LOGIN: ${{ secrets.DOCKERHUB_LOGIN }}
