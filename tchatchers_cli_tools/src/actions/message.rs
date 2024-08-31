@@ -14,8 +14,7 @@ impl MessageAction {
     ///
     /// # Returns
     ///
-    /// * `Result<(), CliError>` - Returns `Ok(())` if the operation was successful, otherwise
-    /// returns an error of type `CliError`.
+    /// * `Result<(), CliError>` - Returns `Ok(())` if the operation was successful, otherwise returns an error of type `CliError`.
     pub async fn delete_messages(messages_uuid: Vec<Uuid>) -> Result<(), CliError> {
         let pool = tchatchers_core::pool::get_pg_pool().await?;
         WsMessageContent::delete_messages(&messages_uuid, &pool).await?;

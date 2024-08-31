@@ -22,7 +22,7 @@
 /// The struct available in this module is:
 ///
 /// - RefreshToken: represents the refresh token that is used to renew access tokens used by the client.
-/// It has the following fields:
+///   It has the following fields:
 /// - user_id: represents the id of the user.
 /// - exp: represents the expiration time of the refresh token.
 /// - session_only: represents whether the refresh token should be used for a session only.

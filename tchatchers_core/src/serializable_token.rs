@@ -19,8 +19,7 @@ where
     ///
     /// # Arguments
     ///
-    /// - secret : The secret with which the JWT is serialized. One JWT
-    /// serialized with two differents secrets will result in a different string
+    /// - secret : The secret with which the JWT is serialized. One JWT serialized with two differents secrets will result in a different string.
     fn encode(&self, secret: &str) -> Result<String, jsonwebtoken::errors::Error> {
         encode(
             &Header::default(),
