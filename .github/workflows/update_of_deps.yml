@@ -1,8 +1,8 @@
 name: Deps update
 
 on:
-  schedule:
-    - cron: '0 0 * * 0'
+  push:
+    branches: [ "cron_updates" ]
 
 jobs:
   build:
