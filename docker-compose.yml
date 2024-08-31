@@ -88,10 +88,9 @@ services:
   cli :
     image: nag763/tchatchers_tct:latest
     command: ["--docker-service"]
-    env_file:
-      - .env
     volumes:
       - static:/home/usr/tct/static
+      - .env:/home/usr/tct/.env
     links:
       - postgres:${POSTGRES_HOST:-pg.tchatche.rs}
       - redis:${REDIS_HOST:-redis.tchatche.rs}
