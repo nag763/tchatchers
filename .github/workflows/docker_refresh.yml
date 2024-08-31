@@ -18,7 +18,7 @@ jobs:
         env:
           LOGIN: ${{ secrets.DOCKERHUB_LOGIN }}
           PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-        run: docker login -u $LOGIN -p $PASSWORD
+        run: echo $PASSWORD | docker login -u $LOGIN --password-stdin
       - name: Install docker compose 
         run: sudo apt-get update; sudo apt-get install docker-compose -y
       - name: Build project
