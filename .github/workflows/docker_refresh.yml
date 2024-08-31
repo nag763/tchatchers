@@ -13,12 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Install docker compose 
+        run: apt-get update; apt-get install docker-compose -y
 
-      - name: Run docker-compose
-        uses: hoverkraft-tech/compose-action@v2.0.1
-        with:
-          compose-file: "./docker-compose.yml"
-
-      - name: Execute tests in the running services
+      - name: Extra steps to have it working with github
         run: docker-compose build --parallel
