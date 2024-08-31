@@ -17,6 +17,8 @@ jobs:
       run: cargo upgrade
     - name: Update of lockfile
       run: cargo update
+    - name: foo file
+      run: echo "foo" > foo
     - name: setup git config
       run: |
         git config user.name "GitHub Actions Bot"
@@ -26,6 +28,6 @@ jobs:
         # Stage the file, commit and push
         git add .
         git commit -m "[Actions] Upgrade deps"
-        git push main
+        git push
 
 
