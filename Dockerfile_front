@@ -58,6 +58,4 @@ WORKDIR /usr/share/nginx/html
 
 COPY --from=compressor /usr/tchatchers/dist /usr/share/nginx/html
 
-COPY .git/refs/heads/main /usr/share/nginx/html/.rev
-
 EXPOSE 80
