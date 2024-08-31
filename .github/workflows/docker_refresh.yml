@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Echo dockerhub login
         env:
-          TEST_GITHUB_TOKEN: ${{ secrets.DOCKERHUB_LOGIN }}
+          DOCKERHUB_LOGIN: ${{ secrets.DOCKERHUB_LOGIN }}
         run: echo ${#DOCKERHUB_LOGIN}
       - name: DockerHub login
         env:
