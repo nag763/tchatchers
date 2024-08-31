@@ -87,9 +87,13 @@ The rustdoc can be found for each subproject at :
 |Postgres            |SQL engine                  |latest |
 |Redis               |Messaging and cache         |latest |
 
+## CICD
+
+![](https://raw.githubusercontent.com/nag763/tchatchers/main/.github/cicd.svg)
+
 ## Production project architecture
 
-![](https://raw.githubusercontent.com/nag763/tchatchers/17a4e86adb1c26259c3890e3303d6a67d3dd70df/.github/application_schema.jpg)
+![](https://raw.githubusercontent.com/nag763/tchatchers/main/.github/application_schema.jpg)
 
 The production architecture consists of several layers :
 * <u>The client</u>, who uses the application and interacts with the different ressources.
