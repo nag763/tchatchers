@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 tchatchers_core = { path = "../tchatchers_core", features = ["cli"] }
-clap = { version = "4.5.16", features = ["derive", "std"]}
+clap = { version = "4.5.17", features = ["derive", "std"]}
 dialoguer = { features = ["password"], default-features = false, version = "0.11.0" }
 sqlx = { version = "0.8", features = ["macros"], default-features = false }
 derive_more = { features = ["from", "constructor"], default-features = false, version = "1.0.0" }
