@@ -20,14 +20,14 @@ serde = { version = "1.0.210", features = ["rc"], default-features = false }
 sqlx = { version = "0.8", optional = true ,  features = ["runtime-async-std-native-tls", "postgres", "chrono", "uuid"] }
 uuid = { version = "1.10.0", features = ["v4", "serde"], default-features = false }
 validator = { version = "0.18.1", features = ["derive"], default-features = false }
-axum = { version = "0.7.5", features = ["multipart"], optional = true , default-features = false }
+axum = { version = "0.7.6", features = ["multipart"], optional = true , default-features = false }
 derive_more = { features = ["display"], default-features = false, version = "1.0.0" }
 log = "0.4.22"
 axum-extra = { version = "0.9", features = ["cookie"], optional = true }
 time = { default-features = false, version = "0.3.36" }
 cookie = { version = "0.18.1", optional = true }
 redis = { version = "0.26.1", optional = true, features = ["streams", "aio", "tokio-comp"], default-features = false }
-clap = { version = "4.5.17", features = ["derive", "std"], optional = true}
+clap = { version = "4.5.18", features = ["derive", "std"], optional = true}
 serde_yaml = "0.9.34"
 tokio = { version = "1.40.0", features = ["fs"], optional=true }
 tchatchers_macro = { path = "../tchatchers_macro"} 
