@@ -19,4 +19,4 @@ log = "0.4.22"
 env_logger = { version = "0.11.5" }
 askama = { default-features = false, version = "0.12.1" }
 clap-verbosity-flag = "2.2.1"
-redis = { version = "0.26.1", features = ["aio", "tokio-comp"], default-features = false }
+redis = { version = "0.27.2", features = ["aio", "tokio-comp"], default-features = false }

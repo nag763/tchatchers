@@ -26,7 +26,7 @@ log = "0.4.22"
 axum-extra = { version = "0.9", features = ["cookie"], optional = true }
 time = { default-features = false, version = "0.3.36" }
 cookie = { version = "0.18.1", optional = true }
-redis = { version = "0.26.1", optional = true, features = ["streams", "aio", "tokio-comp"], default-features = false }
+redis = { version = "0.27.2", optional = true, features = ["streams", "aio", "tokio-comp"], default-features = false }
 clap = { version = "4.5.18", features = ["derive", "std"], optional = true}
 serde_yaml = "0.9.34"
 tokio = { version = "1.40.0", features = ["fs"], optional=true }
