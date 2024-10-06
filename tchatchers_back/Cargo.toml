@@ -5,13 +5,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = { version = "0.7.6", features = ["ws", "http1", "multipart"], default-features = false }
+axum = { version = "0.7.7", features = ["ws", "http1", "multipart"], default-features = false }
 tokio = { version = "1.40", features = ["full"], default-features = false }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 dotenv = "0.15.0"
-futures-util = { version = "0.3.30" }
+futures-util = { version = "0.3.31" }
 uuid = { version = "1.10.0", default-features = false }
-tower-http = { version = "0.6.0", features = ["fs", "trace", "util", "request-id", "sensitive-headers", "timeout", "set-header"] }
+tower-http = { version = "0.6.1", features = ["fs", "trace", "util", "request-id", "sensitive-headers", "timeout", "set-header"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"]}
 axum-extra = { version = "0.9.4", features = ["cookie", "typed-header"] }
 tracing = { default-features = false, version = "0.1.40" }
@@ -21,6 +21,6 @@ sqlx = {features = ["uuid", "postgres"], version = "0.8" }
 tower = { default-features = false, version = "0.5.1" }
 mime = "0.3.17"
 anyhow = "1.0.89"
-redis = { version = "0.27.2", features = ["aio", "tokio-comp"], default-features = false }
+redis = { version = "0.27.3", features = ["aio", "tokio-comp"], default-features = false }
 bincode = "1.3.3"
 serde_json = "1.0.128"
