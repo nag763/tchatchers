@@ -42,7 +42,7 @@ RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/ca
 
 RUN cargo binstall trunk -y
 
-RUN trunk build --release tchatchers_front/index.html --minify true
+RUN trunk build  --release true --minify true --config tchatchers_front/Trunk.toml 
 
 FROM ubuntu as compressor
 
