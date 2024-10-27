@@ -16,7 +16,7 @@ derivative = "2.2.0"
 jsonwebtoken = { default-features = false, version = "9.3.0" }
 rand = { default-features = false, version = "0.8.5" }
 rust-argon2 = { version = "2", optional = true, default-features = false }
-serde = { version = "1.0.211", features = ["rc"], default-features = false }
+serde = { version = "1.0.213", features = ["rc"], default-features = false }
 sqlx = { version = "0.8", optional = true ,  features = ["runtime-async-std-native-tls", "postgres", "chrono", "uuid"] }
 uuid = { version = "1.11.0", features = ["v4", "serde"], default-features = false }
 validator = { version = "0.18.1", features = ["derive"], default-features = false }
