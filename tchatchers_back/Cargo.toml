@@ -5,7 +5,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = { version = "0.7.7", features = ["ws", "http1", "multipart"], default-features = false }
+axum = { version = "0.7.8", features = ["ws", "http1", "multipart"], default-features = false }
 tokio = { version = "1.41", features = ["full"], default-features = false }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 dotenv = "0.15.0"
@@ -13,7 +13,7 @@ futures-util = { version = "0.3.31" }
 uuid = { version = "1.11.0", default-features = false }
 tower-http = { version = "0.6.1", features = ["fs", "trace", "util", "request-id", "sensitive-headers", "timeout", "set-header"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"]}
-axum-extra = { version = "0.9.4", features = ["cookie", "typed-header"] }
+axum-extra = { version = "0.9.5", features = ["cookie", "typed-header"] }
 tracing = { default-features = false, version = "0.1.40" }
 validator = { version = "0.19.0"}
 serde = { default-features = false, version = "1.0.215" }
