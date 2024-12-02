@@ -14,7 +14,7 @@ uuid = { version = "1.11.0", default-features = false }
 tower-http = { version = "0.6.2", features = ["fs", "trace", "util", "request-id", "sensitive-headers", "timeout", "set-header"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"]}
 axum-extra = { version = "0.9.6", features = ["cookie", "typed-header"] }
-tracing = { default-features = false, version = "0.1.40" }
+tracing = { default-features = false, version = "0.1.41" }
 validator = { version = "0.19.0"}
 serde = { default-features = false, version = "1.0.215" }
 sqlx = {features = ["uuid", "postgres"], version = "0.8" }
