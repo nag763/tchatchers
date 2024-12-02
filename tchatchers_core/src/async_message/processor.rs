@@ -154,11 +154,11 @@ fn get_processor<'a>(
     pool: &'a PgPool,
 ) -> Pin<Box<dyn Future<Output = Result<(), sqlx::Error>> + Send + 'a>> {
     match queue {
-        AsyncQueue::LoggedUsers => return Box::pin(process_logged_users(payloads, pool)),
-        AsyncQueue::MessagesSeen => return Box::pin(messages_seen(payloads, pool)),
-        AsyncQueue::PersistMessage => return Box::pin(persist_messages(payloads, pool)),
-        AsyncQueue::CleanRoom => return Box::pin(clean_rooms(payloads, pool)),
-        AsyncQueue::RemoveUserData => return Box::pin(clear_user_data(payloads, pool)),
+        AsyncQueue::LoggedUsers => Box::pin(process_logged_users(payloads, pool)),
+        AsyncQueue::MessagesSeen => Box::pin(messages_seen(payloads, pool)),
+        AsyncQueue::PersistMessage => Box::pin(persist_messages(payloads, pool)),
+        AsyncQueue::CleanRoom => Box::pin(clean_rooms(payloads, pool)),
+        AsyncQueue::RemoveUserData => Box::pin(clear_user_data(payloads, pool)),
     }
 }
 

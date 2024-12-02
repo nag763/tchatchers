@@ -123,7 +123,7 @@ pub fn file_attacher(props: &FormFileProperties) -> Html {
         let attr_ref = props.attr_ref.cast::<HtmlInputElement>();
         use_memo(attr_ref, |attr_ref| {
             if let Some(attr_ref) = attr_ref {
-                attr_ref.value().ne("")
+                !attr_ref.value().is_empty()
             } else {
                 false
             }
