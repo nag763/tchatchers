@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.93"
+anyhow = "1.0.94"
 dotenv = { version = "0.15.0", default-features = false }
 env_logger = "0.11.5"
 log = "0.4.22"
-serde = { version = "1.0.215", features = ["derive"] }
+serde = { version = "1.0.216", features = ["derive"] }
 serde_yaml = { version = "0.9.34" }
 tchatchers_core = { path = "../tchatchers_core" , features = ["async"] }
-tokio = { version = "1.41.1", default-features = false, features = ["rt", "macros", "rt-multi-thread", "time", "signal"] }
+tokio = { version = "1.42.0", default-features = false, features = ["rt", "macros", "rt-multi-thread", "time", "signal"] }
