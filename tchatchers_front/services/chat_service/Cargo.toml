@@ -14,4 +14,4 @@ tchatchers_core = { version = "0.1.0", path = "../../../tchatchers_core", featur
 wasm-bindgen-futures = "0.4.49"
 yew-agent = "0.3.0"
 tokio = { version = "1.42.0", features = ["sync", "rt", "macros"] }
-serde = { version = "1.0.216", features = ["derive"] }
+serde = { version = "1.0.217", features = ["derive"] }

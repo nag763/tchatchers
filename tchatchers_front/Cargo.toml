@@ -7,7 +7,7 @@ edition = "2021"
 gloo-console = "0.3.0"
 gloo-net = "0.6.0"
 gloo-timers = "0.3.0"
-serde = { version = "1.0.216", features = ["derive"] }
+serde = { version = "1.0.217", features = ["derive"] }
 wasm-bindgen = "0.2.99"
 wasm-bindgen-futures = "0.4.49"
 web-sys = { version = "0.3.76", features = ["HtmlDocument", "FileReader", "Event", "Navigator", "FormData"] }
