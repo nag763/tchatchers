@@ -6,11 +6,11 @@ edition = "2021"
 
 [dependencies]
 axum = { version = "0.7.9", features = ["ws", "http1", "multipart"], default-features = false }
-tokio = { version = "1.42", features = ["full"], default-features = false }
+tokio = { version = "1.43", features = ["full"], default-features = false }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 dotenv = "0.15.0"
 futures-util = { version = "0.3.31" }
-uuid = { version = "1.11.0", default-features = false }
+uuid = { version = "1.11.1", default-features = false }
 tower-http = { version = "0.6.2", features = ["fs", "trace", "util", "request-id", "sensitive-headers", "timeout", "set-header"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"]}
 axum-extra = { version = "0.9.6", features = ["cookie", "typed-header"] }
@@ -23,4 +23,4 @@ mime = "0.3.17"
 anyhow = "1.0.95"
 redis = { version = "0.27.6", features = ["aio", "tokio-comp"], default-features = false }
 bincode = "1.3.3"
-serde_json = "1.0.134"
+serde_json = "1.0.135"
