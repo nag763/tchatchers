@@ -115,7 +115,7 @@ fn bincode_content_type(headers: &HeaderMap) -> bool {
     };
 
     let is_bincode_content_type = mime.type_() == "application"
-        && (mime.subtype() == "bincode" || mime.suffix().map_or(false, |name| name == "bincode"));
+        && (mime.subtype() == "bincode" || mime.suffix().is_some_and(|name| name == "bincode"));
 
     is_bincode_content_type
 }
