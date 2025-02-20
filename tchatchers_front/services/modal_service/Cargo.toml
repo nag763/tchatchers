@@ -7,5 +7,5 @@ edition = "2021"
 
 [dependencies]
 gloo-console = "0.3.0"
-serde = { version = "1.0.217", features = ["derive"] }
+serde = { version = "1.0.218", features = ["derive"] }
 yew-agent = "0.3.0"
