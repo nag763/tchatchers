@@ -13,8 +13,8 @@ use crate::profile::Profile;
 use chrono::DateTime;
 use chrono::Utc;
 use derive_more::Display;
-#[cfg(any(feature = "back", feature = "cli"))]
-use rand::Rng;
+#[cfg(any(feature = "back", feature = "cli"))]        
+use rand::random;
 use serde::{Deserialize, Serialize};
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
 use sqlx::postgres::PgQueryResult;
@@ -470,7 +470,7 @@ impl InsertableUser {
     /// - pool : The connection pool.
     #[cfg(feature = "back")]
     pub async fn insert(&self, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
-        let salt: [u8; 32] = rand::rng().random();
+        let salt: [u8; 32] = random();
         let config = argon2::Config::rfc9106_low_mem();
         let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
         sqlx::query("INSERT INTO CHATTER(login, password, name, locale_id) VALUES ($1,$2,$3,$4)")
@@ -494,7 +494,7 @@ impl InsertableUser {
         profile: Profile,
         pool: &PgPool,
     ) -> Result<PgQueryResult, sqlx::Error> {
-        let salt: [u8; 32] = rand::rng().random();
+        let salt: [u8; 32] = random();
         let config = argon2::Config::rfc9106_low_mem();
         let hash = argon2::hash_encoded(self.password.as_bytes(), &salt, &config).unwrap();
         sqlx::query("INSERT INTO CHATTER(login, password, name, profile_id) VALUES ($1,$2,$3,$4)")

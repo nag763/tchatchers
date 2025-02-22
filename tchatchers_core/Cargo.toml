@@ -14,7 +14,7 @@ async = ["dep:sqlx", "dep:redis", "dep:tokio"]
 chrono = { version = "0.4.39", features = ["clock", "serde"], default-features = false }
 derivative = "2.2.0"
 jsonwebtoken = { default-features = false, version = "9.3.1" }
-rand = { default-features = false, version = "0.9.0" }
+rand = { features = ["thread_rng"], default-features = false, version = "0.9.0" }
 rust-argon2 = { version = "2", optional = true, default-features = false }
 serde = { version = "1.0.218", features = ["rc"], default-features = false }
 sqlx = { version = "0.8", optional = true ,  features = ["runtime-async-std-native-tls", "postgres", "chrono", "uuid"] }
