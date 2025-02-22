@@ -7,7 +7,7 @@ edition = "2021"
 anyhow = "1.0.96"
 dotenv = { version = "0.15.0", default-features = false }
 env_logger = "0.11.6"
-log = "0.4.25"
+log = "0.4.26"
 serde = { version = "1.0.218", features = ["derive"] }
 serde_yaml = { version = "0.9.34" }
 tchatchers_core = { path = "../tchatchers_core" , features = ["async"] }
