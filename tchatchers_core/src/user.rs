@@ -13,7 +13,7 @@ use crate::profile::Profile;
 use chrono::DateTime;
 use chrono::Utc;
 use derive_more::Display;
-#[cfg(any(feature = "back", feature = "cli"))]        
+#[cfg(any(feature = "back", feature = "cli"))]
 use rand::random;
 use serde::{Deserialize, Serialize};
 #[cfg(any(feature = "back", feature = "cli", feature = "async"))]
