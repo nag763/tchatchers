@@ -5,7 +5,6 @@
 
 use crate::AppState;
 use axum::{
-    async_trait,
     body::{Body, Bytes},
     extract::{FromRequest, FromRequestParts},
     http::{header, request::Parts, HeaderMap, HeaderValue, Request},
@@ -29,7 +28,6 @@ static BINCODE_CONTENT_TYPE: &str = "application/bincode";
 /// The JWT should be sent as a cookie to the server.
 pub struct JwtUserExtractor(pub AuthorizationToken);
 
-#[async_trait]
 impl FromRequestParts<AppState> for JwtUserExtractor {
     type Rejection = ApiGenericResponse;
 
@@ -55,7 +53,6 @@ impl FromRequestParts<AppState> for JwtUserExtractor {
 /// 2. The user has at least moderator roles in database.
 pub struct ModeratorExtractor(pub AuthorizationToken);
 
-#[async_trait]
 impl FromRequestParts<AppState> for ModeratorExtractor {
     type Rejection = ApiGenericResponse;
 
@@ -78,7 +75,6 @@ impl FromRequestParts<AppState> for ModeratorExtractor {
 /// 2. The user has at least admin roles in database.
 pub struct AdminExtractor(pub AuthorizationToken);
 
-#[async_trait]
 impl FromRequestParts<AppState> for AdminExtractor {
     type Rejection = ApiGenericResponse;
 
@@ -125,7 +121,6 @@ fn bincode_content_type(headers: &HeaderMap) -> bool {
 /// Mainly used to validate the data before processing it server side.
 pub struct Bincode<T>(pub T);
 
-#[async_trait]
 impl<T> FromRequest<AppState> for Bincode<T>
 where
     T: Sized + DeserializeOwned,
@@ -149,7 +144,6 @@ pub struct ValidBincode<T>(pub T)
 where
     T: Validate;
 
-#[async_trait]
 impl<T> FromRequest<AppState> for ValidBincode<T>
 where
     T: Sized + DeserializeOwned + Validate,

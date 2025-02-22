@@ -93,7 +93,7 @@ async fn handle_socket(socket: WebSocket, state: AppState, room: String) {
         while let Ok(msg) = tokio::select! {v = private_rx.recv() => v, v = shared_rx.recv() => v }
         {
             // In any websocket error, break loop.
-            if sender.send(Message::Binary(msg)).await.is_err() {
+            if sender.send(Message::Binary(msg.into())).await.is_err() {
                 break;
             }
         }

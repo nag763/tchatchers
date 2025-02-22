@@ -109,9 +109,9 @@ async fn main() -> anyhow::Result<()> {
             "/api/user",
             post(create_user).put(update_user).delete(delete_user),
         )
-        .route("/api/login_exists/:login", get(login_exists))
-        .route("/api/user/revoke/:user_id", post(revoke_user))
-        .route("/api/user/:reported_user/report", post(report_user))
+        .route("/api/login_exists/{login}", get(login_exists))
+        .route("/api/user/revoke/{user_id}", post(revoke_user))
+        .route("/api/user/{reported_user}/report", post(report_user))
         .route(
             "/api/authenticate",
             post(authenticate).patch(reauthenticate),
@@ -119,9 +119,9 @@ async fn main() -> anyhow::Result<()> {
         .route("/api/logout", get(logout))
         .route("/api/validate", get(validate))
         .route("/api/whoami", get(whoami))
-        .route("/api/message/:message_id", delete(delete_message))
-        .route("/api/message/:message_id/report", post(report_message))
-        .route("/ws/:room", get(ws_handler))
+        .route("/api/message/{message_id}", delete(delete_message))
+        .route("/api/message/{message_id}/report", post(report_message))
+        .route("/ws/{room}", get(ws_handler))
         .nest_service(
             "/static",
             get_service(ServeDir::new("static"))
