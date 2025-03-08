@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 axum = { version = "0.8.1", features = ["ws", "http1", "multipart"], default-features = false }
-tokio = { version = "1.43", features = ["full"], default-features = false }
+tokio = { version = "1.44", features = ["full"], default-features = false }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 dotenv = "0.15.0"
 futures-util = { version = "0.3.31" }
