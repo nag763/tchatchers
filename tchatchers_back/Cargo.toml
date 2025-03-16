@@ -10,13 +10,13 @@ tokio = { version = "1.44", features = ["full"], default-features = false }
 tchatchers_core = { path = "../tchatchers_core", features = ["back"] }
 dotenv = "0.15.0"
 futures-util = { version = "0.3.31" }
-uuid = { version = "1.15.1", default-features = false }
+uuid = { version = "1.16.0", default-features = false }
 tower-http = { version = "0.6.2", features = ["fs", "trace", "util", "request-id", "sensitive-headers", "timeout", "set-header"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"]}
 axum-extra = { version = "0.10.0", features = ["cookie", "typed-header"] }
 tracing = { default-features = false, version = "0.1.41" }
 validator = { version = "0.20.0"}
-serde = { default-features = false, version = "1.0.218" }
+serde = { default-features = false, version = "1.0.219" }
 sqlx = {features = ["uuid", "postgres"], version = "0.8" }
 tower = { default-features = false, version = "0.5.2" }
 mime = "0.3.17"
