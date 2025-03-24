@@ -21,6 +21,6 @@ sqlx = {features = ["uuid", "postgres"], version = "0.8" }
 tower = { default-features = false, version = "0.5.2" }
 mime = "0.3.17"
 anyhow = "1.0.97"
-redis = { version = "0.29.1", features = ["aio", "tokio-comp"], default-features = false }
+redis = { version = "0.29.2", features = ["aio", "tokio-comp"], default-features = false }
 bincode = "1.3.3"
 serde_json = "1.0.140"
