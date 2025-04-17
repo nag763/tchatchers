@@ -6,6 +6,8 @@
 
 <p align="center"><img height="300" src="https://raw.githubusercontent.com/nag763/tchatchers/main/.github/gh_logo.png"></img></p>
 
+<h4 align="center">This project is now archived, thanks for the support!</h4>
+
 <h2 align="center">tchatchers</h2>
 <h4 align="center">A blazing fast chat application built with Axum and yew.rs :rocket:</h4>
 
